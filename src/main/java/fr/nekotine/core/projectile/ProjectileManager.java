@@ -1,4 +1,4 @@
-package fr.nekotine.nekotinecore.projectile;
+package fr.nekotine.core.projectile;
 
 import java.util.HashMap;
 import java.util.Iterator;

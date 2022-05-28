@@ -1,4 +1,4 @@
-package fr.nekotine.nekotinecore.projectile;
+package fr.nekotine.core.projectile;
 
 import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
