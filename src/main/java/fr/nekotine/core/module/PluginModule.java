@@ -24,14 +24,26 @@ public abstract class PluginModule implements Listener {
 		_name = name;
 	}
 	
+	/**
+	 * Execute le runnable sur le prochain tick minecraft.
+	 * @param runnable
+	 */
 	public void RunAsync(Runnable runnable) {
 		Bukkit.getScheduler().runTaskAsynchronously(_plugin, runnable);
 	}
 	
+	/**
+	 * Execute le runnable sur un thread séparé.
+	 * @param runnable
+	 */
 	public void RunSync(Runnable runnable) {
 		Bukkit.getScheduler().runTask(_plugin, runnable);
 	}
 	
+	/**
+	 * Affiche du texte informatif dans la console.
+	 * @param text
+	 */
 	public void logInfo(String text) {
 		_plugin.getLogger().info(Text.moduleLog(this,text));
 	}
