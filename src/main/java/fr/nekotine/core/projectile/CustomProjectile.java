@@ -45,7 +45,7 @@ public class CustomProjectile {
 	/**
 	 * @return Vrai si le projectile est expiré/collision
 	 */
-	public boolean Collision(/* inserer tick event ici */) {
+	public boolean Collision() {
 		
 		if(expireTime != -1 && System.currentTimeMillis() >  expireTime) {
 			iProj.Faded(this);
