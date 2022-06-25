@@ -35,6 +35,14 @@ public class ChargeManager extends PluginModule{
 		return false;
 	}
 	
+	public boolean SetCancelled(String user, String chargeName, boolean cancelled) {
+		if(Exist(user, chargeName)) {
+			Get(user, chargeName).setCancelled(cancelled);
+			return true;
+		}
+		return false;
+	}
+	
 	@EventHandler
 	public void Tick(/* inserer tick event ici */) {
 		for (HashMap<String, Charger> maps : charges.values()){
@@ -43,5 +51,12 @@ public class ChargeManager extends PluginModule{
 				if(entry.getValue().Charged()) iterator.remove();
 			}
 		}
+	}
+	
+	private boolean Exist(String user, String chargeName) {
+		return (charges.containsKey(user) && charges.get(user).containsKey(chargeName));
+	}
+	private Charger Get(String user, String chargeName) {
+		return charges.get(user).get(chargeName);
 	}
 }
