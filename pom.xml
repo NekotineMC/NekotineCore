@@ -1,10 +1,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>nekotine</groupId>
+  <groupId>fr.nekotine</groupId>
   <artifactId>NekotineCore</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>NekotineCore</name>
-  
+
+  <properties>
+     <maven.compiler.source>17</maven.compiler.source>
+     <maven.compiler.target>17</maven.compiler.target>
+  </properties>
+
   <repositories>
 
 	<repository>
@@ -35,5 +40,36 @@
   	</dependency>
 
   </dependencies>
+
+	<build>
+        <resources>
+            <resource>
+                <directory>${basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>*</include>
+                </includes>
+            </resource>
+        </resources>
+        <sourceDirectory>src/main/java</sourceDirectory>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <configuration>
+                	<outputFile>E:\MinecraftServer\ProgramationPaper1.18.2\plugins\${project.artifactId}.jar</outputFile>
+                </configuration>
+                <version>2.4.3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

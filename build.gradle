@@ -1,0 +1,50 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenLocal()
+    maven {
+        url = uri('https://papermc.io/repo/repository/maven-public/')
+    }
+
+    maven {
+        url = uri('https://repo.dmulloy2.net/repository/public/')
+    }
+
+    maven {
+        url = uri('https://repo.maven.apache.org/maven2/')
+    }
+}
+
+dependencies {
+    implementation 'com.comphenix.protocol:ProtocolLib:4.7.0'
+    compileOnly 'io.papermc.paper:paper-api:1.18.2-R0.1-SNAPSHOT'
+}
+
+group = 'fr.nekotine'
+version = '0.0.1-SNAPSHOT'
+description = 'NekotineCore'
+java.sourceCompatibility = JavaVersion.VERSION_1_8
+
+// TASKS
+
+task customBuild {
+	
+}
+
+processResources{
+	doFirst{
+		file("$buildDir/resources/main").listFiles().each{
+			it.delete();
+		}
+	}
+}
+
+if (project.hasProperty('TestServerPluginDirectory')){
+	task copyJarToTestEnvironement(type: Copy) {  
+	    from "./build/libs"
+	    into "$TestServerPluginDirectory"
+	    outputs.upToDateWhen { false }
+	}
+}

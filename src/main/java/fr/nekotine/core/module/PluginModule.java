@@ -52,10 +52,14 @@ public abstract class PluginModule implements Listener {
 		return _name;
 	}
 	
+	public JavaPlugin getPlugin() {
+		return _plugin;
+	}
+	
 	/**
 	 * Méthode à appeler pour charger le module.
 	 */
-	public void enable() {
+	public final void enable() {
 		final long epoch = System.currentTimeMillis();
 		logInfo("début du chargement...");
 		onEnable();
@@ -65,7 +69,7 @@ public abstract class PluginModule implements Listener {
 	/**
 	 * Méthode à appeler pour décharger le module.
 	 */
-	public void disable() {
+	public final void disable() {
 		final long epoch = System.currentTimeMillis();
 		logInfo("début du déchargement...");
 		onEnable();
@@ -76,12 +80,12 @@ public abstract class PluginModule implements Listener {
 	 * Méhode à ne pas appeler, utilisez plutôt {@link #enable()}
 	 * Cette méthode est destinée à être surchargée par la classe enfant.
 	 */
-	public void onEnable() {}
+	protected void onEnable() {}
 	
 	/**
 	 * Méhode à ne pas appeler, utilisez plutôt {@link #disbale()}
 	 * Cette méthode est destinée à être surchargée par la classe enfant.
 	 */
-	public void onDisable() {}
+	protected void onDisable() {}
 	
 }
