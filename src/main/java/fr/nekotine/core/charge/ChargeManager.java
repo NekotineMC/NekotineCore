@@ -13,50 +13,73 @@ public class ChargeManager extends PluginModule{
 	
 	//Clé 1 = nom de ce qui utilise la charge
 	//Clé 2 = nom de la charge
-	private HashMap<String, HashMap<String, Charger>> charges = new HashMap<String, HashMap<String, Charger>>();
+	private HashMap<String, HashMap<String, Charge>> charges = new HashMap<String, HashMap<String, Charge>>();
+	
+	//
 	
 	public ChargeManager(JavaPlugin plugin) {
 		super(plugin, "ChargeManager");
 	}
 	
+	//
+	
+	/**
+	 * ! Le couple (user, chargeName) doit être unique !
+	 * @param user L'utilisateur de la charge
+	 * @param chargeName Le nom de la charge
+	 * @param duration Durée en ms
+	 * @param iCharge Interface
+	 * @return True si la charge a été ajoutée
+	 */
 	public boolean AddCharge(String user, String chargeName, long duration, ICharge iCharge) {
-		Charger charger = new Charger(user, chargeName, duration, iCharge);
+		Charge charge = new Charge(user, chargeName, duration, iCharge);
+		
 		if(!charges.containsKey(user)) {
-			HashMap<String, Charger> toPut = new HashMap<String, Charger>();
-			toPut.put(chargeName, charger);
+			HashMap<String, Charge> toPut = new HashMap<String, Charge>();
+			toPut.put(chargeName, charge);
 			charges.put(user, toPut);
 			return true;
 		}
-		HashMap<String, Charger> toPut = charges.get(user);
+		HashMap<String, Charge> toPut = charges.get(user);
 		if(!toPut.containsKey(user)) {
-			toPut.put(chargeName, charger);
+			toPut.put(chargeName, charge);
 			return true;
 		}
 		return false;
 	}
+	
+	//
 	
 	public boolean SetCancelled(String user, String chargeName, boolean cancelled) {
 		if(Exist(user, chargeName)) {
-			Get(user, chargeName).setCancelled(cancelled);
+			Get(user, chargeName).SetCancelled(cancelled);
 			return true;
 		}
 		return false;
 	}
+	public long GetTimeLeft(String user, String chargeName) {
+		return Get(user, chargeName).GetTimeLeft();
+	}
+	
+	//
 	
 	@EventHandler
 	public void Tick(/* inserer tick event ici */) {
-		for (HashMap<String, Charger> maps : charges.values()){
-			for (Iterator<Entry<String, Charger>> iterator = maps.entrySet().iterator(); iterator.hasNext();){
-				Entry<String, Charger> entry = iterator.next();
-				if(entry.getValue().Charged()) iterator.remove();
+		for (HashMap<String, Charge> maps : charges.values()){
+			for (Iterator<Entry<String, Charge>> iterator = maps.entrySet().iterator(); iterator.hasNext();){
+				Entry<String, Charge> entry = iterator.next();
+				if(entry.getValue().Update()) iterator.remove();
 			}
 		}
 	}
 	
+	//
+	
+	private Charge Get(String user, String chargeName) {
+		return charges.get(user).get(chargeName);
+	}
 	private boolean Exist(String user, String chargeName) {
 		return (charges.containsKey(user) && charges.get(user).containsKey(chargeName));
 	}
-	private Charger Get(String user, String chargeName) {
-		return charges.get(user).get(chargeName);
-	}
+	
 }

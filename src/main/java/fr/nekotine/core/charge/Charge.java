@@ -1,14 +1,18 @@
 package fr.nekotine.core.charge;
 
-public class Charger {
+public class Charge {
 	
 	private long started;
 	private boolean cancelled;
+	
+	//
 	
 	private String user;
 	private String chargeName;
 	private long duration;
 	private ICharge iCharge;
+	
+	//
 	
 	/**
 	 * 
@@ -17,7 +21,7 @@ public class Charger {
 	 * @param duration Durée en ms
 	 * @param iCharge Interface
 	 */
-	public Charger(String user, String chargeName, long duration, ICharge iCharge) {
+	public Charge(String user, String chargeName, long duration, ICharge iCharge) {
 		this.user = user;
 		this.chargeName = chargeName;
 		this.duration = duration;
@@ -27,7 +31,9 @@ public class Charger {
 		this.cancelled = false;
 	}
 	
-	public boolean Charged() {
+	//
+	
+	protected boolean Update() {
 		if(cancelled) {
 			iCharge.Cancelled(user, chargeName, GetTimeLeft());
 			return true;
@@ -39,21 +45,29 @@ public class Charger {
 		return false;
 	}
 	
+	//
+	
 	/**
 	 * Annulle la charge
 	 * @param cancelled
 	 */
-	public void setCancelled(boolean cancelled) {
+	protected void SetCancelled(boolean cancelled) {
 		this.cancelled = cancelled;
 	}
+	/**
+	 * 
+	 * @return Temps restant en ms
+	 */
+	protected long GetTimeLeft() {
+		return duration - (GetTime() - started);
+	}
+	
+	//
 	
 	private long GetTime() {
 		return System.currentTimeMillis();
 	}
-	private long GetTimeLeft() {
-		return GetTime() - started;
-	}
 	private boolean Expired() {
-		return GetTimeLeft() >= duration;
+		return GetTimeLeft() < 0;
 	}
 }

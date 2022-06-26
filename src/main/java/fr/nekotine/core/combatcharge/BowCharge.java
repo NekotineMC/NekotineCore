@@ -7,7 +7,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-import fr.nekotine.core.charge.ChargeManager;
 import fr.nekotine.core.charge.ICharge;
 import fr.nekotine.core.util.CustomAction;
 import fr.nekotine.core.util.UtilEvent;
@@ -15,73 +14,98 @@ import fr.nekotine.core.util.UtilGear;
 
 public class BowCharge implements ICharge{
 	
-	private ChargeManager chargeManager;
+	private Arrow arrow;
+	//Si le joueur a tiré
+	private boolean shot;
+	//Si la charge est terminée
+	private boolean ended;
+	
+	//
+	
+	private BowChargeManager bowChargeManager;
 	private Player user;
 	private String chargeName;
-	
-	//True si la personne a bandé son arc
+	private long duration;
 	private boolean activated;
-	
 	private IBowCharge iBowCharge;
 	
-	//La flèche à renvoyer lors du tir
-	private Arrow arrow;
+	//
 	
-	public BowCharge(ChargeManager chargeManager, Player user, String chargeName, long duration, boolean activated, IBowCharge iBowCharge) {
-		this.chargeManager = chargeManager;
+	public BowCharge(BowChargeManager bowChargeManager, Player user, String chargeName, long duration, boolean activated, IBowCharge iBowCharge) {
+		this.bowChargeManager = bowChargeManager;
 		this.user = user;
 		this.chargeName = chargeName;
+		this.duration = duration;
 		this.activated = activated;
 		this.iBowCharge = iBowCharge;
 		
 		this.arrow = null;
-				
-		//Si le joueur avait déjà bandé l'arc
+		this.shot = false;
+		this.ended = false;
+		
 		if(activated){
-			chargeManager.AddCharge(user.getName(), chargeName, duration, this);
+			bowChargeManager.AddCharge(user, chargeName, duration, this);
 		}
 	}
 	
-	@EventHandler
-	public void Tick(/* Tick event ici*/) {
-		if(!activated) return;
-		if(UtilGear.HasInAnyHand(user, Material.BOW)) return;
-		
-		chargeManager.SetCancelled(user.getName(), chargeName, true);
+	//
+	
+	protected boolean Update() {
+		if(shot) {
+			SetCancelled();
+			iBowCharge.Released(this.user, chargeName, GetTimeLeft(), arrow);
+			return true;
+		}
+		if(activated && !UtilGear.HasInAnyHand(user, Material.BOW)) {
+			SetCancelled();
+			iBowCharge.Cancelled(this.user, chargeName, GetTimeLeft());
+			return true;
+		}
+		return false;
 	}
+	
+	//
+	
 	@EventHandler
 	public void LoadBow(PlayerInteractEvent e) {
 		if(activated) return;
+		if(shot) return;
 		if(!user.equals(e.getPlayer())) return;
 		if(!UtilGear.IsMaterial(e.getItem(), Material.BOW)) return;
 		if(!UtilEvent.IsAction(e.getAction(), CustomAction.RIGHT_CLICK)) return;
 		if(!UtilGear.HasMaterial(user, Material.ARROW)) return;
 		
+		bowChargeManager.AddCharge(user, chargeName, duration, this);
 		activated = true;
 	}
 	@EventHandler
 	public void ShootBow(EntityShootBowEvent e) {
 		if(!activated) return;
+		if(shot) return;
 		if(!user.equals(e.getEntity())) return;
-		
+
+		shot = true;
 		arrow = (Arrow)e.getProjectile();
-		chargeManager.SetCancelled(user.getName(), chargeName, true);
 	}
 	
+	//
 	
 	@Override
 	public void Ended(String user, String chargeName) {
+		ended = true;
 		iBowCharge.Ended(this.user, chargeName);
 	}
-
 	@Override
 	public void Cancelled(String user, String chargeName, long left) {
-		//arrow != null => le joueur a tiré
-		if(arrow != null) {
-			iBowCharge.Released(this.user, chargeName, left, arrow);
-		}else {
-			iBowCharge.Cancelled(this.user, chargeName, left);
-		}
 	}
-
+	
+	//
+	
+	private long GetTimeLeft() {
+		if(ended) return 0;
+		return bowChargeManager.GetTimeLeft(user, chargeName);
+	}
+	private void SetCancelled() {
+		if(!ended) bowChargeManager.SetCancelled(user, chargeName, true);
+	}
 }
