@@ -24,23 +24,20 @@ public class EntityVisibilityModule extends PluginModule implements Listener{
 	
 	private PacketListener metadataListener;
 	
-	private Map<Player, Set<Player>> hiddenMap;
+	private Map<Player, Set<Player>> hiddenMap; // Map<JoueurCaché,CachéPour>
 	
 	public EntityVisibilityModule(JavaPlugin plugin) {
 		super(plugin, "EntityVisibilityModule");
 		hiddenMap = new HashMap<>();
-		metadataListener = new PacketAdapter(plugin, PacketType.Play.Server.ENTITY_EQUIPMENT) {
+		metadataListener = new PacketAdapter(plugin, PacketType.Play.Server.SPAWN_ENTITY_LIVING) {
 			@Override
-			public void onPacketSending(PacketEvent event) {/*
+			public void onPacketSending(PacketEvent event) {
 				super.onPacketSending(event);
 				PacketContainer packet = event.getPacket();
-				if (!hiddenMap.containsKey(packet)//TODO.contains(event.getPlayer())) return;
-				for (Player p : hiden) {
-					if (p.getEntityId()==packet.getIntegers().read(0)) {
-						event.setCancelled(true);
-						return;
-					}
-				}*/
+				
+				if (hiddenMap.containsKey(event.getPlayer()) && false/*packet.getEntityId()==packet.getIntegers().read(0)*/){
+					
+				}
 			}
 		};
 	}
@@ -57,25 +54,4 @@ public class EntityVisibilityModule extends PluginModule implements Listener{
 		ProtocolLibrary.getProtocolManager().removePacketListener(metadataListener);
 		super.onDisable();
 	}
-	
-	@EventHandler
-	public static void test(PlayerToggleSneakEvent evt) {
-		Player player = evt.getPlayer();
-		ArrayList<Integer> list = new ArrayList<>();
-		list.add(player.getEntityId());
-		PacketContainer packet = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.ENTITY_DESTROY);
-		packet.getIntLists().write(0, list);
-		ProtocolManager pmanager = ProtocolLibrary.getProtocolManager();
-		for (Player p : Bukkit.getServer().getOnlinePlayers()) {
-				try {
-					if (p.equals(player)) {
-						continue;
-					}
-					pmanager.sendServerPacket(p, packet);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-		}
-	}
-	
 }

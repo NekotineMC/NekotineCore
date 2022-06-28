@@ -13,15 +13,27 @@ import fr.nekotine.core.text.Text;
  * @author XxGoldenbluexX
  *
  */
-public abstract class PluginModule implements Listener {
+public abstract class PluginModule<PluginType extends JavaPlugin> implements Listener {
 
 	private String _name;
 	
-	private JavaPlugin _plugin;
+	private PluginType _plugin;
 	
-	public PluginModule(JavaPlugin plugin, String name) {
+	private ModuleManager<PluginType> _manager;
+	
+	public PluginModule(PluginType plugin, String name, ModuleManager<PluginType> manager) {
 		_plugin = plugin;
 		_name = name;
+		_manager = manager;
+	}
+	
+	/**
+	 * Récupère le module souhaité par son nom.
+	 * @param name Nom du module.
+	 * @return Le module souhaité.
+	 */
+	public PluginModule<PluginType> GetPluginModule(String name) {
+		return _manager.Get(_name);
 	}
 	
 	/**
@@ -52,7 +64,7 @@ public abstract class PluginModule implements Listener {
 		return _name;
 	}
 	
-	public JavaPlugin getPlugin() {
+	public PluginType getPlugin() {
 		return _plugin;
 	}
 	
