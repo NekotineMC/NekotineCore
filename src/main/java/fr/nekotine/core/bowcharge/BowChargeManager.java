@@ -1,4 +1,4 @@
-package fr.nekotine.core.combatcharge;
+package fr.nekotine.core.bowcharge;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -6,6 +6,8 @@ import java.util.Map.Entry;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.entity.EntityShootBowEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import fr.nekotine.core.charge.ChargeManager;
@@ -54,13 +56,20 @@ public class BowChargeManager extends PluginModule{
 		}
 	}
 	
+	@EventHandler
+	public void LoadBow(PlayerInteractEvent e) {
+		bowCharges.values().forEach( (charge) -> charge.LoadBow(e));
+	}
+	
+	@EventHandler
+	public void ShootBow(EntityShootBowEvent e) {
+		bowCharges.values().forEach( (charge) -> charge.ShootBow(e));
+	}
+	
 	//
 	
 	protected long GetTimeLeft(Player user, String chargeName) {
-		if(Exist(user)) {
-			return chargeManager.GetTimeLeft(chargeName, chargeName);
-		}
-		return -1;
+		return chargeManager.GetTimeLeft(chargeName, chargeName);
 	}
 	protected boolean SetCancelled(Player user, String chargeName, boolean cancelled) {
 		return chargeManager.SetCancelled(user.getName(), chargeName, cancelled);

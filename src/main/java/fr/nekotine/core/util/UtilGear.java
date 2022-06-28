@@ -79,4 +79,14 @@ public class UtilGear {
 			return null;
 		}
 	}
+	
+	/**
+	 * 
+	 * @param item1
+	 * @param item2
+	 * @return True si ce sont les mêmes
+	 */
+	public static boolean IsItem(ItemStack item1, ItemStack item2) {
+		return item1.equals(item2);
+	}
 }
