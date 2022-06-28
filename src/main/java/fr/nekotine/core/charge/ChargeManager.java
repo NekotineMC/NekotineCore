@@ -11,25 +11,25 @@ import fr.nekotine.core.module.PluginModule;
 
 public class ChargeManager extends PluginModule{
 	
-	//Clé 1 = nom de ce qui utilise la charge
-	//Clé 2 = nom de la charge
+	//Clï¿½ 1 = nom de ce qui utilise la charge
+	//Clï¿½ 2 = nom de la charge
 	private HashMap<String, HashMap<String, Charge>> charges = new HashMap<String, HashMap<String, Charge>>();
 	
 	//
 	
-	public ChargeManager(JavaPlugin plugin) {
-		super(plugin, "ChargeManager");
+	public ChargeManager(JavaPlugin plugin, PluginModule pmanager) {
+		super(plugin, pmanager,"ChargeManager");
 	}
 	
 	//
 	
 	/**
-	 * ! Le couple (user, chargeName) doit être unique !
+	 * ! Le couple (user, chargeName) doit ï¿½tre unique !
 	 * @param user L'utilisateur de la charge
 	 * @param chargeName Le nom de la charge
-	 * @param duration Durée en ms
+	 * @param duration Durï¿½e en ms
 	 * @param iCharge Interface
-	 * @return True si la charge a été ajoutée
+	 * @return True si la charge a ï¿½tï¿½ ajoutï¿½e
 	 */
 	public boolean AddCharge(String user, String chargeName, long duration, ICharge iCharge) {
 		Charge charge = new Charge(user, chargeName, duration, iCharge);
