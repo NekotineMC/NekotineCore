@@ -69,6 +69,7 @@ public class SwordCharge implements ICharge{
 		if(!activated) {
 			if(!UtilEvent.IsAction(e.getAction(), action)) return;
 			if(bindToItem && !UtilGear.IsItem(bindItem, e.getItem())) return;
+			
 			activated = true;
 			swordChargeManager.AddCharge(user, chargeName, duration, this);
 			

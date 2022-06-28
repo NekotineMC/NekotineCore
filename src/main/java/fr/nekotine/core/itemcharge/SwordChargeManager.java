@@ -12,6 +12,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import fr.nekotine.core.charge.ChargeManager;
 import fr.nekotine.core.charge.ICharge;
+import fr.nekotine.core.module.ModuleManager;
 import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.util.CustomAction;
 
@@ -20,9 +21,9 @@ public class SwordChargeManager extends PluginModule{
 	private ChargeManager chargeManager;
 	private HashMap<Player, SwordCharge> swordCharges = new HashMap<Player,SwordCharge>();
 	
-	public SwordChargeManager(JavaPlugin plugin, ChargeManager chargeManager) {
-		super(plugin, "SwordChargeManager");
-		this.chargeManager = chargeManager;
+	public SwordChargeManager(JavaPlugin plugin, ModuleManager manager) {
+		super(plugin,"SwordChargeManager", manager);
+		this.chargeManager = (ChargeManager)GetPluginModule(ChargeManager.GetName());
 	}
 
 	//

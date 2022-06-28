@@ -12,6 +12,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import fr.nekotine.core.charge.ChargeManager;
 import fr.nekotine.core.charge.ICharge;
+import fr.nekotine.core.module.ModuleManager;
 import fr.nekotine.core.module.PluginModule;
 
 public class BowChargeManager extends PluginModule{
@@ -21,9 +22,9 @@ public class BowChargeManager extends PluginModule{
 	
 	//
 	
-	public BowChargeManager(JavaPlugin plugin, ChargeManager chargeManager) {
-		super(plugin, "BowChargeManager");
-		this.chargeManager = chargeManager;
+	public BowChargeManager(JavaPlugin plugin, ModuleManager manager) {
+		super(plugin,"BowChargeManager", manager);
+		this.chargeManager = (ChargeManager)GetPluginModule(ChargeManager.GetName());
 	}
 	
 	//

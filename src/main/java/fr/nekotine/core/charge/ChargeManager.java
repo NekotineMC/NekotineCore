@@ -7,9 +7,11 @@ import java.util.Map.Entry;
 import org.bukkit.event.EventHandler;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import fr.nekotine.core.module.ModuleManager;
 import fr.nekotine.core.module.PluginModule;
 
 public class ChargeManager extends PluginModule{
+	private static final String NAME = "ChargeManager";
 	
 	//Cl� 1 = nom de ce qui utilise la charge
 	//Cl� 2 = nom de la charge
@@ -17,8 +19,8 @@ public class ChargeManager extends PluginModule{
 	
 	//
 	
-	public ChargeManager(JavaPlugin plugin, PluginModule pmanager) {
-		super(plugin, pmanager,"ChargeManager");
+	public ChargeManager(JavaPlugin plugin, ModuleManager manager) {
+		super(plugin,"ChargeManager", manager);
 	}
 	
 	//
@@ -85,4 +87,9 @@ public class ChargeManager extends PluginModule{
 		return (charges.containsKey(user) && charges.get(user).containsKey(chargeName));
 	}
 	
+	//
+	
+	public static String GetName() {
+		return NAME;
+	}
 }
