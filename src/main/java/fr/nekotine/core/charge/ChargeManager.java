@@ -58,7 +58,10 @@ public class ChargeManager extends PluginModule{
 		return false;
 	}
 	public long GetTimeLeft(String user, String chargeName) {
-		return Get(user, chargeName).GetTimeLeft();
+		if(Exist(user, chargeName)) {
+			return Get(user, chargeName).GetTimeLeft();
+		}
+		return -1;
 	}
 	
 	//

@@ -1,9 +1,8 @@
-package fr.nekotine.core.combatcharge;
+package fr.nekotine.core.bowcharge;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
@@ -17,8 +16,6 @@ public class BowCharge implements ICharge{
 	private Arrow arrow;
 	//Si le joueur a tiré
 	private boolean shot;
-	//Si la charge est terminée
-	private boolean ended;
 	
 	//
 	
@@ -41,7 +38,6 @@ public class BowCharge implements ICharge{
 		
 		this.arrow = null;
 		this.shot = false;
-		this.ended = false;
 		
 		if(activated){
 			bowChargeManager.AddCharge(user, chargeName, duration, this);
@@ -66,7 +62,6 @@ public class BowCharge implements ICharge{
 	
 	//
 	
-	@EventHandler
 	public void LoadBow(PlayerInteractEvent e) {
 		if(activated) return;
 		if(shot) return;
@@ -78,7 +73,6 @@ public class BowCharge implements ICharge{
 		bowChargeManager.AddCharge(user, chargeName, duration, this);
 		activated = true;
 	}
-	@EventHandler
 	public void ShootBow(EntityShootBowEvent e) {
 		if(!activated) return;
 		if(shot) return;
@@ -92,7 +86,6 @@ public class BowCharge implements ICharge{
 	
 	@Override
 	public void Ended(String user, String chargeName) {
-		ended = true;
 		iBowCharge.Ended(this.user, chargeName);
 	}
 	@Override
@@ -102,10 +95,9 @@ public class BowCharge implements ICharge{
 	//
 	
 	private long GetTimeLeft() {
-		if(ended) return 0;
-		return bowChargeManager.GetTimeLeft(user, chargeName);
+		return Math.max(0, bowChargeManager.GetTimeLeft(user, chargeName));
 	}
 	private void SetCancelled() {
-		if(!ended) bowChargeManager.SetCancelled(user, chargeName, true);
+		bowChargeManager.SetCancelled(user, chargeName, true);
 	}
 }

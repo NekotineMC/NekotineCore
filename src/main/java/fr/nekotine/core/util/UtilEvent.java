@@ -1,6 +1,10 @@
 package fr.nekotine.core.util;
 
+import org.bukkit.Bukkit;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.plugin.Plugin;
 
 public class UtilEvent {
 	
@@ -20,5 +24,22 @@ public class UtilEvent {
 		default:
 			return false;
 		}
+	}
+	
+	/**
+	 * Enregistre les Events pour le Listener
+	 * @param plugin
+	 * @param listener
+	 */
+	public static void Register(Plugin plugin, Listener listener) {
+		Bukkit.getPluginManager().registerEvents(listener, plugin);
+	}
+	
+	/**
+	 * D&serengistre les Events pour le Listener
+	 * @param listener
+	 */
+	public static void Unregister(Listener listener) {
+		HandlerList.unregisterAll(listener);
 	}
 }

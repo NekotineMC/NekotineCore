@@ -1,4 +1,4 @@
-package fr.nekotine.core.combatcharge;
+package fr.nekotine.core.bowcharge;
 
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
