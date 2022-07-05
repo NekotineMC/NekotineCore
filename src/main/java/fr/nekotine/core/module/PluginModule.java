@@ -27,6 +27,10 @@ public abstract class PluginModule implements Listener {
 		_manager = manager;
 	}
 	
+	public PluginModule(String name) {
+		_name = name;
+	}
+	
 	/**
 	 * Récupère le module souhaité par son nom.
 	 * @param name Nom du module.
@@ -74,6 +78,22 @@ public abstract class PluginModule implements Listener {
 	 */
 	public JavaPlugin getPlugin() {
 		return _plugin;
+	}
+	
+	/**
+	 * Met le plugin.
+	 * @param plugin
+	 */
+	public void setPlugin(JavaPlugin plugin) {
+		_plugin = plugin;
+	}
+	
+	public ModuleManager getModuleManager() {
+		return _manager;
+	}
+	
+	public void setModuleManager(ModuleManager manager) {
+		_manager = manager;
 	}
 	
 	/**

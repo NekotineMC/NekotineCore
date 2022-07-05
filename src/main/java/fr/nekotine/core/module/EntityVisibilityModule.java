@@ -27,7 +27,7 @@ public class EntityVisibilityModule extends PluginModule implements Listener{
 	private Map<Player, Set<Player>> hiddenMap; // Map<JoueurCaché,CachéPour>
 	
 	public EntityVisibilityModule(JavaPlugin plugin) {
-		super(plugin, "EntityVisibilityModule");
+		super("EntityVisibilityModule");
 		hiddenMap = new HashMap<>();
 		metadataListener = new PacketAdapter(plugin, PacketType.Play.Server.SPAWN_ENTITY_LIVING) {
 			@Override
