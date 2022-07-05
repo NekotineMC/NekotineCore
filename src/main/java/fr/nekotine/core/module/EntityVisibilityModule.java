@@ -51,8 +51,4 @@ public class EntityVisibilityModule extends PluginModule implements Listener{
 		ProtocolLibrary.getProtocolManager().removePacketListener(metadataListener);
 		super.onDisable();
 	}
-	
-	public static boolean IsPlayerIdMatching(int id) {
-		return false;
-	}
 }
