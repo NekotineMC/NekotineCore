@@ -1,20 +1,17 @@
 package fr.nekotine.core.module;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
@@ -24,7 +21,7 @@ public class EntityVisibilityModule extends PluginModule implements Listener{
 	
 	private PacketListener metadataListener;
 	
-	private Map<Player, Set<Player>> hiddenMap; // Map<JoueurCaché,CachéPour>
+	private Map<Player, Set<Player>> hiddenMap; // Map<JoueurCaché, CachéPour>
 	
 	public EntityVisibilityModule(JavaPlugin plugin) {
 		super("EntityVisibilityModule");
@@ -34,9 +31,9 @@ public class EntityVisibilityModule extends PluginModule implements Listener{
 			public void onPacketSending(PacketEvent event) {
 				super.onPacketSending(event);
 				PacketContainer packet = event.getPacket();
-				
-				if (hiddenMap.containsKey(event.getPlayer()) && false/*packet.getEntityId()==packet.getIntegers().read(0)*/){
-					
+				Optional<Player> hiddenOne = hiddenMap.keySet().stream().filter((p) -> p.getEntityId() == packet.getIntegers().read(0)).findFirst();
+				if (hiddenOne.isPresent() && hiddenMap.get(hiddenOne.get()).contains(event.getPlayer())) {
+					event.setCancelled(true);
 				}
 			}
 		};
@@ -53,5 +50,9 @@ public class EntityVisibilityModule extends PluginModule implements Listener{
 	protected void onDisable() {
 		ProtocolLibrary.getProtocolManager().removePacketListener(metadataListener);
 		super.onDisable();
+	}
+	
+	public static boolean IsPlayerIdMatching(int id) {
+		return false;
 	}
 }
