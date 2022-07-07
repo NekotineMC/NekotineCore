@@ -42,19 +42,32 @@ public class DamageManager extends PluginModule{
 	}
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void EndEvent(LivingEntityDamageEvent event) {
-		if(event.isCancelled()) return;
+		if(event.IsCancelled()) return;
+		
+		ApplyModifiers(event);
+		
 		if(event.IsIgnoreArmor()) 
-			event.setDamage( CalculateNeededDamage((LivingEntity)event.getEntity(), event.getDamage()) );
+			event.SetDamage( CalculateNeededDamage(event.GetDamaged(), event.GetDamage()) );
 		if(event.IsKnockback() && event.GetDamager() != null) 
-			event.getEntity().setVelocity(event.GetDamager().getLocation().getDirection().setY(0).normalize().multiply(1));
+			event.GetDamaged().setVelocity(event.GetDamager().getLocation().getDirection().setY(0).normalize().multiply(event.GetKnockbackMult()));
 		
 		
-		((LivingEntity)event.getEntity()).damage(event.getDamage());
-		event.setCancelled(true);
+		event.GetDamaged().damage(event.GetDamage());
+		event.SetCancelled(true);
 	}
 	
 	//
 	
+	/**
+	 * Endommage la LivingEntity
+	 * @param damaged La LivingEntity qui prend les dégâts
+	 * @param damager La LivingEntity qui fait les dégâts (si il y en a)
+	 * @param projectile Le Projectile qui fait les dégâts (si il y en a)
+	 * @param cause La cause du dégât
+	 * @param damage Le montant brut de dégât
+	 * @param ignoreArmor Si le coup doit ignorer l'armure du joueur
+	 * @param knockback Si le coup doit faire reculer
+	 */
 	public void Damage(LivingEntity damaged, LivingEntity damager, Projectile projectile, DamageCause cause, double damage, boolean ignoreArmor, boolean knockback) {
 		new LivingEntityDamageEvent(damaged, damager, projectile, cause, damage, ignoreArmor, knockback).callEvent();
 	}
@@ -107,5 +120,21 @@ public class DamageManager extends PluginModule{
 		double withResistance = withArmorAndToughness * (1 + (resistance * 0.2));
 		double withEnchants = withResistance * (1 + (Math.min(20.0, protection) / 25));
 		return withEnchants;
+	}
+	private void ApplyModifiers(LivingEntityDamageEvent event) {
+		double damage = event.GetDamage();
+		
+		//Dégats de base ajoutés
+		damage += event.GetBaseMod();
+				
+		//Ajout des multiplicateurs des dégats de bases
+		double baseMult = event.GetBaseMult();
+		if(baseMult < -1) damage = 0;
+		damage *= 1 + baseMult;
+				
+		//Ajout des multiplicateurs
+		damage *= event.GetFinalMult();
+		
+		event.SetDamage(damage);
 	}
 }
