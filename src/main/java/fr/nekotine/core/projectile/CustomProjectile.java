@@ -1,5 +1,7 @@
 package fr.nekotine.core.projectile;
 
+import javax.annotation.Nullable;
+
 import org.bukkit.GameMode;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
@@ -7,6 +9,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
 
 public class CustomProjectile {
 	private Entity projectile;
@@ -89,7 +92,7 @@ public class CustomProjectile {
 	/**
 	 * @return La Entity utilisée comme projectile
 	 */
-	public Entity GetProjectile() {
+	public @NotNull Entity GetProjectile() {
 		return projectile;
 	}
 	
@@ -97,7 +100,7 @@ public class CustomProjectile {
 	 * 
 	 * @return La LivingEntity qui a lancée le projectile
 	 */
-	public LivingEntity GetSender() {
+	public @Nullable LivingEntity GetSender() {
 		return sender;
 	}
 

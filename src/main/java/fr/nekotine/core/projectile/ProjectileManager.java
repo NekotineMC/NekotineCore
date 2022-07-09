@@ -11,14 +11,15 @@ import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 
+import fr.nekotine.core.module.ModuleManager;
 import fr.nekotine.core.module.PluginModule;
 
 public class ProjectileManager extends PluginModule{
 	
 	private HashMap<Entity, CustomProjectile> projectiles = new HashMap<Entity, CustomProjectile>();
 	
-	public ProjectileManager(JavaPlugin plugin) {
-		super(plugin, "ProjectileManager");
+	public ProjectileManager(JavaPlugin plugin, ModuleManager moduleManager) {
+		super(plugin, "ProjectileManager", moduleManager);
 	}
 	
 	public void AddProjectile(Entity projectile, LivingEntity sender, IProjectile iProj, Vector velocity, long expireTime,
