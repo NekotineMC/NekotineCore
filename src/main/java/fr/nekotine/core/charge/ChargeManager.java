@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import org.bukkit.event.EventHandler;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import fr.nekotine.core.arrache.TickEvent;
 import fr.nekotine.core.module.ModuleManager;
 import fr.nekotine.core.module.PluginModule;
 
@@ -69,7 +70,7 @@ public class ChargeManager extends PluginModule{
 	//
 	
 	@EventHandler
-	public void Tick(/* inserer tick event ici */) {
+	public void Tick(TickEvent e) {
 		for (HashMap<String, Charge> maps : charges.values()){
 			for (Iterator<Entry<String, Charge>> iterator = maps.entrySet().iterator(); iterator.hasNext();){
 				Entry<String, Charge> entry = iterator.next();

@@ -21,6 +21,8 @@ public class CustomProjectile {
 	private boolean targetLivingEntity;
 	private boolean targetBlock;
 	
+	private boolean triggered;
+	
 	private final double DISTANCE_TO_HIT_BLOCK = 0.5;
 	
 	public CustomProjectile(Entity projectile, LivingEntity sender, IProjectile iProj, Vector velocity, long expireTime, boolean targetLivingEntity,
@@ -32,6 +34,7 @@ public class CustomProjectile {
 		this.targetLivingEntity = targetLivingEntity;
 		this.targetBlock = targetBlock;
 		
+		this.triggered = false;
 		ConfigureProjectile(projectile, velocity);
 	}
 	
@@ -45,11 +48,16 @@ public class CustomProjectile {
 		}
 	}
 	
+	//
+	
 	/**
-	 * @return Vrai si le projectile est expiré/collision
+	 * @return Vrai si le projectile est expirï¿½/collision
 	 */
 	public boolean Collision() {
-		
+		if(triggered) {
+			iProj.Triggered(this);
+			return true;
+		}
 		if(expireTime != -1 && System.currentTimeMillis() >  expireTime) {
 			iProj.Faded(this);
 			return true;
@@ -89,8 +97,18 @@ public class CustomProjectile {
 		return false;
 	}
 	
+	//
+	
 	/**
-	 * @return La Entity utilisée comme projectile
+	 * 
+	 * @param triggered Si le projectile doit Ãªtre dÃ©clenchÃ©
+	 */
+	public void SetTriggered(boolean triggered) {
+		this.triggered = triggered;
+	}
+	
+	/**
+	 * @return La Entity utilisï¿½e comme projectile
 	 */
 	public @NotNull Entity GetProjectile() {
 		return projectile;
@@ -98,7 +116,7 @@ public class CustomProjectile {
 	
 	/**
 	 * 
-	 * @return La LivingEntity qui a lancée le projectile
+	 * @return La LivingEntity qui a lancï¿½e le projectile
 	 */
 	public @Nullable LivingEntity GetSender() {
 		return sender;

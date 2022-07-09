@@ -8,12 +8,17 @@ import org.bukkit.entity.LivingEntity;
 public interface IProjectile {
 	
 	/**
-	 * Appelée lorsque le projectile touche une LivingEntity ou un Block
+	 * Appelï¿½e lorsque le projectile touche une LivingEntity ou un Block
 	 */
 	public void Hit(@Nullable LivingEntity hitEntity, @Nullable Block hitBlock, CustomProjectile projectile);
 
 	/**
-	 * Appelée lorsque la durée de vie du projectile est dépassée
+	 * Appelï¿½e lorsque la durï¿½e de vie du projectile est dï¿½passï¿½e
 	 */
 	public void Faded(CustomProjectile projectile);
+	
+	/**
+	 * AppellÃ© lorsque le projectile a Ã©tÃ© manuellement dÃ©clenchÃ©
+	 */
+	public void Triggered(CustomProjectile projectile);
 }

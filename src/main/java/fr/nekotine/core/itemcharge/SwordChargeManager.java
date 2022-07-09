@@ -10,6 +10,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import fr.nekotine.core.arrache.TickEvent;
 import fr.nekotine.core.charge.ChargeManager;
 import fr.nekotine.core.charge.ICharge;
 import fr.nekotine.core.module.ModuleManager;
@@ -29,16 +30,16 @@ public class SwordChargeManager extends PluginModule{
 	//
 	
 	/**
-	 * ! Le couple (user, chargeName) doit être unique !
+	 * ! Le couple (user, chargeName) doit ï¿½tre unique !
 	 * @param user Le joueur
 	 * @param chargeName Le nom de la charge
-	 * @param duration La durée en ms de la charge
-	 * @param activated Si la charge a déjà été commencée avant
-	 * @param action L'action pour déclencher la charge
-	 * @param bindToItem Si la charge ne peut être déclenchée que par un item
+	 * @param duration La durï¿½e en ms de la charge
+	 * @param activated Si la charge a dï¿½jï¿½ ï¿½tï¿½ commencï¿½e avant
+	 * @param action L'action pour dï¿½clencher la charge
+	 * @param bindToItem Si la charge ne peut ï¿½tre dï¿½clenchï¿½e que par un item
 	 * @param bindItem L'item en question
 	 * @param iSwordCharge Interface
-	 * @return Si l'ajout à été bien pris en compte
+	 * @return Si l'ajout ï¿½ ï¿½tï¿½ bien pris en compte
 	 */
 	public boolean AddSwordCharge(Player user, String chargeName, long duration, boolean activated, CustomAction action, boolean bindToItem, ItemStack bindItem, 
 			ISwordCharge iSwordCharge) {
@@ -65,7 +66,7 @@ public class SwordChargeManager extends PluginModule{
 	//
 	
 	@EventHandler
-	public void Tick(/* inserer tick event ici */) {
+	public void Tick(TickEvent e) {
 		for (Iterator<Entry<Player, SwordCharge>> iterator = swordCharges.entrySet().iterator(); iterator.hasNext();){
 			Entry<Player, SwordCharge> entry = iterator.next();
 			if(entry.getValue().Update()) iterator.remove();

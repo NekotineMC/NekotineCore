@@ -10,6 +10,7 @@ import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import fr.nekotine.core.arrache.TickEvent;
 import fr.nekotine.core.charge.ChargeManager;
 import fr.nekotine.core.charge.ICharge;
 import fr.nekotine.core.module.ModuleManager;
@@ -30,13 +31,13 @@ public class BowChargeManager extends PluginModule{
 	//
 	
 	/**
-	 * ! Le couple (user, chargeName) doit être unique !
+	 * ! Le couple (user, chargeName) doit ï¿½tre unique !
 	 * @param user Le joueur qui tire
 	 * @param chargeName Le nom de la charge
-	 * @param duration La durée maximale de la charge en ms
-	 * @param activated Si le joueur avais déjà commencé à bander son arc
+	 * @param duration La durï¿½e maximale de la charge en ms
+	 * @param activated Si le joueur avais dï¿½jï¿½ commencï¿½ ï¿½ bander son arc
 	 * @param iBowCharge Interface
-	 * @return Si l'ajout à été bien pris en compte
+	 * @return Si l'ajout ï¿½ ï¿½tï¿½ bien pris en compte
 	 */
 	public boolean AddBowCharge(Player user, String chargeName, long duration, boolean activated, IBowCharge iBowCharge) {	
 		if(!Exist(user)) {
@@ -50,7 +51,7 @@ public class BowChargeManager extends PluginModule{
 	//
 	
 	@EventHandler
-	public void Tick(/* inserer tick event ici */) {
+	public void Tick(TickEvent e) {
 		for (Iterator<Entry<Player, BowCharge>> iterator = bowCharges.entrySet().iterator(); iterator.hasNext();){
 			Entry<Player, BowCharge> entry = iterator.next();
 			if(entry.getValue().Update()) iterator.remove();
