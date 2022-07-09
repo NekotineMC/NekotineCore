@@ -5,6 +5,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import fr.nekotine.core.text.Text;
+import fr.nekotine.core.util.UtilEvent;
 
 /**
  * Classe abstraite représentant un module utilisable par un plugin.
@@ -103,6 +104,7 @@ public abstract class PluginModule implements Listener {
 		final long epoch = System.currentTimeMillis();
 		logInfo("début du chargement...");
 		onEnable();
+		UtilEvent.Register(getPlugin(), this);
 		logInfo(String.format("le module est chargé! (%d ms)", System.currentTimeMillis()-epoch));
 	}
 	
@@ -112,7 +114,8 @@ public abstract class PluginModule implements Listener {
 	public final void disable() {
 		final long epoch = System.currentTimeMillis();
 		logInfo("début du déchargement...");
-		onEnable();
+		UtilEvent.Unregister(this);
+		onDisable();
 		logInfo(String.format("le module est déchargé! (%d ms)", System.currentTimeMillis()-epoch));
 	}
 	
