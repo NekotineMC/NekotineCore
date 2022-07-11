@@ -22,10 +22,6 @@ public abstract class PluginModule implements Listener {
 	
 	private ModuleManager _manager;
 	
-	public PluginModule(String name) {
-		_name = name;
-	}
-	
 	/**
 	 * Récupère le module souhaité par son nom.
 	 * @param name Nom du module.

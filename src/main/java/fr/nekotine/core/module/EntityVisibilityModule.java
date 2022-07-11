@@ -20,6 +20,9 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.events.PacketListener;
 
+import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
+
+@ModuleNameAnnotation(Name = "EntityVisibilityModule")
 public class EntityVisibilityModule extends PluginModule{
 	
 	private PacketListener metadataListener;
@@ -36,7 +39,6 @@ public class EntityVisibilityModule extends PluginModule{
 	BukkitTask updateTask;
 	
 	public EntityVisibilityModule() {
-		super("EntityVisibilityModule");
 		currentVisibilityStatus = new HashSet<>();
 		toUpdateVisibilityStatus = new HashSet<>();
 		metadataListener = new PacketAdapter(getPlugin(), PacketType.Play.Server.SPAWN_ENTITY_LIVING) {
