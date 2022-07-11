@@ -32,6 +32,15 @@ public abstract class PluginModule implements Listener {
 	}
 	
 	/**
+	 * Récupère le module souhaité par sa classe.
+	 * @param moduleType Type du module.
+	 * @return Le module souhaité.
+	 */
+	public <T extends PluginModule> T GetPluginModule(Class<T> moduleType) {
+		return _manager.Get(moduleType);
+	}
+	
+	/**
 	 * Execute le runnable sur le prochain tick minecraft.
 	 * @param runnable
 	 */
