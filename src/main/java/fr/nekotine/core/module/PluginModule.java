@@ -22,12 +22,6 @@ public abstract class PluginModule implements Listener {
 	
 	private ModuleManager _manager;
 	
-	public PluginModule(JavaPlugin plugin, String name, ModuleManager manager) {
-		_plugin = plugin;
-		_name = name;
-		_manager = manager;
-	}
-	
 	public PluginModule(String name) {
 		_name = name;
 	}
