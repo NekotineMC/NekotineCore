@@ -25,7 +25,7 @@ public class ModuleManager{
 					nameMappings.put(annotation.Name(), moduleType);
 				}
 			} catch (Exception e) {
-				plugin.getLogger().warning("Impossible de créer le module de type " + moduleType.getTypeName() + '\n' + e.getMessage());
+				plugin.getLogger().warning("Impossible de créer le module de type " + moduleType.getTypeName() + '\n' + e.getClass().toString() + " : " + e.getMessage());
 			}
 		}
 	}
