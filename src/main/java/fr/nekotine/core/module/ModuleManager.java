@@ -16,7 +16,7 @@ public class ModuleManager{
 	public void Load(JavaPlugin plugin, Class<? extends PluginModule>... moduleTypes) {
 		for (Class<? extends PluginModule> moduleType : moduleTypes) {
 			try {
-				PluginModule module = moduleType.getConstructor(JavaPlugin.class).newInstance();
+				PluginModule module = moduleType.getConstructor(String.class).newInstance();
 				module.setModuleManager(this);
 				module.setPlugin(plugin);
 				modules.put(moduleType,module);
