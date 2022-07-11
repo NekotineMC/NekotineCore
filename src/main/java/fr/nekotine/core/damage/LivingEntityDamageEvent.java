@@ -21,10 +21,10 @@ public class LivingEntityDamageEvent extends Event{
 	
 	//
 	
-	private LivingEntity damaged;
-	private LivingEntity damager;
-	private Projectile projectile;
-	private DamageCause cause;
+	private final LivingEntity damaged;
+	private final LivingEntity damager;
+	private final Projectile projectile;
+	private final DamageCause cause;
 	private double damage;
 	private boolean ignoreArmor;
 	private boolean knockback;
@@ -71,21 +71,21 @@ public class LivingEntityDamageEvent extends Event{
 	}
 	/**
 	 * 
-	 * @return La LivingEntity qui fait les dégâts
+	 * @return La LivingEntity qui fait les dï¿½gï¿½ts
 	 */
 	public @Nullable LivingEntity GetDamager() {
 		return damager;
 	}
 	/**
 	 * 
-	 * @return Le Projectile qui fait les dégâts
+	 * @return Le Projectile qui fait les dï¿½gï¿½ts
 	 */
 	public @Nullable Projectile GetProjectile() {
 		return projectile;
 	}
 	/**
 	 * 
-	 * @return Si l'Event a été annullé
+	 * @return Si l'Event a ï¿½tï¿½ annullï¿½
 	 */
 	public boolean IsCancelled() {
 		return cancelled;
@@ -95,42 +95,42 @@ public class LivingEntityDamageEvent extends Event{
 	}
 	/**
 	 * 
-	 * @return La cause du dégât
+	 * @return La cause du dï¿½gï¿½t
 	 */
 	public @Nullable DamageCause GetCause() {
 		return cause;
 	}
 	/**
 	 * 
-	 * @return Le dégâts brut du coup
+	 * @return Le dï¿½gï¿½ts brut du coup
 	 */
 	public double GetDamage() {
 		return damage;
 	}
 	/**
 	 * 
-	 * @return La valeur de base qui sera ajoutée aux dégâts
+	 * @return La valeur de base qui sera ajoutï¿½e aux dï¿½gï¿½ts
 	 */
 	public double GetBaseMod() {
 		return baseMod;
 	}
 	/**
 	 * 
-	 * @return Le multiplicatuer de base qui sera ajouté aux dégâts
+	 * @return Le multiplicatuer de base qui sera ajoutï¿½ aux dï¿½gï¿½ts
 	 */
 	public double GetBaseMult() {
 		return baseMult;
 	}
 	/**
 	 * 
-	 * @return Le multiplicateur final qui sera ajouté aux dégâts
+	 * @return Le multiplicateur final qui sera ajoutï¿½ aux dï¿½gï¿½ts
 	 */
 	public double GetFinalMult() {
 		return finalMult;
 	}
 	/**
 	 * 
-	 * @return Le multiplicateur final qui sera ajouté au recul
+	 * @return Le multiplicateur final qui sera ajoutï¿½ au recul
 	 */
 	public double GetKnockbackMult() {
 		return knockbackMult;
@@ -154,42 +154,42 @@ public class LivingEntityDamageEvent extends Event{
 	}
 	/**
 	 * 
-	 * @param cancelled Si le coup doit être annullé
+	 * @param cancelled Si le coup doit ï¿½tre annullï¿½
 	 */
 	public void SetCancelled(boolean cancelled) {
 		this.cancelled = cancelled;
 	}
 	/**
 	 * 
-	 * @param damage Dégâts de bases du coup
+	 * @param damage Dï¿½gï¿½ts de bases du coup
 	 */
 	public void SetDamage(double damage) {
 		this.damage = damage;
 	}
 	/**
 	 * 
-	 * @param baseMod Les dégâts de base à ajouter
+	 * @param baseMod Les dï¿½gï¿½ts de base ï¿½ ajouter
 	 */
 	public void AddBaseMod(double baseMod) {
 		this.baseMod += baseMod;
 	}
 	/**
 	 * 
-	 * @param baseMult Le multiplicateur de base à ajouter
+	 * @param baseMult Le multiplicateur de base ï¿½ ajouter
 	 */
 	public void AddBaseMult(double baseMult) {
 		this.baseMult += baseMult;
 	}
 	/**
 	 * 
-	 * @param finalMult Le multiplicateur final à ajouter
+	 * @param finalMult Le multiplicateur final ï¿½ ajouter
 	 */
 	public void AddFinalMult(double finalMult) {
 		this.finalMult *= finalMult;
 	}
 	/**
 	 * 
-	 * @param knockbackMult Le multiplicateur final à ajouter
+	 * @param knockbackMult Le multiplicateur final ï¿½ ajouter
 	 */
 	public void AddKnockbackMult(double knockbackMult) {
 		this.knockbackMult *= knockbackMult;

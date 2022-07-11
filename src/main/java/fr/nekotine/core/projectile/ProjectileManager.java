@@ -9,22 +9,16 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
 import fr.nekotine.core.arrache.TickEvent;
-import fr.nekotine.core.module.ModuleManager;
 import fr.nekotine.core.module.PluginModule;
+import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
 
+@ModuleNameAnnotation(Name = "ProjectileManager")
 public class ProjectileManager extends PluginModule{
-	public ProjectileManager(JavaPlugin plugin, ModuleManager moduleManager) {
-		super(plugin, "ProjectileManager", moduleManager);
-	}
-	
-	//
-	
-	private HashMap<Entity, CustomProjectile> projectiles = new HashMap<Entity, CustomProjectile>();
+	private final HashMap<Entity, CustomProjectile> projectiles = new HashMap<Entity, CustomProjectile>();
 	
 	//
 	
@@ -76,7 +70,7 @@ public class ProjectileManager extends PluginModule{
 	public void Tick(TickEvent e) {
 		for (Iterator<Entry<Entity, CustomProjectile>> iterator = projectiles.entrySet().iterator(); iterator.hasNext();){
 			Entry<Entity, CustomProjectile> entry = iterator.next();
-			if(!entry.getKey().isValid() || entry.getValue().Collision()) iterator.remove();
+			if(entry.getValue().Collision()) iterator.remove();
 		}
 	}
 	@EventHandler
