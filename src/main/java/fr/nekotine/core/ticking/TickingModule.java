@@ -1,5 +1,8 @@
 package fr.nekotine.core.ticking;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.bukkit.event.Event;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -12,9 +15,12 @@ public class TickingModule extends PluginModule{
 	
 	TickEventRunnable runningTask;
 	
+	Map<TickTimeStamp, Integer> stamps;
+	
 	@Override
 	protected void onEnable() {
 		super.onEnable();
+		stamps = new HashMap<>();
 		runningTask = new TickEventRunnable(this);
 		runningTask.runTaskTimer(getPlugin(), 0, 1);
 	}
@@ -29,7 +35,16 @@ public class TickingModule extends PluginModule{
 	}
 	
 	private void Tick() {
-		Event tickEvent = new TickElapsedEvent();
+		Map<TickTimeStamp, Boolean> stampStatus = new HashMap<>();
+		for (TickTimeStamp stamp : TickTimeStamp.values()) {
+			if (stamps.get(stamp) > stamp.getNumberOfTick()) {
+				stamps.put(stamp, 0);
+				stampStatus.put(stamp, true);
+			}else {
+				stampStatus.put(stamp, false);
+			}
+		}
+		Event tickEvent = new TickElapsedEvent(stampStatus);
 		getPlugin().getServer().getPluginManager().callEvent(tickEvent);
 	}
 	
