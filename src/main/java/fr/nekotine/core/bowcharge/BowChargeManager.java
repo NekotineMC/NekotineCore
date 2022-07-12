@@ -1,6 +1,7 @@
 package fr.nekotine.core.bowcharge;
 
 import java.util.HashMap;
+
 import java.util.Iterator;
 import java.util.Map.Entry;
 
@@ -8,25 +9,18 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import fr.nekotine.core.arrache.TickEvent;
 import fr.nekotine.core.charge.ChargeManager;
 import fr.nekotine.core.charge.ICharge;
-import fr.nekotine.core.module.ModuleManager;
 import fr.nekotine.core.module.PluginModule;
+import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
 
+@ModuleNameAnnotation(Name = "BowChargeManager")
 public class BowChargeManager extends PluginModule{
 	
 	private ChargeManager chargeManager;
-	private HashMap<Player, BowCharge> bowCharges = new HashMap<Player,BowCharge>();
-	
-	//
-	
-	public BowChargeManager(JavaPlugin plugin, ModuleManager manager) {
-		super(plugin,"BowChargeManager", manager);
-		this.chargeManager = (ChargeManager)GetPluginModule(ChargeManager.GetName());
-	}
+	private final HashMap<Player, BowCharge> bowCharges = new HashMap<Player,BowCharge>();
 	
 	//
 	
@@ -66,6 +60,12 @@ public class BowChargeManager extends PluginModule{
 	@EventHandler
 	public void ShootBow(EntityShootBowEvent e) {
 		bowCharges.values().forEach( (charge) -> charge.ShootBow(e));
+	}
+	
+	@Override
+	public void onEnable() {
+		super.onEnable();
+		this.chargeManager = GetPluginModule(ChargeManager.class);
 	}
 	
 	//

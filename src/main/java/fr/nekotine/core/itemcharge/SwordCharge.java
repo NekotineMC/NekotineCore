@@ -1,6 +1,7 @@
 package fr.nekotine.core.itemcharge;
 
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -12,24 +13,24 @@ import fr.nekotine.core.util.UtilTime;
 
 public class SwordCharge implements ICharge{
 	
-	//Délai maximal entre deux appel d'Interract Event afin de constater la fin de la charge
-	private final long RELEASE_DELAY_MS = 100;
+	//Dï¿½lai maximal entre deux appel d'Interract Event afin de constater la fin de la charge
+	private final long RELEASE_DELAY_MS = 200;
 	
-	//Si le joueur a arrêté l'action
+	//Si le joueur a arrï¿½tï¿½ l'action
 	private boolean released;
-	//Dernière fois que l'action était réalisée
+	//Derniï¿½re fois que l'action ï¿½tait rï¿½alisï¿½e
 	private long lastFired;
 	//
 	
-	private SwordChargeManager swordChargeManager;
-	private Player user;
-	private String chargeName;
-	private long duration;
+	private final SwordChargeManager swordChargeManager;
+	private final Player user;
+	private final String chargeName;
+	private final long duration;
 	private boolean activated;
-	private CustomAction action;
-	private boolean bindToItem;
-	private ItemStack bindItem;
-	private ISwordCharge iSwordCharge;
+	private final CustomAction action;
+	private final boolean bindToItem;
+	private final ItemStack bindItem;
+	private final ISwordCharge iSwordCharge;
 	
 	public SwordCharge(SwordChargeManager swordChargeManager, Player user, String chargeName, long duration, boolean activated, CustomAction action,
 			boolean bindToItem, ItemStack bindItem, ISwordCharge iSwordCharge) {
@@ -38,6 +39,7 @@ public class SwordCharge implements ICharge{
 		this.chargeName = chargeName;
 		this.duration = duration;
 		this.activated = activated;
+		this.action = action;
 		this.bindToItem = bindToItem;
 		this.bindItem = bindItem;
 		this.iSwordCharge = iSwordCharge;
@@ -45,6 +47,7 @@ public class SwordCharge implements ICharge{
 		this.released = false;
 		
 		if(activated){
+			lastFired = UtilTime.GetTime();
 			swordChargeManager.AddCharge(user, chargeName, duration, this);
 		}
 	}
@@ -52,39 +55,34 @@ public class SwordCharge implements ICharge{
 	//
 	
 	public boolean Update() {
+		if(activated && bindToItem && !UtilGear.HasInAnyHand(user, bindItem)) released = true;
+		if(activated && UtilTime.Passed(lastFired) > RELEASE_DELAY_MS) {
+			released = true;
+		}
+		
 		if(released) {
 			SetCancelled();
 			iSwordCharge.Released(user, chargeName, GetTimeLeft());
 			return true;
 		}
+		
 		return false;
 	}
 	
 	//
 	
+	@EventHandler
 	public void Action(PlayerInteractEvent e) {
 		if(released) return;
 		if(!user.equals(e.getPlayer())) return;
+		if(!UtilEvent.IsAction(e.getAction(), action)) return;
+		if(bindToItem && !UtilGear.IsItem(bindItem, e.getItem())) return;
 		
 		if(!activated) {
-			if(!UtilEvent.IsAction(e.getAction(), action)) return;
-			if(bindToItem && !UtilGear.IsItem(bindItem, e.getItem())) return;
-			
 			activated = true;
 			swordChargeManager.AddCharge(user, chargeName, duration, this);
-			
-		}else {
-			
-			if(bindToItem && !UtilGear.IsItem(bindItem, e.getItem())) {
-				released = true;
-				
-			}else {
-				if(UtilEvent.IsAction(e.getAction(), action)) return;
-				if(UtilTime.Passed(lastFired) <= RELEASE_DELAY_MS) return;
-				
-				released = true;
-			}
 		}
+		lastFired = UtilTime.GetTime();
 	}
 	
 	//

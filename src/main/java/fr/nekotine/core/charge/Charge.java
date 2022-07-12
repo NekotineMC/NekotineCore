@@ -7,18 +7,18 @@ public class Charge {
 	
 	//
 	
-	private String user;
-	private String chargeName;
-	private long duration;
-	private ICharge iCharge;
+	private final String user;
+	private final String chargeName;
+	private final long duration;
+	private final ICharge iCharge;
 	
 	//
 	
 	/**
 	 * 
 	 * @param user Utilisateur de la charge
-	 * @param chargeName Nom de la charge /!\ Doit être différente pour chaque user
-	 * @param duration Durée en ms
+	 * @param chargeName Nom de la charge /!\ Doit ï¿½tre diffï¿½rente pour chaque user
+	 * @param duration Durï¿½e en ms
 	 * @param iCharge Interface
 	 */
 	public Charge(String user, String chargeName, long duration, ICharge iCharge) {

@@ -8,24 +8,19 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import fr.nekotine.core.arrache.TickEvent;
 import fr.nekotine.core.charge.ChargeManager;
 import fr.nekotine.core.charge.ICharge;
-import fr.nekotine.core.module.ModuleManager;
 import fr.nekotine.core.module.PluginModule;
+import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
 import fr.nekotine.core.util.CustomAction;
 
+@ModuleNameAnnotation(Name = "SwordChargeManager")
 public class SwordChargeManager extends PluginModule{
 	
 	private ChargeManager chargeManager;
-	private HashMap<Player, SwordCharge> swordCharges = new HashMap<Player,SwordCharge>();
-	
-	public SwordChargeManager(JavaPlugin plugin, ModuleManager manager) {
-		super(plugin,"SwordChargeManager", manager);
-		this.chargeManager = (ChargeManager)GetPluginModule(ChargeManager.GetName());
-	}
+	private final HashMap<Player, SwordCharge> swordCharges = new HashMap<Player,SwordCharge>();
 
 	//
 	
@@ -75,6 +70,11 @@ public class SwordChargeManager extends PluginModule{
 	@EventHandler
 	public void Action(PlayerInteractEvent e) {
 		swordCharges.values().forEach( (charge) -> charge.Action(e));
+	}
+	@Override
+	public void onEnable() {
+		super.onEnable();
+		this.chargeManager = GetPluginModule(ChargeManager.class);
 	}
 	
 	//

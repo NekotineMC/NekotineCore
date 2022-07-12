@@ -12,20 +12,14 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import fr.nekotine.core.module.ModuleManager;
 import fr.nekotine.core.module.PluginModule;
+import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
 
+@ModuleNameAnnotation(Name = "DamageManager")
 public class DamageManager extends PluginModule{
-	public DamageManager(JavaPlugin plugin, ModuleManager manager) {
-		super(plugin, "DamageManager", manager);
-	}
-	
-	//
-	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void OnDamage(EntityDamageEvent event) {
 		if(!(event.getEntity() instanceof LivingEntity)) return;
@@ -48,11 +42,11 @@ public class DamageManager extends PluginModule{
 		
 		if(event.IsIgnoreArmor()) 
 			event.SetDamage( CalculateNeededDamage(event.GetDamaged(), event.GetDamage()) );
-		if(event.IsKnockback() && event.GetDamager() != null) 
+		if(event.IsKnockback() && event.GetDamager() != null)
 			event.GetDamaged().setVelocity(event.GetDamager().getLocation().getDirection().setY(0).normalize().multiply(event.GetKnockbackMult()));
 		
 		
-		event.GetDamaged().damage(event.GetDamage());
+		//event.GetDamaged().damage(event.GetDamage());
 		event.SetCancelled(true);
 	}
 	
@@ -60,11 +54,11 @@ public class DamageManager extends PluginModule{
 	
 	/**
 	 * Endommage la LivingEntity
-	 * @param damaged La LivingEntity qui prend les dégâts
-	 * @param damager La LivingEntity qui fait les dégâts (si il y en a)
-	 * @param projectile Le Projectile qui fait les dégâts (si il y en a)
-	 * @param cause La cause du dégât
-	 * @param damage Le montant brut de dégât
+	 * @param damaged La LivingEntity qui prend les dï¿½gï¿½ts
+	 * @param damager La LivingEntity qui fait les dï¿½gï¿½ts (si il y en a)
+	 * @param projectile Le Projectile qui fait les dï¿½gï¿½ts (si il y en a)
+	 * @param cause La cause du dï¿½gï¿½t
+	 * @param damage Le montant brut de dï¿½gï¿½t
 	 * @param ignoreArmor Si le coup doit ignorer l'armure du joueur
 	 * @param knockback Si le coup doit faire reculer
 	 */
@@ -124,10 +118,10 @@ public class DamageManager extends PluginModule{
 	private void ApplyModifiers(LivingEntityDamageEvent event) {
 		double damage = event.GetDamage();
 		
-		//Dégats de base ajoutés
+		//Dï¿½gats de base ajoutï¿½s
 		damage += event.GetBaseMod();
 				
-		//Ajout des multiplicateurs des dégats de bases
+		//Ajout des multiplicateurs des dï¿½gats de bases
 		double baseMult = event.GetBaseMult();
 		if(baseMult < -1) damage = 0;
 		damage *= 1 + baseMult;

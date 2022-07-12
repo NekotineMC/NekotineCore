@@ -14,17 +14,17 @@ import fr.nekotine.core.util.UtilGear;
 public class BowCharge implements ICharge{
 	
 	private Arrow arrow;
-	//Si le joueur a tiré
+	//Si le joueur a tirï¿½
 	private boolean shot;
 	
 	//
 	
-	private BowChargeManager bowChargeManager;
-	private Player user;
-	private String chargeName;
-	private long duration;
+	private final BowChargeManager bowChargeManager;
+	private final Player user;
+	private final String chargeName;
+	private final long duration;
 	private boolean activated;
-	private IBowCharge iBowCharge;
+	private final IBowCharge iBowCharge;
 	
 	//
 	

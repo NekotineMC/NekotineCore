@@ -1,22 +1,13 @@
 package fr.nekotine.core.arrache;
 
-import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import fr.nekotine.core.module.ModuleManager;
 import fr.nekotine.core.module.PluginModule;
+import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
 
+@ModuleNameAnnotation(Name = "TickManager")
 public class TickManager extends PluginModule{
 	private BukkitRunnable ticker;
-	public TickManager(JavaPlugin plugin, ModuleManager manager) {
-		super(plugin, "TickManager", manager);
-		
-		ticker = (new BukkitRunnable() {
-			public void run() {
-				tick();
-			}
-		});
-	}
 	
 	private void tick() {
 		new TickEvent().callEvent();
@@ -25,6 +16,11 @@ public class TickManager extends PluginModule{
 	@Override
 	protected void onEnable() {
 		super.onEnable();
+		ticker = (new BukkitRunnable() {
+			public void run() {
+				tick();
+			}
+		});
 		ticker.runTaskTimer(getPlugin(), 0L, 1L);
 	}
 

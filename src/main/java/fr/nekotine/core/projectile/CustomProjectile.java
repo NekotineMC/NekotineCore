@@ -11,18 +11,18 @@ import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
+import fr.nekotine.core.util.UtilTime;
+
 public class CustomProjectile {
-	private Entity projectile;
-	private LivingEntity sender;
-	private IProjectile iProj;
+	private final Entity projectile;
+	private final LivingEntity sender;
+	private final IProjectile iProj;
+	private final long expireTime;
+	private final boolean targetLivingEntity;
+	private final boolean targetBlock;
 	
-	private long expireTime;
-	
-	private boolean targetLivingEntity;
-	private boolean targetBlock;
-	
+	private final long startedTime;
 	private boolean triggered;
-	
 	private final double DISTANCE_TO_HIT_BLOCK = 0.5;
 	
 	public CustomProjectile(Entity projectile, LivingEntity sender, IProjectile iProj, Vector velocity, long expireTime, boolean targetLivingEntity,
@@ -34,6 +34,7 @@ public class CustomProjectile {
 		this.targetLivingEntity = targetLivingEntity;
 		this.targetBlock = targetBlock;
 		
+		this.startedTime = UtilTime.GetTime();
 		this.triggered = false;
 		ConfigureProjectile(projectile, velocity);
 	}
@@ -56,19 +57,16 @@ public class CustomProjectile {
 	public boolean Collision() {
 		if(triggered) {
 			iProj.Triggered(this);
-			return true;
+			return triggered;
 		}
-		if(expireTime != -1 && System.currentTimeMillis() >  expireTime) {
+		if(expireTime != -1 && UtilTime.Difference(UtilTime.GetTime(), startedTime) >  expireTime) {
+			triggered = true;
 			iProj.Faded(this);
-			return true;
+			return triggered;
 		}
 		
 		if(targetLivingEntity) {
-			double boundingSizeX = projectile.getBoundingBox().getWidthX();
-			double boundingSizeY = projectile.getBoundingBox().getHeight();
-			double boundingSizeZ = projectile.getBoundingBox().getWidthZ();
-			
-			for(Entity hitEntity : projectile.getNearbyEntities(boundingSizeX / 2, boundingSizeY / 2, boundingSizeZ / 2)) {
+			for(Entity hitEntity : projectile.getNearbyEntities(0,0, 0)) {
 				if(hitEntity instanceof LivingEntity) {
 					LivingEntity hitLivingEntity = (LivingEntity)hitEntity;
 					
@@ -79,17 +77,20 @@ public class CustomProjectile {
 						if(hitPlayer.getGameMode() == GameMode.CREATIVE || hitPlayer.getGameMode() == GameMode.SPECTATOR) continue;
 					}
 					
+					triggered = true;
 					iProj.Hit(hitLivingEntity, null, this);
-					return true;
+					return triggered;
 				}	
 			}
 		}
 		
 		if(targetBlock) {
 			RayTraceResult result = projectile.getWorld().rayTraceBlocks(projectile.getLocation(), projectile.getVelocity(), DISTANCE_TO_HIT_BLOCK);
-			if(result.getHitBlock() != null && result.getHitBlock().isSolid()) {
+			if(result!=null && result.getHitBlock() != null && result.getHitBlock().isSolid()) {
+				
+				triggered = true;
 				iProj.Hit(null, result.getHitBlock(), this);
-				return true;
+				return triggered;
 			}
 		}
 		
@@ -101,12 +102,11 @@ public class CustomProjectile {
 	
 	/**
 	 * 
-	 * @param triggered Si le projectile doit être déclenché
+	 * @param triggered Si le projectile doit être supprimé
 	 */
 	public void SetTriggered(boolean triggered) {
 		this.triggered = triggered;
 	}
-	
 	/**
 	 * @return La Entity utilis�e comme projectile
 	 */

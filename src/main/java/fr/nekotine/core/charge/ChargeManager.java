@@ -5,24 +5,18 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 
 import org.bukkit.event.EventHandler;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import fr.nekotine.core.arrache.TickEvent;
-import fr.nekotine.core.module.ModuleManager;
 import fr.nekotine.core.module.PluginModule;
+import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
 
+@ModuleNameAnnotation(Name = "ChargeManager")
 public class ChargeManager extends PluginModule{
 	private static final String NAME = "ChargeManager";
 	
 	//Cl� 1 = nom de ce qui utilise la charge
 	//Cl� 2 = nom de la charge
-	private HashMap<String, HashMap<String, Charge>> charges = new HashMap<String, HashMap<String, Charge>>();
-	
-	//
-	
-	public ChargeManager(JavaPlugin plugin, ModuleManager manager) {
-		super(plugin,"ChargeManager", manager);
-	}
+	private final HashMap<String, HashMap<String, Charge>> charges = new HashMap<String, HashMap<String, Charge>>();
 	
 	//
 	
