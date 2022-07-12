@@ -61,6 +61,16 @@ public class ModuleManager{
 	public <T extends PluginModule> T Get(Class<T> moduleType) {
 		return (T) modules.get(moduleType);
 	}
+	
+	/**
+	 * Récupère un module à partir de sa classe.
+	 * @param moduleType Type du module à récuperer.
+	 * @return Le module désiré.
+	 */
+	public PluginModule Get(Object moduleType) {
+		return modules.get(moduleType);
+	}
+	
 	/**
 	 * Récupère le module souhaité par son nom.
 	 * @param name Nom du module.

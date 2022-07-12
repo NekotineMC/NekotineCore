@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import fr.nekotine.core.module.annotation.InheritedModuleAnnotation;
 import fr.nekotine.core.text.Text;
 import fr.nekotine.core.util.UtilEvent;
 
@@ -67,6 +68,14 @@ public abstract class PluginModule implements Listener {
 	}
 	
 	/**
+	 * Affiche du texte informatif dans la console.
+	 * @param text
+	 */
+	public void logWarning(Exception e) {
+		_plugin.getLogger().throwing(getClass().getName(), "", e);
+	}
+	
+	/**
 	 * Récupère le nom du module.
 	 * @return
 	 */
@@ -124,13 +133,23 @@ public abstract class PluginModule implements Listener {
 	 */
 	protected void onEnable() {
 		// loading dependecies
-		for (Field field : getClass().getDeclaredFields()) {
-			if (PluginModule.class.isAssignableFrom(field.getType())) {
-				if (!field.canAccess(field)) {
-					field.setAccessible(true);
+		try {
+			for (Field field : getClass().getDeclaredFields()) {
+				InheritedModuleAnnotation annotation = field.getAnnotation(InheritedModuleAnnotation.class);
+				if (annotation != null) {
+					if (PluginModule.class.isAssignableFrom(field.getType())) {
+						if (!field.canAccess(field)) {
+							field.setAccessible(true);
+						}
+						try {
+							field.set(this, _manager.Get(field.getType()));
+						} catch (Exception e) {
+						}
+					}
 				}
-				//TODO field.set
 			}
+		}catch(Exception e) {
+			logWarning(e);
 		}
 		//
 		UtilEvent.Register(getPlugin(), this);
