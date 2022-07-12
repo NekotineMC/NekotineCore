@@ -1,5 +1,7 @@
 package fr.nekotine.core.module;
 
+import java.lang.reflect.Field;
+
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -103,7 +105,6 @@ public abstract class PluginModule implements Listener {
 		final long epoch = System.currentTimeMillis();
 		logInfo("début du chargement...");
 		onEnable();
-		UtilEvent.Register(getPlugin(), this);
 		logInfo(String.format("le module est chargé! (%d ms)", System.currentTimeMillis()-epoch));
 	}
 	
@@ -113,7 +114,6 @@ public abstract class PluginModule implements Listener {
 	public final void disable() {
 		final long epoch = System.currentTimeMillis();
 		logInfo("début du déchargement...");
-		UtilEvent.Unregister(this);
 		onDisable();
 		logInfo(String.format("le module est déchargé! (%d ms)", System.currentTimeMillis()-epoch));
 	}
@@ -122,12 +122,26 @@ public abstract class PluginModule implements Listener {
 	 * Méhode à ne pas appeler, utilisez plutôt {@link #enable()}
 	 * Cette méthode est destinée à être surchargée par la classe enfant.
 	 */
-	protected void onEnable() {}
+	protected void onEnable() {
+		// loading dependecies
+		for (Field field : getClass().getDeclaredFields()) {
+			if (PluginModule.class.isAssignableFrom(field.getType())) {
+				if (!field.canAccess(field)) {
+					field.setAccessible(true);
+				}
+				//TODO field.set
+			}
+		}
+		//
+		UtilEvent.Register(getPlugin(), this);
+	}
 	
 	/**
 	 * Méhode à ne pas appeler, utilisez plutôt {@link #disbale()}
 	 * Cette méthode est destinée à être surchargée par la classe enfant.
 	 */
-	protected void onDisable() {}
+	protected void onDisable() {
+		UtilEvent.Unregister(this);
+	}
 	
 }

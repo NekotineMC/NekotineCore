@@ -1,10 +1,12 @@
 package fr.nekotine.core.module;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
+import fr.nekotine.core.module.annotation.InheritedModuleAnnotation;
 import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
 
 public class ModuleManager{
@@ -15,20 +17,37 @@ public class ModuleManager{
 	@SuppressWarnings("unchecked")
 	public void Load(JavaPlugin plugin, Class<? extends PluginModule>... moduleTypes) {
 		for (Class<? extends PluginModule> moduleType : moduleTypes) {
-			try {
-				PluginModule module = moduleType.getConstructor().newInstance();
-				module.setModuleManager(this);
-				module.setPlugin(plugin);
-				modules.put(moduleType,module);
-				ModuleNameAnnotation annotation = moduleType.getAnnotation(ModuleNameAnnotation.class);
+			for (Field field : moduleType.getDeclaredFields()) {
+				InheritedModuleAnnotation annotation = field.getAnnotation(InheritedModuleAnnotation.class);
 				if (annotation != null) {
-					nameMappings.put(annotation.Name(), moduleType);
+					Class<?> fieldType = field.getType();
+					if (PluginModule.class.isAssignableFrom(fieldType)) {
+						if (!modules.containsKey(fieldType)) {
+							tryLoadModule(plugin, (Class<? extends PluginModule>) fieldType);
+						}
+					}
 				}
-			} catch (Exception e) {
-				plugin.getLogger().warning("Impossible de créer le module de type " + moduleType.getTypeName() + '\n'
-						+ e.getClass().toString() + " : " + e.getMessage() + '\n'
-						+ e.getStackTrace());
 			}
+			if (!modules.containsKey(moduleType)) {
+				tryLoadModule(plugin, (Class<? extends PluginModule>) moduleType);
+			}
+		}
+	}
+	
+	private void tryLoadModule(JavaPlugin plugin, Class<? extends PluginModule> moduleType) {
+		try {
+			PluginModule module = moduleType.getConstructor().newInstance();
+			module.setModuleManager(this);
+			module.setPlugin(plugin);
+			modules.put(moduleType,module);
+			ModuleNameAnnotation annotation = moduleType.getAnnotation(ModuleNameAnnotation.class);
+			if (annotation != null) {
+				nameMappings.put(annotation.Name(), moduleType);
+			}
+		} catch (Exception e) {
+			plugin.getLogger().warning("Impossible de créer le module de type " + moduleType.getTypeName() + '\n'
+					+ e.getClass().toString() + " : " + e.getMessage() + '\n'
+					+ e.getStackTrace());
 		}
 	}
 	
