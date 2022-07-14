@@ -13,5 +13,4 @@ public class CustomEffectModule extends PluginModule{
 	protected void onDisable() {
 		super.onDisable();
 	}
-	
 }
