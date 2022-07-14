@@ -8,17 +8,20 @@ import java.util.Map.Entry;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
 import fr.nekotine.core.arrache.TickEvent;
+import fr.nekotine.core.damage.LivingEntityDamageEvent;
 import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
 
 @ModuleNameAnnotation(Name = "ProjectileManager")
 public class ProjectileManager extends PluginModule{
 	private final HashMap<Entity, CustomProjectile> projectiles = new HashMap<Entity, CustomProjectile>();
+	private final HashMap<Entity, CustomProjectile> projectilesBuffer = new HashMap<Entity, CustomProjectile>();
 	
 	//
 	
@@ -32,10 +35,13 @@ public class ProjectileManager extends PluginModule{
 	 * @param targetLivingEntity Si le projectile doit toucher les LivingEntity
 	 * @param targetBlock Si le projectile doit toucher les blocs
 	 */
-	public void AddProjectile(Entity projectile, LivingEntity sender, IProjectile iProj, Vector velocity, long expireTime,
+	public boolean AddProjectile(Entity projectile, LivingEntity sender, IProjectile iProj, Vector velocity, long expireTime,
 			boolean targetLivingEntity, boolean targetBlock) {
+		if(Exist(projectile)) return false;
+
 		CustomProjectile customProjectile = new CustomProjectile(projectile, sender, iProj, velocity, expireTime, targetLivingEntity, targetBlock);
-		projectiles.put(projectile, customProjectile);
+		projectilesBuffer.put(projectile, customProjectile);
+		return true;
 	}
 
 	//
@@ -45,10 +51,25 @@ public class ProjectileManager extends PluginModule{
 	 * @param sender Le lanceur du projectile
 	 */
 	public void TriggerFromSender(@NotNull LivingEntity sender) {
+		TransferBuffer();
+		
 		for (Iterator<Entry<Entity, CustomProjectile>> iterator = projectiles.entrySet().iterator(); iterator.hasNext();){
 			Entry<Entity, CustomProjectile> entry = iterator.next();
 			
 			if(sender.equals( entry.getValue().GetSender()) ) entry.getValue().SetTriggered(true);
+		}
+	}
+	/**
+	 * Trigger tous les projectiles du lanceur
+	 * @param iProj L'interface utilisée pour les projectiles
+	 */
+	public void TriggerFromInterface(@NotNull IProjectile iProj) {
+		TransferBuffer();
+		
+		for (Iterator<Entry<Entity, CustomProjectile>> iterator = projectiles.entrySet().iterator(); iterator.hasNext();){
+			Entry<Entity, CustomProjectile> entry = iterator.next();
+			
+			if(iProj.equals( entry.getValue().GetInterface()) ) entry.getValue().SetTriggered(true);
 		}
 	}
 	/**
@@ -57,6 +78,8 @@ public class ProjectileManager extends PluginModule{
 	 * @return La liste des projectiles lancés par le lanceur
 	 */
 	public ArrayList<CustomProjectile> GetFromSender(@NotNull LivingEntity sender) {
+		TransferBuffer();
+		
 		ArrayList<CustomProjectile> senderProjectiles = new ArrayList<>();
 		for(CustomProjectile projectile : projectiles.values()) {
 			if(sender.equals( projectile.GetSender()) ) senderProjectiles.add(projectile);
@@ -68,13 +91,31 @@ public class ProjectileManager extends PluginModule{
 	
 	@EventHandler
 	public void Tick(TickEvent e) {
+		TransferBuffer();
+
 		for (Iterator<Entry<Entity, CustomProjectile>> iterator = projectiles.entrySet().iterator(); iterator.hasNext();){
 			Entry<Entity, CustomProjectile> entry = iterator.next();
-			if(entry.getValue().Collision()) iterator.remove();
+			if(!entry.getValue().GetProjectile().isValid() || entry.getValue().Collision()) iterator.remove();
 		}
+	}
+	@EventHandler(priority = EventPriority.LOW)
+	public void OnDamage(LivingEntityDamageEvent e) {
+		if(projectiles.containsKey( e.GetDamager()) ) e.SetCancelled(true);
 	}
 	@EventHandler
 	public void OnHopperPickup(InventoryPickupItemEvent event) {
 		if(projectiles.containsKey(event.getItem())) event.setCancelled(true);
+	}
+	
+	//
+	
+	private void TransferBuffer() {
+		for(Entry<Entity, CustomProjectile> entry : projectilesBuffer.entrySet()) {
+			projectiles.put(entry.getKey(), entry.getValue());
+		}
+		projectilesBuffer.clear();
+	}
+	private boolean Exist(Entity entity) {
+		return projectiles.containsKey(entity);
 	}
 }

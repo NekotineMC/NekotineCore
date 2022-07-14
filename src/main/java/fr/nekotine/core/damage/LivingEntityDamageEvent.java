@@ -47,7 +47,7 @@ public class LivingEntityDamageEvent extends Event{
 		this.knockback = knockback;
 		
 		this.baseMod = 0;
-		this.baseMult = 1;
+		this.baseMult = 0;
 		this.finalMult = 1;
 		this.knockbackMult = 1;
 		this.cancelled = false;

@@ -9,6 +9,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
+import com.comphenix.protocol.wrappers.Pair;
+
 import fr.nekotine.core.arrache.TickEvent;
 import fr.nekotine.core.charge.ChargeManager;
 import fr.nekotine.core.charge.ICharge;
@@ -20,8 +22,9 @@ import fr.nekotine.core.util.CustomAction;
 public class SwordChargeManager extends PluginModule{
 	
 	private ChargeManager chargeManager;
-	private final HashMap<Player, SwordCharge> swordCharges = new HashMap<Player,SwordCharge>();
-
+	private final HashMap<Pair<Player, String>, SwordCharge> swordCharges = new HashMap<Pair<Player, String>, SwordCharge>();
+	private final HashMap<Pair<Player, String>, SwordCharge> swordChargesBuffer = new HashMap<Pair<Player, String>, SwordCharge>();
+	
 	//
 	
 	/**
@@ -38,12 +41,10 @@ public class SwordChargeManager extends PluginModule{
 	 */
 	public boolean AddSwordCharge(Player user, String chargeName, long duration, boolean activated, CustomAction action, boolean bindToItem, ItemStack bindItem, 
 			ISwordCharge iSwordCharge) {
-		if(!Exist(user)) {
-			SwordCharge swordCharge = new SwordCharge(this, user, chargeName, duration, activated, action, bindToItem, bindItem, iSwordCharge);
-			swordCharges.put(user, swordCharge);
-			return true;
-		}
-		return false;
+		if(Exist(user, chargeName)) return false;
+		SwordCharge swordCharge = new SwordCharge(this, user, chargeName, duration, activated, action, bindToItem, bindItem, iSwordCharge);
+		swordChargesBuffer.put(new Pair<Player, String>(user, chargeName), swordCharge);
+		return true;
 	}
 	
 	//
@@ -55,15 +56,17 @@ public class SwordChargeManager extends PluginModule{
 		return chargeManager.SetCancelled(user.getName(), chargeName, cancelled);
 	}
 	protected boolean AddCharge(Player user, String chargeName, long duration, ICharge iCharge) {
-		return chargeManager.AddCharge(user.getName(), chargeName, duration, iCharge);
+		return chargeManager.AddCharge(user.getName(), chargeName, duration, true, iCharge);
 	}
 	
 	//
 	
 	@EventHandler
-	public void Tick(TickEvent e) {
-		for (Iterator<Entry<Player, SwordCharge>> iterator = swordCharges.entrySet().iterator(); iterator.hasNext();){
-			Entry<Player, SwordCharge> entry = iterator.next();
+	public void Tick(TickEvent e) {	
+		TransferBuffer();
+		
+		for (Iterator<Entry<Pair<Player, String>, SwordCharge>> iterator = swordCharges.entrySet().iterator(); iterator.hasNext();){
+			Entry<Pair<Player, String>, SwordCharge> entry = iterator.next();
 			if(entry.getValue().Update()) iterator.remove();
 		}
 	}
@@ -79,7 +82,16 @@ public class SwordChargeManager extends PluginModule{
 	
 	//
 	
-	private boolean Exist(Player player) {
-		return swordCharges.containsKey(player);
+	private boolean Exist(Player player, String chargeName) {
+		return Exist(new Pair<Player, String>(player, chargeName));
+	}
+	private boolean Exist(Pair<Player, String> keys) {
+		return swordCharges.containsKey(keys) || swordChargesBuffer.containsKey(keys);
+	}
+	private void TransferBuffer() {
+		for(Entry<Pair<Player, String>, SwordCharge> entry : swordChargesBuffer.entrySet()) {
+			swordCharges.put(entry.getKey(), entry.getValue());
+		}
+		swordChargesBuffer.clear();
 	}
 }

@@ -3,11 +3,12 @@ package fr.nekotine.core.projectile;
 import javax.annotation.Nullable;
 
 import org.bukkit.GameMode;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.util.RayTraceResult;
+import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,7 +24,8 @@ public class CustomProjectile {
 	
 	private final long startedTime;
 	private boolean triggered;
-	private final double DISTANCE_TO_HIT_BLOCK = 0.5;
+	private boolean cancelled;
+	private final double DISTANCE_TO_HIT_BLOCK = 0.05;
 	
 	public CustomProjectile(Entity projectile, LivingEntity sender, IProjectile iProj, Vector velocity, long expireTime, boolean targetLivingEntity,
 			boolean targetBlock) {
@@ -36,6 +38,7 @@ public class CustomProjectile {
 		
 		this.startedTime = UtilTime.GetTime();
 		this.triggered = false;
+		this.cancelled = false;
 		ConfigureProjectile(projectile, velocity);
 	}
 	
@@ -48,6 +51,18 @@ public class CustomProjectile {
 			itemProjectile.setCanPlayerPickup(false);
 		}
 	}
+	private int CalculateCeil(double value) {
+		return (int)Math.round( Math.ceil( Math.abs(value) ) * Math.signum(value) ) ;
+	}
+	private int CalculateFloor(double value) {
+		return (int)Math.round( Math.floor( Math.abs(value) ) * Math.signum(value) ) ;
+	}
+	private int CalculateMin(double value) {
+		return (value < 0) ? CalculateCeil(value) - 1: CalculateFloor(value);
+	}
+	private int CalculateMax(double value) {
+		return (value < 0) ? CalculateFloor(value) + 1: CalculateCeil(value);
+	}
 	
 	//
 	
@@ -57,12 +72,12 @@ public class CustomProjectile {
 	public boolean Collision() {
 		if(triggered) {
 			iProj.Triggered(this);
-			return triggered;
+			return true;
 		}
 		if(expireTime != -1 && UtilTime.Difference(UtilTime.GetTime(), startedTime) >  expireTime) {
-			triggered = true;
+			cancelled = false;
 			iProj.Faded(this);
-			return triggered;
+			return !cancelled;
 		}
 		
 		if(targetLivingEntity) {
@@ -70,30 +85,43 @@ public class CustomProjectile {
 				if(hitEntity instanceof LivingEntity) {
 					LivingEntity hitLivingEntity = (LivingEntity)hitEntity;
 					
-					if(hitLivingEntity.equals(sender)) continue;
-					
 					if(hitLivingEntity instanceof Player) {
 						Player hitPlayer = (Player)hitLivingEntity;
 						if(hitPlayer.getGameMode() == GameMode.CREATIVE || hitPlayer.getGameMode() == GameMode.SPECTATOR) continue;
 					}
 					
-					triggered = true;
+					cancelled = false;
 					iProj.Hit(hitLivingEntity, null, this);
-					return triggered;
+					return !cancelled;
 				}	
 			}
 		}
 		
 		if(targetBlock) {
-			RayTraceResult result = projectile.getWorld().rayTraceBlocks(projectile.getLocation(), projectile.getVelocity(), DISTANCE_TO_HIT_BLOCK);
-			if(result!=null && result.getHitBlock() != null && result.getHitBlock().isSolid()) {
-				
-				triggered = true;
-				iProj.Hit(null, result.getHitBlock(), this);
-				return triggered;
+			BoundingBox box = projectile.getBoundingBox().clone().expand(DISTANCE_TO_HIT_BLOCK);
+			int startX = CalculateMin(box.getMinX());
+			int startY = CalculateMin(box.getMinY());
+			int startZ = CalculateMin(box.getMinZ());
+			
+			int endX = CalculateMax(box.getMaxX());
+			int endY = CalculateMax(box.getMaxY()) + 1;
+			int endZ = CalculateMax(box.getMaxZ());
+
+			for(int x = startX ; x <= endX ; x++) {
+				for(int y = startY ; y <= endY ; y++) {
+					for(int z = startZ ; z <= endZ ; z++) {
+						
+						Block hitBlock = projectile.getWorld().getBlockAt(x, y, z);
+						if(hitBlock.isSolid() && hitBlock.getBoundingBox().overlaps(box)) {
+							
+							cancelled = false;
+							iProj.Hit(null, hitBlock, this);
+							return !cancelled;
+						}
+					}
+				}
 			}
 		}
-		
 		
 		return false;
 	}
@@ -108,12 +136,24 @@ public class CustomProjectile {
 		this.triggered = triggered;
 	}
 	/**
+	 * 
+	 * @param triggered Si le projectile doit être supprimé
+	 */
+	public void SetCancelled(boolean cancelled) {
+		this.cancelled = cancelled;
+	}
+	/**
 	 * @return La Entity utilis�e comme projectile
 	 */
 	public @NotNull Entity GetProjectile() {
 		return projectile;
 	}
-	
+	/**
+	 * @return L'interface utilisée pour ce projectile
+	 */
+	public @NotNull IProjectile GetInterface() {
+		return iProj;
+	}
 	/**
 	 * 
 	 * @return La LivingEntity qui a lanc�e le projectile

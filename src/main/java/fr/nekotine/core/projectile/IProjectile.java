@@ -8,6 +8,7 @@ import org.bukkit.entity.LivingEntity;
 public interface IProjectile {
 	
 	/**
+	 * ATTENTION: Le joueur touché peut être le lanceur lui-même
 	 * Appel�e lorsque le projectile touche une LivingEntity ou un Block
 	 */
 	public void Hit(@Nullable LivingEntity hitEntity, @Nullable Block hitBlock, CustomProjectile projectile);

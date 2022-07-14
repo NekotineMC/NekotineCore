@@ -1,7 +1,6 @@
 package fr.nekotine.core.bowcharge;
 
 import java.util.HashMap;
-
 import java.util.Iterator;
 import java.util.Map.Entry;
 
@@ -9,6 +8,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+
+import com.comphenix.protocol.wrappers.Pair;
 
 import fr.nekotine.core.arrache.TickEvent;
 import fr.nekotine.core.charge.ChargeManager;
@@ -20,7 +21,8 @@ import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
 public class BowChargeManager extends PluginModule{
 	
 	private ChargeManager chargeManager;
-	private final HashMap<Player, BowCharge> bowCharges = new HashMap<Player,BowCharge>();
+	private final HashMap<Pair<Player, String>, BowCharge> bowCharges = new HashMap<Pair<Player, String>, BowCharge>();
+	private final HashMap<Pair<Player, String>, BowCharge> bowChargesBuffer = new HashMap<Pair<Player, String>, BowCharge>();
 	
 	//
 	
@@ -34,20 +36,21 @@ public class BowChargeManager extends PluginModule{
 	 * @return Si l'ajout � �t� bien pris en compte
 	 */
 	public boolean AddBowCharge(Player user, String chargeName, long duration, boolean activated, IBowCharge iBowCharge) {	
-		if(!Exist(user)) {
-			BowCharge bowCharge = new BowCharge(this, user, chargeName, duration, activated, iBowCharge);
-			bowCharges.put(user, bowCharge);
-			return true;
-		}
-		return false;
+		if(Exist(user, chargeName)) return false;
+		
+		BowCharge bowCharge = new BowCharge(this, user, chargeName, duration, activated, iBowCharge);
+		bowChargesBuffer.put(new Pair<Player, String>(user, chargeName), bowCharge);
+		return true;
 	}
 	
 	//
 	
 	@EventHandler
 	public void Tick(TickEvent e) {
-		for (Iterator<Entry<Player, BowCharge>> iterator = bowCharges.entrySet().iterator(); iterator.hasNext();){
-			Entry<Player, BowCharge> entry = iterator.next();
+		TransferBuffer();
+		
+		for (Iterator<Entry<Pair<Player, String>, BowCharge>> iterator = bowCharges.entrySet().iterator(); iterator.hasNext();){
+			Entry<Pair<Player, String>, BowCharge> entry = iterator.next();
 			if(entry.getValue().Update()) iterator.remove();
 		}
 	}
@@ -77,13 +80,22 @@ public class BowChargeManager extends PluginModule{
 		return chargeManager.SetCancelled(user.getName(), chargeName, cancelled);
 	}
 	protected boolean AddCharge(Player user, String chargeName, long duration, ICharge iCharge) {
-		return chargeManager.AddCharge(user.getName(), chargeName, duration, iCharge);
+		return chargeManager.AddCharge(user.getName(), chargeName, duration, true, iCharge);
 	}
 	
 	//
 	
-	private boolean Exist(Player player) {
-		return bowCharges.containsKey(player);
+	private boolean Exist(Player player, String chargeName) {
+		return Exist(new Pair<Player, String>(player, chargeName));
+	}
+	private boolean Exist(Pair<Player, String> keys) {
+		return bowCharges.containsKey(keys) || bowChargesBuffer.containsKey(keys);
+	}
+	private void TransferBuffer() {
+		for(Entry<Pair<Player, String>, BowCharge> entry : bowChargesBuffer.entrySet()) {
+			bowCharges.put(entry.getKey(), entry.getValue());
+		}
+		bowChargesBuffer.clear();
 	}
 
 }

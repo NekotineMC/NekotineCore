@@ -20,34 +20,35 @@ import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
 
 @ModuleNameAnnotation(Name = "DamageManager")
 public class DamageManager extends PluginModule{
+	private static final float BASE_KNOCKBACK = 0.5f;
+	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void OnDamage(EntityDamageEvent event) {
 		if(!(event.getEntity() instanceof LivingEntity)) return;
 		if(event.isCancelled()) return;
+		if(!event.getEntity().isValid()) return;
+		if(event.getEntity().isInvulnerable()) return;
 		
 		LivingEntity entity = (LivingEntity)event.getEntity();
 		LivingEntity damager = GetDamager(event);
 		Projectile projectile = GetProjectile(event);
-		
+
 		LivingEntityDamageEvent extendedEvent = new LivingEntityDamageEvent(entity, damager, projectile, event.getCause(), event.getDamage(), false, true);
-		
-		event.setCancelled(true);
 		extendedEvent.callEvent();
+		
+		event.setCancelled(extendedEvent.IsCancelled());
+		event.setDamage(Math.min(Double.MAX_VALUE, extendedEvent.GetDamage()));
+		
+		System.out.println(extendedEvent.GetDamage());
 	}
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void EndEvent(LivingEntityDamageEvent event) {
-		if(event.IsCancelled()) return;
-		
 		ApplyModifiers(event);
-		
+
 		if(event.IsIgnoreArmor()) 
 			event.SetDamage( CalculateNeededDamage(event.GetDamaged(), event.GetDamage()) );
 		if(event.IsKnockback() && event.GetDamager() != null)
-			event.GetDamaged().setVelocity(event.GetDamager().getLocation().getDirection().setY(0).normalize().multiply(event.GetKnockbackMult()));
-		
-		
-		//event.GetDamaged().damage(event.GetDamage());
-		event.SetCancelled(true);
+			event.GetDamaged().setVelocity(event.GetDamager().getLocation().getDirection().normalize().multiply(BASE_KNOCKBACK).multiply(event.GetKnockbackMult()));
 	}
 	
 	//
@@ -63,7 +64,9 @@ public class DamageManager extends PluginModule{
 	 * @param knockback Si le coup doit faire reculer
 	 */
 	public void Damage(LivingEntity damaged, LivingEntity damager, Projectile projectile, DamageCause cause, double damage, boolean ignoreArmor, boolean knockback) {
-		new LivingEntityDamageEvent(damaged, damager, projectile, cause, damage, ignoreArmor, knockback).callEvent();
+		/*LivingEntityDamageEvent e = new LivingEntityDamageEvent(damaged, damager, projectile, cause, damage, ignoreArmor, knockback);
+		e.callEvent();
+		new EntityDamageEvent(damaged, cause, e.GetDamage());*/
 	}
 	
 	//
