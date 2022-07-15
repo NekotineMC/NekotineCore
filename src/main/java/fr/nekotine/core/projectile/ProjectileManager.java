@@ -100,11 +100,11 @@ public class ProjectileManager extends PluginModule{
 	}
 	@EventHandler(priority = EventPriority.LOW)
 	public void OnDamage(LivingEntityDamageEvent e) {
-		if(projectiles.containsKey( e.GetDamager()) ) e.SetCancelled(true);
+		if(projectilesBuffer.containsKey(e.GetDamager()) || projectiles.containsKey( e.GetDamager()) ) e.SetCancelled(true);
 	}
 	@EventHandler
-	public void OnHopperPickup(InventoryPickupItemEvent event) {
-		if(projectiles.containsKey(event.getItem())) event.setCancelled(true);
+	public void OnHopperPickup(InventoryPickupItemEvent e) {
+		if(projectilesBuffer.containsKey(e.getItem()) || projectiles.containsKey(e.getItem())) e.setCancelled(true);
 	}
 	
 	//

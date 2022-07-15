@@ -2,8 +2,10 @@ package fr.nekotine.core.damage;
 
 import org.bukkit.EntityEffect;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -33,25 +35,45 @@ public class DamageManager extends PluginModule{
 		if(!event.getEntity().isValid()) return;
 		if(event.getEntity().isInvulnerable()) return;
 		
+		System.out.println("initial: "+event.getDamage());
+		
+		event.setCancelled(true);
+		
 		LivingEntity entity = (LivingEntity)event.getEntity();
 		LivingEntity damager = GetDamager(event);
 		Projectile projectile = GetProjectile(event);
 
-		LivingEntityDamageEvent extendedEvent = new LivingEntityDamageEvent(entity, damager, projectile, event.getCause(), event.getDamage(), false, true);
-		extendedEvent.callEvent();
-		
-		event.setCancelled(extendedEvent.IsCancelled());
-		event.setDamage(Math.min(Double.MAX_VALUE, extendedEvent.GetDamage()));
-		
-		System.out.println(extendedEvent.GetDamage());
+		new LivingEntityDamageEvent(entity, damager, projectile, event.getCause(), event.getDamage(), false, true).callEvent();
 	}
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void EndEvent(LivingEntityDamageEvent event) {
+		if(event.IsCancelled()) return;
+		if(!event.GetDamaged().isValid()) return;
+		if(event.GetDamaged().isInvulnerable()) return;
+		
+		System.out.println("final: "+event.GetDamage());
+		
+		//Apply modifiers (mulitplyers, ignoreArmor, ...)
 		ApplyModifiers(event);
-		//Damage(event);
-		if(event.IsIgnoreArmor()) 
-			event.SetDamage( CalculateNeededDamage(event.GetDamaged(), event.GetDamage()) );
+
+		//Apply damage
+		Damage(event);
+		
+		//Sound
+		Sound(event);
+		
+		//Knockback
 		Knockback(event);
+		
+		//Hurt effect
+		event.GetDamaged().playEffect(EntityEffect.HURT);
+		
+		//Remove arrows
+		if(event.GetProjectile() instanceof Arrow) event.GetProjectile().remove();
+
+		//Delai avait de taper
+		
+		//Ajouter le punch, kb avec les enchants
 	}
 	
 	//
@@ -67,9 +89,7 @@ public class DamageManager extends PluginModule{
 	 * @param knockback Si le coup doit faire reculer
 	 */
 	public void Damage(LivingEntity damaged, LivingEntity damager, Projectile projectile, DamageCause cause, double damage, boolean ignoreArmor, boolean knockback) {
-		/*LivingEntityDamageEvent e = new LivingEntityDamageEvent(damaged, damager, projectile, cause, damage, ignoreArmor, knockback);
-		e.callEvent();
-		new EntityDamageEvent(damaged, cause, e.GetDamage());*/
+		new LivingEntityDamageEvent(damaged, damager, projectile, cause, damage, ignoreArmor, knockback).callEvent();
 	}
 	
 	//
@@ -135,6 +155,11 @@ public class DamageManager extends PluginModule{
 		//Ajout des multiplicateurs
 		damage *= event.GetFinalMult();
 		
+		if(event.IsIgnoreArmor()) damage = CalculateNeededDamage(event.GetDamaged(), damage);
+		
+		//Si les dégats proviennent d'un /kill
+		damage = Math.min(damage, Double.MAX_VALUE);
+		
 		event.SetDamage(damage);
 	}
 	private void Knockback(LivingEntityDamageEvent event) {
@@ -164,10 +189,21 @@ public class DamageManager extends PluginModule{
 					false, 0, Math.abs(0.2 * knockback), 0.4 + (0.04 * knockback), true);
 		}
 	}
-	private void Damage(LivingEntityDamageEvent event) {
-		
-		
-		event.GetDamaged().playEffect(EntityEffect.HURT);
+	private void Sound(LivingEntityDamageEvent event) {
+		UtilEntity.PlayDamageSound(event.GetDamaged());
+		if (event.GetProjectile() != null && event.GetProjectile() instanceof Arrow && event.GetDamager() instanceof Player) {
+			Player player = (Player)event.GetDamager();
+			player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 0.5f);
+		}
 	}
-	
+	private void Damage(LivingEntityDamageEvent event) {
+		double health = Math.max(0, event.GetDamaged().getHealth() - event.GetDamage());
+		health = Math.min(health, UtilEntity.GetMaxHealth(event.GetDamaged()));
+		
+		event.GetDamaged().setLastDamage(event.GetDamage());
+		event.GetDamaged().setLastDamageCause(new EntityDamageEvent(event.GetDamaged(), event.GetCause(), event.GetDamage()));
+		if(event.GetDamager() instanceof Player) event.GetDamaged().setKiller((Player)event.GetDamager());
+		
+		event.GetDamaged().setHealth(health);
+	}	
 }

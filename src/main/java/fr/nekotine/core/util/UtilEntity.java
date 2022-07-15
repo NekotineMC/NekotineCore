@@ -1,8 +1,11 @@
 package fr.nekotine.core.util;
 
 import org.bukkit.Location;
+import org.bukkit.Sound;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Slime;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.util.Vector;
@@ -23,7 +26,7 @@ public class UtilEntity {
 	/**
 	 * 
 	 * @param entity L'entité à regarder
-	 * @return True si l'entité est située au dessus d'un block solide ( ne vérifie pas si elle vole au dessus de ce bloc )
+	 * @return True si l'entité est suportée par un block solide
 	 */
 	public static boolean IsOnGround(Entity entity) {
 		return entity.isOnGround();
@@ -77,5 +80,32 @@ public class UtilEntity {
 		ent.setFallDistance(0);
 		
 		ent.setVelocity(vec);	
+	}
+	public static void PlayDamageSound(LivingEntity entity) {
+		Sound sound = Sound.ENTITY_ZOMBIFIED_PIGLIN_HURT;
+		try {
+			sound = Sound.valueOf("ENTITY_"+entity.getType()+"_HURT");
+		} catch (IllegalArgumentException  e) {
+			System.out.println("[NekotineCore][UtilEntity][PlayDamageSound] impossible d'obtenir le son pour "+entity.getType());
+			System.out.println(e.getStackTrace());
+		}
+		
+		entity.getWorld().playSound(entity.getLocation(), sound, 1.5f + (float)(0.5f * Math.random()), 0.8f + (float)(0.4f * Math.random()));
+	}
+	/**
+	 * 
+	 * @param entity
+	 * @return La vie maximale de l'entité
+	 */
+	public static double GetMaxHealth(LivingEntity entity) {
+		return entity.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
+	}
+	/**
+	 * 
+	 * @param entity
+	 * @param value (0.5 si <= 0)
+	 */
+	public static void SetMaxHealth(LivingEntity entity, double value) {
+		entity.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(value);
 	}
 }
