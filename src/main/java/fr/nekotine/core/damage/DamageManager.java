@@ -1,5 +1,7 @@
 package fr.nekotine.core.damage;
 
+import org.bukkit.EntityEffect;
+import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.LivingEntity;
@@ -14,13 +16,15 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.Vector;
 
 import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
+import fr.nekotine.core.util.UtilEntity;
+import fr.nekotine.core.util.UtilMath;
 
 @ModuleNameAnnotation(Name = "DamageManager")
 public class DamageManager extends PluginModule{
-	private static final float BASE_KNOCKBACK = 0.5f;
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void OnDamage(EntityDamageEvent event) {
@@ -44,11 +48,10 @@ public class DamageManager extends PluginModule{
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void EndEvent(LivingEntityDamageEvent event) {
 		ApplyModifiers(event);
-
+		//Damage(event);
 		if(event.IsIgnoreArmor()) 
 			event.SetDamage( CalculateNeededDamage(event.GetDamaged(), event.GetDamage()) );
-		if(event.IsKnockback() && event.GetDamager() != null)
-			event.GetDamaged().setVelocity(event.GetDamager().getLocation().getDirection().normalize().multiply(BASE_KNOCKBACK).multiply(event.GetKnockbackMult()));
+		Knockback(event);
 	}
 	
 	//
@@ -134,4 +137,37 @@ public class DamageManager extends PluginModule{
 		
 		event.SetDamage(damage);
 	}
+	private void Knockback(LivingEntityDamageEvent event) {
+		if (event.IsKnockback() && event.GetDamager() != null){
+			
+			//Base
+			double knockback = event.GetDamage();
+			if (knockback < 2)	knockback = 2;
+			knockback = Math.log10(knockback);
+			
+			knockback *= event.GetKnockbackMult();
+
+			//Origin
+			Location origin = event.GetDamager().getLocation();
+			if (event.GetKnockbackOrigin() != null)
+				origin = event.GetKnockbackOrigin();
+
+			//Vec
+			Vector trajectory = UtilMath.GetTrajectory2d(origin, event.GetDamaged().getLocation());
+			trajectory.multiply(0.6 * knockback);
+			trajectory.setY(Math.abs(trajectory.getY()));
+
+			//Apply
+			double vel = 0.2 + trajectory.length() * 0.8;
+
+			UtilEntity.ApplyVelocity(event.GetDamaged(), trajectory, vel, 
+					false, 0, Math.abs(0.2 * knockback), 0.4 + (0.04 * knockback), true);
+		}
+	}
+	private void Damage(LivingEntityDamageEvent event) {
+		
+		
+		event.GetDamaged().playEffect(EntityEffect.HURT);
+	}
+	
 }

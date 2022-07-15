@@ -2,6 +2,7 @@ package fr.nekotine.core.damage;
 
 import javax.annotation.Nullable;
 
+import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.Event;
@@ -34,6 +35,7 @@ public class LivingEntityDamageEvent extends Event{
 	private double finalMult;
 	private double knockbackMult;
 	private boolean cancelled;
+	private Location knockbackOrigin;
 	
 	//
 	
@@ -51,6 +53,7 @@ public class LivingEntityDamageEvent extends Event{
 		this.finalMult = 1;
 		this.knockbackMult = 1;
 		this.cancelled = false;
+		this.knockbackOrigin = null;
 	}
 	
 	//
@@ -135,6 +138,13 @@ public class LivingEntityDamageEvent extends Event{
 	public double GetKnockbackMult() {
 		return knockbackMult;
 	}
+	/**
+	 * 
+	 * @return @Nullable La location de l'origine du knockback
+	 */
+	public Location GetKnockbackOrigin() {
+		return knockbackOrigin;
+	}
 	
 	//
 
@@ -193,5 +203,12 @@ public class LivingEntityDamageEvent extends Event{
 	 */
 	public void AddKnockbackMult(double knockbackMult) {
 		this.knockbackMult *= knockbackMult;
+	}
+	/**
+	 * 
+	 * @param knockbackOrigin La Location d'origine du knockback
+	 */
+	public void SetKnockbackOrigin(Location knockbackOrigin) {
+		this.knockbackOrigin = knockbackOrigin;
 	}
 }
