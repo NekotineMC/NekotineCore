@@ -1,7 +1,10 @@
 package fr.nekotine.core.damage;
 
+import java.util.Map;
+
 import org.bukkit.EntityEffect;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.enchantments.Enchantment;
@@ -14,7 +17,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -27,6 +29,24 @@ import fr.nekotine.core.util.UtilMath;
 
 @ModuleNameAnnotation(Name = "DamageManager")
 public class DamageManager extends PluginModule{
+	private static final Material ATTACK_COOLDOWN_MATERIAL = Material.BARRIER;
+	private static final int ATTACK_COOLDOWN_TICK = 10;
+	private static final int NO_DAMAGE_DURATION_TICK = 20;
+	private static final DamageCause[] DAMAGE_CAUSE_WITH_INVINCIBILITY_FRAME = {
+			DamageCause.CONTACT, DamageCause.DRAGON_BREATH, DamageCause.FIRE, DamageCause.HOT_FLOOR, DamageCause.LAVA, DamageCause.SUFFOCATION};
+	
+	private static final double CRITICAL_BOOST = 1.5;
+	
+	private static final double ARROW_DAMAGE_PER_VELOCITY_LENGTH = 3;
+	
+	private static final double PROTECTION_ENCHANT_REDUCTION = 0.04;
+	private static final double FALL_PROTECTION_ENCHANT_REDUCTION = 0.12;
+	private static final double FIRE_PROTECTION_ENCHANT_REDUCTION = 0.08;
+	private static final double PROJECTILE_PROTECTION_ENCHANT_REDUCTION = 0.08;
+	private static final double BLAST_PROTECTION_ENCHANT_REDUCTION = 0.08;
+	private static final double THORNS_DAMAGE = 2;
+	
+	//
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void OnDamage(EntityDamageEvent event) {
@@ -35,8 +55,6 @@ public class DamageManager extends PluginModule{
 		if(!event.getEntity().isValid()) return;
 		if(event.getEntity().isInvulnerable()) return;
 		
-		System.out.println("initial: "+event.getDamage());
-		
 		event.setCancelled(true);
 		
 		LivingEntity entity = (LivingEntity)event.getEntity();
@@ -44,13 +62,16 @@ public class DamageManager extends PluginModule{
 		Projectile projectile = GetProjectile(event);
 		double damage = event.getDamage();
 		
-		boolean critical = IsCritical(event);
 		//Remove critical damage from close combat
-		if(critical && projectile==null) damage = damage / 1.5;
-		//Consistent fully charged arrow damage
-		if(critical && projectile instanceof Arrow) damage = 6;
+		boolean critical = IsCritical(event);
+		if(critical && projectile==null) damage = damage / CRITICAL_BOOST;
 		
-		new LivingEntityDamageEvent(entity, damager, projectile, event.getCause(), damage, false, true, null).callEvent();
+		//Consistant arrow damage
+		if (projectile != null && projectile instanceof Arrow) damage = projectile.getVelocity().length() * ARROW_DAMAGE_PER_VELOCITY_LENGTH;
+		
+		LivingEntityDamageEvent customDamageEvent = new LivingEntityDamageEvent(entity, damager, projectile, event.getCause(), damage, false, true, null);
+		//If hit is valid (attack cooldown, ...)
+		if(ValidHit(customDamageEvent)) customDamageEvent.callEvent();
 	}
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void EndEvent(LivingEntityDamageEvent event) {
@@ -58,9 +79,7 @@ public class DamageManager extends PluginModule{
 		if(!event.GetDamaged().isValid()) return;
 		if(event.GetDamaged().isInvulnerable()) return;
 		
-		
-		
-		//Apply modifiers (mulitplyers, ignoreArmor, ...)
+		//Apply modifiers (mulitplyers, ignoreArmor, enchants, ....) 
 		ApplyModifiers(event);
 
 		//Apply damage
@@ -77,12 +96,6 @@ public class DamageManager extends PluginModule{
 		
 		//Remove arrows
 		if(event.GetProjectile() instanceof Arrow) event.GetProjectile().remove();
-
-		//Delai avait de taper
-		
-		//Ajouter le punch, kb avec les enchants
-		
-		System.out.println("final: "+event.GetDamage());
 	}
 	
 	//
@@ -130,54 +143,97 @@ public class DamageManager extends PluginModule{
 		
 		return ((EntityDamageByEntityEvent)event).isCritical();
 	}
-	private int GetProtection(LivingEntity damaged) {
-		EntityEquipment equipement = damaged.getEquipment();
-
-		ItemStack helm = equipement.getHelmet();
-		ItemStack chest = equipement.getChestplate();
-		ItemStack legs = equipement.getLeggings();
-		ItemStack boot = equipement.getBoots();
-
-		return (helm != null ? helm.getEnchantmentLevel(Enchantment.DAMAGE_ALL) : 0) +
-				(chest != null ? chest.getEnchantmentLevel(Enchantment.DAMAGE_ALL) : 0) +
-				(legs != null ? legs.getEnchantmentLevel(Enchantment.DAMAGE_ALL) : 0) +
-				(boot != null ? boot.getEnchantmentLevel(Enchantment.DAMAGE_ALL) : 0);
-	}
-	private double GetReducedDamage(LivingEntity damaged, double damage) {
-		System.out.println("before: "+damage);
-		double defense = damaged.getAttribute(Attribute.GENERIC_ARMOR).getValue();
-		double toughness = damaged.getAttribute(Attribute.GENERIC_ARMOR_TOUGHNESS).getValue();
-		double protection = GetProtection(damaged);
-		PotionEffect effect = damaged.getPotionEffect(PotionEffectType.DAMAGE_RESISTANCE);
+	private void ApplyArmor(LivingEntityDamageEvent event) {
+		//Base resistance & armor protection
+		double defense = event.GetDamaged().getAttribute(Attribute.GENERIC_ARMOR).getValue();
+		double toughness = event.GetDamaged().getAttribute(Attribute.GENERIC_ARMOR_TOUGHNESS).getValue();
+		PotionEffect effect = event.GetDamaged().getPotionEffect(PotionEffectType.DAMAGE_RESISTANCE);
 		int resistance = effect == null ? 0 : effect.getAmplifier();
 		
-		double withArmorAndToughness = damage * (1 - Math.min(20, Math.max(defense / 5, defense - damage / (2 + toughness / 4))) / 25);
+		double withArmorAndToughness = event.GetDamage() * (1 - Math.min(20, Math.max(defense / 5, defense - event.GetDamage() / (2 + toughness / 4))) / 25);
 		double withResistance = withArmorAndToughness * (1 - (resistance * 0.2));
-		double withEnchants = withResistance * (1 - (Math.min(20.0, protection) / 25));
-		System.out.println("after: "+withEnchants);
-		return withEnchants;
+		
+		event.SetDamage(withResistance);
 		
 	}
-	private void ApplyModifiers(LivingEntityDamageEvent event) {
-		double damage = event.GetDamage();
+	private void ApplyEnchants(LivingEntityDamageEvent event) {
+		//Defensif
+		for (ItemStack armor : event.GetDamaged().getEquipment().getArmorContents()) {
+			if (armor != null) {
+				Map<Enchantment, Integer> enchants = armor.getEnchantments();
+				for (Enchantment e : enchants.keySet()) {
+					
+					if (e.equals(Enchantment.PROTECTION_ENVIRONMENTAL))
+						event.AddFinalMult( 1 - (PROTECTION_ENCHANT_REDUCTION * enchants.get(e)));
+					
+					else if (e.equals(Enchantment.PROTECTION_FIRE) && 
+						(event.GetCause() == DamageCause.FIRE ||
+						event.GetCause() == DamageCause.FIRE_TICK ||
+						event.GetCause() == DamageCause.LAVA))
+						event.AddFinalMult(1 - (FIRE_PROTECTION_ENCHANT_REDUCTION * enchants.get(e)));
+	
+					else if (e.equals(Enchantment.PROTECTION_FALL) && 
+							event.GetCause() == DamageCause.FALL)
+						event.AddFinalMult(1 - (FALL_PROTECTION_ENCHANT_REDUCTION * enchants.get(e)));
+	
+					else if (e.equals(Enchantment.PROTECTION_EXPLOSIONS) && 
+							event.GetCause() == DamageCause.ENTITY_EXPLOSION)
+						event.AddFinalMult(1 - (BLAST_PROTECTION_ENCHANT_REDUCTION * enchants.get(e)));
+	
+					else if (e.equals(Enchantment.PROTECTION_PROJECTILE) && 
+							event.GetCause() == DamageCause.PROJECTILE)
+						event.AddFinalMult(1 - (PROJECTILE_PROTECTION_ENCHANT_REDUCTION * enchants.get(e)));
+					
+					else if (e.equals(Enchantment.THORNS)) {
+						if(event.GetDamager() != null) Damage(event.GetDamager(), event.GetDamaged(), null, DamageCause.THORNS, THORNS_DAMAGE, false, true, null);
+					}
+				}
+			}
+		}
 		
+		//Offensifs
+		if (event.GetDamager() != null) {
+			ItemStack weapon = event.GetDamager().getActiveItem();
+			if(event.GetDamager() instanceof Player) weapon = ((Player)event.GetDamager()).getInventory().getItemInMainHand();
+
+			if (weapon != null) {
+				Map<Enchantment, Integer> enchants = weapon.getEnchantments();
+				for (Enchantment e : enchants.keySet()) {
+					
+					if (e.equals(Enchantment.ARROW_KNOCKBACK) || e.equals(Enchantment.KNOCKBACK)) 
+						event.AddKnockbackMult(1 + (0.5 * enchants.get(e)));
+					
+					else if (e.equals(Enchantment.FIRE_ASPECT)) 
+						event.GetDamaged().setFireTicks(Math.max(event.GetDamaged().getFireTicks(), 20 * ((enchants.get(e) * 4) - 1) ));
+					
+					else if (e.equals(Enchantment.ARROW_FIRE))
+						event.GetDamaged().setFireTicks(Math.max(event.GetDamaged().getFireTicks(), 20 * ((enchants.get(e) * 5)) ));
+					
+					else if (e.equals(Enchantment.ARROW_DAMAGE))
+						event.AddFinalMult(1 + (0.25 * (enchants.get(e) + 1)));
+				}
+			}
+		}
+	}
+	private void ApplyModifiers(LivingEntityDamageEvent event) {	
 		//D�gats de base ajout�s
-		damage += event.GetBaseMod();
-				
+		event.SetDamage(event.GetDamage() + event.GetBaseMod());
+
 		//Ajout des multiplicateurs des d�gats de bases
-		double baseMult = event.GetBaseMult();
-		if(baseMult < -1) damage = 0;
-		damage *= 1 + baseMult;
+		if(event.GetBaseMult() < -1) event.SetDamage(0);
+		event.SetDamage(event.GetDamage() * (1 + event.GetBaseMult()));
+		
+		//Armure
+		if(!event.IsIgnoreArmor()) ApplyArmor(event);
 				
+		//Enchantements
+		ApplyEnchants(event);
+		
 		//Ajout des multiplicateurs
-		damage *= event.GetFinalMult();
-		
-		if(!event.IsIgnoreArmor()) damage = GetReducedDamage(event.GetDamaged(), damage);
-		
+		event.SetDamage(event.GetDamage() * event.GetFinalMult());
+
 		//Si les dégats proviennent d'un /kill
-		damage = Math.min(damage, Double.MAX_VALUE);
-		
-		event.SetDamage(damage);
+		event.SetDamage( Math.min(event.GetDamage(), Double.MAX_VALUE) );
 	}
 	private void Knockback(LivingEntityDamageEvent event) {
 		if (event.IsKnockback() && event.GetDamager() != null){
@@ -222,5 +278,32 @@ public class DamageManager extends PluginModule{
 		if(event.GetDamager() instanceof Player) event.GetDamaged().setKiller((Player)event.GetDamager());
 		
 		event.GetDamaged().setHealth(health);
-	}	
+	}
+	private boolean Contains(DamageCause[] causes, DamageCause cause) {
+		for(int i=0 ; i<causes.length ; i++) {
+			if (causes[i] == cause) return true;
+		}
+		return false;
+	}
+	private boolean ValidHit(LivingEntityDamageEvent event) {
+		if(event.GetCause() == DamageCause.ENTITY_ATTACK) {
+			if(!(event.GetDamager() instanceof Player)) return true;
+			
+			Player damager = (Player)event.GetDamager();
+			int cooldown = damager.getCooldown(ATTACK_COOLDOWN_MATERIAL);
+			
+			if(cooldown > 0) return false;
+			
+			damager.setCooldown(ATTACK_COOLDOWN_MATERIAL, ATTACK_COOLDOWN_TICK);
+			return true;
+		}
+		if(Contains(DAMAGE_CAUSE_WITH_INVINCIBILITY_FRAME, event.GetCause())){
+			
+			if(event.GetDamaged().getNoDamageTicks() > 0) return false;
+			
+			event.GetDamaged().setNoDamageTicks(NO_DAMAGE_DURATION_TICK);			
+			return true;
+		}
+		return true;
+	}
 }

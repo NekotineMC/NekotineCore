@@ -88,9 +88,6 @@ public class Charge {
 		player.setExp(ratio);
 		
 		float denom = 1f / AUDIO_BIP_NUMBER;
-		System.out.println(denom);
-		System.out.println(before / denom);
-		System.out.println(ratio / denom);
 		
 		if(Math.floor(before / denom) != Math.floor(ratio / denom)) player.playSound(player, Sound.BLOCK_DISPENSER_DISPENSE, 0.2f, ratio * 2);
 	}

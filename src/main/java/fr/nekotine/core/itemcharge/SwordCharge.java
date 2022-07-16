@@ -14,7 +14,7 @@ import fr.nekotine.core.util.UtilTime;
 public class SwordCharge implements ICharge{
 	
 	//D�lai maximal entre deux appel d'Interract Event afin de constater la fin de la charge
-	private final long RELEASE_DELAY_MS = 300;
+	private final long RELEASE_DELAY_MS = 500;
 	
 	//Si le joueur a arr�t� l'action
 	private boolean released;
