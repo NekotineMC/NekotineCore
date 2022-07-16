@@ -14,8 +14,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
@@ -42,8 +42,15 @@ public class DamageManager extends PluginModule{
 		LivingEntity entity = (LivingEntity)event.getEntity();
 		LivingEntity damager = GetDamager(event);
 		Projectile projectile = GetProjectile(event);
-
-		new LivingEntityDamageEvent(entity, damager, projectile, event.getCause(), event.getDamage(), false, true).callEvent();
+		double damage = event.getDamage();
+		
+		boolean critical = IsCritical(event);
+		//Remove critical damage from close combat
+		if(critical && projectile==null) damage = damage / 1.5;
+		//Consistent fully charged arrow damage
+		if(critical && projectile instanceof Arrow) damage = 6;
+		
+		new LivingEntityDamageEvent(entity, damager, projectile, event.getCause(), damage, false, true, null).callEvent();
 	}
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void EndEvent(LivingEntityDamageEvent event) {
@@ -51,7 +58,7 @@ public class DamageManager extends PluginModule{
 		if(!event.GetDamaged().isValid()) return;
 		if(event.GetDamaged().isInvulnerable()) return;
 		
-		System.out.println("final: "+event.GetDamage());
+		
 		
 		//Apply modifiers (mulitplyers, ignoreArmor, ...)
 		ApplyModifiers(event);
@@ -74,6 +81,8 @@ public class DamageManager extends PluginModule{
 		//Delai avait de taper
 		
 		//Ajouter le punch, kb avec les enchants
+		
+		System.out.println("final: "+event.GetDamage());
 	}
 	
 	//
@@ -87,9 +96,11 @@ public class DamageManager extends PluginModule{
 	 * @param damage Le montant brut de d�g�t
 	 * @param ignoreArmor Si le coup doit ignorer l'armure du joueur
 	 * @param knockback Si le coup doit faire reculer
+	 * @param knockbackOrigin La Location de l'origine du recul (si null, l'origine est le damager)
 	 */
-	public void Damage(LivingEntity damaged, LivingEntity damager, Projectile projectile, DamageCause cause, double damage, boolean ignoreArmor, boolean knockback) {
-		new LivingEntityDamageEvent(damaged, damager, projectile, cause, damage, ignoreArmor, knockback).callEvent();
+	public void Damage(LivingEntity damaged, LivingEntity damager, Projectile projectile, DamageCause cause, double damage, boolean ignoreArmor, boolean knockback, 
+						Location knockbackOrigin) {
+		new LivingEntityDamageEvent(damaged, damager, projectile, cause, damage, ignoreArmor, knockback, knockbackOrigin).callEvent();
 	}
 	
 	//
@@ -114,32 +125,38 @@ public class DamageManager extends PluginModule{
 		
 		return (Projectile)entityEvent.getDamager();
 	}
-	private int GetProtection(LivingEntity damaged) {
-		if(!(damaged instanceof Player)) return 0;
+	private boolean IsCritical(EntityDamageEvent event) {
+		if(!(event instanceof EntityDamageByEntityEvent)) return false;
 		
-		Player damagedPlayer = (Player)damaged;
-		PlayerInventory inv = damagedPlayer.getInventory();
-		ItemStack helm = inv.getHelmet();
-		ItemStack chest = inv.getChestplate();
-		ItemStack legs = inv.getLeggings();
-		ItemStack boot = inv.getBoots();
+		return ((EntityDamageByEntityEvent)event).isCritical();
+	}
+	private int GetProtection(LivingEntity damaged) {
+		EntityEquipment equipement = damaged.getEquipment();
+
+		ItemStack helm = equipement.getHelmet();
+		ItemStack chest = equipement.getChestplate();
+		ItemStack legs = equipement.getLeggings();
+		ItemStack boot = equipement.getBoots();
 
 		return (helm != null ? helm.getEnchantmentLevel(Enchantment.DAMAGE_ALL) : 0) +
 				(chest != null ? chest.getEnchantmentLevel(Enchantment.DAMAGE_ALL) : 0) +
 				(legs != null ? legs.getEnchantmentLevel(Enchantment.DAMAGE_ALL) : 0) +
 				(boot != null ? boot.getEnchantmentLevel(Enchantment.DAMAGE_ALL) : 0);
 	}
-	private double CalculateNeededDamage(LivingEntity damaged, double damage) {
+	private double GetReducedDamage(LivingEntity damaged, double damage) {
+		System.out.println("before: "+damage);
 		double defense = damaged.getAttribute(Attribute.GENERIC_ARMOR).getValue();
 		double toughness = damaged.getAttribute(Attribute.GENERIC_ARMOR_TOUGHNESS).getValue();
 		double protection = GetProtection(damaged);
 		PotionEffect effect = damaged.getPotionEffect(PotionEffectType.DAMAGE_RESISTANCE);
 		int resistance = effect == null ? 0 : effect.getAmplifier();
 		
-		double withArmorAndToughness = damage * (1 + Math.min(20, Math.max(defense / 5, defense - damage / (2 + toughness / 4))) / 25);
-		double withResistance = withArmorAndToughness * (1 + (resistance * 0.2));
-		double withEnchants = withResistance * (1 + (Math.min(20.0, protection) / 25));
+		double withArmorAndToughness = damage * (1 - Math.min(20, Math.max(defense / 5, defense - damage / (2 + toughness / 4))) / 25);
+		double withResistance = withArmorAndToughness * (1 - (resistance * 0.2));
+		double withEnchants = withResistance * (1 - (Math.min(20.0, protection) / 25));
+		System.out.println("after: "+withEnchants);
 		return withEnchants;
+		
 	}
 	private void ApplyModifiers(LivingEntityDamageEvent event) {
 		double damage = event.GetDamage();
@@ -155,7 +172,7 @@ public class DamageManager extends PluginModule{
 		//Ajout des multiplicateurs
 		damage *= event.GetFinalMult();
 		
-		if(event.IsIgnoreArmor()) damage = CalculateNeededDamage(event.GetDamaged(), damage);
+		if(!event.IsIgnoreArmor()) damage = GetReducedDamage(event.GetDamaged(), damage);
 		
 		//Si les dégats proviennent d'un /kill
 		damage = Math.min(damage, Double.MAX_VALUE);

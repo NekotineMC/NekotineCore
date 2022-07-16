@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
@@ -36,12 +37,18 @@ public class ProjectileManager extends PluginModule{
 	 * @param targetBlock Si le projectile doit toucher les blocs
 	 */
 	public boolean AddProjectile(Entity projectile, LivingEntity sender, IProjectile iProj, Vector velocity, long expireTime,
-			boolean targetLivingEntity, boolean targetBlock) {
+			boolean targetLivingEntity, boolean targetBlock, LivingEntity[] entityBlacklist, Material[] blockBlacklist) {
 		if(Exist(projectile)) return false;
 
-		CustomProjectile customProjectile = new CustomProjectile(projectile, sender, iProj, velocity, expireTime, targetLivingEntity, targetBlock);
+		CustomProjectile customProjectile = new CustomProjectile(projectile, sender, iProj, velocity, expireTime, targetLivingEntity, targetBlock, entityBlacklist, blockBlacklist);
 		projectilesBuffer.put(projectile, customProjectile);
 		return true;
+	}
+	public boolean AddProjectile(Entity projectile, LivingEntity sender, IProjectile iProj, Vector velocity, long expireTime,
+			boolean targetLivingEntity, boolean targetBlock) {
+		LivingEntity[] entityBlacklist = {};
+		Material[] blockBlacklist = {};
+		return AddProjectile(projectile, sender, iProj, velocity, expireTime, targetLivingEntity, targetBlock, entityBlacklist, blockBlacklist);
 	}
 
 	//

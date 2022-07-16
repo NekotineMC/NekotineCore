@@ -1,8 +1,11 @@
 package fr.nekotine.core.projectile;
 
+import java.util.ArrayList;
+
 import javax.annotation.Nullable;
 
 import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
@@ -21,6 +24,8 @@ public class CustomProjectile {
 	private final long expireTime;
 	private final boolean targetLivingEntity;
 	private final boolean targetBlock;
+	private ArrayList<LivingEntity> entityBlacklist;
+	private ArrayList<Material> blockBlacklist;
 	
 	private final long startedTime;
 	private boolean triggered;
@@ -28,13 +33,15 @@ public class CustomProjectile {
 	private final double DISTANCE_TO_HIT_BLOCK = 0.05;
 	
 	public CustomProjectile(Entity projectile, LivingEntity sender, IProjectile iProj, Vector velocity, long expireTime, boolean targetLivingEntity,
-			boolean targetBlock) {
+			boolean targetBlock, LivingEntity[] entityBlacklist, Material[] blockBlacklist) {
 		this.projectile = projectile;
 		this.sender = sender;
 		this.iProj = iProj;
 		this.expireTime = expireTime;
 		this.targetLivingEntity = targetLivingEntity;
 		this.targetBlock = targetBlock;
+		TransferBlackLists(entityBlacklist, blockBlacklist);
+		
 		
 		this.startedTime = UtilTime.GetTime();
 		this.triggered = false;
@@ -63,6 +70,13 @@ public class CustomProjectile {
 	private int CalculateMax(double value) {
 		return (value < 0) ? CalculateFloor(value) + 1: CalculateCeil(value);
 	}
+	private void TransferBlackLists(LivingEntity[] entityBlacklist, Material[] blockBlacklist) {
+		this.entityBlacklist = new ArrayList<>();
+		this.blockBlacklist = new ArrayList<>();
+		
+		for(int i=0 ; i<entityBlacklist.length; i++) this.entityBlacklist.add(entityBlacklist[i]);
+		for(int i=0 ; i<blockBlacklist.length; i++) this.blockBlacklist.add(blockBlacklist[i]);
+	}
 	
 	//
 	
@@ -79,24 +93,24 @@ public class CustomProjectile {
 			iProj.Faded(this);
 			return !cancelled;
 		}
-		
 		if(targetLivingEntity) {
 			for(Entity hitEntity : projectile.getNearbyEntities(0,0, 0)) {
 				if(hitEntity instanceof LivingEntity) {
 					LivingEntity hitLivingEntity = (LivingEntity)hitEntity;
 					
-					if(hitLivingEntity instanceof Player) {
-						Player hitPlayer = (Player)hitLivingEntity;
-						if(hitPlayer.getGameMode() == GameMode.CREATIVE || hitPlayer.getGameMode() == GameMode.SPECTATOR) continue;
+					if(!entityBlacklist.contains(hitLivingEntity)) {
+						if(hitLivingEntity instanceof Player) {
+							Player hitPlayer = (Player)hitLivingEntity;
+							if(hitPlayer.getGameMode() == GameMode.CREATIVE || hitPlayer.getGameMode() == GameMode.SPECTATOR) continue;
+						}
+						
+						cancelled = false;
+						iProj.Hit(hitLivingEntity, null, this);
+						return !cancelled;
 					}
-					
-					cancelled = false;
-					iProj.Hit(hitLivingEntity, null, this);
-					return !cancelled;
 				}	
 			}
 		}
-		
 		if(targetBlock) {
 			BoundingBox box = projectile.getBoundingBox().clone().expand(DISTANCE_TO_HIT_BLOCK);
 			int startX = CalculateMin(box.getMinX());
@@ -112,7 +126,7 @@ public class CustomProjectile {
 					for(int z = startZ ; z <= endZ ; z++) {
 						
 						Block hitBlock = projectile.getWorld().getBlockAt(x, y, z);
-						if(hitBlock.isSolid() && hitBlock.getBoundingBox().overlaps(box)) {
+						if(!blockBlacklist.contains(hitBlock.getType()) && hitBlock.isSolid() && hitBlock.getBoundingBox().overlaps(box)) {
 							
 							cancelled = false;
 							iProj.Hit(null, hitBlock, this);

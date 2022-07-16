@@ -39,7 +39,8 @@ public class LivingEntityDamageEvent extends Event{
 	
 	//
 	
-	public LivingEntityDamageEvent(LivingEntity damaged, LivingEntity damager, Projectile projectile, DamageCause cause, double damage, boolean ignoreArmor, boolean knockback) {
+	public LivingEntityDamageEvent(LivingEntity damaged, LivingEntity damager, Projectile projectile, DamageCause cause, double damage, boolean ignoreArmor, boolean knockback, 
+			Location knockbackOrigin) {
 		this.damaged = damaged;
 		this.damager = damager;
 		this.projectile = projectile;
@@ -47,13 +48,13 @@ public class LivingEntityDamageEvent extends Event{
 		this.damage = damage;
 		this.ignoreArmor = ignoreArmor;
 		this.knockback = knockback;
+		this.knockbackOrigin = knockbackOrigin;
 		
 		this.baseMod = 0;
 		this.baseMult = 0;
 		this.finalMult = 1;
 		this.knockbackMult = 1;
 		this.cancelled = false;
-		this.knockbackOrigin = null;
 	}
 	
 	//
