@@ -10,6 +10,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
@@ -112,6 +114,14 @@ public class ProjectileManager extends PluginModule{
 	@EventHandler
 	public void OnHopperPickup(InventoryPickupItemEvent e) {
 		if(projectilesBuffer.containsKey(e.getItem()) || projectiles.containsKey(e.getItem())) e.setCancelled(true);
+	}
+	@EventHandler
+	public void OnExplosion(EntityExplodeEvent e) {
+		if(projectilesBuffer.containsKey(e.getEntity()) || projectiles.containsKey(e.getEntity())) e.setCancelled(true);
+	}
+	@EventHandler
+	public void OnDeath(EntityDeathEvent e) {
+		if(projectilesBuffer.containsKey(e.getEntity()) || projectiles.containsKey(e.getEntity())) e.setCancelled(true);
 	}
 	
 	//

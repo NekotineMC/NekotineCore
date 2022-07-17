@@ -7,9 +7,9 @@ import java.util.Map.Entry;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityShootBowEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 
 import com.comphenix.protocol.wrappers.Pair;
+import com.destroystokyo.paper.event.player.PlayerReadyArrowEvent;
 
 import fr.nekotine.core.arrache.TickEvent;
 import fr.nekotine.core.charge.ChargeManager;
@@ -35,10 +35,10 @@ public class BowChargeManager extends PluginModule{
 	 * @param iBowCharge Interface
 	 * @return Si l'ajout � �t� bien pris en compte
 	 */
-	public boolean AddBowCharge(Player user, String chargeName, long duration, boolean activated, IBowCharge iBowCharge) {	
-		if(Exist(user, chargeName)) return false;
+	public boolean AddBowCharge(Player user, String chargeName, long duration, boolean activated, boolean displayOnExpBar, boolean withAudio, long audioBipNumber, IBowCharge iBowCharge) {	
+		if(BufferExist(user, chargeName)) return false;
 		
-		BowCharge bowCharge = new BowCharge(this, user, chargeName, duration, activated, iBowCharge);
+		BowCharge bowCharge = new BowCharge(this, user, chargeName, duration, activated, displayOnExpBar, withAudio, audioBipNumber, iBowCharge);
 		bowChargesBuffer.put(new Pair<Player, String>(user, chargeName), bowCharge);
 		return true;
 	}
@@ -53,17 +53,19 @@ public class BowChargeManager extends PluginModule{
 			Entry<Pair<Player, String>, BowCharge> entry = iterator.next();
 			if(entry.getValue().Update()) iterator.remove();
 		}
+		
+		TransferBuffer();
 	}
-	
-	@EventHandler
-	public void LoadBow(PlayerInteractEvent e) {
-		bowCharges.values().forEach( (charge) -> charge.LoadBow(e));
-	}
-	
 	@EventHandler
 	public void ShootBow(EntityShootBowEvent e) {
 		bowCharges.values().forEach( (charge) -> charge.ShootBow(e));
 	}
+	@EventHandler
+	public void LoadBow(PlayerReadyArrowEvent e) {
+		bowCharges.values().forEach( (charge) -> charge.LoadBow(e));
+	}
+	
+	//
 	
 	@Override
 	public void onEnable() {
@@ -74,28 +76,33 @@ public class BowChargeManager extends PluginModule{
 	//
 	
 	protected long GetTimeLeft(Player user, String chargeName) {
-		return chargeManager.GetTimeLeft(chargeName, chargeName);
+		return chargeManager.GetTimeLeft(user.getName(), chargeName);
 	}
 	protected boolean SetCancelled(Player user, String chargeName, boolean cancelled) {
 		return chargeManager.SetCancelled(user.getName(), chargeName, cancelled);
 	}
-	protected boolean AddCharge(Player user, String chargeName, long duration, ICharge iCharge) {
-		return chargeManager.AddCharge(user.getName(), chargeName, duration, true, iCharge);
+	protected boolean AddCharge(Player user, String chargeName, long duration, boolean displayOnExpBar, boolean withAudio, long audioBipNumber, ICharge iCharge) {
+		return chargeManager.AddCharge(user.getName(), chargeName, duration, displayOnExpBar, withAudio, audioBipNumber, iCharge);
 	}
 	
 	//
 	
-	private boolean Exist(Player player, String chargeName) {
-		return Exist(new Pair<Player, String>(player, chargeName));
-	}
 	private boolean Exist(Pair<Player, String> keys) {
-		return bowCharges.containsKey(keys) || bowChargesBuffer.containsKey(keys);
+		return bowCharges.containsKey(keys);
+	}
+	private boolean BufferExist(Player player, String chargeName) {
+		return BufferExist(new Pair<Player, String>(player, chargeName));
+	}
+	private boolean BufferExist(Pair<Player, String> keys) {
+		return bowChargesBuffer.containsKey(keys);
 	}
 	private void TransferBuffer() {
-		for(Entry<Pair<Player, String>, BowCharge> entry : bowChargesBuffer.entrySet()) {
-			bowCharges.put(entry.getKey(), entry.getValue());
+		for(Iterator<Entry<Pair<Player, String>, BowCharge>> iterator = bowChargesBuffer.entrySet().iterator() ; iterator.hasNext() ; ) {
+			Entry<Pair<Player, String>, BowCharge> entry = iterator.next();
+			if(!Exist(entry.getKey())) {
+				bowCharges.put(entry.getKey(), entry.getValue());
+				iterator.remove();
+			}
 		}
-		bowChargesBuffer.clear();
 	}
-
 }

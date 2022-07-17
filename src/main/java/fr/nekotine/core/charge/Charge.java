@@ -17,9 +17,10 @@ public class Charge {
 	private final String chargeName;
 	private final long duration;
 	private final boolean displayOnExpBar;
+	private final boolean withAudio;
+	private final long audioBipNumber;
 	private final ICharge iCharge;
 	
-	private static final int AUDIO_BIP_NUMBER = 15;
 	//
 	
 	/**
@@ -30,11 +31,13 @@ public class Charge {
 	 * @param displayOnExpBar Si la charge doit être affichée dans la barre d'exp
 	 * @param iCharge Interface
 	 */
-	public Charge(String user, String chargeName, long duration, boolean displayOnExpBar, ICharge iCharge) {
+	public Charge(String user, String chargeName, long duration, boolean displayOnExpBar, boolean withAudio, long audioBipNumber, ICharge iCharge) {
 		this.user = user;
 		this.chargeName = chargeName;
 		this.duration = duration;
 		this.displayOnExpBar = displayOnExpBar;
+		this.withAudio = withAudio;
+		this.audioBipNumber = audioBipNumber;
 		this.iCharge = iCharge;
 		
 		this.started = System.currentTimeMillis();
@@ -49,12 +52,12 @@ public class Charge {
 			return true;
 		}
 		if(Expired()) {
-			if(displayOnExpBar) SetExp(1);
+			PlayAudio(2);
 			iCharge.Ended(user, chargeName);
 			return true;
 		}
 		
-		if(displayOnExpBar) SetExp((float)(UtilTime.GetTime() - started) / duration);
+		PlayIndicators();
 		
 		return false;
 	}
@@ -81,14 +84,41 @@ public class Charge {
 	private boolean Expired() {
 		return GetTimeLeft() < 0;
 	}
-	private void SetExp(float ratio) {
+	private void PlayIndicators() {
+		SetExp();
+		PlayAudio();
+	}
+	private boolean CanPlayAudio(Player player, float ratio) {
+		float before = player.getExp();
+		float denom = 1f / audioBipNumber;
+		return (Math.ceil(before / denom) != Math.ceil(ratio / denom));
+	}
+	private void SetExp() {
+		if(!displayOnExpBar) return;
+		
 		Player player = Bukkit.getPlayer(user);
 		if(player == null) return;
-		float before = player.getExp();
+		
+		float ratio = (float)(UtilTime.GetTime() - started) / duration;
 		player.setExp(ratio);
+	}
+	private void PlayAudio() {
+		if(!withAudio) return;
 		
-		float denom = 1f / AUDIO_BIP_NUMBER;
+		Player player = Bukkit.getPlayer(user);
+		if(player == null) return;
 		
-		if(Math.floor(before / denom) != Math.floor(ratio / denom)) player.playSound(player, Sound.BLOCK_DISPENSER_DISPENSE, 0.2f, ratio * 2);
+		float ratio = (float)(UtilTime.GetTime() - started) / duration;
+		if(CanPlayAudio(player, ratio))
+			player.playSound(player, Sound.BLOCK_DISPENSER_DISPENSE, 0.2f, ratio);
+		
+	}
+	private void PlayAudio(float ratio) {
+		if(!withAudio) return;
+		
+		Player player = Bukkit.getPlayer(user);
+		if(player == null) return;
+		
+		player.playSound(player, Sound.BLOCK_DISPENSER_DISPENSE, 0.2f, ratio);
 	}
 }

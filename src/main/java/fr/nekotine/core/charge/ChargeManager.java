@@ -27,13 +27,15 @@ public class ChargeManager extends PluginModule{
 	 * @param chargeName Le nom de la charge
 	 * @param duration Dur�e en ms
 	 * @param displayOnExpBar Si la charge doit être affichée dans la barre d'exp
+	 * @param withAudio Si la charge doit jouer un audio
+	 * @param audioBipNumber Le nombre de bips audio par charge
 	 * @param iCharge Interface
 	 * @return True si la charge a �t� ajout�e
 	 */
-	public boolean AddCharge(String user, String chargeName, long duration, boolean displayOnExpBar, ICharge iCharge) {
-		if(Exist(user, chargeName)) return false;
+	public boolean AddCharge(String user, String chargeName, long duration, boolean displayOnExpBar, boolean withAudio, long audioBipNumber, ICharge iCharge) {
+		if(BufferExist(user, chargeName)) return false;
 		
-		Charge charge = new Charge(user, chargeName, duration, displayOnExpBar, iCharge);
+		Charge charge = new Charge(user, chargeName, duration, displayOnExpBar, withAudio, audioBipNumber, iCharge);
 		chargesBuffer.put(new Pair<String, String>(user, chargeName), charge);
 		return true;
 	}
@@ -57,7 +59,7 @@ public class ChargeManager extends PluginModule{
 		return Exist(new Pair<String, String>(user, chargeName));
 	}
 	public boolean Exist(Pair<String, String> keys) {
-		return charges.containsKey(keys) || chargesBuffer.containsKey(keys);
+		return charges.containsKey(keys);
 	}
 	
 	//
@@ -77,13 +79,21 @@ public class ChargeManager extends PluginModule{
 	private Charge Get(String user, String chargeName) {
 		return charges.get(new Pair<String, String>(user, chargeName));
 	}
-	private void TransferBuffer() {
-		for(Entry<Pair<String, String>, Charge> entry : chargesBuffer.entrySet()) {
-			charges.put(entry.getKey(), entry.getValue());
-		}
-		chargesBuffer.clear();
+	private boolean BufferExist(String user, String chargeName) {
+		return BufferExist(new Pair<String, String>(user, chargeName));
 	}
-	
+	private boolean BufferExist(Pair<String, String> keys) {
+		return chargesBuffer.containsKey(keys);
+	}
+	private void TransferBuffer() {
+		for(Iterator<Entry<Pair<String, String>, Charge>> iterator = chargesBuffer.entrySet().iterator() ; iterator.hasNext() ; ) {
+			Entry<Pair<String, String>, Charge> entry = iterator.next();
+			if(!Exist(entry.getKey())) {
+				charges.put(entry.getKey(), entry.getValue());
+				iterator.remove();
+			}
+		}
+	}
 	
 	//
 	

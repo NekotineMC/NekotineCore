@@ -5,6 +5,7 @@ import java.util.Map;
 import org.bukkit.EntityEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.enchantments.Enchantment;
@@ -114,6 +115,25 @@ public class DamageManager extends PluginModule{
 	public void Damage(LivingEntity damaged, LivingEntity damager, Projectile projectile, DamageCause cause, double damage, boolean ignoreArmor, boolean knockback, 
 						Location knockbackOrigin) {
 		new LivingEntityDamageEvent(damaged, damager, projectile, cause, damage, ignoreArmor, knockback, knockbackOrigin).callEvent();
+	}
+	/**
+	 * 
+	 * @param damager La LivingEntity qui fait les d�g�ts (si il y en a)
+	 * @param radius La portée de l'explosion
+	 * @param cause La cause de l'explosion
+	 * @param damage Les dégâts de l'explosion
+	 * @param ignoreArmor Si l'explosion doit ignorer l'armure
+	 * @param knockback Si l'explosion doit faire reculer les joueurs
+	 * @param origin L'origine de l'explosion 
+	 * @param ignoreDamager Si l'explosion doit ignorer celui qui fait les dégats
+	 * @param particle La particle jouée pour l'explosion
+	 */
+	public void Explode(LivingEntity damager, double radius, DamageCause cause, double damage, boolean ignoreArmor, boolean knockback, Location origin, boolean ignoreDamager, Particle particle) {
+		origin.getWorld().spawnParticle(particle, origin, 1);
+		for(LivingEntity damaged : origin.getWorld().getNearbyLivingEntities(origin, radius)) {
+			if(ignoreDamager && damager.equals(damaged)) continue;
+			new LivingEntityDamageEvent(damaged, damager, null, cause, damage, ignoreArmor, knockback, origin).callEvent();
+		}
 	}
 	
 	//

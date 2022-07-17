@@ -39,10 +39,11 @@ public class SwordChargeManager extends PluginModule{
 	 * @param iSwordCharge Interface
 	 * @return Si l'ajout � �t� bien pris en compte
 	 */
-	public boolean AddSwordCharge(Player user, String chargeName, long duration, boolean activated, CustomAction action, boolean bindToItem, ItemStack bindItem, 
-			ISwordCharge iSwordCharge) {
-		if(Exist(user, chargeName)) return false;
-		SwordCharge swordCharge = new SwordCharge(this, user, chargeName, duration, activated, action, bindToItem, bindItem, iSwordCharge);
+	public boolean AddSwordCharge(Player user, String chargeName, long duration, boolean activated, boolean displayOnExpBar, boolean withAudio, long audioBipNumber, 
+			CustomAction action, boolean bindToItem, ItemStack bindItem, ISwordCharge iSwordCharge) {
+		if(BufferExist(user, chargeName)) return false;
+		
+		SwordCharge swordCharge = new SwordCharge(this, user, chargeName, duration, activated, displayOnExpBar, withAudio, audioBipNumber, action, bindToItem, bindItem, iSwordCharge);
 		swordChargesBuffer.put(new Pair<Player, String>(user, chargeName), swordCharge);
 		return true;
 	}
@@ -50,13 +51,13 @@ public class SwordChargeManager extends PluginModule{
 	//
 	
 	protected long GetTimeLeft(Player user, String chargeName) {
-		return chargeManager.GetTimeLeft(chargeName, chargeName);
+		return chargeManager.GetTimeLeft(user.getName(), chargeName);
 	}
 	protected boolean SetCancelled(Player user, String chargeName, boolean cancelled) {
 		return chargeManager.SetCancelled(user.getName(), chargeName, cancelled);
 	}
-	protected boolean AddCharge(Player user, String chargeName, long duration, ICharge iCharge) {
-		return chargeManager.AddCharge(user.getName(), chargeName, duration, true, iCharge);
+	protected boolean AddCharge(Player user, String chargeName, long duration, boolean displayOnExpBar, boolean withAudio, long audioBipNumber, ICharge iCharge) {
+		return chargeManager.AddCharge(user.getName(), chargeName, duration, displayOnExpBar, withAudio, audioBipNumber, iCharge);
 	}
 	
 	//
@@ -82,16 +83,22 @@ public class SwordChargeManager extends PluginModule{
 	
 	//
 	
-	private boolean Exist(Player player, String chargeName) {
-		return Exist(new Pair<Player, String>(player, chargeName));
-	}
 	private boolean Exist(Pair<Player, String> keys) {
-		return swordCharges.containsKey(keys) || swordChargesBuffer.containsKey(keys);
+		return swordCharges.containsKey(keys);
+	}
+	private boolean BufferExist(Player player, String chargeName) {
+		return BufferExist(new Pair<Player, String>(player, chargeName));
+	}
+	private boolean BufferExist(Pair<Player, String> keys) {
+		return swordChargesBuffer.containsKey(keys);
 	}
 	private void TransferBuffer() {
-		for(Entry<Pair<Player, String>, SwordCharge> entry : swordChargesBuffer.entrySet()) {
-			swordCharges.put(entry.getKey(), entry.getValue());
+		for(Iterator<Entry<Pair<Player, String>, SwordCharge>> iterator = swordChargesBuffer.entrySet().iterator() ; iterator.hasNext() ; ) {
+			Entry<Pair<Player, String>, SwordCharge> entry = iterator.next();
+			if(!Exist(entry.getKey())) {
+				swordCharges.put(entry.getKey(), entry.getValue());
+				iterator.remove();
+			}
 		}
-		swordChargesBuffer.clear();
 	}
 }

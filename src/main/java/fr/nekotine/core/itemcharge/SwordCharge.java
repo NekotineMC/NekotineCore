@@ -14,7 +14,7 @@ import fr.nekotine.core.util.UtilTime;
 public class SwordCharge implements ICharge{
 	
 	//D�lai maximal entre deux appel d'Interract Event afin de constater la fin de la charge
-	private final long RELEASE_DELAY_MS = 500;
+	private final long RELEASE_DELAY_MS = 350;
 	
 	//Si le joueur a arr�t� l'action
 	private boolean released;
@@ -27,18 +27,24 @@ public class SwordCharge implements ICharge{
 	private final String chargeName;
 	private final long duration;
 	private boolean activated;
+	private final boolean displayOnExpBar;
+	private final boolean withAudio;
+	private final long audioBipNumber;
 	private final CustomAction action;
 	private final boolean bindToItem;
 	private final ItemStack bindItem;
 	private final ISwordCharge iSwordCharge;
 	
-	public SwordCharge(SwordChargeManager swordChargeManager, Player user, String chargeName, long duration, boolean activated, CustomAction action,
-			boolean bindToItem, ItemStack bindItem, ISwordCharge iSwordCharge) {
+	public SwordCharge(SwordChargeManager swordChargeManager, Player user, String chargeName, long duration, boolean activated, boolean displayOnExpBar, boolean withAudio, long audioBipNumber,
+			CustomAction action, boolean bindToItem, ItemStack bindItem, ISwordCharge iSwordCharge) {
 		this.swordChargeManager = swordChargeManager;
 		this.user = user;
 		this.chargeName = chargeName;
 		this.duration = duration;
 		this.activated = activated;
+		this.displayOnExpBar = displayOnExpBar;
+		this.withAudio = withAudio;
+		this.audioBipNumber = audioBipNumber;
 		this.action = action;
 		this.bindToItem = bindToItem;
 		this.bindItem = bindItem;
@@ -48,21 +54,19 @@ public class SwordCharge implements ICharge{
 		
 		if(activated){
 			lastFired = UtilTime.GetTime();
-			swordChargeManager.AddCharge(user, chargeName, duration, this);
+			swordChargeManager.AddCharge(user, chargeName, duration, displayOnExpBar, withAudio, audioBipNumber, this);
 		}
 	}
 	
 	//
 	
 	public boolean Update() {
+		if(activated && UtilTime.Passed(lastFired) > RELEASE_DELAY_MS) released = true;
 		if(activated && bindToItem && !UtilGear.HasInAnyHand(user, bindItem)) released = true;
-		if(activated && UtilTime.Passed(lastFired) > RELEASE_DELAY_MS) {
-			released = true;
-		}
 		
 		if(released) {
-			SetCancelled();
 			iSwordCharge.Released(user, chargeName, GetTimeLeft());
+			SetCancelled();
 			return true;
 		}
 		
@@ -80,7 +84,7 @@ public class SwordCharge implements ICharge{
 		
 		if(!activated) {
 			activated = true;
-			swordChargeManager.AddCharge(user, chargeName, duration, this);
+			swordChargeManager.AddCharge(user, chargeName, duration, displayOnExpBar, withAudio, audioBipNumber, this);
 		}
 		lastFired = UtilTime.GetTime();
 	}

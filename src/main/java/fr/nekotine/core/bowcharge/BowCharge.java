@@ -4,11 +4,10 @@ import org.bukkit.Material;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityShootBowEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
+
+import com.destroystokyo.paper.event.player.PlayerReadyArrowEvent;
 
 import fr.nekotine.core.charge.ICharge;
-import fr.nekotine.core.util.CustomAction;
-import fr.nekotine.core.util.UtilEvent;
 import fr.nekotine.core.util.UtilGear;
 
 public class BowCharge implements ICharge{
@@ -16,6 +15,8 @@ public class BowCharge implements ICharge{
 	private Arrow arrow;
 	//Si le joueur a tir�
 	private boolean shot;
+	//Si le tir a été annullé
+	private boolean cancelled;
 	
 	//
 	
@@ -24,23 +25,30 @@ public class BowCharge implements ICharge{
 	private final String chargeName;
 	private final long duration;
 	private boolean activated;
+	private final boolean displayOnExpBar;
+	private final boolean withAudio;
+	private final long audioBipNumber;
 	private final IBowCharge iBowCharge;
 	
 	//
 	
-	public BowCharge(BowChargeManager bowChargeManager, Player user, String chargeName, long duration, boolean activated, IBowCharge iBowCharge) {
+	public BowCharge(BowChargeManager bowChargeManager, Player user, String chargeName, long duration, boolean activated, boolean displayOnExpBar, boolean withAudio, long audioBipNumber, 
+			IBowCharge iBowCharge) {
 		this.bowChargeManager = bowChargeManager;
 		this.user = user;
 		this.chargeName = chargeName;
 		this.duration = duration;
 		this.activated = activated;
+		this.displayOnExpBar = displayOnExpBar;
+		this.withAudio = withAudio;
+		this.audioBipNumber = audioBipNumber;
 		this.iBowCharge = iBowCharge;
 		
 		this.arrow = null;
 		this.shot = false;
 		
 		if(activated){
-			bowChargeManager.AddCharge(user, chargeName, duration, this);
+			bowChargeManager.AddCharge(user, chargeName, duration, displayOnExpBar, withAudio, audioBipNumber, this);
 		}
 	}
 	
@@ -48,31 +56,23 @@ public class BowCharge implements ICharge{
 	
 	protected boolean Update() {
 		if(shot) {
-			SetCancelled();
 			iBowCharge.Released(this.user, chargeName, GetTimeLeft(), arrow);
-			return true;
-		}
-		if(activated && !UtilGear.HasInAnyHand(user, Material.BOW)) {
 			SetCancelled();
-			iBowCharge.Cancelled(this.user, chargeName, GetTimeLeft());
 			return true;
 		}
+		if(activated && !UtilGear.HasInAnyHand(user, Material.BOW)) cancelled = true;
+		if(cancelled) {
+			iBowCharge.Cancelled(this.user, chargeName, GetTimeLeft());
+			SetCancelled();
+			return true;
+		}
+		
+		
 		return false;
 	}
 	
 	//
-	
-	public void LoadBow(PlayerInteractEvent e) {
-		if(activated) return;
-		if(shot) return;
-		if(!user.equals(e.getPlayer())) return;
-		if(!UtilGear.IsMaterial(e.getItem(), Material.BOW)) return;
-		if(!UtilEvent.IsAction(e.getAction(), CustomAction.RIGHT_CLICK)) return;
-		if(!UtilGear.HasMaterial(user, Material.ARROW)) return;
-		
-		bowChargeManager.AddCharge(user, chargeName, duration, this);
-		activated = true;
-	}
+
 	public void ShootBow(EntityShootBowEvent e) {
 		if(!activated) return;
 		if(shot) return;
@@ -80,6 +80,18 @@ public class BowCharge implements ICharge{
 
 		shot = true;
 		arrow = (Arrow)e.getProjectile();
+	}
+	public void LoadBow(PlayerReadyArrowEvent e) {
+		if(shot) return;
+		if(!user.equals(e.getPlayer())) return;
+		
+		if(activated) {
+			cancelled = true;
+			return;
+		}
+
+		bowChargeManager.AddCharge(user, chargeName, duration, displayOnExpBar, withAudio, audioBipNumber, this);
+		activated = true;
 	}
 	
 	//

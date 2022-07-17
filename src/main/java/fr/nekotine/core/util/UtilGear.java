@@ -15,6 +15,7 @@ public class UtilGear {
 	 * @return True si �gaux
 	 */
 	public static boolean IsMaterial(ItemStack item, Material material) {
+		if(item==null) return false;
 		return item.getType()==material;
 	}
 	
