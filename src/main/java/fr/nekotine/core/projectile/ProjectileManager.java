@@ -67,6 +67,8 @@ public class ProjectileManager extends PluginModule{
 			
 			if(sender.equals( entry.getValue().GetSender()) ) entry.getValue().SetTriggered(true);
 		}
+		
+		TransferBuffer();
 	}
 	/**
 	 * Trigger tous les projectiles du lanceur
@@ -77,9 +79,10 @@ public class ProjectileManager extends PluginModule{
 		
 		for (Iterator<Entry<Entity, CustomProjectile>> iterator = projectiles.entrySet().iterator(); iterator.hasNext();){
 			Entry<Entity, CustomProjectile> entry = iterator.next();
-			
 			if(iProj.equals( entry.getValue().GetInterface()) ) entry.getValue().SetTriggered(true);
 		}
+		
+		TransferBuffer();
 	}
 	/**
 	 * 
@@ -106,6 +109,8 @@ public class ProjectileManager extends PluginModule{
 			Entry<Entity, CustomProjectile> entry = iterator.next();
 			if(!entry.getValue().GetProjectile().isValid() || entry.getValue().Collision()) iterator.remove();
 		}
+		
+		TransferBuffer();
 	}
 	@EventHandler(priority = EventPriority.LOW)
 	public void OnDamage(LivingEntityDamageEvent e) {

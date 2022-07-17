@@ -70,6 +70,8 @@ public class SwordChargeManager extends PluginModule{
 			Entry<Pair<Player, String>, SwordCharge> entry = iterator.next();
 			if(entry.getValue().Update()) iterator.remove();
 		}
+		
+		TransferBuffer();
 	}
 	@EventHandler
 	public void Action(PlayerInteractEvent e) {

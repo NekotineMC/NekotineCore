@@ -72,6 +72,8 @@ public class ChargeManager extends PluginModule{
 			Entry<Pair<String, String>, Charge> entry = iterator.next();
 			if(entry.getValue().Update()) iterator.remove();
 		}
+		
+		TransferBuffer();
 	}
 	
 	//
