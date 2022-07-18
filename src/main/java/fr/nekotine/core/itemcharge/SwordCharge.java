@@ -108,5 +108,14 @@ public class SwordCharge implements ICharge{
 	private void SetCancelled() {
 		swordChargeManager.SetCancelled(user, chargeName, true);
 	}
+	
+	//
+	
+	public ISwordCharge GetInterface() {
+		return iSwordCharge;
+	}
+	public Player GetPlayer() {
+		return user;
+	}
 
 }

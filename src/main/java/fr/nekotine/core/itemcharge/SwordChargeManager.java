@@ -47,6 +47,38 @@ public class SwordChargeManager extends PluginModule{
 		swordChargesBuffer.put(new Pair<Player, String>(user, chargeName), swordCharge);
 		return true;
 	}
+	public void DestroyFromPlayer(Player player) {
+		for(Iterator<Entry<Pair<Player, String>, SwordCharge>> iterator = swordCharges.entrySet().iterator() ; iterator.hasNext() ; ) {
+			Entry<Pair<Player, String>, SwordCharge> entry = iterator.next();
+			if(entry.getValue().GetPlayer().equals(player)) {
+				SetCancelled(entry.getKey().getFirst(), entry.getKey().getSecond(), true);
+				iterator.remove();
+			}
+		}
+		for(Iterator<Entry<Pair<Player, String>, SwordCharge>> iterator = swordChargesBuffer.entrySet().iterator() ; iterator.hasNext() ; ) {
+			Entry<Pair<Player, String>, SwordCharge> entry = iterator.next();
+			if(entry.getValue().GetPlayer().equals(player)) {
+				SetCancelled(entry.getKey().getFirst(), entry.getKey().getSecond(), true);
+				iterator.remove();
+			}
+		}
+	}
+	public void DestroyFromInterface(ISwordCharge iSwordCharge) {
+		for(Iterator<Entry<Pair<Player, String>, SwordCharge>> iterator = swordCharges.entrySet().iterator() ; iterator.hasNext() ; ) {
+			Entry<Pair<Player, String>, SwordCharge> entry = iterator.next();
+			if(entry.getValue().GetInterface().equals(iSwordCharge)) {
+				SetCancelled(entry.getKey().getFirst(), entry.getKey().getSecond(), true);
+				iterator.remove();
+			}
+		}
+		for(Iterator<Entry<Pair<Player, String>, SwordCharge>> iterator = swordChargesBuffer.entrySet().iterator() ; iterator.hasNext() ; ) {
+			Entry<Pair<Player, String>, SwordCharge> entry = iterator.next();
+			if(entry.getValue().GetInterface().equals(iSwordCharge)) {
+				SetCancelled(entry.getKey().getFirst(), entry.getKey().getSecond(), true);
+				iterator.remove();
+			}
+		}
+	}
 	
 	//
 	

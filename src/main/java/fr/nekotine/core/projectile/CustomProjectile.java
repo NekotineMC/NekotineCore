@@ -32,6 +32,8 @@ public class CustomProjectile {
 	private boolean cancelled;
 	private final double DISTANCE_TO_HIT_BLOCK = 0.05;
 	
+	//
+	
 	public CustomProjectile(Entity projectile, LivingEntity sender, IProjectile iProj, Vector velocity, long expireTime, boolean targetLivingEntity,
 			boolean targetBlock, LivingEntity[] entityBlacklist, Material[] blockBlacklist) {
 		this.projectile = projectile;
@@ -48,6 +50,8 @@ public class CustomProjectile {
 		this.cancelled = false;
 		ConfigureProjectile(projectile, velocity);
 	}
+	
+	//
 	
 	private void ConfigureProjectile(Entity projectile, Vector velocity) {
 		projectile.setInvulnerable(true);
@@ -156,6 +160,16 @@ public class CustomProjectile {
 	public void SetCancelled(boolean cancelled) {
 		this.cancelled = cancelled;
 	}
+	/**
+	 * A appeller lorsque le projectile a touché un bloc (utilisé principalement par les Projectile)
+	 * @param hitBlock
+	 */
+	public void ProjectileHitBlock(Block hitBlock) {
+		iProj.Hit(null, hitBlock, this);
+	}
+	
+	//
+	
 	/**
 	 * @return La Entity utilis�e comme projectile
 	 */

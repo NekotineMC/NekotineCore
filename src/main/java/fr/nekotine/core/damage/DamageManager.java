@@ -5,7 +5,6 @@ import java.util.Map;
 import org.bukkit.EntityEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.enchantments.Enchantment;
@@ -126,13 +125,11 @@ public class DamageManager extends PluginModule{
 	 * @param knockback Si l'explosion doit faire reculer les joueurs
 	 * @param origin L'origine de l'explosion 
 	 * @param ignoreDamager Si l'explosion doit ignorer celui qui fait les dégats
-	 * @param particle La particle jouée pour l'explosion
 	 */
-	public void Explode(LivingEntity damager, double radius, DamageCause cause, double damage, boolean ignoreArmor, boolean knockback, Location origin, boolean ignoreDamager, Particle particle) {
-		origin.getWorld().spawnParticle(particle, origin, 1);
+	public void Explode(LivingEntity damager, double radius, DamageCause cause, double damage, boolean ignoreArmor, boolean knockback, Location origin, boolean ignoreDamager) {
 		for(LivingEntity damaged : origin.getWorld().getNearbyLivingEntities(origin, radius)) {
 			if(ignoreDamager && damager.equals(damaged)) continue;
-			new LivingEntityDamageEvent(damaged, damager, null, cause, damage, ignoreArmor, knockback, origin).callEvent();
+			Damage(damaged, damager, null, cause, damage, ignoreArmor, knockback, origin);
 		}
 	}
 	
@@ -278,8 +275,7 @@ public class DamageManager extends PluginModule{
 			//Apply
 			double vel = 0.2 + trajectory.length() * 0.8;
 
-			UtilEntity.ApplyVelocity(event.GetDamaged(), trajectory, vel, 
-					false, 0, Math.abs(0.2 * knockback), 0.4 + (0.04 * knockback), true);
+			UtilEntity.ApplyVelocity(event.GetDamaged(), trajectory, vel, false, 0, Math.abs(0.2 * knockback), 0.4 + (0.04 * knockback), true);
 		}
 	}
 	private void Sound(LivingEntityDamageEvent event) {

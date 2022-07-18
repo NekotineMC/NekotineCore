@@ -112,4 +112,13 @@ public class BowCharge implements ICharge{
 	private void SetCancelled() {
 		bowChargeManager.SetCancelled(user, chargeName, true);
 	}
+	
+	//
+	
+	public IBowCharge GetInterface() {
+		return iBowCharge;
+	}
+	public Player GetPlayer() {
+		return user;
+	}
 }

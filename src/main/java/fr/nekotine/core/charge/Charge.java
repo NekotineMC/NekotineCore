@@ -10,6 +10,7 @@ public class Charge {
 	
 	private long started;
 	private boolean cancelled;
+	private long lastLeft;
 	
 	//
 	
@@ -37,11 +38,14 @@ public class Charge {
 		this.duration = duration;
 		this.displayOnExpBar = displayOnExpBar;
 		this.withAudio = withAudio;
-		this.audioBipNumber = audioBipNumber;
+		this.audioBipNumber = audioBipNumber + 1;
 		this.iCharge = iCharge;
 		
 		this.started = System.currentTimeMillis();
 		this.cancelled = false;
+		this.lastLeft = duration;
+		
+		PlayUncheckedAudio(0);
 	}
 	
 	//
@@ -52,7 +56,7 @@ public class Charge {
 			return true;
 		}
 		if(Expired()) {
-			PlayAudio(2);
+			PlayAudio(1);
 			iCharge.Ended(user, chargeName);
 			return true;
 		}
@@ -87,11 +91,27 @@ public class Charge {
 	private void PlayIndicators() {
 		SetExp();
 		PlayAudio();
+		
+		lastLeft = GetTimeLeft();
 	}
 	private boolean CanPlayAudio(Player player, float ratio) {
-		float before = player.getExp();
-		float denom = 1f / audioBipNumber;
-		return (Math.ceil(before / denom) != Math.ceil(ratio / denom));
+		if(audioBipNumber < 0) return false;
+		
+		float denom = (float)duration / audioBipNumber;
+		return (Math.ceil(lastLeft / denom) != Math.ceil(GetTimeLeft() / denom));
+	}
+	private void PlayAudio(float ratio) {
+		if(!withAudio) return;
+		
+		Player player = Bukkit.getPlayer(user);
+		if(player == null) return;
+		
+		if(!CanPlayAudio(player, ratio)) return;
+		player.playSound(player, Sound.BLOCK_DISPENSER_DISPENSE, 0.2f, ratio);
+	}
+	private void PlayAudio() {
+		float ratio = (float)(UtilTime.GetTime() - started) / duration;
+		PlayAudio(ratio);
 	}
 	private void SetExp() {
 		if(!displayOnExpBar) return;
@@ -102,18 +122,7 @@ public class Charge {
 		float ratio = (float)(UtilTime.GetTime() - started) / duration;
 		player.setExp(ratio);
 	}
-	private void PlayAudio() {
-		if(!withAudio) return;
-		
-		Player player = Bukkit.getPlayer(user);
-		if(player == null) return;
-		
-		float ratio = (float)(UtilTime.GetTime() - started) / duration;
-		if(CanPlayAudio(player, ratio))
-			player.playSound(player, Sound.BLOCK_DISPENSER_DISPENSE, 0.2f, ratio);
-		
-	}
-	private void PlayAudio(float ratio) {
+	private void PlayUncheckedAudio(float ratio) {
 		if(!withAudio) return;
 		
 		Player player = Bukkit.getPlayer(user);
@@ -121,4 +130,8 @@ public class Charge {
 		
 		player.playSound(player, Sound.BLOCK_DISPENSER_DISPENSE, 0.2f, ratio);
 	}
+	
+	
+	
+	
 }

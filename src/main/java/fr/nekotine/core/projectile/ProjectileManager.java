@@ -11,10 +11,14 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.ExplosionPrimeEvent;
+import org.bukkit.event.entity.PotionSplashEvent;
+import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
+
+import com.destroystokyo.paper.event.entity.ProjectileCollideEvent;
 
 import fr.nekotine.core.arrache.TickEvent;
 import fr.nekotine.core.damage.LivingEntityDamageEvent;
@@ -120,12 +124,30 @@ public class ProjectileManager extends PluginModule{
 	public void OnHopperPickup(InventoryPickupItemEvent e) {
 		if(projectilesBuffer.containsKey(e.getItem()) || projectiles.containsKey(e.getItem())) e.setCancelled(true);
 	}
+	//Creeper & Wither skull
 	@EventHandler
-	public void OnExplosion(EntityExplodeEvent e) {
+	public void OnExplosion(ExplosionPrimeEvent e) {
 		if(projectilesBuffer.containsKey(e.getEntity()) || projectiles.containsKey(e.getEntity())) e.setCancelled(true);
 	}
+	//Au cas où
 	@EventHandler
 	public void OnDeath(EntityDeathEvent e) {
+		if(projectilesBuffer.containsKey(e.getEntity()) || projectiles.containsKey(e.getEntity())) e.setCancelled(true);
+	}
+	//Projectile
+	@EventHandler
+	public void OnProjectileHit(ProjectileHitEvent e) {
+		if(projectilesBuffer.containsKey(e.getEntity())) projectilesBuffer.get(e.getEntity()).ProjectileHitBlock(e.getHitBlock());
+		if(projectiles.containsKey(e.getEntity())) projectiles.get(e.getEntity()).ProjectileHitBlock(e.getHitBlock());
+	}
+	//Projectile
+	@EventHandler
+	public void OnProjectileCollide(ProjectileCollideEvent e) {
+		if(projectilesBuffer.containsKey(e.getEntity()) || projectiles.containsKey(e.getEntity())) e.setCancelled(true);
+	}
+	//Potion(a voir)
+	@EventHandler
+	public void OnPotion(PotionSplashEvent e) {
 		if(projectilesBuffer.containsKey(e.getEntity()) || projectiles.containsKey(e.getEntity())) e.setCancelled(true);
 	}
 	
