@@ -4,6 +4,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityShootBowEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 
 import com.destroystokyo.paper.event.player.PlayerReadyArrowEvent;
 
@@ -92,6 +93,13 @@ public class BowCharge implements ICharge{
 
 		bowChargeManager.AddCharge(user, chargeName, duration, displayOnExpBar, withAudio, audioBipNumber, this);
 		activated = true;
+	}
+	public void OnDrop(PlayerDropItemEvent e) {
+		if(shot) return;
+		if(!user.equals(e.getPlayer())) return;
+		if(!activated) return;
+		
+		cancelled = true;
 	}
 	
 	//

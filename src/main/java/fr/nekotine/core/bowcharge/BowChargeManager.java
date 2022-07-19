@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityShootBowEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 
 import com.comphenix.protocol.wrappers.Pair;
 import com.destroystokyo.paper.event.player.PlayerReadyArrowEvent;
@@ -95,6 +96,10 @@ public class BowChargeManager extends PluginModule{
 	@EventHandler
 	public void LoadBow(PlayerReadyArrowEvent e) {
 		bowCharges.values().forEach( (charge) -> charge.LoadBow(e));
+	}
+	@EventHandler
+	public void OnDrop(PlayerDropItemEvent e) {
+		bowCharges.values().forEach( (charge) -> charge.OnDrop(e));
 	}
 	
 	//

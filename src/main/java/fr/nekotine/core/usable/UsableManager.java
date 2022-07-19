@@ -3,12 +3,15 @@ package fr.nekotine.core.usable;
 import java.util.HashMap;
 
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+
+import com.destroystokyo.paper.event.player.PlayerReadyArrowEvent;
 
 import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
@@ -19,10 +22,10 @@ public class UsableManager extends PluginModule{
 	
 	//
 	
-	public Usable AddUsable(ItemStack item, Inventory holder, IUsable iUsable) {
+	public Usable AddUsable(ItemStack item, Inventory holder) {
 		if(usables.containsKey(item)) return null;
 		
-		Usable usable = new Usable(item, holder, iUsable);
+		Usable usable = new Usable(this, item, holder);
 		usables.put(item, usable);
 		return usable;
 	}
@@ -45,6 +48,14 @@ public class UsableManager extends PluginModule{
 	public void OnConsume(PlayerItemConsumeEvent e) {
 		usables.values().forEach( (usable) -> usable.OnConsume(e));
 	}
+	@EventHandler
+	public void OnReadyArrow(PlayerReadyArrowEvent e) {
+		usables.values().forEach( (usable) -> usable.OnReadyArrow(e));
+	}
+	@EventHandler
+	public void OnBowShoot(EntityShootBowEvent e) {
+		usables.values().forEach( (usable) -> usable.OnBowShoot(e));
+	}
 	
 	//
 	
@@ -53,5 +64,10 @@ public class UsableManager extends PluginModule{
 	}
 	public boolean Exist(ItemStack item) {
 		return usables.containsKey(item);
+	}
+	public void Remove(ItemStack item) {
+		if(!Exist(item)) return;
+		
+		usables.remove(item);
 	}
 }
