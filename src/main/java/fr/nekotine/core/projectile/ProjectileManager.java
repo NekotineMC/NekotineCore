@@ -20,10 +20,10 @@ import org.jetbrains.annotations.NotNull;
 
 import com.destroystokyo.paper.event.entity.ProjectileCollideEvent;
 
-import fr.nekotine.core.arrache.TickEvent;
 import fr.nekotine.core.damage.LivingEntityDamageEvent;
 import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
+import fr.nekotine.core.ticking.event.TickElapsedEvent;
 
 @ModuleNameAnnotation(Name = "ProjectileManager")
 public class ProjectileManager extends PluginModule{
@@ -106,7 +106,7 @@ public class ProjectileManager extends PluginModule{
 	//
 	
 	@EventHandler
-	public void Tick(TickEvent e) {
+	public void Tick(TickElapsedEvent e) {
 		TransferBuffer();
 
 		for (Iterator<Entry<Entity, CustomProjectile>> iterator = projectiles.entrySet().iterator(); iterator.hasNext();){

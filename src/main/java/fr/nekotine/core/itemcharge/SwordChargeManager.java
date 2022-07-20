@@ -11,11 +11,11 @@ import org.bukkit.inventory.ItemStack;
 
 import com.comphenix.protocol.wrappers.Pair;
 
-import fr.nekotine.core.arrache.TickEvent;
 import fr.nekotine.core.charge.ChargeManager;
 import fr.nekotine.core.charge.ICharge;
 import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
+import fr.nekotine.core.ticking.event.TickElapsedEvent;
 import fr.nekotine.core.util.CustomAction;
 
 @ModuleNameAnnotation(Name = "SwordChargeManager")
@@ -95,7 +95,7 @@ public class SwordChargeManager extends PluginModule{
 	//
 	
 	@EventHandler
-	public void Tick(TickEvent e) {	
+	public void Tick(TickElapsedEvent e) {	
 		TransferBuffer();
 		
 		for (Iterator<Entry<Pair<Player, String>, SwordCharge>> iterator = swordCharges.entrySet().iterator(); iterator.hasNext();){

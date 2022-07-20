@@ -8,9 +8,9 @@ import org.bukkit.event.EventHandler;
 
 import com.comphenix.protocol.wrappers.Pair;
 
-import fr.nekotine.core.arrache.TickEvent;
 import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
+import fr.nekotine.core.ticking.event.TickElapsedEvent;
 
 @ModuleNameAnnotation(Name = "ChargeManager")
 public class ChargeManager extends PluginModule{
@@ -72,7 +72,7 @@ public class ChargeManager extends PluginModule{
 	//
 	
 	@EventHandler
-	public void Tick(TickEvent e) {
+	public void Tick(TickElapsedEvent e) {
 		TransferBuffer();
 		
 		for (Iterator<Entry<Pair<String, String>, Charge>> iterator = charges.entrySet().iterator(); iterator.hasNext();){
