@@ -37,7 +37,7 @@ public class TickingModule extends PluginModule{
 	private void Tick() {
 		Map<TickTimeStamp, Boolean> stampStatus = new HashMap<>();
 		for (TickTimeStamp stamp : TickTimeStamp.values()) {
-			if (stamps.get(stamp) > stamp.getNumberOfTick()) {
+			if (stamps.get(stamp)!=null && stamps.get(stamp) > stamp.getNumberOfTick()) {
 				stamps.put(stamp, 0);
 				stampStatus.put(stamp, true);
 			}else {
