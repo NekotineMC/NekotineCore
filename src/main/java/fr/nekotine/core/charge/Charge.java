@@ -11,12 +11,14 @@ public class Charge {
 	private long started;
 	private boolean cancelled;
 	private long lastLeft;
+	private boolean paused;
+	private long pausedTime;
 	
 	//
 	
 	private final String user;
 	private final String chargeName;
-	private final long duration;
+	private long duration;
 	private final boolean displayOnExpBar;
 	private final boolean withAudio;
 	private final long audioBipNumber;
@@ -44,6 +46,7 @@ public class Charge {
 		this.started = System.currentTimeMillis();
 		this.cancelled = false;
 		this.lastLeft = duration;
+		this.paused = false;
 		
 		PlayUncheckedAudio(0);
 	}
@@ -51,6 +54,8 @@ public class Charge {
 	//
 	
 	protected boolean Update() {
+		if(paused) return false;
+		
 		if(cancelled) {
 			iCharge.Cancelled(user, chargeName, GetTimeLeft());
 			return true;
@@ -81,6 +86,14 @@ public class Charge {
 	 */
 	protected long GetTimeLeft() {
 		return duration - (UtilTime.GetTime() - started);
+	}
+	protected void SetPaused(boolean paused) {
+		if(this.paused && !paused) {
+			duration += UtilTime.Passed(pausedTime);
+		}else if(!this.paused && paused) {
+			pausedTime = UtilTime.GetTime();
+		}
+		this.paused = paused;
 	}
 	
 	//

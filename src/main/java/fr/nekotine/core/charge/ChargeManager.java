@@ -49,6 +49,13 @@ public class ChargeManager extends PluginModule{
 		}
 		return false;
 	}
+	public boolean SetPaused(String user, String chargeName, boolean paused) {
+		if(Exist(user, chargeName)) {
+			Get(user, chargeName).SetPaused(paused);
+			return true;
+		}
+		return false;
+	}
 	public long GetTimeLeft(String user, String chargeName) {
 		if(Exist(user, chargeName)) {
 			return Get(user, chargeName).GetTimeLeft();
@@ -59,7 +66,7 @@ public class ChargeManager extends PluginModule{
 		return Exist(new Pair<String, String>(user, chargeName));
 	}
 	public boolean Exist(Pair<String, String> keys) {
-		return charges.containsKey(keys);
+		return MainExist(keys) ||  BufferExist(keys);
 	}
 	
 	//
@@ -79,7 +86,8 @@ public class ChargeManager extends PluginModule{
 	//
 	
 	private Charge Get(String user, String chargeName) {
-		return charges.get(new Pair<String, String>(user, chargeName));
+		if(MainExist(user, chargeName)) return charges.get(new Pair<String, String>(user, chargeName));
+		 return chargesBuffer.get(new Pair<String, String>(user, chargeName));
 	}
 	private boolean BufferExist(String user, String chargeName) {
 		return BufferExist(new Pair<String, String>(user, chargeName));
@@ -87,10 +95,16 @@ public class ChargeManager extends PluginModule{
 	private boolean BufferExist(Pair<String, String> keys) {
 		return chargesBuffer.containsKey(keys);
 	}
+	private boolean MainExist(String user, String chargeName) {
+		return MainExist(new Pair<String, String>(user, chargeName));
+	}
+	private boolean MainExist(Pair<String, String> keys) {
+		return charges.containsKey(keys);
+	}
 	private void TransferBuffer() {
 		for(Iterator<Entry<Pair<String, String>, Charge>> iterator = chargesBuffer.entrySet().iterator() ; iterator.hasNext() ; ) {
 			Entry<Pair<String, String>, Charge> entry = iterator.next();
-			if(!Exist(entry.getKey())) {
+			if(!MainExist(entry.getKey())) {
 				charges.put(entry.getKey(), entry.getValue());
 				iterator.remove();
 			}
