@@ -37,8 +37,6 @@ public class DamageManager extends PluginModule{
 	
 	private static final double CRITICAL_BOOST = 1.5;
 	
-	private static final double ARROW_DAMAGE_PER_VELOCITY_LENGTH = 3;
-	
 	private static final double PROTECTION_ENCHANT_REDUCTION = 0.04;
 	private static final double FALL_PROTECTION_ENCHANT_REDUCTION = 0.12;
 	private static final double FIRE_PROTECTION_ENCHANT_REDUCTION = 0.08;
@@ -67,7 +65,7 @@ public class DamageManager extends PluginModule{
 		if(critical && projectile==null) damage = damage / CRITICAL_BOOST;
 		
 		//Consistant arrow damage
-		if (projectile != null && projectile instanceof Arrow) damage = projectile.getVelocity().length() * ARROW_DAMAGE_PER_VELOCITY_LENGTH;
+		if (projectile instanceof Arrow) ((Arrow)projectile).setCritical(false);
 		
 		LivingEntityDamageEvent customDamageEvent = new LivingEntityDamageEvent(entity, damager, projectile, event.getCause(), damage, false, true, null);
 		//If hit is valid (attack cooldown, ...)
