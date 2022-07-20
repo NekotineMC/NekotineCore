@@ -289,7 +289,7 @@ public class DamageManager extends PluginModule{
 		
 		event.GetDamaged().setLastDamage(event.GetDamage());
 		event.GetDamaged().setLastDamageCause(new EntityDamageEvent(event.GetDamaged(), event.GetCause(), event.GetDamage()));
-		if(event.GetDamager() instanceof Player) event.GetDamaged().setKiller((Player)event.GetDamager());
+		if(event.GetDamager() instanceof Player && event.GetDamaged() != event.GetDamager()) event.GetDamaged().setKiller((Player)event.GetDamager());
 		
 		event.GetDamaged().setHealth(health);
 	}
