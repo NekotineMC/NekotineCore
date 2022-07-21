@@ -146,4 +146,8 @@ public class UtilGear {
 			if(from.equals( playerInventory.getItemInOffHand()) ) playerInventory.setItemInOffHand(to);
 		}
 	}
+	
+	public static void Remove(Inventory inventory, ItemStack item) {
+		Replace(inventory, item, new ItemStack(Material.AIR));
+	}
 }

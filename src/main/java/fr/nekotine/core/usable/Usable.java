@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.entity.EntityShootBowEvent;
@@ -122,7 +123,8 @@ public class Usable {
 		Update(previous);
 	}
 	public void Remove() {
-		inventory.remove(item);
+		UtilGear.Remove(inventory, item);
+		
 		usableManager.Remove(item);
 	}
 	public void Give() {
@@ -173,6 +175,15 @@ public class Usable {
 		
 		Update(previous);
 	}
+	public void SetMaterial(Material material) {
+		ItemStack previous = item.clone();
+		
+		ItemStack newItem = new ItemStack(material, item.getAmount());
+		newItem.setItemMeta(item.getItemMeta());
+		item = newItem;
+		
+		Update(previous);
+	}
 	public void OnInteract(Consumer<PlayerInteractEvent> OnInteract) {
 		this.OnInteract = OnInteract;
 	}
@@ -194,8 +205,11 @@ public class Usable {
 	
 	//
 	
-	public int GetCount() {
+	public int GetAmount() {
 		return item.getAmount();
+	}
+	public Material GetMaterial() {
+		return item.getType();
 	}
 	
 	//
