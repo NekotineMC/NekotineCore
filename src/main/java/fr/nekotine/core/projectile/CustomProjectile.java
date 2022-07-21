@@ -165,7 +165,7 @@ public class CustomProjectile {
 	 * @param hitBlock
 	 */
 	public void ProjectileHitBlock(Block hitBlock) {
-		iProj.Hit(null, hitBlock, this);
+		if(targetBlock) iProj.Hit(null, hitBlock, this);
 	}
 	
 	//
