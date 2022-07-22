@@ -74,13 +74,10 @@ public class ChargeManager extends PluginModule{
 	@EventHandler
 	public void Tick(TickElapsedEvent e) {
 		TransferBuffer();
-		
 		for (Iterator<Entry<Pair<String, String>, Charge>> iterator = charges.entrySet().iterator(); iterator.hasNext();){
 			Entry<Pair<String, String>, Charge> entry = iterator.next();
 			if(entry.getValue().Update()) iterator.remove();
 		}
-		
-		TransferBuffer();
 	}
 	
 	//
@@ -104,11 +101,9 @@ public class ChargeManager extends PluginModule{
 	private void TransferBuffer() {
 		for(Iterator<Entry<Pair<String, String>, Charge>> iterator = chargesBuffer.entrySet().iterator() ; iterator.hasNext() ; ) {
 			Entry<Pair<String, String>, Charge> entry = iterator.next();
-			if(!MainExist(entry.getKey())) {
-				charges.put(entry.getKey(), entry.getValue());
-				iterator.remove();
-			}
+			if(!MainExist(entry.getKey())) charges.put(entry.getKey(), entry.getValue());
 		}
+		chargesBuffer.clear();
 	}
 	
 	//

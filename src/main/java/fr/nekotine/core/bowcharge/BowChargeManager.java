@@ -44,14 +44,8 @@ public class BowChargeManager extends PluginModule{
 		return true;
 	}
 	public void DestroyFromPlayer(Player player) {
+		TransferBuffer();
 		for(Iterator<Entry<Pair<Player, String>, BowCharge>> iterator = bowCharges.entrySet().iterator() ; iterator.hasNext() ; ) {
-			Entry<Pair<Player, String>, BowCharge> entry = iterator.next();
-			if(entry.getValue().GetPlayer().equals(player)) {
-				SetCancelled(entry.getKey().getFirst(), entry.getKey().getSecond(), true);
-				iterator.remove();
-			}
-		}
-		for(Iterator<Entry<Pair<Player, String>, BowCharge>> iterator = bowChargesBuffer.entrySet().iterator() ; iterator.hasNext() ; ) {
 			Entry<Pair<Player, String>, BowCharge> entry = iterator.next();
 			if(entry.getValue().GetPlayer().equals(player)) {
 				SetCancelled(entry.getKey().getFirst(), entry.getKey().getSecond(), true);
@@ -60,14 +54,8 @@ public class BowChargeManager extends PluginModule{
 		}
 	}
 	public void DestroyFromInterface(IBowCharge iBowCharge) {
+		TransferBuffer();
 		for(Iterator<Entry<Pair<Player, String>, BowCharge>> iterator = bowCharges.entrySet().iterator() ; iterator.hasNext() ; ) {
-			Entry<Pair<Player, String>, BowCharge> entry = iterator.next();
-			if(entry.getValue().GetInterface().equals(iBowCharge)) {
-				SetCancelled(entry.getKey().getFirst(), entry.getKey().getSecond(), true);
-				iterator.remove();
-			}
-		}
-		for(Iterator<Entry<Pair<Player, String>, BowCharge>> iterator = bowChargesBuffer.entrySet().iterator() ; iterator.hasNext() ; ) {
 			Entry<Pair<Player, String>, BowCharge> entry = iterator.next();
 			if(entry.getValue().GetInterface().equals(iBowCharge)) {
 				SetCancelled(entry.getKey().getFirst(), entry.getKey().getSecond(), true);
@@ -81,24 +69,24 @@ public class BowChargeManager extends PluginModule{
 	@EventHandler
 	public void Tick(TickElapsedEvent e) {
 		TransferBuffer();
-		
 		for (Iterator<Entry<Pair<Player, String>, BowCharge>> iterator = bowCharges.entrySet().iterator(); iterator.hasNext();){
 			Entry<Pair<Player, String>, BowCharge> entry = iterator.next();
 			if(entry.getValue().Update()) iterator.remove();
 		}
-		
-		TransferBuffer();
 	}
 	@EventHandler
 	public void ShootBow(EntityShootBowEvent e) {
+		TransferBuffer();
 		bowCharges.values().forEach( (charge) -> charge.ShootBow(e));
 	}
 	@EventHandler
 	public void LoadBow(PlayerReadyArrowEvent e) {
+		TransferBuffer();
 		bowCharges.values().forEach( (charge) -> charge.LoadBow(e));
 	}
 	@EventHandler
 	public void OnDrop(PlayerDropItemEvent e) {
+		TransferBuffer();
 		bowCharges.values().forEach( (charge) -> charge.OnDrop(e));
 	}
 	
@@ -124,7 +112,7 @@ public class BowChargeManager extends PluginModule{
 	
 	//
 	
-	private boolean Exist(Pair<Player, String> keys) {
+	private boolean MainExist(Pair<Player, String> keys) {
 		return bowCharges.containsKey(keys);
 	}
 	private boolean BufferExist(Player player, String chargeName) {
@@ -136,10 +124,8 @@ public class BowChargeManager extends PluginModule{
 	private void TransferBuffer() {
 		for(Iterator<Entry<Pair<Player, String>, BowCharge>> iterator = bowChargesBuffer.entrySet().iterator() ; iterator.hasNext() ; ) {
 			Entry<Pair<Player, String>, BowCharge> entry = iterator.next();
-			if(!Exist(entry.getKey())) {
-				bowCharges.put(entry.getKey(), entry.getValue());
-				iterator.remove();
-			}
+			if(!MainExist(entry.getKey())) bowCharges.put(entry.getKey(), entry.getValue());
 		}
+		bowChargesBuffer.clear();
 	}
 }

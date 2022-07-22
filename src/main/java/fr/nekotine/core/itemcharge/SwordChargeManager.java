@@ -48,14 +48,8 @@ public class SwordChargeManager extends PluginModule{
 		return true;
 	}
 	public void DestroyFromPlayer(Player player) {
+		TransferBuffer();
 		for(Iterator<Entry<Pair<Player, String>, SwordCharge>> iterator = swordCharges.entrySet().iterator() ; iterator.hasNext() ; ) {
-			Entry<Pair<Player, String>, SwordCharge> entry = iterator.next();
-			if(entry.getValue().GetPlayer().equals(player)) {
-				SetCancelled(entry.getKey().getFirst(), entry.getKey().getSecond(), true);
-				iterator.remove();
-			}
-		}
-		for(Iterator<Entry<Pair<Player, String>, SwordCharge>> iterator = swordChargesBuffer.entrySet().iterator() ; iterator.hasNext() ; ) {
 			Entry<Pair<Player, String>, SwordCharge> entry = iterator.next();
 			if(entry.getValue().GetPlayer().equals(player)) {
 				SetCancelled(entry.getKey().getFirst(), entry.getKey().getSecond(), true);
@@ -64,14 +58,8 @@ public class SwordChargeManager extends PluginModule{
 		}
 	}
 	public void DestroyFromInterface(ISwordCharge iSwordCharge) {
+		TransferBuffer();
 		for(Iterator<Entry<Pair<Player, String>, SwordCharge>> iterator = swordCharges.entrySet().iterator() ; iterator.hasNext() ; ) {
-			Entry<Pair<Player, String>, SwordCharge> entry = iterator.next();
-			if(entry.getValue().GetInterface().equals(iSwordCharge)) {
-				SetCancelled(entry.getKey().getFirst(), entry.getKey().getSecond(), true);
-				iterator.remove();
-			}
-		}
-		for(Iterator<Entry<Pair<Player, String>, SwordCharge>> iterator = swordChargesBuffer.entrySet().iterator() ; iterator.hasNext() ; ) {
 			Entry<Pair<Player, String>, SwordCharge> entry = iterator.next();
 			if(entry.getValue().GetInterface().equals(iSwordCharge)) {
 				SetCancelled(entry.getKey().getFirst(), entry.getKey().getSecond(), true);
@@ -97,16 +85,14 @@ public class SwordChargeManager extends PluginModule{
 	@EventHandler
 	public void Tick(TickElapsedEvent e) {	
 		TransferBuffer();
-		
 		for (Iterator<Entry<Pair<Player, String>, SwordCharge>> iterator = swordCharges.entrySet().iterator(); iterator.hasNext();){
 			Entry<Pair<Player, String>, SwordCharge> entry = iterator.next();
 			if(entry.getValue().Update()) iterator.remove();
 		}
-		
-		TransferBuffer();
 	}
 	@EventHandler
 	public void Action(PlayerInteractEvent e) {
+		TransferBuffer();
 		swordCharges.values().forEach( (charge) -> charge.Action(e));
 	}
 	@Override
@@ -117,7 +103,7 @@ public class SwordChargeManager extends PluginModule{
 	
 	//
 	
-	private boolean Exist(Pair<Player, String> keys) {
+	private boolean MainExist(Pair<Player, String> keys) {
 		return swordCharges.containsKey(keys);
 	}
 	private boolean BufferExist(Player player, String chargeName) {
@@ -129,10 +115,8 @@ public class SwordChargeManager extends PluginModule{
 	private void TransferBuffer() {
 		for(Iterator<Entry<Pair<Player, String>, SwordCharge>> iterator = swordChargesBuffer.entrySet().iterator() ; iterator.hasNext() ; ) {
 			Entry<Pair<Player, String>, SwordCharge> entry = iterator.next();
-			if(!Exist(entry.getKey())) {
-				swordCharges.put(entry.getKey(), entry.getValue());
-				iterator.remove();
-			}
+			if(!MainExist(entry.getKey())) swordCharges.put(entry.getKey(), entry.getValue());
 		}
+		swordChargesBuffer.clear();
 	}
 }
