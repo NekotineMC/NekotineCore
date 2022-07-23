@@ -54,7 +54,6 @@ public class CustomProjectile {
 	//
 	
 	private void ConfigureProjectile(Entity projectile, Vector velocity) {
-		projectile.setInvulnerable(true);
 		projectile.setVelocity(velocity);
 		if(projectile instanceof Item) {
 			Item itemProjectile = (Item)projectile;
