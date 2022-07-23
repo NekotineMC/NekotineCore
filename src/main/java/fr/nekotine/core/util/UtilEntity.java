@@ -6,6 +6,7 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Llama;
 import org.bukkit.entity.Slime;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.util.Vector;
@@ -82,9 +83,13 @@ public class UtilEntity {
 		ent.setVelocity(vec);	
 	}
 	public static void PlayDamageSound(LivingEntity entity) {
-		Sound sound = Sound.ENTITY_ZOMBIFIED_PIGLIN_HURT;
+		Sound sound = Sound.ENTITY_PLAYER_HURT;
+		
+		EntityType type = entity.getType();
+		if(entity instanceof Llama) type = EntityType.LLAMA;
+		
 		try {
-			sound = Sound.valueOf("ENTITY_"+entity.getType()+"_HURT");
+			sound = Sound.valueOf("ENTITY_"+type+"_HURT");
 		} catch (IllegalArgumentException  e) {
 			System.out.println("[NekotineCore][UtilEntity][PlayDamageSound] impossible d'obtenir le son pour "+entity.getType());
 			System.out.println(e.getStackTrace());

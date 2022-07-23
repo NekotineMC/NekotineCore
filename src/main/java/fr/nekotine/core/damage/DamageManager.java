@@ -92,6 +92,7 @@ public class DamageManager extends PluginModule{
 		//Hurt effect
 		event.GetDamaged().playEffect(EntityEffect.HURT);
 		
+		
 		//Remove arrows
 		if(event.GetProjectile() instanceof Arrow) event.GetProjectile().remove();
 	}
