@@ -24,7 +24,7 @@ import fr.nekotine.core.util.UtilGear;
 import net.kyori.adventure.text.Component;
 
 public class Usable {
-	private final UsableManager usableManager;
+	private final UsableModule usableManager;
 	private ItemStack item;
 	private final Inventory inventory;
 	
@@ -41,7 +41,7 @@ public class Usable {
 	
 	//
 	
-	public Usable(UsableManager usableManager, ItemStack item, Inventory inventory) {
+	public Usable(UsableModule usableManager, ItemStack item, Inventory inventory) {
 		this.usableManager = usableManager;
 		this.item = item;
 		this.inventory = inventory;

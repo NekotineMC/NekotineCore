@@ -22,7 +22,7 @@ public class SwordCharge implements ICharge{
 	private long lastFired;
 	//
 	
-	private final SwordChargeManager swordChargeManager;
+	private final SwordChargeModule swordChargeManager;
 	private final Player user;
 	private final String chargeName;
 	private final long duration;
@@ -35,7 +35,7 @@ public class SwordCharge implements ICharge{
 	private final ItemStack bindItem;
 	private final ISwordCharge iSwordCharge;
 	
-	public SwordCharge(SwordChargeManager swordChargeManager, Player user, String chargeName, long duration, boolean activated, boolean displayOnExpBar, boolean withAudio, long audioBipNumber,
+	public SwordCharge(SwordChargeModule swordChargeManager, Player user, String chargeName, long duration, boolean activated, boolean displayOnExpBar, boolean withAudio, long audioBipNumber,
 			CustomAction action, boolean bindToItem, ItemStack bindItem, ISwordCharge iSwordCharge) {
 		this.swordChargeManager = swordChargeManager;
 		this.user = user;

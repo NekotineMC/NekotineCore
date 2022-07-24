@@ -28,7 +28,7 @@ import fr.nekotine.core.util.UtilEntity;
 import fr.nekotine.core.util.UtilMath;
 
 @ModuleNameAnnotation(Name = "DamageManager")
-public class DamageManager extends PluginModule{
+public class DamageModule extends PluginModule{
 	private static final Material ATTACK_COOLDOWN_MATERIAL = Material.BARRIER;
 	private static final int ATTACK_COOLDOWN_TICK = 10;
 	private static final int NO_DAMAGE_DURATION_TICK = 20;

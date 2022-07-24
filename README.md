@@ -26,20 +26,20 @@ Voici la liste des modules:
 	
 	> Le sont des bruits de pas est encore là -> changer le craft player à la connexion.
 
-- `ProjectileManager` ✓
+- `ProjectileModule` ✓
 
 	Un module pour faire des projectiles personnalisés facilement.  
 	***Hyez doit donner de plus amples informations***
 	
 	> XxGoldenbluexX devra jetter un oeil.
 
-- `UsableManager` ✓
+- `UsableModule` ✓
 
 	Module pour faciliter la gestion des interactions entre le joueur et l'item dans sa main. 	
 	
 	> XxGoldenbluexX devra jetter un oeil.
 
-- `SwordChargeManager` ✓
+- `SwordChargeModule` ✓
 
 	Module pour gèrer une charge, par exemple pour charger un sort.  
 	***Hyez doit donner de plus amples informations***  
@@ -51,14 +51,14 @@ Voici la liste des modules:
 	Module pour gerer des effets s'appliquant à une cible pour une personne.  
 	Les effets sont superposables et sont définits par une duration, une puissance, une cible et un observateur
 
-- `DamageManager` ✓
+- `DamageModule` ✓
 
 	Module ayant pour objectif de remplacer le système de dégats par défaut de *minecraft* pour éviter les temps
 	d'invincibilités et permettre une meilleur flexibilitée.
 	
 	> XxGoldenbluexX devra jetter un oeil.
 
-- `ChargeManager` ✓
+- `ChargeModule` ✓
 
 	Module pour faire facilement des temps de recharge.  
 	***Hyez doit donner de plus amples informations***  

@@ -12,7 +12,7 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import com.comphenix.protocol.wrappers.Pair;
 import com.destroystokyo.paper.event.player.PlayerReadyArrowEvent;
 
-import fr.nekotine.core.charge.ChargeManager;
+import fr.nekotine.core.charge.ChargeModule;
 import fr.nekotine.core.charge.ICharge;
 import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
@@ -21,7 +21,7 @@ import fr.nekotine.core.ticking.event.TickElapsedEvent;
 @ModuleNameAnnotation(Name = "BowChargeManager")
 public class BowChargeManager extends PluginModule{
 	
-	private ChargeManager chargeManager;
+	private ChargeModule chargeManager;
 	private final HashMap<Pair<Player, String>, BowCharge> bowCharges = new HashMap<Pair<Player, String>, BowCharge>();
 	private final HashMap<Pair<Player, String>, BowCharge> bowChargesBuffer = new HashMap<Pair<Player, String>, BowCharge>();
 	
@@ -95,7 +95,7 @@ public class BowChargeManager extends PluginModule{
 	@Override
 	public void onEnable() {
 		super.onEnable();
-		this.chargeManager = GetPluginModule(ChargeManager.class);
+		this.chargeManager = GetPluginModule(ChargeModule.class);
 	}
 	
 	//

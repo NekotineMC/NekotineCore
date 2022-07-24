@@ -17,7 +17,7 @@ import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
 
 @ModuleNameAnnotation(Name = "UsableManager")
-public class UsableManager extends PluginModule{
+public class UsableModule extends PluginModule{
 	private final HashMap<ItemStack, Usable> usables = new HashMap<ItemStack, Usable>();
 	
 	//
