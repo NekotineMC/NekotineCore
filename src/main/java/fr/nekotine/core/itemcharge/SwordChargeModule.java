@@ -18,7 +18,7 @@ import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
 import fr.nekotine.core.ticking.event.TickElapsedEvent;
 import fr.nekotine.core.util.CustomAction;
 
-@ModuleNameAnnotation(Name = "SwordChargeManager")
+@ModuleNameAnnotation(Name = "SwordChargeModule")
 public class SwordChargeModule extends PluginModule{
 	
 	private ChargeModule chargeManager;

@@ -12,9 +12,9 @@ import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
 import fr.nekotine.core.ticking.event.TickElapsedEvent;
 
-@ModuleNameAnnotation(Name = "ChargeManager")
+@ModuleNameAnnotation(Name = "ChargeModule")
 public class ChargeModule extends PluginModule{
-	private static final String NAME = "ChargeManager";
+	private static final String NAME = "ChargeModule";
 	
 	private final HashMap<Pair<String, String>, Charge> charges = new HashMap<Pair<String, String>, Charge>();
 	private final HashMap<Pair<String, String>, Charge> chargesBuffer = new HashMap<Pair<String, String>, Charge>();

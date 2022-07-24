@@ -22,7 +22,7 @@ import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
 import fr.nekotine.core.ticking.event.TickElapsedEvent;
 
-@ModuleNameAnnotation(Name = "ProjectileManager")
+@ModuleNameAnnotation(Name = "ProjectileModule")
 public class ProjectileModule extends PluginModule{
 	private final HashMap<Entity, CustomProjectile> projectiles = new HashMap<Entity, CustomProjectile>();
 	private final HashMap<Entity, CustomProjectile> projectilesBuffer = new HashMap<Entity, CustomProjectile>();
