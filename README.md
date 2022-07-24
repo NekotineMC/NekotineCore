@@ -63,7 +63,7 @@ Voici la liste des modules:
 	Module pour faire facilement des temps de recharge.
 	Il permet de faire des décomptes que l'on peut afficher ensuite aux joueurs, dans leurs barres d'expériences ou avec des sons.
 
-- `BowChargeManager` ✓
+- `BowChargeModule` ✓
 
 	Module pour gérer une charge à l'arc.
 	Il permet de détecter lorsqu'un joueur charge son arc sur un temps donné, lorsque celui-ci tire sa flèche, ou annulle son tir.
