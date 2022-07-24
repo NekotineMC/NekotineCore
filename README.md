@@ -29,7 +29,7 @@ Voici la liste des modules:
 - `ProjectileManager` ✓
 
 	Un module pour faire des projectiles personnalisés facilement.  
-	***Hyez doit donner de plus amples informations***
+	Il permet de détecter lorsque les entités projectiles touchent un mur, une autre entité, ou après un certain temps.
 	
 	> XxGoldenbluexX devra jetter un oeil.
 
@@ -41,15 +41,15 @@ Voici la liste des modules:
 
 - `SwordChargeManager` ✓
 
-	Module pour gèrer une charge, par exemple pour charger un sort.  
-	***Hyez doit donner de plus amples informations***  
+	Module pour gérer une charge, par exemple pour charger un sort.  
+	Il permet de détecter lorsqu'un joueur réalise une action (avec ou sans item précis) sur une durée donnée.
 	
 	> XxGoldenbluexX devra jetter un oeil.
 	
 - `CustomEffectModule` ⧖
 
-	Module pour gerer des effets s'appliquant à une cible pour une personne.  
-	Les effets sont superposables et sont définits par une duration, une puissance, une cible et un observateur
+	Module pour gérer des effets s'appliquant à une cible pour une personne.  
+	Les effets sont superposables et sont définits par une duration, une puissance, une cible et un observateur.
 
 - `DamageManager` ✓
 
@@ -60,9 +60,16 @@ Voici la liste des modules:
 
 - `ChargeManager` ✓
 
-	Module pour faire facilement des temps de recharge.  
-	***Hyez doit donner de plus amples informations***  
+	Module pour faire facilement des temps de recharge.
+	Il permet de faire des décomptes que l'on peut afficher ensuite aux joueurs, dans leurs barres d'expériences ou avec des sons.
 
+- `BowChargeManager` ✓
+
+	Module pour gérer une charge à l'arc.
+	Il permet de détecter lorsqu'un joueur charge son arc sur un temps donné, lorsque celui-ci tire sa flèche, ou annulle son tir.
+	
+	> XxGoldenbluexX devra jetter un oeil.
+	
 ***
 
 ## Autres
