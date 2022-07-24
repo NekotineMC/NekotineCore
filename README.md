@@ -29,7 +29,7 @@ Voici la liste des modules:
 - `ProjectileModule` ✓
 
 	Un module pour faire des projectiles personnalisés facilement.  
-	***Hyez doit donner de plus amples informations***
+	Il permet de détecter lorsque les entités projectiles touchent un mur, une autre entité, ou après un certain temps.
 	
 	> XxGoldenbluexX devra jetter un oeil.
 
@@ -41,15 +41,15 @@ Voici la liste des modules:
 
 - `SwordChargeModule` ✓
 
-	Module pour gèrer une charge, par exemple pour charger un sort.  
-	***Hyez doit donner de plus amples informations***  
+	Module pour gérer une charge, par exemple pour charger un sort.  
+	Il permet de détecter lorsqu'un joueur réalise une action (avec ou sans item précis) sur une durée donnée.
 	
 	> XxGoldenbluexX devra jetter un oeil.
 	
 - `CustomEffectModule` ⧖
 
-	Module pour gerer des effets s'appliquant à une cible pour une personne.  
-	Les effets sont superposables et sont définits par une duration, une puissance, une cible et un observateur
+	Module pour gérer des effets s'appliquant à une cible pour une personne.  
+	Les effets sont superposables et sont définits par une duration, une puissance, une cible et un observateur.
 
 - `DamageModule` ✓
 
@@ -60,9 +60,16 @@ Voici la liste des modules:
 
 - `ChargeModule` ✓
 
-	Module pour faire facilement des temps de recharge.  
-	***Hyez doit donner de plus amples informations***  
+	Module pour faire facilement des temps de recharge.
+	Il permet de faire des décomptes que l'on peut afficher ensuite aux joueurs, dans leurs barres d'expériences ou avec des sons.
 
+- `BowChargeManager` ✓
+
+	Module pour gérer une charge à l'arc.
+	Il permet de détecter lorsqu'un joueur charge son arc sur un temps donné, lorsque celui-ci tire sa flèche, ou annulle son tir.
+	
+	> XxGoldenbluexX devra jetter un oeil.
+	
 ***
 
 ## Autres
@@ -70,12 +77,12 @@ Voici la liste des modules:
 Le NekotineCore propose aussi d'autres outils tel que:
 
 - `Text` et `TextColor` pour unifier la disposition et la couleur des messages dans le chat, pour plus de cohérance pour l'utilisateur.  
-- `UtilEntity` ***Hyez doit donner de plus amples informations***  
-- `UtilEvent` ***Hyez doit donner de plus amples informations***  
-- `UtilGear` ***Hyez doit donner de plus amples informations***  
-- `UtilMath` ***Hyez doit donner de plus amples informations***  
+- `UtilEntity` pour modifier et faire des tests sur des entités ou sur leurs enfants  
+- `UtilEvent` pour enregistrer des listeners ou faire des tests sur les objets en rapport avec les events Bukkit
+- `UtilGear` pour modifier et faire des tests sur tout ce qui a un rapport avec les items
+- `UtilMath` pour réaliser des calculs mathématiques précis
 - `UtilMobAi` Classe utilitaire pour faciliter la gestion des IA des mobs.
-- `UtilTime` ***Hyez doit donner de plus amples informations***  
+- `UtilTime` pour réaliser et faires des tests sur des données temporelles
 - `AutoWrapper` et `WrapperBase` pour avoir un système de Wrapping générique.
 
 ***
