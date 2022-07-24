@@ -5,6 +5,7 @@ import java.util.Map;
 import org.bukkit.EntityEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.enchantments.Enchantment;
@@ -90,8 +91,11 @@ public class DamageModule extends PluginModule{
 		Knockback(event);
 		
 		//Hurt effect
-		event.GetDamaged().playEffect(EntityEffect.HURT);
-		
+		if(event.GetDamage() >= 0) {
+			event.GetDamaged().playEffect(EntityEffect.HURT);
+		}else {
+			event.GetDamaged().getWorld().spawnParticle(Particle.HEART, event.GetDamaged().getLocation().add(0, 1, 0), 5, 0.5, 0, 0.5);;
+		}
 		
 		//Remove arrows
 		if(event.GetProjectile() instanceof Arrow) event.GetProjectile().remove();
