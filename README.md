@@ -36,7 +36,6 @@ Voici la liste des modules:
 - `UsableManager` ✓
 
 	Module pour faciliter la gestion des interactions entre le joueur et l'item dans sa main. 	
-	***Hyez : deuxième main?***
 	
 	> XxGoldenbluexX devra jetter un oeil.
 
@@ -78,3 +77,31 @@ Le NekotineCore propose aussi d'autres outils tel que:
 - `UtilMobAi` Classe utilitaire pour faciliter la gestion des IA des mobs.
 - `UtilTime` ***Hyez doit donner de plus amples informations***  
 - `AutoWrapper` et `WrapperBase` pour avoir un système de Wrapping générique.
+
+***
+
+### A propos de ce document
+
+Ce document à pour but d'avoir une vue d'ensemble sur les différentes fonctionnalités du core pour pouvoir piocher dedant facilement et ne pas refaire des choses plusieurs fois.
+
+***
+
+Je laisse ici des charactère spéciaux pour remplir ce document facilement.  
+
+✓ Fonctionel
+⧖ En développement
+🞪 Non réalisé (en projet)
+
+***
+
+je laisse aussi un peut de documentation pour le Markup. Pour plus d'informations voir [ici](https://www.markdownguide.org/basic-syntax).
+
+	# Titre 1
+	## Titre 2
+	### Titre 3
+	...
+	###### Titre 6
+	
+	*italique*
+	**gras**
+	***italique + gras***
