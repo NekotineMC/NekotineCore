@@ -6,11 +6,75 @@ Bibliotheque utilitaire pour faire des plugins minecraft avec papermc.
 
 Le NekotineCore est composé de plusieurs modules qui peuvent être chargé par le plugin.
 
->Les modules ne sont pas indépendants et peuvent communiquer entre eux.
+Les modules ne sont pas indépendants et peuvent communiquer entre eux.
+
+***
 
 Voici la liste des modules:
 
-- VisibilityModule
+- TickingModule ✓
 
-	> Permet de rendre un joueur invisible pour d'autres.  
-	> **Ce module n'utilise pas d'effet d'invisibilité et n'est donc pas compatible avec l'effet de** ***Glow***.
+	Ce module envoit un évènement bukkit chaque tick.  
+	Il intègre aussi des informations pour se repèrer dans le temps sur des intervales prédéfinits.
+	
+	> Ce module est optimisable.
+
+- VisibilityModule ✓
+
+	Permet de rendre un joueur invisible pour d'autres.  
+	**Ce module n'utilise pas d'effet d'invisibilité et n'est donc pas compatible avec l'effet de** ***Glow***.
+	
+	> Le sont des bruits de pas est encore là -> changer le craft player à la connexion.
+
+- ProjectileManager ✓
+
+	Un module pour faire des projectiles personnalisés facilement.  
+	***Hyez doit donner de plus amples informations***
+	
+	> XxGoldenbluexX devra jetter un oeil.
+
+- UsableManager ✓
+
+	Module pour faciliter la gestion des interactions entre le joueur et l'item dans sa main. 	
+	***Hyez : deuxième main?***
+	
+	> XxGoldenbluexX devra jetter un oeil.
+
+- SwordChargeManager ✓
+
+	Module pour gèrer une charge, par exemple pour charger un sort.  
+	***Hyez doit donner de plus amples informations***  
+	
+	> XxGoldenbluexX devra jetter un oeil.
+	
+- CustomEffectModule ⧖
+
+	Module pour gerer des effets s'appliquant à une cible pour une personne.  
+	Les effets sont superposables et sont définits par une duration, une puissance, une cible et un observateur
+
+- DamageManager ✓
+
+	Module ayant pour objectif de remplacer le système de dégats par défaut de *minecraft* pour éviter les temps
+	d'invincibilités et permettre une meilleur flexibilitée.
+	
+	> XxGoldenbluexX devra jetter un oeil.
+
+- ChargeManager ✓
+
+	Module pour faire facilement des temps de recharge.  
+	***Hyez doit donner de plus amples informations***  
+
+***
+
+## Autres
+
+Le NekotineCore propose aussi d'autres outils tel que:
+
+- `Text` et `TextColor` pour unifier la disposition et la couleur des messages dans le chat, pour plus de cohérance pour l'utilisateur.  
+- `UtilEntity` ***Hyez doit donner de plus amples informations***  
+- `UtilEvent` ***Hyez doit donner de plus amples informations***  
+- `UtilGear` ***Hyez doit donner de plus amples informations***  
+- `UtilMath` ***Hyez doit donner de plus amples informations***  
+- `UtilMobAi` Classe utilitaire pour faciliter la gestion des IA des mobs.
+- `UtilTime` ***Hyez doit donner de plus amples informations***  
+- `AutoWrapper` et `WrapperBase` pour avoir un système de Wrapping générique.
