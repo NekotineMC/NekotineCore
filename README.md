@@ -77,12 +77,12 @@ Voici la liste des modules:
 Le NekotineCore propose aussi d'autres outils tel que:
 
 - `Text` et `TextColor` pour unifier la disposition et la couleur des messages dans le chat, pour plus de cohérance pour l'utilisateur.  
-- `UtilEntity` ***Hyez doit donner de plus amples informations***  
-- `UtilEvent` ***Hyez doit donner de plus amples informations***  
-- `UtilGear` ***Hyez doit donner de plus amples informations***  
-- `UtilMath` ***Hyez doit donner de plus amples informations***  
+- `UtilEntity` pour modifier et faire des tests sur des entités ou sur leurs enfants  
+- `UtilEvent` pour enregistrer des listeners ou faire des tests sur les objets en rapport avec les events Bukkit
+- `UtilGear` pour modifier et faire des tests sur tout ce qui a un rapport avec les items
+- `UtilMath` pour réaliser des calculs mathématiques précis
 - `UtilMobAi` Classe utilitaire pour faciliter la gestion des IA des mobs.
-- `UtilTime` ***Hyez doit donner de plus amples informations***  
+- `UtilTime` pour réaliser et faires des tests sur des données temporelles
 - `AutoWrapper` et `WrapperBase` pour avoir un système de Wrapping générique.
 
 ***
