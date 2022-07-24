@@ -14,14 +14,12 @@ import fr.nekotine.core.util.UtilGear;
 public class BowCharge implements ICharge{
 	
 	private Arrow arrow;
-	//Si le joueur a tir�
 	private boolean shot;
-	//Si le tir a été annullé
 	private boolean cancelled;
 	
 	//
 	
-	private final BowChargeManager bowChargeManager;
+	private final BowChargeModule bowChargeManager;
 	private final Player user;
 	private final String chargeName;
 	private final long duration;
@@ -33,7 +31,7 @@ public class BowCharge implements ICharge{
 	
 	//
 	
-	public BowCharge(BowChargeManager bowChargeManager, Player user, String chargeName, long duration, boolean activated, boolean displayOnExpBar, boolean withAudio, long audioBipNumber, 
+	public BowCharge(BowChargeModule bowChargeManager, Player user, String chargeName, long duration, boolean activated, boolean displayOnExpBar, boolean withAudio, long audioBipNumber, 
 			IBowCharge iBowCharge) {
 		this.bowChargeManager = bowChargeManager;
 		this.user = user;

@@ -6,27 +6,27 @@ import org.bukkit.entity.Player;
 public interface IBowCharge {
 	
 	/**
-	 * Lorsque la durée initiale de la charge est terminée (ne veut pas dire que la fleche est tirée)
-	 * @param player Le joueur qui tire
-	 * @param chargeName Le nom de la charge
+	 * Lorsque la charge est terminée (ne veut pas dire que la flèche est tirée)
+	 * @param user
+	 * @param chargeName
 	 */
-	public void Ended(Player player, String chargeName);
+	public void Ended(Player user, String chargeName);
 	
 	/**
-	 * Lorsque le joueur tire sa fleche chargée
-	 * @param player Le joueur qui a tiré
-	 * @param chargeName Le nom de la charge
-	 * @param left La durée restante de la charge
-	 * @param arrow La fleche tirée
+	 * Lorsque la flèche est tirée
+	 * @param user
+	 * @param chargeName
+	 * @param left Temps en ms restant de la charge
+	 * @param arrow La flèche tirée
 	 */
-	public void Released(Player player, String chargeName, long left, Arrow arrow);
+	public void Released(Player user, String chargeName, long left, Arrow arrow);
 	
 	/**
-	 * Lorsque le joueur annule son tire
-	 * @param player Le joueur qui a annulé son tir
-	 * @param chargeName Le nom de la charge
-	 * @param left La durée restante de la charge
+	 * Lorsque le joueur annule son tir
+	 * @param player
+	 * @param chargeName
+	 * @param left Temps en ms restant de la charge
 	 */
-	public void Cancelled(Player player, String chargeName, long left);
+	public void Cancelled(Player user, String chargeName, long left);
 	
 }

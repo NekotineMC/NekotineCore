@@ -18,8 +18,8 @@ import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
 import fr.nekotine.core.ticking.event.TickElapsedEvent;
 
-@ModuleNameAnnotation(Name = "BowChargeManager")
-public class BowChargeManager extends PluginModule{
+@ModuleNameAnnotation(Name = "BowChargeModule")
+public class BowChargeModule extends PluginModule{
 	
 	private ChargeModule chargeManager;
 	private final HashMap<Pair<Player, String>, BowCharge> bowCharges = new HashMap<Pair<Player, String>, BowCharge>();
@@ -28,13 +28,16 @@ public class BowChargeManager extends PluginModule{
 	//
 	
 	/**
-	 * ! Le couple (user, chargeName) doit ï¿½tre unique !
-	 * @param user Le joueur qui tire
-	 * @param chargeName Le nom de la charge
-	 * @param duration La durï¿½e maximale de la charge en ms
-	 * @param activated Si le joueur avais dï¿½jï¿½ commencï¿½ ï¿½ bander son arc
-	 * @param iBowCharge Interface
-	 * @return Si l'ajout ï¿½ ï¿½tï¿½ bien pris en compte
+	 * LE COUPLE (user, chargeName) DOIT ETRE UNIQUE
+	 * @param user Joueur qui tir
+	 * @param chargeName Nom de la charge
+	 * @param duration Durée de la charge en ms
+	 * @param activated Si la charge avait déjà commencée
+	 * @param displayOnExpBar Si la charge doit s'afficher dans la barre d'expérience
+	 * @param withAudio Si la charge doit faire du bruit au joueur
+	 * @param audioBipNumber Nombre de bruits joués (sans compter celui de début & celui de fin)
+	 * @param iBowCharge
+	 * @return True si la charge a été ajoutée
 	 */
 	public boolean AddBowCharge(Player user, String chargeName, long duration, boolean activated, boolean displayOnExpBar, boolean withAudio, long audioBipNumber, IBowCharge iBowCharge) {	
 		if(BufferExist(user, chargeName)) return false;
@@ -43,6 +46,10 @@ public class BowChargeManager extends PluginModule{
 		bowChargesBuffer.put(new Pair<Player, String>(user, chargeName), bowCharge);
 		return true;
 	}
+	/**
+	 * Détruit toutes les charges liées au joueur
+	 * @param player
+	 */
 	public void DestroyFromPlayer(Player player) {
 		TransferBuffer();
 		for(Iterator<Entry<Pair<Player, String>, BowCharge>> iterator = bowCharges.entrySet().iterator() ; iterator.hasNext() ; ) {
@@ -53,6 +60,10 @@ public class BowChargeManager extends PluginModule{
 			}
 		}
 	}
+	/**
+	 * Détruit toutes les charges liées à l'interface
+	 * @param iBowCharge
+	 */
 	public void DestroyFromInterface(IBowCharge iBowCharge) {
 		TransferBuffer();
 		for(Iterator<Entry<Pair<Player, String>, BowCharge>> iterator = bowCharges.entrySet().iterator() ; iterator.hasNext() ; ) {
@@ -100,7 +111,7 @@ public class BowChargeManager extends PluginModule{
 	
 	//
 	
-	protected long GetTimeLeft(Player user, String chargeName) {
+	public long GetTimeLeft(Player user, String chargeName) {
 		return chargeManager.GetTimeLeft(user.getName(), chargeName);
 	}
 	protected boolean SetCancelled(Player user, String chargeName, boolean cancelled) {

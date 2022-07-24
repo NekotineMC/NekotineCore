@@ -1,25 +1,27 @@
 package fr.nekotine.core.projectile;
 
-import javax.annotation.Nullable;
-
 import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
 
 public interface IProjectile {
 	
 	/**
-	 * ATTENTION: Le joueur touchÃ© peut Ãªtre le lanceur lui-mÃªme
-	 * Appelï¿½e lorsque le projectile touche une LivingEntity ou un Block
+	 * Lorsque le projectile a touché une entitée ou un block
+	 * @param hitEntity 
+	 * @param hitBlock
+	 * @param projectile
 	 */
-	public void Hit(@Nullable LivingEntity hitEntity, @Nullable Block hitBlock, CustomProjectile projectile);
+	public void Hit(LivingEntity hitEntity, Block hitBlock, CustomProjectile projectile);
 
 	/**
-	 * Appelï¿½e lorsque la durï¿½e de vie du projectile est dï¿½passï¿½e
+	 *Lorsque le projectile a atteint sa durée de vie maximale
+	 * @param projectile
 	 */
 	public void Faded(CustomProjectile projectile);
 	
 	/**
-	 * AppellÃ© lorsque le projectile a Ã©tÃ© manuellement dÃ©clenchÃ©
+	 * Lorsque le projectile a manuellement été déclenché
+	 * @param projectile
 	 */
 	public void Triggered(CustomProjectile projectile);
 }

@@ -22,15 +22,15 @@ public class ChargeModule extends PluginModule{
 	//
 	
 	/**
-	 * ! Le couple (user, chargeName) doit �tre unique !
-	 * @param user L'utilisateur de la charge
-	 * @param chargeName Le nom de la charge
-	 * @param duration Dur�e en ms
-	 * @param displayOnExpBar Si la charge doit être affichée dans la barre d'exp
-	 * @param withAudio Si la charge doit jouer un audio
-	 * @param audioBipNumber Le nombre de bips audio par charge
-	 * @param iCharge Interface
-	 * @return True si la charge a �t� ajout�e
+	 * LE COUPLE (user, chargeName) DOIT ETRE UNIQUE
+	 * @param user Nom de l'utilisateur de la charge
+	 * @param chargeName Nom de la charge
+	 * @param duration Durée de la charge en ms
+	 * @param displayOnExpBar Si la charge doit s'afficher dans la barre d'expérience
+	 * @param withAudio Si la charge doit faire du bruit au joueur
+	 * @param audioBipNumber Nombre de bruits joués (sans compter celui de début & celui de fin)
+	 * @param iCharge
+	 * @return True si la charge a été ajoutée
 	 */
 	public boolean AddCharge(String user, String chargeName, long duration, boolean displayOnExpBar, boolean withAudio, long audioBipNumber, ICharge iCharge) {
 		if(BufferExist(user, chargeName)) return false;
@@ -42,6 +42,13 @@ public class ChargeModule extends PluginModule{
 	
 	//
 	
+	/**
+	 * Annule la charge
+	 * @param user
+	 * @param chargeName
+	 * @param cancelled
+	 * @return True si la charge a été annulée
+	 */
 	public boolean SetCancelled(String user, String chargeName, boolean cancelled) {
 		if(Exist(user, chargeName)) {
 			Get(user, chargeName).SetCancelled(cancelled);
@@ -49,6 +56,13 @@ public class ChargeModule extends PluginModule{
 		}
 		return false;
 	}
+	/**
+	 * Met en pause la charge
+	 * @param user
+	 * @param chargeName
+	 * @param paused
+	 * @return True si la charge a été mise en pause
+	 */
 	public boolean SetPaused(String user, String chargeName, boolean paused) {
 		if(Exist(user, chargeName)) {
 			Get(user, chargeName).SetPaused(paused);
@@ -56,15 +70,32 @@ public class ChargeModule extends PluginModule{
 		}
 		return false;
 	}
+	/**
+	 * 
+	 * @param user
+	 * @param chargeName
+	 * @return Le temps restant de la charge en ms (-1 si la charge n'existe pas)
+	 */
 	public long GetTimeLeft(String user, String chargeName) {
 		if(Exist(user, chargeName)) {
 			return Get(user, chargeName).GetTimeLeft();
 		}
 		return -1;
 	}
+	/**
+	 * 
+	 * @param user
+	 * @param chargeName
+	 * @return True si la charge existe
+	 */
 	public boolean Exist(String user, String chargeName) {
 		return Exist(new Pair<String, String>(user, chargeName));
 	}
+	/**
+	 * 
+	 * @param keys
+	 * @return True si la charge existe
+	 */
 	public boolean Exist(Pair<String, String> keys) {
 		return MainExist(keys) ||  BufferExist(keys);
 	}

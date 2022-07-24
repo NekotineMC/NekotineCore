@@ -30,14 +30,17 @@ public class ProjectileModule extends PluginModule{
 	//
 	
 	/**
-	 * 
-	 * @param projectile L'entitÃ© Ã  envoyer
-	 * @param sender Le lanceur du projectile
-	 * @param iProj Interface
-	 * @param velocity La vÃ©locitÃ© initiale du projectile
-	 * @param expireTime La durÃ©e de vie du projectile en ms
-	 * @param targetLivingEntity Si le projectile doit toucher les LivingEntity
-	 * @param targetBlock Si le projectile doit toucher les blocs
+	 * RIEN N'EMPECHE LE PROJECTILE DE TOUCHER SON LANCEUR
+	 * @param projectile Entité qui sert de projectile
+	 * @param sender Lanceur du projectile
+	 * @param iProj
+	 * @param velocity Velocité initiale du projectile
+	 * @param expireTime Durée de vie du projectile en ms
+	 * @param targetLivingEntity Si le projectile peut toucher les LivingEntity
+	 * @param targetBlock Si le projectile peut toucher les Block
+	 * @param entityBlacklist Entités à ignorer
+	 * @param blockBlacklist Matériaux des blocks à ignorer
+	 * @return True si le projectile a été ajouté
 	 */
 	public boolean AddProjectile(Entity projectile, LivingEntity sender, IProjectile iProj, Vector velocity, long expireTime,
 			boolean targetLivingEntity, boolean targetBlock, LivingEntity[] entityBlacklist, Material[] blockBlacklist) {
@@ -57,8 +60,8 @@ public class ProjectileModule extends PluginModule{
 	//
 	
 	/**
-	 * Trigger tous les projectiles du lanceur
-	 * @param sender Le lanceur du projectile
+	 * Déclenche manuellement tous les projectiles du lanceur
+	 * @param sender
 	 */
 	public void TriggerFromSender(@NotNull LivingEntity sender) {
 		TransferBuffer();
@@ -70,8 +73,8 @@ public class ProjectileModule extends PluginModule{
 		}
 	}
 	/**
-	 * Trigger tous les projectiles du lanceur
-	 * @param iProj L'interface utilisÃ©e pour les projectiles
+	 * Déclenche manuellement tous les projectiles liés à l'interface
+	 * @param iProj
 	 */
 	public void TriggerFromInterface(@NotNull IProjectile iProj) {
 		TransferBuffer();
@@ -83,8 +86,8 @@ public class ProjectileModule extends PluginModule{
 	}
 	/**
 	 * 
-	 * @param sender Le lanceur
-	 * @return La liste des projectiles lancÃ©s par le lanceur
+	 * @param sender
+	 * @return Tous les projectiles du lanceur
 	 */
 	public ArrayList<CustomProjectile> GetFromSender(@NotNull LivingEntity sender) {
 		TransferBuffer();
@@ -95,6 +98,11 @@ public class ProjectileModule extends PluginModule{
 		}
 		return senderProjectiles;
 	}
+	/**
+	 * 
+	 * @param projectile
+	 * @return True si le projectile existe
+	 */
 	public boolean Exist(Entity projectile) {
 		return MainExist(projectile) || BufferExist(projectile);
 	}
@@ -115,26 +123,22 @@ public class ProjectileModule extends PluginModule{
 		TransferBuffer();
 		if(MainExist(e.getItem())) e.setCancelled(true);
 	}
-	//Creeper & Wither skull
 	@EventHandler
 	public void OnExplosion(ExplosionPrimeEvent e) {
 		TransferBuffer();
 		if(MainExist(e.getEntity())) e.setCancelled(true);
 	}
-	//Au cas oÃ¹
 	@EventHandler
 	public void OnDeath(EntityDeathEvent e) {
 		TransferBuffer();
 		if(MainExist(e.getEntity())) e.setCancelled(true);
 	}
-	//Projectile
 	@EventHandler
 	public void OnProjectileHit(ProjectileHitEvent e) {
 		TransferBuffer();
 		if(e.getHitBlock() == null) return;
 		if(MainExist(e.getEntity())) projectiles.get(e.getEntity()).ProjectileHitBlock(e.getHitBlock());
 	}
-	//Projectile
 	@EventHandler
 	public void OnProjectileCollide(ProjectileCollideEvent e) {
 		TransferBuffer();

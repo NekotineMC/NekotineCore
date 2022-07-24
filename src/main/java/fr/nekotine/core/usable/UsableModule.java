@@ -22,6 +22,12 @@ public class UsableModule extends PluginModule{
 	
 	//
 	
+	/**
+	 * 
+	 * @param item L'item à regarder
+	 * @param holder L'inventaire dans lequel il se trouve
+	 * @return L'usable crée
+	 */
 	public Usable AddUsable(ItemStack item, Inventory holder) {
 		if(usables.containsKey(item)) return null;
 		
@@ -59,13 +65,13 @@ public class UsableModule extends PluginModule{
 	
 	//
 	
-	public Usable Get(ItemStack item) {
-		return usables.get(item);
-	}
-	public boolean Exist(ItemStack item) {
+	private boolean Exist(ItemStack item) {
 		return usables.containsKey(item);
 	}
-	public void Remove(ItemStack item) {
+	
+	//
+	
+	protected void Remove(ItemStack item) {
 		if(!Exist(item)) return;
 		
 		usables.remove(item);

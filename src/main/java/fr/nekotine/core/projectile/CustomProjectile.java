@@ -2,8 +2,6 @@ package fr.nekotine.core.projectile;
 
 import java.util.ArrayList;
 
-import javax.annotation.Nullable;
-
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -13,7 +11,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.NotNull;
 
 import fr.nekotine.core.util.UtilTime;
 
@@ -82,10 +79,7 @@ public class CustomProjectile {
 	}
 	
 	//
-	
-	/**
-	 * @return Vrai si le projectile est expirï¿½/collision
-	 */
+
 	public boolean Collision() {
 		if(triggered) {
 			iProj.Triggered(this);
@@ -145,47 +139,44 @@ public class CustomProjectile {
 	
 	//
 	
-	/**
-	 * 
-	 * @param triggered Si le projectile doit Ãªtre supprimÃ©
-	 */
-	public void SetTriggered(boolean triggered) {
+	protected void SetTriggered(boolean triggered) {
 		this.triggered = triggered;
 	}
-	/**
-	 * 
-	 * @param triggered Si le projectile doit Ãªtre supprimÃ©
-	 */
-	public void SetCancelled(boolean cancelled) {
-		this.cancelled = cancelled;
-	}
-	/**
-	 * A appeller lorsque le projectile a touchÃ© un bloc (utilisÃ© principalement par les Projectile)
-	 * @param hitBlock
-	 */
-	public void ProjectileHitBlock(Block hitBlock) {
+	protected void ProjectileHitBlock(Block hitBlock) {
 		if(targetBlock) iProj.Hit(null, hitBlock, this);
 	}
 	
 	//
 	
 	/**
-	 * @return La Entity utilisï¿½e comme projectile
+	 * Si il faut continuer à traiter l'entitée comme un projectile
+	 * @param cancelled
 	 */
-	public @NotNull Entity GetProjectile() {
+	public void SetCancelled(boolean cancelled) {
+		this.cancelled = cancelled;
+	}
+	
+	//
+	
+	/**
+	 * 
+	 * @return L'entité utilisée comme projectile
+	 */
+	public Entity GetProjectile() {
 		return projectile;
 	}
 	/**
-	 * @return L'interface utilisÃ©e pour ce projectile
+	 * 
+	 * @return L'interface utilisée pour le projectile
 	 */
-	public @NotNull IProjectile GetInterface() {
+	public IProjectile GetInterface() {
 		return iProj;
 	}
 	/**
 	 * 
-	 * @return La LivingEntity qui a lancï¿½e le projectile
+	 * @return Le lanceur du projectile
 	 */
-	public @Nullable LivingEntity GetSender() {
+	public LivingEntity GetSender() {
 		return sender;
 	}
 

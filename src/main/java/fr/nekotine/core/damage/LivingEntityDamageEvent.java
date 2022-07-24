@@ -61,7 +61,7 @@ public class LivingEntityDamageEvent extends Event{
 	
 	/**
 	 * 
-	 * @return True si le coup doit ignorer l'armur du joueur
+	 * @return True si le dégât doit ignorer l'armure
 	 */
 	public boolean IsIgnoreArmor() {
 		return ignoreArmor;

@@ -11,18 +11,16 @@ import fr.nekotine.core.util.UtilEvent;
 import fr.nekotine.core.util.UtilGear;
 import fr.nekotine.core.util.UtilTime;
 
-public class SwordCharge implements ICharge{
+public class ItemCharge implements ICharge{
 	
-	//Dï¿½lai maximal entre deux appel d'Interract Event afin de constater la fin de la charge
+	//Délai maximal entre deux appel d'Interract Event afin de constater la fin de la charge
 	private final long RELEASE_DELAY_MS = 350;
 	
-	//Si le joueur a arrï¿½tï¿½ l'action
 	private boolean released;
-	//Derniï¿½re fois que l'action ï¿½tait rï¿½alisï¿½e
 	private long lastFired;
 	//
 	
-	private final SwordChargeModule swordChargeManager;
+	private final ItemChargeModule swordChargeManager;
 	private final Player user;
 	private final String chargeName;
 	private final long duration;
@@ -33,10 +31,10 @@ public class SwordCharge implements ICharge{
 	private final CustomAction action;
 	private final boolean bindToItem;
 	private final ItemStack bindItem;
-	private final ISwordCharge iSwordCharge;
+	private final IItemCharge iSwordCharge;
 	
-	public SwordCharge(SwordChargeModule swordChargeManager, Player user, String chargeName, long duration, boolean activated, boolean displayOnExpBar, boolean withAudio, long audioBipNumber,
-			CustomAction action, boolean bindToItem, ItemStack bindItem, ISwordCharge iSwordCharge) {
+	public ItemCharge(ItemChargeModule swordChargeManager, Player user, String chargeName, long duration, boolean activated, boolean displayOnExpBar, boolean withAudio, long audioBipNumber,
+			CustomAction action, boolean bindToItem, ItemStack bindItem, IItemCharge iSwordCharge) {
 		this.swordChargeManager = swordChargeManager;
 		this.user = user;
 		this.chargeName = chargeName;
@@ -111,7 +109,7 @@ public class SwordCharge implements ICharge{
 	
 	//
 	
-	public ISwordCharge GetInterface() {
+	public IItemCharge GetInterface() {
 		return iSwordCharge;
 	}
 	public Player GetPlayer() {

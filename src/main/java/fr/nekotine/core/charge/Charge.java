@@ -26,14 +26,6 @@ public class Charge {
 	
 	//
 	
-	/**
-	 * WARNING: Si displayOnExpBar=true, alors user doit être le nom du joueur
-	 * @param user Utilisateur de la charge
-	 * @param chargeName Nom de la charge /!\ Doit �tre diff�rente pour chaque user
-	 * @param duration Dur�e en ms
-	 * @param displayOnExpBar Si la charge doit être affichée dans la barre d'exp
-	 * @param iCharge Interface
-	 */
 	public Charge(String user, String chargeName, long duration, boolean displayOnExpBar, boolean withAudio, long audioBipNumber, ICharge iCharge) {
 		this.user = user;
 		this.chargeName = chargeName;
@@ -73,17 +65,9 @@ public class Charge {
 	
 	//
 	
-	/**
-	 * Annulle la charge
-	 * @param cancelled
-	 */
 	protected void SetCancelled(boolean cancelled) {
 		this.cancelled = cancelled;
 	}
-	/**
-	 * 
-	 * @return Temps restant en ms
-	 */
 	protected long GetTimeLeft() {
 		return duration - (UtilTime.GetTime() - started);
 	}
@@ -143,8 +127,4 @@ public class Charge {
 		
 		player.playSound(player, Sound.BLOCK_DISPENSER_DISPENSE, 0.2f, ratio);
 	}
-	
-	
-	
-	
 }
