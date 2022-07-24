@@ -1,14 +1,11 @@
 package fr.nekotine.core.damage;
 
-import javax.annotation.Nullable;
-
 import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.jetbrains.annotations.NotNull;
 
 public class LivingEntityDamageEvent extends Event{
 	private static final HandlerList handlers = new HandlerList();
@@ -75,73 +72,77 @@ public class LivingEntityDamageEvent extends Event{
 	}
 	/**
 	 * 
-	 * @return La LivingEntity qui fait les dï¿½gï¿½ts
+	 * @return La LivingEntity qui fait des dégâts
 	 */
-	public @Nullable LivingEntity GetDamager() {
+	public LivingEntity GetDamager() {
 		return damager;
 	}
 	/**
 	 * 
-	 * @return Le Projectile qui fait les dï¿½gï¿½ts
+	 * @return Le Projectile qui fait les dégâts
 	 */
-	public @Nullable Projectile GetProjectile() {
+	public Projectile GetProjectile() {
 		return projectile;
 	}
 	/**
 	 * 
-	 * @return Si l'Event a ï¿½tï¿½ annullï¿½
+	 * @return Si l'Event a été annulé
 	 */
 	public boolean IsCancelled() {
 		return cancelled;
 	}
-	public @NotNull LivingEntity GetDamaged() {
+	/**
+	 * 
+	 * @return La LivingEntity qui prend des dégâts
+	 */
+	public LivingEntity GetDamaged() {
 		return damaged;
 	}
 	/**
 	 * 
-	 * @return La cause du dï¿½gï¿½t
+	 * @return La cause des dégâts
 	 */
-	public @Nullable DamageCause GetCause() {
+	public DamageCause GetCause() {
 		return cause;
 	}
 	/**
 	 * 
-	 * @return Le dï¿½gï¿½ts brut du coup
+	 * @return Les dégâts bruts
 	 */
 	public double GetDamage() {
 		return damage;
 	}
 	/**
 	 * 
-	 * @return La valeur de base qui sera ajoutï¿½e aux dï¿½gï¿½ts
+	 * @return La valeur de base qui sera ajoutée aux dégâts
 	 */
 	public double GetBaseMod() {
 		return baseMod;
 	}
 	/**
 	 * 
-	 * @return Le multiplicatuer de base qui sera ajoutï¿½ aux dï¿½gï¿½ts
+	 * @return Le multiplicateur de base qui sera ajouté aux dégâts
 	 */
 	public double GetBaseMult() {
 		return baseMult;
 	}
 	/**
 	 * 
-	 * @return Le multiplicateur final qui sera ajoutï¿½ aux dï¿½gï¿½ts
+	 * @return Le multiplicateur final qui sera ajouté aux dégâts
 	 */
 	public double GetFinalMult() {
 		return finalMult;
 	}
 	/**
 	 * 
-	 * @return Le multiplicateur final qui sera ajoutï¿½ au recul
+	 * @return Le multiplicateur final qui sera sera ajouté au recul
 	 */
 	public double GetKnockbackMult() {
 		return knockbackMult;
 	}
 	/**
 	 * 
-	 * @return @Nullable La location de l'origine du knockback
+	 * @return La Location de l'origine du knockback
 	 */
 	public Location GetKnockbackOrigin() {
 		return knockbackOrigin;
@@ -150,64 +151,64 @@ public class LivingEntityDamageEvent extends Event{
 	//
 
 	/**
-	 * 
-	 * @param ignoreArmor Si le coup doit ignorer l'armure du joueur
+	 * Si le coup doit ignorer l'armure du joueur
+	 * @param ignoreArmor 
 	 */
 	public void SetIgnoreArmor(boolean ignoreArmor) {
 		this.ignoreArmor = ignoreArmor;
 	}
 	/**
-	 * 
-	 * @param knockback Si le coup doit faire reculer le joueur
+	 * Si le coup doit faire reculer le joueur
+	 * @param knockback 
 	 */
 	public void SetKnockback(boolean knockback) {
 		this.knockback = knockback;
 	}
 	/**
-	 * 
-	 * @param cancelled Si le coup doit ï¿½tre annullï¿½
+	 * Si le coup doit être annulé
+	 * @param cancelled 
 	 */
 	public void SetCancelled(boolean cancelled) {
 		this.cancelled = cancelled;
 	}
 	/**
-	 * 
-	 * @param damage Dï¿½gï¿½ts de bases du coup
+	 * Fixe les dégâts de bases
+	 * @param damage
 	 */
 	public void SetDamage(double damage) {
 		this.damage = damage;
 	}
 	/**
-	 * 
-	 * @param baseMod Les dï¿½gï¿½ts de base ï¿½ ajouter
+	 * Ajoute des dégâts de bases
+	 * @param baseMod
 	 */
 	public void AddBaseMod(double baseMod) {
 		this.baseMod += baseMod;
 	}
 	/**
-	 * 
-	 * @param baseMult Le multiplicateur de base ï¿½ ajouter
+	 * Ajoute un multiplicateur de dégâts de base
+	 * @param baseMult
 	 */
 	public void AddBaseMult(double baseMult) {
 		this.baseMult += baseMult;
 	}
 	/**
-	 * 
-	 * @param finalMult Le multiplicateur final ï¿½ ajouter
+	 * Ajoute un multiplicateur de dégâts final
+	 * @param finalMult
 	 */
 	public void AddFinalMult(double finalMult) {
 		this.finalMult *= finalMult;
 	}
 	/**
-	 * 
-	 * @param knockbackMult Le multiplicateur final ï¿½ ajouter
+	 * Ajoute un multiplicateur de recul
+	 * @param knockbackMult
 	 */
 	public void AddKnockbackMult(double knockbackMult) {
 		this.knockbackMult *= knockbackMult;
 	}
 	/**
-	 * 
-	 * @param knockbackOrigin La Location d'origine du knockback
+	 * Modifie l'origine du recul
+	 * @param knockbackOrigin
 	 */
 	public void SetKnockbackOrigin(Location knockbackOrigin) {
 		this.knockbackOrigin = knockbackOrigin;

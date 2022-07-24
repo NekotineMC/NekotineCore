@@ -6,8 +6,8 @@
   <name>NekotineCore</name>
 
   <properties>
-     <maven.compiler.source>17</maven.compiler.source>
-     <maven.compiler.target>17</maven.compiler.target>
+     <maven.compiler.source>16</maven.compiler.source>
+     <maven.compiler.target>16</maven.compiler.target>
   </properties>
 
   <repositories>
@@ -57,7 +57,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <configuration>
-                	<outputFile>E:\MinecraftServer\ProgramationPaper1.18.2\plugins\${project.artifactId}.jar</outputFile>
+                	<outputFile>${basedir}\build\${project.artifactId}.jar</outputFile>
                 </configuration>
                 <version>2.4.3</version>
                 <executions>

@@ -100,30 +100,30 @@ public class DamageModule extends PluginModule{
 	//
 	
 	/**
-	 * Endommage la LivingEntity
-	 * @param damaged La LivingEntity qui prend les dï¿½gï¿½ts
-	 * @param damager La LivingEntity qui fait les dï¿½gï¿½ts (si il y en a)
-	 * @param projectile Le Projectile qui fait les dï¿½gï¿½ts (si il y en a)
-	 * @param cause La cause du dï¿½gï¿½t
-	 * @param damage Le montant brut de dï¿½gï¿½t
-	 * @param ignoreArmor Si le coup doit ignorer l'armure du joueur
-	 * @param knockback Si le coup doit faire reculer
-	 * @param knockbackOrigin La Location de l'origine du recul (si null, l'origine est le damager)
+	 * Endommage une LivingEntity
+	 * @param damaged L'entité qui prend les dégâts
+	 * @param damager L'entité qui fait les dégâts
+	 * @param projectile Le projectile qui fait les dégâts
+	 * @param cause La cause des dégâts
+	 * @param damage La valeur des dégâts
+	 * @param ignoreArmor Si les dégât doivent ignorer l'armure
+	 * @param knockback Si les dégâts doivent faire reculer
+	 * @param knockbackOrigin L'origine du recul
 	 */
 	public void Damage(LivingEntity damaged, LivingEntity damager, Projectile projectile, DamageCause cause, double damage, boolean ignoreArmor, boolean knockback, 
 						Location knockbackOrigin) {
 		new LivingEntityDamageEvent(damaged, damager, projectile, cause, damage, ignoreArmor, knockback, knockbackOrigin).callEvent();
 	}
 	/**
-	 * 
-	 * @param damager La LivingEntity qui fait les dï¿½gï¿½ts (si il y en a)
-	 * @param radius La portÃ©e de l'explosion
-	 * @param cause La cause de l'explosion
-	 * @param damage Les dÃ©gÃ¢ts de l'explosion
-	 * @param ignoreArmor Si l'explosion doit ignorer l'armure
-	 * @param knockback Si l'explosion doit faire reculer les joueurs
-	 * @param origin L'origine de l'explosion 
-	 * @param ignoreDamager Si l'explosion doit ignorer celui qui fait les dÃ©gats
+	 * Fait des dégâts dans un radius
+	 * @param damager L'entité qui fait les dégâts
+	 * @param radius Le radius des dégâts
+	 * @param cause La cause des dégâts
+	 * @param damage La cause des dégâts
+	 * @param ignoreArmor Si les dégâts doivent ignorer l'armure
+	 * @param knockback Si les dégâts doivent faire reculer
+	 * @param origin L'origine du dégâts
+	 * @param ignoreDamager Si les dégâts doivent ignorer celui fait fait les dégâts
 	 */
 	public void Explode(LivingEntity damager, double radius, DamageCause cause, double damage, boolean ignoreArmor, boolean knockback, Location origin, boolean ignoreDamager) {
 		for(LivingEntity damaged : origin.getWorld().getNearbyLivingEntities(origin, radius)) {
