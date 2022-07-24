@@ -13,6 +13,7 @@ import org.bukkit.util.Vector;
 
 public class UtilEntity {
 	/**
+	 * Crée un slime de la taille donnée.
 	 * 
 	 * @param location La location du slime
 	 * @param reason La raison de l'apparition
