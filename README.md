@@ -88,9 +88,9 @@ Ce document à pour but d'avoir une vue d'ensemble sur les différentes fonction
 
 Je laisse ici des charactère spéciaux pour remplir ce document facilement.  
 
-✓ Fonctionel
-⧖ En développement
-🞪 Non réalisé (en projet)
+✓ Fonctionel  
+⧖ En développement  
+🞪 Non réalisé (en projet)  
 
 ***
 
@@ -105,3 +105,30 @@ je laisse aussi un peut de documentation pour le Markup. Pour plus d'information
 	*italique*
 	**gras**
 	***italique + gras***
+	
+	Pour mettre à la ligne, il fait finir la ligne précédente avec 2 espaces
+	
+	> Message dans un carré (Blockquotes)
+	>
+	> Ces messages peuvent être formatés (italique, gras, titre, liste, etc)
+	>> Ces messages peuvent être emboités comme ceci.
+	
+	1. Liste avec un ordre
+	2. 0
+	3. 0
+	
+	- Liste sans ordre
+	- 0
+	- 0
+	
+	- Tous les types de liste peuvent être emboités
+		- En utilisant une tabulation (ou 4 espaces)
+	
+		Des zones de code peuvent être faites en les tabulant (ou 4 espaces)
+		Ces zones ne peuvent pas être formatées (logique).
+	
+	On peut mettre en évidence des `mots` (comme par exemple ceux issues de languages de programation)
+	
+	[Un lien](http://monAdresse.com)
+	
+	![Une image](http://monAdresse.com)
