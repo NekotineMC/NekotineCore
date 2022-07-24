@@ -23,7 +23,7 @@ public class UtilTime {
 	/**
 	 * 
 	 * @param started
-	 * @return Le temps passé en ms depuis started
+	 * @return Le temps passÃ© en ms depuis started
 	 */
 	public static long Passed(long started) {
 		return GetTime() - started;
