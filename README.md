@@ -4,7 +4,7 @@ Bibliotheque utilitaire pour faire des plugins minecraft avec papermc.
 
 ## Modules
 
-Le NekotineCore est composé de plusieurs modules qui peuvent être chargé par le plugin.
+Le *NekotineCore* est composé de plusieurs modules qui peuvent être chargé par le plugin.
 
 Les modules ne sont pas indépendants et peuvent communiquer entre eux.
 
@@ -12,54 +12,54 @@ Les modules ne sont pas indépendants et peuvent communiquer entre eux.
 
 Voici la liste des modules:
 
-- TickingModule ✓
+- `TickingModule` ✓
 
 	Ce module envoit un évènement bukkit chaque tick.  
 	Il intègre aussi des informations pour se repèrer dans le temps sur des intervales prédéfinits.
 	
 	> Ce module est optimisable.
 
-- VisibilityModule ✓
+- `VisibilityModule` ✓
 
 	Permet de rendre un joueur invisible pour d'autres.  
 	**Ce module n'utilise pas d'effet d'invisibilité et n'est donc pas compatible avec l'effet de** ***Glow***.
 	
 	> Le sont des bruits de pas est encore là -> changer le craft player à la connexion.
 
-- ProjectileManager ✓
+- `ProjectileManager` ✓
 
 	Un module pour faire des projectiles personnalisés facilement.  
 	***Hyez doit donner de plus amples informations***
 	
 	> XxGoldenbluexX devra jetter un oeil.
 
-- UsableManager ✓
+- `UsableManager` ✓
 
 	Module pour faciliter la gestion des interactions entre le joueur et l'item dans sa main. 	
 	***Hyez : deuxième main?***
 	
 	> XxGoldenbluexX devra jetter un oeil.
 
-- SwordChargeManager ✓
+- `SwordChargeManager` ✓
 
 	Module pour gèrer une charge, par exemple pour charger un sort.  
 	***Hyez doit donner de plus amples informations***  
 	
 	> XxGoldenbluexX devra jetter un oeil.
 	
-- CustomEffectModule ⧖
+- `CustomEffectModule` ⧖
 
 	Module pour gerer des effets s'appliquant à une cible pour une personne.  
 	Les effets sont superposables et sont définits par une duration, une puissance, une cible et un observateur
 
-- DamageManager ✓
+- `DamageManager` ✓
 
 	Module ayant pour objectif de remplacer le système de dégats par défaut de *minecraft* pour éviter les temps
 	d'invincibilités et permettre une meilleur flexibilitée.
 	
 	> XxGoldenbluexX devra jetter un oeil.
 
-- ChargeManager ✓
+- `ChargeManager` ✓
 
 	Module pour faire facilement des temps de recharge.  
 	***Hyez doit donner de plus amples informations***  
