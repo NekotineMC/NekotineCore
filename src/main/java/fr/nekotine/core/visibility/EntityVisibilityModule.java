@@ -1,4 +1,4 @@
-package fr.nekotine.core.module;
+package fr.nekotine.core.visibility;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
@@ -20,6 +20,7 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.events.PacketListener;
 
+import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
 
 @ModuleNameAnnotation(Name = "EntityVisibilityModule")
