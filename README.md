@@ -39,7 +39,7 @@ Voici la liste des modules:
 	
 	> XxGoldenbluexX devra jetter un oeil.
 
-- `SwordChargeModule` ✓
+- `ItemChargeModule` ✓
 
 	Module pour gérer une charge, par exemple pour charger un sort.  
 	Il permet de détecter lorsqu'un joueur réalise une action (avec ou sans item précis) sur une durée donnée.
