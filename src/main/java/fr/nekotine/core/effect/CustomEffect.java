@@ -16,6 +16,6 @@ public abstract class CustomEffect {
 	
 	public abstract void onUnapply();
 	
-	public abstract void onAmplifierChange();
+	public abstract void onAmplifierChange(int lastAmplifier, int newAmplifier);
 	
 }
