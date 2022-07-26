@@ -1,21 +1,41 @@
 package fr.nekotine.core.effect;
 
-public abstract class CustomEffect {
+public class CustomEffect {
+
+	private CustomEffectType _type;
 	
-	private double _expireTimeSpan;
+	private int _amplifier;
 	
-	public void setExpireTimeSpan(double expireTimeSpan) {
-		_expireTimeSpan = expireTimeSpan;
-	}
+	private int _duration;
 	
-	public double getExpireTimeSpan() {
-		return _expireTimeSpan;
+	private CustomEffect(CustomEffectType type, int amplifier, int duration) {
+		_type = type;
+		_amplifier = amplifier;
+		_duration = duration;
 	}
 
-	public abstract void onApply();
-	
-	public abstract void onUnapply();
-	
-	public abstract void onAmplifierChange(int lastAmplifier, int newAmplifier);
+	public CustomEffectType getType() {
+		return _type;
+	}
+
+	public void setType(CustomEffectType _type) {
+		this._type = _type;
+	}
+
+	public int getAmplifier() {
+		return _amplifier;
+	}
+
+	public void setAmplifier(int _amplifier) {
+		this._amplifier = _amplifier;
+	}
+
+	public int getDuration() {
+		return _duration;
+	}
+
+	public void setDuration(int _duration) {
+		this._duration = _duration;
+	}
 	
 }
