@@ -42,6 +42,7 @@ public class ModuleManager{
 			modules.put(moduleType,module);
 			ModuleNameAnnotation annotation = moduleType.getAnnotation(ModuleNameAnnotation.class);
 			if (annotation != null) {
+				module.setName(annotation.Name());
 				nameMappings.put(annotation.Name(), moduleType);
 			}
 		} catch (Exception e) {

@@ -84,6 +84,14 @@ public abstract class PluginModule implements Listener {
 	}
 	
 	/**
+	 * Définit le nom du module pour son affichage dans le chat.
+	 * @param name Le nom du module.
+	 */
+	public void setName(String name) {
+		_name = name;
+	}
+	
+	/**
 	 * Récupère le plugin.
 	 * @return le plugin utilisant ce module.
 	 */

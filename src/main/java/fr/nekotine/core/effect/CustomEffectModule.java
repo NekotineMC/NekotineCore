@@ -6,7 +6,9 @@ import java.util.WeakHashMap;
 import org.bukkit.entity.LivingEntity;
 
 import fr.nekotine.core.module.PluginModule;
+import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
 
+@ModuleNameAnnotation(Name = "CustomEffectModule")
 public class CustomEffectModule extends PluginModule{
 
 	private final Map<LivingEntity,CustomEffectContainer> effectMap = new WeakHashMap<>();

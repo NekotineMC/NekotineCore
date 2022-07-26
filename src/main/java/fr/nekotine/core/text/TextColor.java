@@ -2,6 +2,12 @@ package fr.nekotine.core.text;
 
 import org.bukkit.ChatColor;
 
+/**
+ * ChatColor à été remplacé par net.kyori.adventures
+ * @deprecated
+ * @author XxGoldenbluexX
+ *
+ */
 public class TextColor {
 
 	/**
