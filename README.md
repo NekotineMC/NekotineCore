@@ -35,9 +35,7 @@ Voici la liste des modules:
 
 - `UsableModule` ✓
 
-	Module pour faciliter la gestion des interactions entre le joueur et l'item dans sa main. 	
-	
-	> XxGoldenbluexX devra jetter un oeil.
+	Module pour faciliter la gestion des interactions entre le joueur et l'item dans sa main.
 
 - `ItemChargeModule` ✓
 

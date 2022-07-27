@@ -101,13 +101,13 @@ public class DamageModule extends PluginModule{
 	
 	/**
 	 * Endommage une LivingEntity
-	 * @param damaged L'entité qui prend les dégâts
-	 * @param damager L'entité qui fait les dégâts
-	 * @param projectile Le projectile qui fait les dégâts
-	 * @param cause La cause des dégâts
-	 * @param damage La valeur des dégâts
-	 * @param ignoreArmor Si les dégât doivent ignorer l'armure
-	 * @param knockback Si les dégâts doivent faire reculer
+	 * @param damaged L'entitï¿½ qui prend les dï¿½gï¿½ts
+	 * @param damager L'entitï¿½ qui fait les dï¿½gï¿½ts
+	 * @param projectile Le projectile qui fait les dï¿½gï¿½ts
+	 * @param cause La cause des dï¿½gï¿½ts
+	 * @param damage La valeur des dï¿½gï¿½ts
+	 * @param ignoreArmor Si les dï¿½gï¿½t doivent ignorer l'armure
+	 * @param knockback Si les dï¿½gï¿½ts doivent faire reculer
 	 * @param knockbackOrigin L'origine du recul
 	 */
 	public void Damage(LivingEntity damaged, LivingEntity damager, Projectile projectile, DamageCause cause, double damage, boolean ignoreArmor, boolean knockback, 
@@ -115,15 +115,15 @@ public class DamageModule extends PluginModule{
 		new LivingEntityDamageEvent(damaged, damager, projectile, cause, damage, ignoreArmor, knockback, knockbackOrigin).callEvent();
 	}
 	/**
-	 * Fait des dégâts dans un radius
-	 * @param damager L'entité qui fait les dégâts
-	 * @param radius Le radius des dégâts
-	 * @param cause La cause des dégâts
-	 * @param damage La cause des dégâts
-	 * @param ignoreArmor Si les dégâts doivent ignorer l'armure
-	 * @param knockback Si les dégâts doivent faire reculer
-	 * @param origin L'origine du dégâts
-	 * @param toIgnore Liste des entités à ignorer
+	 * Fait des dï¿½gï¿½ts dans un radius
+	 * @param damager L'entitï¿½ qui fait les dï¿½gï¿½ts
+	 * @param radius Le radius des dï¿½gï¿½ts
+	 * @param cause La cause des dï¿½gï¿½ts
+	 * @param damage La cause des dï¿½gï¿½ts
+	 * @param ignoreArmor Si les dï¿½gï¿½ts doivent ignorer l'armure
+	 * @param knockback Si les dï¿½gï¿½ts doivent faire reculer
+	 * @param origin L'origine du dï¿½gï¿½ts
+	 * @param toIgnore Liste des entitï¿½s ï¿½ ignorer
 	 */
 	public void Explode(LivingEntity damager, double radius, DamageCause cause, double damage, boolean ignoreArmor, boolean knockback, Location origin, LivingEntity[] toIgnore) {
 		for(LivingEntity damaged : UtilEntity.GetNearbyLivingEntities(origin, radius)) {
@@ -335,7 +335,7 @@ public class DamageModule extends PluginModule{
 		event.GetDamaged().getWorld().spawnParticle(Particle.HEART, event.GetDamaged().getLocation().add(0, 1, 0), 5, 0.5, 0, 0.5);;
 	}
 	private boolean Contains(LivingEntity[] entities, LivingEntity entity) {
-		for(int i = 0; i <= entities.length ; i++) {
+		for(int i = 0; i < entities.length ; i++) {
 			if(entity.equals(entities[i])) return true;
 		}
 		return false;
