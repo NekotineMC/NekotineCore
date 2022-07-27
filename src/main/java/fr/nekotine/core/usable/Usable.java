@@ -19,21 +19,12 @@ import org.bukkit.persistence.PersistentDataType;
 
 import com.destroystokyo.paper.event.player.PlayerReadyArrowEvent;
 
-import fr.nekotine.core.util.UtilGear;
 import net.kyori.adventure.text.Component;
 
 public class Usable {
-	private final UsableModule usableManager;
+	private UsableModule _module;
 	private ItemStack item;
-	private final Inventory inventory;
-
-	private Class<?>[] classes;
-	private Function2<PlayerInteractEvent, Class<?>[]> OnInteract;
-	private Function2<PlayerDropItemEvent, Class<?>[]> OnDrop;
-	private Function2<InventoryClickEvent, Class<?>[]> OnInventoryClick;
-	private Function2<PlayerItemConsumeEvent, Class<?>[]> OnConsume;
-	private Function2<PlayerReadyArrowEvent, Class<?>[]> OnReadyArrow;
-	private Function2<EntityShootBowEvent, Class<?>[]> OnBowShoot;
+	private Inventory _inventory;
 	
 	private final NamespacedKey key;
 	
@@ -41,40 +32,75 @@ public class Usable {
 	
 	//
 	
-	public Usable(UsableModule usableManager, ItemStack item, Inventory inventory) {
-		this.usableManager = usableManager;
+	public Usable(UsableModule module, ItemStack item) {
 		this.item = item;
-		this.inventory = inventory;
-		
-		key = new NamespacedKey(usableManager.getPlugin(), "Unstackable");
+		_module = module;
+		key = new NamespacedKey(_module.getPlugin(), "Unstackable");
 		SetUnstackable();
+	}
+	
+	/**
+	 * Enregistre ce Usable pour qu'il recoive les événements.
+	 * Si l'ItemStack utilisé par ce Usable à déja un Usable associé, l'ajout au registre échoue.
+	 * @return si oui ou non le Usable à été ajouté au registre.
+	 */
+	public boolean register() {
+		return _module.register(this);
+	}
+	
+	/**
+	 * Retire ce Usable du registre s'il y est présent.
+	 * @return Si oui ou non l'Usable a été retiré du registre.
+	 */
+	public boolean unregister() {
+		return _module.unregister(this);
+	}
+	
+	/**
+	 * Ajout l'item Usable à l'inventaire.
+	 * @param inventory l'inventaire auquel doit être fait l'ajout.
+	 */
+	public void Give(Inventory inventory) {
+		if (_inventory == null) {
+			inventory.addItem(item);
+			_inventory = inventory;
+		}
+	}
+	
+	/**
+	 * Supprime l'item Usable de l'inventaire ou il est. Cette methode ne fait rien si l'item n'y est plus.
+	 * @param inventory L'inventaire auquel supprimer l'item.
+	 */
+	public void Remove() {
+		if (_inventory != null) {
+			_inventory.remove(item);
+			_inventory = null;
+		}
+	}
+	
+	public void Update(ItemStack previous) {
+		if (_inventory != null) {
+			int slot = _inventory.first(previous);
+			if (slot != -1) {
+				_inventory.remove(item);
+				_inventory.setItem(slot, item);
+			}
+		}
 	}
 	
 	//
 	
 	protected void OnInteract(PlayerInteractEvent e) {
-		if(OnInteract==null) return;
-		if(item.equals(e.getItem())) OnInteract.run(e, classes);
 	}
 	protected void OnDrop(PlayerDropItemEvent e) {
-		if(OnDrop==null) return;
-		if(item.equals(e.getItemDrop().getItemStack())) OnDrop.run(e, classes);
 	}
 	protected void OnInventoryClick(InventoryClickEvent e) {
-		if(OnInventoryClick==null) return;
-		if(item.equals(e.getCurrentItem())) OnInventoryClick.run(e, classes);
 	}
 	protected void OnConsume(PlayerItemConsumeEvent e) {
-		if(OnConsume==null) return;
-		if(item.equals(e.getItem())) OnConsume.run(e, classes);
 	}
 	protected void OnReadyArrow(PlayerReadyArrowEvent e) {
-		if(OnReadyArrow==null) return;
-		if(item.equals(e.getArrow())) OnReadyArrow.run(e, classes);
 	}
 	protected void OnBowShoot(EntityShootBowEvent e) {
-		if(OnBowShoot==null) return;
-		if(item.equals(e.getBow())) OnBowShoot.run(e, classes);
 	}
 	
 	//
@@ -144,21 +170,7 @@ public class Usable {
 		Update(previous);
 	}
 	/**
-	 * Supprime l'objet de l'inventaire & en tant qu'Usable
-	 */
-	public void Remove() {
-		UtilGear.Remove(inventory, item);
-		
-		usableManager.Remove(item);
-	}
-	/**
-	 * Place l'objet dans l'inventaire
-	 */
-	public void Give() {
-		inventory.addItem(item);
-	}
-	/**
-	 * Si l'objet doit �tre incassable
+	 * Si l'objet doit �tre incassable
 	 * @param unbreakable
 	 */
 	public void SetUnbreakable(boolean unbreakable) {
@@ -218,7 +230,7 @@ public class Usable {
 		Update(previous);
 	}
 	/**
-	 * Change le mat�riau de l'objet
+	 * Change le mat�riau de l'objet
 	 * @param material
 	 */
 	public void SetMaterial(Material material) {
@@ -230,28 +242,6 @@ public class Usable {
 		
 		Update(previous);
 	}
-	public void SetClasses(Class<?>[] classes) {
-		this.classes = classes;
-	}
-	public void OnInteract(Function2<PlayerInteractEvent, Class<?>[]> OnInteract) {
-		this.OnInteract = OnInteract;
-	}
-	public void OnDrop(Function2<PlayerDropItemEvent, Class<?>[]> OnDrop) {
-		this.OnDrop = OnDrop;
-	}
-	public void OnInventoryClick(Function2<InventoryClickEvent, Class<?>[]> OnInventoryClick) {
-		this.OnInventoryClick = OnInventoryClick;
-	}
-	public void OnConsume(Function2<PlayerItemConsumeEvent, Class<?>[]> OnConsume) {
-		this.OnConsume = OnConsume;
-	}
-	public void OnReadyArrow(Function2<PlayerReadyArrowEvent, Class<?>[]> OnReadyArrow) {
-		this.OnReadyArrow = OnReadyArrow;
-	}
-	public void OnBowShoot(Function2<EntityShootBowEvent, Class<?>[]> OnBowShoot) {
-		this.OnBowShoot = OnBowShoot;
-	}
-	
 	//
 	
 	/**
@@ -263,7 +253,7 @@ public class Usable {
 	}
 	/**
 	 * 
-	 * @return Le mat�riau de l'objet
+	 * @return Le mat�riau de l'objet
 	 */
 	public Material GetMaterial() {
 		return item.getType();
@@ -280,7 +270,8 @@ public class Usable {
 		
 		Update(previous);
 	}
-	private void Update(ItemStack previous) {
-		UtilGear.Replace(inventory, previous, item);
+	
+	public ItemStack getItem() {
+		return item;
 	}
 }

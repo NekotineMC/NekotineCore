@@ -8,7 +8,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import com.destroystokyo.paper.event.player.PlayerReadyArrowEvent;
@@ -18,62 +17,96 @@ import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
 
 @ModuleNameAnnotation(Name = "UsableModule")
 public class UsableModule extends PluginModule{
-	private final HashMap<ItemStack, Usable> usables = new HashMap<ItemStack, Usable>();
 	
-	//
+	private final HashMap<ItemStack, Usable> usables = new HashMap<ItemStack, Usable>();
+
+	@Override
+	protected void onDisable() {
+		usables.clear();
+	}
 	
 	/**
-	 * 
-	 * @param item L'item � regarder
-	 * @param holder L'inventaire dans lequel il se trouve
-	 * @return L'usable cr�e
+	 * Enregistre ce Usable pour qu'il recoive les événements.
+	 * Si l'ItemStack utilisé par ce Usable à déja un Usable associé, l'ajout au registre échoue.
+	 * @param usable L'usable à ajouter au registre.
+	 * @return si oui ou non le Usable à été ajouté au registre.
 	 */
-	public Usable AddUsable(ItemStack item, Inventory holder) {
-		if(usables.containsKey(item)) return null;
-		
-		Usable usable = new Usable(this, item, holder);
-		usables.put(item, usable);
-		return usable;
+	public boolean register(Usable usable) {
+		if (haveRegisteredUsable(usable.getItem())) return false;
+		usables.put(usable.getItem(), usable);
+		return true;
 	}
 	
-	//
-	
-	@EventHandler
-	public void OnInteract(PlayerInteractEvent e) {
-		usables.values().forEach( (usable) -> usable.OnInteract(e));
-	}
-	@EventHandler
-	public void OnDrop(PlayerDropItemEvent e) {
-		usables.values().forEach( (usable) -> usable.OnDrop(e));
-	}
-	@EventHandler
-	public void OnInventoryClick(InventoryClickEvent e) {
-		usables.values().forEach( (usable) -> usable.OnInventoryClick(e));
-	}
-	@EventHandler
-	public void OnConsume(PlayerItemConsumeEvent e) {
-		usables.values().forEach( (usable) -> usable.OnConsume(e));
-	}
-	@EventHandler
-	public void OnReadyArrow(PlayerReadyArrowEvent e) {
-		usables.values().forEach( (usable) -> usable.OnReadyArrow(e));
-	}
-	@EventHandler
-	public void OnBowShoot(EntityShootBowEvent e) {
-		usables.values().forEach( (usable) -> usable.OnBowShoot(e));
-	}
-	
-	//
-	
-	private boolean Exist(ItemStack item) {
+	/**
+	 * Retourne si oui ou non un Usable est associé à cet ItemStack
+	 * @param item
+	 * @return
+	 */
+	public boolean haveRegisteredUsable(ItemStack item) {
 		return usables.containsKey(item);
 	}
 	
-	//
+	/**
+	 * Retire ce Usable du registre s'il y est présent.
+	 * @param usable
+	 * @return Si oui ou non l'Usable a été retiré du registre.
+	 */
+	public boolean unregister(Usable usable) {
+		return usables.remove(usable.getItem()) != null;
+	}
 	
-	protected void Remove(ItemStack item) {
-		if(!Exist(item)) return;
-		
-		usables.remove(item);
+	// --- Events
+	
+	@EventHandler
+	public void OnInteract(PlayerInteractEvent e) {
+		for (Usable u : usables.values()) {
+			if (u.getItem().equals(e.getItem())) {
+				u.OnInteract(e);
+			}
+		}
+	}
+	
+	@EventHandler
+	public void OnDrop(PlayerDropItemEvent e) {
+		for (Usable u : usables.values()) {
+			if (u.getItem().equals(e.getItemDrop().getItemStack())) {
+				u.OnDrop(e);
+			}
+		}
+	}
+	
+	@EventHandler
+	public void OnInventoryClick(InventoryClickEvent e) {
+		for (Usable u : usables.values()) {
+			if (u.getItem().equals(e.getCurrentItem())) {
+				u.OnInventoryClick(e);
+			}
+		}
+	}
+	
+	@EventHandler
+	public void OnConsume(PlayerItemConsumeEvent e) {
+		for (Usable u : usables.values()) {
+			if (u.getItem().equals(e.getItem())) {
+				u.OnConsume(e);
+			}
+		}
+	}
+	
+	@EventHandler
+	public void OnReadyArrow(PlayerReadyArrowEvent e) {
+		for (Usable u : usables.values()) {
+			if (u.getItem().equals(e.getArrow())) {
+				u.OnReadyArrow(e);
+			}
+		}
+	}
+	@EventHandler
+	public void OnBowShoot(EntityShootBowEvent e) {
+		for (Usable u : usables.values()) {
+			if (u.getItem().equals(e.getBow())) {
+				u.OnBowShoot(e);
+			}
+		}
 	}
 }

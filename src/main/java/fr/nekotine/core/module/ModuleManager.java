@@ -3,6 +3,7 @@ package fr.nekotine.core.module;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -46,9 +47,7 @@ public class ModuleManager{
 				nameMappings.put(annotation.Name(), moduleType);
 			}
 		} catch (Exception e) {
-			plugin.getLogger().warning("Impossible de créer le module de type " + moduleType.getTypeName() + '\n'
-					+ e.getClass().toString() + " : " + e.getMessage() + '\n'
-					+ e.getStackTrace());
+			plugin.getLogger().log(Level.WARNING,"Impossible de créer le module de type " + moduleType.getTypeName(), e);
 		}
 	}
 	
