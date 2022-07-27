@@ -42,36 +42,6 @@ public class EntityVisibilityModule extends PluginModule{
 	public EntityVisibilityModule() {
 		currentVisibilityStatus = new HashSet<>();
 		toUpdateVisibilityStatus = new HashSet<>();
-	}
-	
-	public void hideFrom(Entity hidden, Player blind) {
-		VisibilityData vd = new VisibilityData(hidden, blind, true);
-		toUpdateVisibilityStatus.remove(vd);
-		toUpdateVisibilityStatus.add(vd);
-	}
-	
-	public void showFrom(Entity showed, Player blind) {
-		VisibilityData vd = new VisibilityData(showed, blind, false);
-		toUpdateVisibilityStatus.remove(vd);
-		toUpdateVisibilityStatus.add(vd);
-	}
-	
-	@Override
-	protected void onEnable() {
-		super.onEnable();
-		metadataListener = new PacketAdapter(getPlugin(), PacketType.Play.Server.SPAWN_ENTITY_LIVING) {
-			@Override
-			public void onPacketSending(PacketEvent event) {
-				super.onPacketSending(event);
-				PacketContainer packet = event.getPacket();
-				if (currentVisibilityStatus.stream().anyMatch(
-						vs -> vs.blind.equals(event.getPlayer()) && vs.hidden.getEntityId() == packet.getIntegers().read(0)
-						))
-				{
-					event.setCancelled(true);
-				}
-			}
-		};
 		updateVisibilityStatus = new BukkitRunnable() {
 			@Override
 			public void run() {
@@ -107,6 +77,35 @@ public class EntityVisibilityModule extends PluginModule{
 					} catch (InvocationTargetException e) {
 					}
 					iterator.remove();
+				}
+			}
+		};
+	}
+	
+	public void hideFrom(Entity hidden, Player blind) {
+		VisibilityData vd = new VisibilityData(hidden, blind, true);
+		toUpdateVisibilityStatus.remove(vd);
+		toUpdateVisibilityStatus.add(vd);
+	}
+	
+	public void showFrom(Entity showed, Player blind) {
+		VisibilityData vd = new VisibilityData(showed, blind, false);
+		toUpdateVisibilityStatus.remove(vd);
+		toUpdateVisibilityStatus.add(vd);
+	}
+	
+	@Override
+	protected void onEnable() {
+		super.onEnable();
+		metadataListener = new PacketAdapter(getPlugin(), PacketType.Play.Server.SPAWN_ENTITY_LIVING) {
+			@Override
+			public void onPacketSending(PacketEvent event) {
+				PacketContainer packet = event.getPacket();
+				if (currentVisibilityStatus.stream().anyMatch(
+						vs -> vs.blind.equals(event.getPlayer()) && vs.hidden.getEntityId() == packet.getIntegers().read(0)
+						))
+				{
+					event.setCancelled(true);
 				}
 			}
 		};
