@@ -1,5 +1,8 @@
 package fr.nekotine.core.util;
 
+import java.util.Collection;
+import java.util.function.Predicate;
+
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
@@ -113,5 +116,15 @@ public class UtilEntity {
 	 */
 	public static void SetMaxHealth(LivingEntity entity, double value) {
 		entity.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(value);
+	}
+	public static Collection<LivingEntity> GetNearbyLivingEntities(Location center, double radius) {
+		Collection<LivingEntity> nearby = center.getWorld().getNearbyLivingEntities(center, radius);
+		nearby.removeIf(new Predicate<LivingEntity>() {
+			@Override
+			public boolean test(LivingEntity t) {
+				return t.getLocation().distanceSquared(center) <= Math.pow(radius, 2);
+			}
+		});
+		return nearby;
 	}
 }

@@ -91,11 +91,7 @@ public class DamageModule extends PluginModule{
 		Knockback(event);
 		
 		//Hurt effect
-		if(event.GetDamage() >= 0) {
-			event.GetDamaged().playEffect(EntityEffect.HURT);
-		}else {
-			event.GetDamaged().getWorld().spawnParticle(Particle.HEART, event.GetDamaged().getLocation().add(0, 1, 0), 5, 0.5, 0, 0.5);;
-		}
+		HurtEffect(event);
 		
 		//Remove arrows
 		if(event.GetProjectile() instanceof Arrow) event.GetProjectile().remove();
@@ -282,11 +278,17 @@ public class DamageModule extends PluginModule{
 		}
 	}
 	private void Sound(LivingEntityDamageEvent event) {
-		UtilEntity.PlayDamageSound(event.GetDamaged());
 		if (event.GetProjectile() != null && event.GetProjectile() instanceof Arrow && event.GetDamager() instanceof Player) {
 			Player player = (Player)event.GetDamager();
 			player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 0.5f);
 		}
+		
+		if(event.GetDamage() >= 0) {
+			UtilEntity.PlayDamageSound(event.GetDamaged());
+			return;
+		}
+		
+		event.GetDamaged().getWorld().playSound(event.GetDamaged().getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1.5f);
 	}
 	private void Damage(LivingEntityDamageEvent event) {
 		double health = Math.max(0, event.GetDamaged().getHealth() - event.GetDamage());
@@ -294,7 +296,7 @@ public class DamageModule extends PluginModule{
 		
 		event.GetDamaged().setLastDamage(event.GetDamage());
 		event.GetDamaged().setLastDamageCause(new EntityDamageEvent(event.GetDamaged(), event.GetCause(), event.GetDamage()));
-		if(event.GetDamager() instanceof Player && event.GetDamaged() != event.GetDamager()) event.GetDamaged().setKiller((Player)event.GetDamager());
+		if(event.GetDamager() instanceof Player && !event.GetDamaged().equals(event.GetDamager())) event.GetDamaged().setKiller((Player)event.GetDamager());
 		
 		event.GetDamaged().setHealth(health);
 	}
@@ -324,5 +326,12 @@ public class DamageModule extends PluginModule{
 			return true;
 		}
 		return true;
+	}
+	private void HurtEffect(LivingEntityDamageEvent event) {
+		if(event.GetDamage() >= 0) {
+			event.GetDamaged().playEffect(EntityEffect.HURT);
+			return;
+		}
+		event.GetDamaged().getWorld().spawnParticle(Particle.HEART, event.GetDamaged().getLocation().add(0, 1, 0), 5, 0.5, 0, 0.5);;
 	}
 }
