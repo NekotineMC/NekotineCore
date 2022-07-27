@@ -123,11 +123,11 @@ public class DamageModule extends PluginModule{
 	 * @param ignoreArmor Si les dégâts doivent ignorer l'armure
 	 * @param knockback Si les dégâts doivent faire reculer
 	 * @param origin L'origine du dégâts
-	 * @param ignoreDamager Si les dégâts doivent ignorer celui fait fait les dégâts
+	 * @param toIgnore Liste des entités à ignorer
 	 */
-	public void Explode(LivingEntity damager, double radius, DamageCause cause, double damage, boolean ignoreArmor, boolean knockback, Location origin, boolean ignoreDamager) {
-		for(LivingEntity damaged : origin.getWorld().getNearbyLivingEntities(origin, radius)) {
-			if(ignoreDamager && damager.equals(damaged)) continue;
+	public void Explode(LivingEntity damager, double radius, DamageCause cause, double damage, boolean ignoreArmor, boolean knockback, Location origin, LivingEntity[] toIgnore) {
+		for(LivingEntity damaged : UtilEntity.GetNearbyLivingEntities(origin, radius)) {
+			if(Contains(toIgnore, damaged)) continue;
 			Damage(damaged, damager, null, cause, damage, ignoreArmor, knockback, origin);
 		}
 	}
@@ -333,5 +333,11 @@ public class DamageModule extends PluginModule{
 			return;
 		}
 		event.GetDamaged().getWorld().spawnParticle(Particle.HEART, event.GetDamaged().getLocation().add(0, 1, 0), 5, 0.5, 0, 0.5);;
+	}
+	private boolean Contains(LivingEntity[] entities, LivingEntity entity) {
+		for(int i = 0; i <= entities.length ; i++) {
+			if(entity.equals(entities[i])) return true;
+		}
+		return false;
 	}
 }
