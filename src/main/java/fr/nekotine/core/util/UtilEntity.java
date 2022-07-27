@@ -122,7 +122,7 @@ public class UtilEntity {
 		nearby.removeIf(new Predicate<LivingEntity>() {
 			@Override
 			public boolean test(LivingEntity t) {
-				return t.getLocation().distanceSquared(center) <= Math.pow(radius, 2);
+				return t.getLocation().distanceSquared(center) > Math.pow(radius, 2);
 			}
 		});
 		return nearby;
