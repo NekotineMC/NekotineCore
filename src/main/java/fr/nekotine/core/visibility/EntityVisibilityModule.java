@@ -42,6 +42,23 @@ public class EntityVisibilityModule extends PluginModule{
 	public EntityVisibilityModule() {
 		currentVisibilityStatus = new HashSet<>();
 		toUpdateVisibilityStatus = new HashSet<>();
+	}
+	
+	public void hideFrom(Entity hidden, Player blind) {
+		VisibilityData vd = new VisibilityData(hidden, blind, true);
+		toUpdateVisibilityStatus.remove(vd);
+		toUpdateVisibilityStatus.add(vd);
+	}
+	
+	public void showFrom(Entity showed, Player blind) {
+		VisibilityData vd = new VisibilityData(showed, blind, false);
+		toUpdateVisibilityStatus.remove(vd);
+		toUpdateVisibilityStatus.add(vd);
+	}
+	
+	@Override
+	protected void onEnable() {
+		super.onEnable();
 		metadataListener = new PacketAdapter(getPlugin(), PacketType.Play.Server.SPAWN_ENTITY_LIVING) {
 			@Override
 			public void onPacketSending(PacketEvent event) {
@@ -93,23 +110,6 @@ public class EntityVisibilityModule extends PluginModule{
 				}
 			}
 		};
-	}
-	
-	public void hideFrom(Entity hidden, Player blind) {
-		VisibilityData vd = new VisibilityData(hidden, blind, true);
-		toUpdateVisibilityStatus.remove(vd);
-		toUpdateVisibilityStatus.add(vd);
-	}
-	
-	public void showFrom(Entity showed, Player blind) {
-		VisibilityData vd = new VisibilityData(showed, blind, false);
-		toUpdateVisibilityStatus.remove(vd);
-		toUpdateVisibilityStatus.add(vd);
-	}
-	
-	@Override
-	protected void onEnable() {
-		super.onEnable();
 		ProtocolLibrary.getProtocolManager().addPacketListener(metadataListener);
 		updateTask = updateVisibilityStatus.runTaskTimer(getPlugin(), 0, 1);
 	}
