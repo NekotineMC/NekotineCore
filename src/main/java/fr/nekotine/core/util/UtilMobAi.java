@@ -16,7 +16,7 @@ public final class UtilMobAi {
 	 * @param mob Le mob à qui retirer les goals.
 	 */
 	public static void clearBrain(Mob mob) {
-		Bukkit.getServer().getMobGoals().removeAllGoals(mob);;
+		Bukkit.getServer().getMobGoals().removeAllGoals(mob);
 	}
 	
 }
