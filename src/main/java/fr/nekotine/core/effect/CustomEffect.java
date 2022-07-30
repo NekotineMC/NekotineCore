@@ -30,10 +30,18 @@ public class CustomEffect {
 		this._amplifier = _amplifier;
 	}
 
+	/**
+	 * Durée de l'effet en tick server (20 par secondes)
+	 * @return
+	 */
 	public int getDuration() {
 		return _duration;
 	}
 
+	/**
+	 * Durée de l'effet en tick server (20 par secondes)
+	 * @param _duration
+	 */
 	public void setDuration(int _duration) {
 		this._duration = _duration;
 	}

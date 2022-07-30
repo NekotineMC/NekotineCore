@@ -69,7 +69,7 @@ public class UsableModule extends PluginModule{
 	@EventHandler
 	public void OnDrop(PlayerDropItemEvent e) {
 		for (Usable u : usables.values()) {
-			if (u.getItem().equals(e.getItemDrop().getItemStack())) {
+			if (u.getItem().isSimilar(e.getItemDrop().getItemStack())) {
 				u.OnDrop(e);
 			}
 		}
