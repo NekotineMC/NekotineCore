@@ -71,11 +71,14 @@ public class CustomProjectile {
 		return (value < 0) ? CalculateFloor(value) + 1: CalculateCeil(value);
 	}
 	private void TransferBlackLists(LivingEntity[] entityBlacklist, Material[] blockBlacklist) {
-		this.entityBlacklist = new ArrayList<>();
-		this.blockBlacklist = new ArrayList<>();
-		
-		for(int i=0 ; i<entityBlacklist.length; i++) this.entityBlacklist.add(entityBlacklist[i]);
-		for(int i=0 ; i<blockBlacklist.length; i++) this.blockBlacklist.add(blockBlacklist[i]);
+		if(targetLivingEntity) {
+			this.entityBlacklist = new ArrayList<>();
+			for(int i=0 ; i<entityBlacklist.length; i++) this.entityBlacklist.add(entityBlacklist[i]);
+		}
+		if(targetBlock) {
+			this.blockBlacklist = new ArrayList<>();
+			for(int i=0 ; i<blockBlacklist.length; i++) this.blockBlacklist.add(blockBlacklist[i]);
+		}
 	}
 	
 	//
@@ -149,7 +152,7 @@ public class CustomProjectile {
 	//
 	
 	/**
-	 * Si il faut continuer à traiter l'entitée comme un projectile
+	 * Si il faut continuer ï¿½ traiter l'entitï¿½e comme un projectile
 	 * @param cancelled
 	 */
 	public void SetCancelled(boolean cancelled) {
@@ -160,14 +163,14 @@ public class CustomProjectile {
 	
 	/**
 	 * 
-	 * @return L'entité utilisée comme projectile
+	 * @return L'entitï¿½ utilisï¿½e comme projectile
 	 */
 	public Entity GetProjectile() {
 		return projectile;
 	}
 	/**
 	 * 
-	 * @return L'interface utilisée pour le projectile
+	 * @return L'interface utilisï¿½e pour le projectile
 	 */
 	public IProjectile GetInterface() {
 		return iProj;

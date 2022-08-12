@@ -8,7 +8,7 @@ public class CustomEffect {
 	
 	private int _duration;
 	
-	private CustomEffect(CustomEffectType type, int amplifier, int duration) {
+	public CustomEffect(CustomEffectType type, int amplifier, int duration) {
 		_type = type;
 		_amplifier = amplifier;
 		_duration = duration;
