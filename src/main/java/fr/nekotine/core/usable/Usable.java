@@ -14,6 +14,7 @@ import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
@@ -170,7 +171,7 @@ public class Usable {
 		Update(previous);
 	}
 	/**
-	 * Si l'objet doit �tre incassable
+	 * Si l'objet doit être incassable
 	 * @param unbreakable
 	 */
 	public void SetUnbreakable(boolean unbreakable) {
@@ -230,7 +231,7 @@ public class Usable {
 		Update(previous);
 	}
 	/**
-	 * Change le mat�riau de l'objet
+	 * Change le matériau de l'objet
 	 * @param material
 	 */
 	public void SetMaterial(Material material) {
@@ -242,6 +243,37 @@ public class Usable {
 		
 		Update(previous);
 	}
+	/**
+	 * Ne fonctionne qu'avec les objets ayant une durabilité
+	 * @param durability La durabilité restante de l'objet
+	 */
+	public void SetDurability(int durability) {
+		if(!(item.getItemMeta() instanceof Damageable)) return;
+			
+		ItemStack previous = item.clone();
+		
+		Damageable meta = (Damageable)item.getItemMeta();
+		meta.setDamage(durability);
+		item.setItemMeta(meta);
+			
+		Update(previous);
+	}
+	/**
+	 * Ne fonctionne qu'avec les objets ayant une durabilité
+	 * @param durability Le pourcentage de durabilité de l'objet
+	 */
+	public void SetDurabilityPercentage(float percentage) {
+		if(!(item.getItemMeta() instanceof Damageable)) return;
+			
+		ItemStack previous = item.clone();
+		
+		Damageable meta = (Damageable)item.getItemMeta();
+		meta.setDamage((int)Math.ceil(item.getType().getMaxDurability() * percentage));
+		item.setItemMeta(meta);
+			
+		Update(previous);
+	}
+	
 	//
 	
 	/**
@@ -253,10 +285,17 @@ public class Usable {
 	}
 	/**
 	 * 
-	 * @return Le mat�riau de l'objet
+	 * @return Le matériau de l'objet
 	 */
 	public Material GetMaterial() {
 		return item.getType();
+	}
+	/**
+	 * 
+	 * @return L'item utilisé comme Usable
+	 */
+	public ItemStack getItem() {
+		return item;
 	}
 	
 	//
@@ -271,7 +310,5 @@ public class Usable {
 		Update(previous);
 	}
 	
-	public ItemStack getItem() {
-		return item;
-	}
+	
 }
