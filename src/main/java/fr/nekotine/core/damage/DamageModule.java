@@ -1,15 +1,9 @@
 package fr.nekotine.core.damage;
 
-import java.util.Map;
+import java.util.ArrayList;
 
-import org.bukkit.EntityEffect;
 import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Arrow;
+import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -18,32 +12,27 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
-import org.bukkit.util.Vector;
 
 import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
 import fr.nekotine.core.util.UtilEntity;
-import fr.nekotine.core.util.UtilMath;
 
 @ModuleNameAnnotation(Name = "DamageModule")
 public class DamageModule extends PluginModule{
-	private static final Material ATTACK_COOLDOWN_MATERIAL = Material.BARRIER;
-	private static final int ATTACK_COOLDOWN_TICK = 10;
-	private static final int NO_DAMAGE_DURATION_TICK = 20;
-	private static final DamageCause[] DAMAGE_CAUSE_WITH_INVINCIBILITY_FRAME = {
-			DamageCause.CONTACT, DamageCause.DRAGON_BREATH, DamageCause.FIRE, DamageCause.HOT_FLOOR, DamageCause.LAVA, DamageCause.SUFFOCATION};
+	private boolean disabled = false;
+	private DamageFunction damageFunction = DamageFunction.NEKOTINE;
 	
-	private static final double CRITICAL_BOOST = 1.5;
+	//
 	
-	private static final double PROTECTION_ENCHANT_REDUCTION = 0.04;
-	private static final double FALL_PROTECTION_ENCHANT_REDUCTION = 0.12;
-	private static final double FIRE_PROTECTION_ENCHANT_REDUCTION = 0.08;
-	private static final double PROJECTILE_PROTECTION_ENCHANT_REDUCTION = 0.08;
-	private static final double BLAST_PROTECTION_ENCHANT_REDUCTION = 0.08;
-	private static final double THORNS_DAMAGE = 2;
+	public void SetDamageFunction(DamageFunction damageFunction) {
+		this.damageFunction = damageFunction;
+	}
+	public void SetDisabled(boolean disabled) {
+		this.disabled = disabled;
+	}
+	public boolean IsDisabled() {
+		return disabled;
+	}
 	
 	//
 	
@@ -53,6 +42,7 @@ public class DamageModule extends PluginModule{
 		if(event.isCancelled()) return;
 		if(!event.getEntity().isValid()) return;
 		if(event.getEntity().isInvulnerable()) return;
+		if(disabled) return;
 		
 		event.setCancelled(true);
 		
@@ -60,17 +50,16 @@ public class DamageModule extends PluginModule{
 		LivingEntity damager = GetDamager(event);
 		Projectile projectile = GetProjectile(event);
 		double damage = event.getDamage();
-		
-		//Remove critical damage from close combat
-		boolean critical = IsCritical(event);
-		if(critical && projectile==null) damage = damage / CRITICAL_BOOST;
-		
-		//Consistant arrow damage
-		if (projectile instanceof Arrow) ((Arrow)projectile).setCritical(false);
-		
+
 		LivingEntityDamageEvent customDamageEvent = new LivingEntityDamageEvent(entity, damager, projectile, event.getCause(), damage, false, true, null);
+		
+		damageFunction.GetDamageCritical().accept(
+				customDamageEvent, 
+				IsCritical(event),
+				projectile instanceof AbstractArrow && ((AbstractArrow)projectile).isCritical());
+		
 		//If hit is valid (attack cooldown, ...)
-		if(ValidHit(customDamageEvent)) customDamageEvent.callEvent();
+		if(damageFunction.GetDamageValidation().apply(customDamageEvent)) customDamageEvent.callEvent();
 	}
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void EndEvent(LivingEntityDamageEvent event) {
@@ -85,51 +74,54 @@ public class DamageModule extends PluginModule{
 		Damage(event);
 		
 		//Sound
-		Sound(event);
+		damageFunction.GetDamageSound().accept(event);
 		
 		//Knockback
-		Knockback(event);
+		damageFunction.GetDamageKnockback().accept(event);
 		
 		//Hurt effect
-		HurtEffect(event);
-		
-		//Remove arrows
-		if(event.GetProjectile() instanceof Arrow) event.GetProjectile().remove();
+		damageFunction.GetDamageEffect().accept(event);
 	}
 	
 	//
 	
 	/**
 	 * Endommage une LivingEntity
-	 * @param damaged L'entit� qui prend les d�g�ts
-	 * @param damager L'entit� qui fait les d�g�ts
-	 * @param projectile Le projectile qui fait les d�g�ts
-	 * @param cause La cause des d�g�ts
-	 * @param damage La valeur des d�g�ts
-	 * @param ignoreArmor Si les d�g�t doivent ignorer l'armure
-	 * @param knockback Si les d�g�ts doivent faire reculer
+	 * @param damaged L'entité qui prend les dégâts
+	 * @param damager L'entité qui fait les dégâts
+	 * @param projectile Le projectile qui fait lesdégâts
+	 * @param cause La cause des dégâts
+	 * @param damage La valeur des dégâts
+	 * @param ignoreArmor Si les dégâts doivent ignorer l'armure
+	 * @param knockback Si les dégâts doivent faire reculer
 	 * @param knockbackOrigin L'origine du recul
+	 * @return L'event crée
 	 */
-	public void Damage(LivingEntity damaged, LivingEntity damager, Projectile projectile, DamageCause cause, double damage, boolean ignoreArmor, boolean knockback, 
+	public LivingEntityDamageEvent Damage(LivingEntity damaged, LivingEntity damager, Projectile projectile, DamageCause cause, double damage, boolean ignoreArmor, boolean knockback, 
 						Location knockbackOrigin) {
-		new LivingEntityDamageEvent(damaged, damager, projectile, cause, damage, ignoreArmor, knockback, knockbackOrigin).callEvent();
+		LivingEntityDamageEvent e = new LivingEntityDamageEvent(damaged, damager, projectile, cause, damage, ignoreArmor, knockback, knockbackOrigin);
+		e.callEvent();
+		return e;
 	}
 	/**
-	 * Fait des d�g�ts dans un radius
-	 * @param damager L'entit� qui fait les d�g�ts
-	 * @param radius Le radius des d�g�ts
-	 * @param cause La cause des d�g�ts
-	 * @param damage La cause des d�g�ts
-	 * @param ignoreArmor Si les d�g�ts doivent ignorer l'armure
-	 * @param knockback Si les d�g�ts doivent faire reculer
-	 * @param origin L'origine du d�g�ts
-	 * @param toIgnore Liste des entit�s � ignorer
+	 * Fait des dégâts dans un radius
+	 * @param damager L'entité qui fait les dégâts
+	 * @param radius Le radius des dégâts
+	 * @param cause La cause des dégâts
+	 * @param damage La cause des dégâts
+	 * @param ignoreArmor Si les dégâts doivent ignorer l'armure
+	 * @param knockback Si les dégâts doivent faire reculer
+	 * @param origin L'origine du dégâts
+	 * @param toIgnore Liste des entités à ignorer
+	 * @return Tous les events crées
 	 */
-	public void Explode(LivingEntity damager, double radius, DamageCause cause, double damage, boolean ignoreArmor, boolean knockback, Location origin, LivingEntity[] toIgnore) {
+	public ArrayList<LivingEntityDamageEvent> Explode(LivingEntity damager, double radius, DamageCause cause, double damage, boolean ignoreArmor, boolean knockback, Location origin, LivingEntity[] toIgnore) {
+		ArrayList<LivingEntityDamageEvent> events = new ArrayList<>();
 		for(LivingEntity damaged : UtilEntity.GetNearbyLivingEntities(origin, radius)) {
 			if(Contains(toIgnore, damaged)) continue;
-			Damage(damaged, damager, null, cause, damage, ignoreArmor, knockback, origin);
+			events.add(Damage(damaged, damager, null, cause, damage, ignoreArmor, knockback, origin));
 		}
+		return events;
 	}
 	
 	//
@@ -159,78 +151,6 @@ public class DamageModule extends PluginModule{
 		
 		return ((EntityDamageByEntityEvent)event).isCritical();
 	}
-	private void ApplyArmor(LivingEntityDamageEvent event) {
-		//Base resistance & armor protection
-		double defense = event.GetDamaged().getAttribute(Attribute.GENERIC_ARMOR).getValue();
-		double toughness = event.GetDamaged().getAttribute(Attribute.GENERIC_ARMOR_TOUGHNESS).getValue();
-		PotionEffect effect = event.GetDamaged().getPotionEffect(PotionEffectType.DAMAGE_RESISTANCE);
-		int resistance = effect == null ? 0 : effect.getAmplifier();
-		
-		double withArmorAndToughness = event.GetDamage() * (1 - Math.min(20, Math.max(defense / 5, defense - event.GetDamage() / (2 + toughness / 4))) / 25);
-		double withResistance = withArmorAndToughness * (1 - (resistance * 0.2));
-		
-		event.SetDamage(withResistance);
-		
-	}
-	private void ApplyEnchants(LivingEntityDamageEvent event) {
-		//Defensif
-		for (ItemStack armor : event.GetDamaged().getEquipment().getArmorContents()) {
-			if (armor != null) {
-				Map<Enchantment, Integer> enchants = armor.getEnchantments();
-				for (Enchantment e : enchants.keySet()) {
-					
-					if (e.equals(Enchantment.PROTECTION_ENVIRONMENTAL))
-						event.AddFinalMult( 1 - (PROTECTION_ENCHANT_REDUCTION * enchants.get(e)));
-					
-					else if (e.equals(Enchantment.PROTECTION_FIRE) && 
-						(event.GetCause() == DamageCause.FIRE ||
-						event.GetCause() == DamageCause.FIRE_TICK ||
-						event.GetCause() == DamageCause.LAVA))
-						event.AddFinalMult(1 - (FIRE_PROTECTION_ENCHANT_REDUCTION * enchants.get(e)));
-	
-					else if (e.equals(Enchantment.PROTECTION_FALL) && 
-							event.GetCause() == DamageCause.FALL)
-						event.AddFinalMult(1 - (FALL_PROTECTION_ENCHANT_REDUCTION * enchants.get(e)));
-	
-					else if (e.equals(Enchantment.PROTECTION_EXPLOSIONS) && 
-							event.GetCause() == DamageCause.ENTITY_EXPLOSION)
-						event.AddFinalMult(1 - (BLAST_PROTECTION_ENCHANT_REDUCTION * enchants.get(e)));
-	
-					else if (e.equals(Enchantment.PROTECTION_PROJECTILE) && 
-							event.GetCause() == DamageCause.PROJECTILE)
-						event.AddFinalMult(1 - (PROJECTILE_PROTECTION_ENCHANT_REDUCTION * enchants.get(e)));
-					
-					else if (e.equals(Enchantment.THORNS)) {
-						if(event.GetDamager() != null) Damage(event.GetDamager(), event.GetDamaged(), null, DamageCause.THORNS, THORNS_DAMAGE, false, true, null);
-					}
-				}
-			}
-		}
-		
-		//Offensifs
-		if (event.GetDamager() != null) {
-			ItemStack weapon = event.GetDamager().getActiveItem();
-			if(event.GetDamager() instanceof Player) weapon = ((Player)event.GetDamager()).getInventory().getItemInMainHand();
-
-			if (weapon != null) {
-				Map<Enchantment, Integer> enchants = weapon.getEnchantments();
-				for (Enchantment e : enchants.keySet()) {
-					
-					if (e.equals(Enchantment.ARROW_KNOCKBACK) || e.equals(Enchantment.KNOCKBACK)) 
-						event.AddKnockbackMult(1 + (0.5 * enchants.get(e)));
-					
-					else if (e.equals(Enchantment.FIRE_ASPECT)) 
-						event.GetDamaged().setFireTicks(Math.max(event.GetDamaged().getFireTicks(), 20 * ((enchants.get(e) * 4) - 1) ));
-					
-					else if (e.equals(Enchantment.ARROW_FIRE))
-						event.GetDamaged().setFireTicks(Math.max(event.GetDamaged().getFireTicks(), 20 * ((enchants.get(e) * 5)) ));
-					
-					else if (e.equals(Enchantment.ARROW_DAMAGE))
-						event.AddFinalMult(1 + (0.25 * (enchants.get(e) + 1)));
-				}
-			}
-		}
-	}
 	private void ApplyModifiers(LivingEntityDamageEvent event) {	
 		//D�gats de base ajout�s
 		event.SetDamage(event.GetDamage() + event.GetBaseMod());
@@ -240,55 +160,16 @@ public class DamageModule extends PluginModule{
 		event.SetDamage(event.GetDamage() * (1 + event.GetBaseMult()));
 		
 		//Armure
-		if(!event.IsIgnoreArmor()) ApplyArmor(event);
+		if(!event.IsIgnoreArmor()) damageFunction.GetDamageArmor().accept(event);
 				
 		//Enchantements
-		ApplyEnchants(event);
+		damageFunction.GetDamageEnchantments().accept(event);
 		
 		//Ajout des multiplicateurs
 		event.SetDamage(event.GetDamage() * event.GetFinalMult());
 
 		//Si les dégats proviennent d'un /kill
 		event.SetDamage( Math.min(event.GetDamage(), Double.MAX_VALUE) );
-	}
-	private void Knockback(LivingEntityDamageEvent event) {
-		if (event.IsKnockback() && event.GetDamager() != null){
-			
-			//Base
-			double knockback = event.GetDamage();
-			if (knockback < 2)	knockback = 2;
-			knockback = Math.log10(knockback);
-			
-			knockback *= event.GetKnockbackMult();
-
-			//Origin
-			Location origin = event.GetDamager().getLocation();
-			if (event.GetKnockbackOrigin() != null)
-				origin = event.GetKnockbackOrigin();
-
-			//Vec
-			Vector trajectory = UtilMath.GetTrajectory2d(origin, event.GetDamaged().getLocation());
-			trajectory.multiply(0.6 * knockback);
-			trajectory.setY(Math.abs(trajectory.getY()));
-
-			//Apply
-			double vel = 0.2 + trajectory.length() * 0.8;
-
-			UtilEntity.ApplyVelocity(event.GetDamaged(), trajectory, vel, false, 0, Math.abs(0.2 * knockback), 0.4 + (0.04 * knockback), true);
-		}
-	}
-	private void Sound(LivingEntityDamageEvent event) {
-		if (event.GetProjectile() != null && event.GetProjectile() instanceof Arrow && event.GetDamager() instanceof Player) {
-			Player player = (Player)event.GetDamager();
-			player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 0.5f);
-		}
-		
-		if(event.GetDamage() >= 0) {
-			UtilEntity.PlayDamageSound(event.GetDamaged());
-			return;
-		}
-		
-		event.GetDamaged().getWorld().playSound(event.GetDamaged().getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1.5f);
 	}
 	private void Damage(LivingEntityDamageEvent event) {
 		double health = Math.max(0, event.GetDamaged().getHealth() - event.GetDamage());
@@ -300,44 +181,18 @@ public class DamageModule extends PluginModule{
 		
 		event.GetDamaged().setHealth(health);
 	}
-	private boolean Contains(DamageCause[] causes, DamageCause cause) {
-		for(int i=0 ; i<causes.length ; i++) {
-			if (causes[i] == cause) return true;
-		}
-		return false;
-	}
-	private boolean ValidHit(LivingEntityDamageEvent event) {
-		if(event.GetCause() == DamageCause.ENTITY_ATTACK) {
-			if(!(event.GetDamager() instanceof Player)) return true;
-			
-			Player damager = (Player)event.GetDamager();
-			int cooldown = damager.getCooldown(ATTACK_COOLDOWN_MATERIAL);
-			
-			if(cooldown > 0) return false;
-			
-			damager.setCooldown(ATTACK_COOLDOWN_MATERIAL, ATTACK_COOLDOWN_TICK);
-			return true;
-		}
-		if(Contains(DAMAGE_CAUSE_WITH_INVINCIBILITY_FRAME, event.GetCause())){
-			
-			if(event.GetDamaged().getNoDamageTicks() > 0) return false;
-			
-			event.GetDamaged().setNoDamageTicks(NO_DAMAGE_DURATION_TICK);			
-			return true;
-		}
-		return true;
-	}
-	private void HurtEffect(LivingEntityDamageEvent event) {
-		if(event.GetDamage() >= 0) {
-			event.GetDamaged().playEffect(EntityEffect.HURT);
-			return;
-		}
-		event.GetDamaged().getWorld().spawnParticle(Particle.HEART, event.GetDamaged().getLocation().add(0, 1, 0), 5, 0.5, 0, 0.5);;
-	}
 	private boolean Contains(LivingEntity[] entities, LivingEntity entity) {
 		for(int i = 0; i < entities.length ; i++) {
 			if(entity.equals(entities[i])) return true;
 		}
 		return false;
+	}
+	
+	//
+	
+	@Override
+	public void onEnable() {
+		super.onEnable();
+		DamageFunction.SetDamageModule(this);
 	}
 }
