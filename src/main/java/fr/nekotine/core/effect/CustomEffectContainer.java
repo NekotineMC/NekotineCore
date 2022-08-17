@@ -71,4 +71,7 @@ public class CustomEffectContainer {
 		effectMap.remove(type);
 	}
 	
+	public boolean hasEffect(CustomEffectType type) {
+		return effectMap.containsKey(type);
+	}
 }

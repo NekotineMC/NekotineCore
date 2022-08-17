@@ -4,14 +4,21 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.event.EventHandler;
 
 import fr.nekotine.core.module.PluginModule;
+import fr.nekotine.core.module.annotation.InheritedModuleAnnotation;
 import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
+import fr.nekotine.core.ticking.TickingModule;
+import fr.nekotine.core.ticking.event.TickElapsedEvent;
 
 @ModuleNameAnnotation(Name = "CustomEffectModule")
 public class CustomEffectModule extends PluginModule{
 
 	private final Map<LivingEntity,CustomEffectContainer> effectMap = new WeakHashMap<>();
+	
+	@InheritedModuleAnnotation
+	private TickingModule tickingModule;
 	
 	private CustomEffectContainer getContainer(LivingEntity entity) {
 		if (effectMap.containsKey(entity)) {
@@ -34,6 +41,10 @@ public class CustomEffectModule extends PluginModule{
 		getContainer(entity).clearEffect(type);
 	}
 	
+	public void hasEffect(LivingEntity entity, CustomEffectType type) {
+		getContainer(entity).clearEffect(type);
+	}
+	
 	@Override
 	protected void onEnable() {
 		super.onEnable();
@@ -42,6 +53,11 @@ public class CustomEffectModule extends PluginModule{
 	@Override
 	protected void onDisable() {
 		super.onDisable();
+	}
+	
+	@EventHandler
+	public void onTick(TickElapsedEvent event) {
+		
 	}
 	
 }
