@@ -31,16 +31,16 @@ public class ProjectileModule extends PluginModule{
 	
 	/**
 	 * RIEN N'EMPECHE LE PROJECTILE DE TOUCHER SON LANCEUR
-	 * @param projectile Entité qui sert de projectile
+	 * @param projectile EntitÃ© qui sert de projectile
 	 * @param sender Lanceur du projectile
 	 * @param iProj
-	 * @param velocity Velocité initiale du projectile
-	 * @param expireTime Durée de vie du projectile en ms
+	 * @param velocity VelocitÃ© initiale du projectile
+	 * @param expireTime DurÃ©e de vie du projectile en ms
 	 * @param targetLivingEntity Si le projectile peut toucher les LivingEntity
 	 * @param targetBlock Si le projectile peut toucher les Block
-	 * @param entityBlacklist Entités à ignorer
-	 * @param blockBlacklist Matériaux des blocks à ignorer
-	 * @return True si le projectile a été ajouté
+	 * @param entityBlacklist EntitÃ©s Ã  ignorer
+	 * @param blockBlacklist MatÃ©riaux des blocks Ã  ignorer
+	 * @return True si le projectile a Ã©tÃ© ajoutÃ©
 	 */
 	public boolean AddProjectile(Entity projectile, LivingEntity sender, IProjectile iProj, Vector velocity, long expireTime,
 			boolean targetLivingEntity, boolean targetBlock, LivingEntity[] entityBlacklist, Material[] blockBlacklist) {
@@ -60,7 +60,7 @@ public class ProjectileModule extends PluginModule{
 	//
 	
 	/**
-	 * Déclenche manuellement tous les projectiles du lanceur
+	 * DÃ©clenche manuellement tous les projectiles du lanceur
 	 * @param sender
 	 */
 	public void TriggerFromSender(@NotNull LivingEntity sender) {
@@ -73,7 +73,7 @@ public class ProjectileModule extends PluginModule{
 		}
 	}
 	/**
-	 * Déclenche manuellement tous les projectiles liés à l'interface
+	 * DÃ©clenche manuellement tous les projectiles liï¿½s ï¿½ l'interface
 	 * @param iProj
 	 */
 	public void TriggerFromInterface(@NotNull IProjectile iProj) {

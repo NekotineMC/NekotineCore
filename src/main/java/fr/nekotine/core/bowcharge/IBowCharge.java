@@ -6,18 +6,18 @@ import org.bukkit.entity.Player;
 public interface IBowCharge {
 	
 	/**
-	 * Lorsque la charge est terminée (ne veut pas dire que la flèche est tirée)
+	 * Lorsque la charge est terminÃ©e (ne veut pas dire que la flÃ¨che est tirÃ©e)
 	 * @param user
 	 * @param chargeName
 	 */
 	public void Ended(Player user, String chargeName);
 	
 	/**
-	 * Lorsque la flèche est tirée
+	 * Lorsque la flÃ¨che est tirÃ©e
 	 * @param user
 	 * @param chargeName
 	 * @param left Temps en ms restant de la charge
-	 * @param arrow La flèche tirée
+	 * @param arrow La flÃ¨che tirÃ©e
 	 */
 	public void Released(Player user, String chargeName, long left, Arrow arrow);
 	

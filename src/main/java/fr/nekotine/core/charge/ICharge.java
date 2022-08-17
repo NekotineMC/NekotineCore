@@ -3,14 +3,14 @@ package fr.nekotine.core.charge;
 public interface ICharge {
 	
 	/**
-	 * Lorsque la charge est terminée
+	 * Lorsque la charge est terminÃ©e
 	 * @param user
 	 * @param chargeName
 	 */
 	public void Ended(String user, String chargeName);
 	
 	/**
-	 * Lorsque la charge a été annulée
+	 * Lorsque la charge a Ã©tÃ© annulÃ©e
 	 * @param user
 	 * @param chargeName
 	 * @param left Temps restant de la charge en ms
