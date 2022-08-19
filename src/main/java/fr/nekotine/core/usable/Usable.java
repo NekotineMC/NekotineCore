@@ -1,6 +1,7 @@
 package fr.nekotine.core.usable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.bukkit.Material;
@@ -11,9 +12,11 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -81,9 +84,17 @@ public class Usable {
 	
 	public void Update(ItemStack previous) {
 		if (_inventory != null) {
+			if (_inventory instanceof PlayerInventory) {
+				PlayerInventory pi = (PlayerInventory)_inventory;
+				for (EquipmentSlot es : EquipmentSlot.values()) {
+					if (pi.getItem(es).isSimilar(previous)) {
+						pi.setItem(es, item);
+						return;
+					}
+				}
+			}
 			int slot = _inventory.first(previous);
 			if (slot != -1) {
-				_inventory.remove(item);
 				_inventory.setItem(slot, item);
 			}
 		}
@@ -203,12 +214,17 @@ public class Usable {
 	 * @param name
 	 */
 	public void SetName(String name) {
+		SetName(Component.text(name));
+	}
+	/**
+	 * Change le nom de l'objet
+	 * @param name
+	 */
+	public void SetName(Component name) {
 		ItemStack previous = item.clone();
-		
 		ItemMeta meta = item.getItemMeta();
-		meta.displayName(Component.text(name));
+		meta.displayName(name);
 		item.setItemMeta(meta);
-		
 		Update(previous);
 	}
 	/**
@@ -216,20 +232,34 @@ public class Usable {
 	 * @param lore
 	 */
 	public void SetLore(String... lore) {
-		ItemStack previous = item.clone();
-		
-		ItemMeta meta = item.getItemMeta();
 		List<Component> loreList = new ArrayList<>(); 
 		for(String line : lore) {
 			if(line!="") {
 				loreList.add(Component.text(line));
 			}
 		}
-		meta.lore(loreList);
+		SetLore(loreList);
+	}
+	
+	/**
+	 * Change la description de l'objet
+	 * @param lore
+	 */
+	public void SetLore(Component... lore) {
+		SetLore(Arrays.asList(lore));
+	}
+	/**
+	 * Change la description de l'objet
+	 * @param lore
+	 */
+	public void SetLore(List<Component> lore) {
+		ItemStack previous = item.clone();
+		ItemMeta meta = item.getItemMeta();
+		meta.lore(lore);
 		item.setItemMeta(meta);
-		
 		Update(previous);
 	}
+	
 	/**
 	 * Change le matériau de l'objet
 	 * @param material
