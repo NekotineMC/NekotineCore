@@ -1,8 +1,8 @@
 package fr.nekotine.core.effect;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -10,51 +10,52 @@ import org.bukkit.entity.LivingEntity;
 
 public class CustomEffectContainer {
 
-	private final Map<CustomEffectType, List<CustomEffect>> effectMap;
+	private final Map<CustomEffectType, List<AppliedEffect>> effectMap;
 	
 	private final LivingEntity _owner;
 	
-	private final Comparator<CustomEffect> amplifierComparator;
+	private final Comparator<AppliedEffect> amplifierComparator;
 	
-	public CustomEffectContainer(LivingEntity owner) {
+	protected CustomEffectContainer(LivingEntity owner) {
 		effectMap = new HashMap<>();
 		_owner = owner;
-		amplifierComparator = new Comparator<CustomEffect>() {
+		amplifierComparator = new Comparator<AppliedEffect>() {
 			@Override
-			public int compare(CustomEffect o1, CustomEffect o2) {
-				return o2.getAmplifier() - o1.getAmplifier();
+			public int compare(AppliedEffect o1, AppliedEffect o2) {
+				return o2.reference.getAmplifier() - o1.reference.getAmplifier();
 			}
 		};
 	}
 	
-	public void addEffect(CustomEffect effect) {
+	protected void addEffect(CustomEffect effect) {
+		AppliedEffect appliedEffect = new AppliedEffect(effect, this);
 		CustomEffectType type = effect.getType();
 		if (!effectMap.containsKey(type)) {
-			effectMap.put(type, new ArrayList<CustomEffect>(3));
+			effectMap.put(type, new LinkedList<AppliedEffect>());
 		}
-		List<CustomEffect> list = effectMap.get(type);
+		List<AppliedEffect> list = effectMap.get(type);
 		if (!list.isEmpty()) {
-			if (type.haveAmplifier() && effect.getAmplifier() != list.get(0).getAmplifier()) {
-				type.onAmplifierChange(_owner, list.get(list.size()).getAmplifier(), effect.getAmplifier());
+			if (type.haveAmplifier() && effect.getAmplifier() != list.get(0).reference.getAmplifier()) {
+				type.onAmplifierChange(_owner, list.get(list.size()).reference.getAmplifier(), effect.getAmplifier());
 			}
 		}else {
 			type.onApply(_owner);
 		}
-		list.add(effect);
+		list.add(appliedEffect);
 		if (type.haveAmplifier()) {
 			list.sort(amplifierComparator);
 		}
 	}
 	
 	
-	public void removeEffect(CustomEffect effect) {
+	protected void removeEffect(CustomEffect effect) {
 		CustomEffectType type = effect.getType();
 		if (effectMap.containsKey(type)) {
-			List<CustomEffect> list = effectMap.get(type);
-			list.remove(effect);
+			List<AppliedEffect> list = effectMap.get(type);
+			list.removeIf((eff) -> eff.reference.equals(effect));
 			if (!list.isEmpty()) {
-				if (list.get(0).getAmplifier() < effect.getAmplifier()) {
-					type.onAmplifierChange(_owner, effect.getAmplifier(), list.get(0).getAmplifier());
+				if (list.get(0).reference.getAmplifier() < effect.getAmplifier()) {
+					type.onAmplifierChange(_owner, effect.getAmplifier(), list.get(0).reference.getAmplifier());
 				}
 			}else {
 				type.onUnapply(_owner);
@@ -62,7 +63,7 @@ public class CustomEffectContainer {
 		}
 	}
 	
-	public void clearEffect(CustomEffectType type) {
+	protected void clearEffect(CustomEffectType type) {
 		if (effectMap.containsKey(type)) {
 			if (!effectMap.get(type).isEmpty()) {
 				type.onUnapply(_owner);
@@ -71,7 +72,37 @@ public class CustomEffectContainer {
 		effectMap.remove(type);
 	}
 	
-	public boolean hasEffect(CustomEffectType type) {
-		return effectMap.containsKey(type);
+	protected boolean hasEffect(CustomEffectType type) {
+		return effectMap.containsKey(type) && !effectMap.get(type).isEmpty();
 	}
+	protected void tick() {
+		for (List<AppliedEffect> effList : effectMap.values()) {
+			for (AppliedEffect eff : effList) {
+				eff.tick();
+			}
+		}
+	}
+	
+	private class AppliedEffect{
+		
+		private CustomEffect reference;
+		
+		private CustomEffectContainer container;
+		
+		private int remainingTicks;
+		
+		private AppliedEffect(CustomEffect reference, CustomEffectContainer container) {
+			remainingTicks = reference.getDuration();
+			this.container = container;
+		}
+		
+		private void tick() {
+			remainingTicks--;
+			if (remainingTicks <= 0) {
+				container.removeEffect(reference);
+			}
+		}
+		
+	}
+	
 }

@@ -46,4 +46,8 @@ public class CustomEffect {
 		this._duration = _duration;
 	}
 	
+	protected void tick() {
+		
+	}
+	
 }

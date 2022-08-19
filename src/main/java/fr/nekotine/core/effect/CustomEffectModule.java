@@ -42,7 +42,7 @@ public class CustomEffectModule extends PluginModule{
 	}
 	
 	public void hasEffect(LivingEntity entity, CustomEffectType type) {
-		getContainer(entity).clearEffect(type);
+		getContainer(entity).hasEffect(type);
 	}
 	
 	@Override
@@ -57,7 +57,9 @@ public class CustomEffectModule extends PluginModule{
 	
 	@EventHandler
 	public void onTick(TickElapsedEvent event) {
-		
+		for (CustomEffectContainer container : effectMap.values()) {
+			container.tick();
+		}
 	}
 	
 }
