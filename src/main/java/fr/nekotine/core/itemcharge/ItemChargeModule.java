@@ -31,16 +31,16 @@ public class ItemChargeModule extends PluginModule{
 	 * LE COUPLE (user, chargeName) DOIT ETRE UNIQUE
 	 * @param user Joueur qui charge
 	 * @param chargeName Nom de la charge
-	 * @param duration DurÈe de la charge en ms
-	 * @param activated Si la charge avait dÈj‡ commencÈe
-	 * @param displayOnExpBar Si la charge doit s'afficher dans la barre d'expÈrience
+	 * @param duration Dur√©e de la charge en ms
+	 * @param activated Si la charge avait d√©j√† √©t√© commenc√©e
+	 * @param displayOnExpBar Si la charge doit s'afficher dans la barre d'exp√©rience
 	 * @param withAudio Si la charge doit faire du bruit au joueur
-	 * @param audioBipNumber Nombre de bruits jouÈs (sans compter celui de dÈbut & celui de fin)
+	 * @param audioBipNumber Nombre de bruits jou√©s (sans compter celui de d√©but & celui de fin)
 	 * @param action L'action que doit faire le joueur pour que la charge continue
-	 * @param bindToItem Si la charge est liÈe ‡ un item
+	 * @param bindToItem Si la charge est li√©e √† un item
 	 * @param bindItem L'objet en question
 	 * @param iItemCharge
-	 * @return True si la charge a ÈtÈ ajoutÈe
+	 * @return True si la charge a √©t√© ajout√©e
 	 */
 	public boolean AddItemCharge(Player user, String chargeName, long duration, boolean activated, boolean displayOnExpBar, boolean withAudio, long audioBipNumber, 
 			CustomAction action, boolean bindToItem, ItemStack bindItem, IItemCharge iItemCharge) {
@@ -51,7 +51,7 @@ public class ItemChargeModule extends PluginModule{
 		return true;
 	}
 	/**
-	 * DÈtruit toutes les charges liÈes au joueur
+	 * D√©truit toutes les charges li√©es au joueur
 	 * @param player
 	 */
 	public void DestroyFromPlayer(Player player) {
@@ -65,7 +65,7 @@ public class ItemChargeModule extends PluginModule{
 		}
 	}
 	/**
-	 * DÈtruit toutes les charges liÈes ‡ l'interface
+	 * D√©truit toutes les charges li√©es √† l'interface
 	 * @param iItemCharge
 	 */
 	public void DestroyFromInterface(IItemCharge iItemCharge) {

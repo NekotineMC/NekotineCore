@@ -6,7 +6,7 @@ import org.bukkit.entity.LivingEntity;
 public interface IProjectile {
 	
 	/**
-	 * Lorsque le projectile a touché une entitée ou un block
+	 * Lorsque le projectile a touchÃ© une entitÃ©e ou un block
 	 * @param hitEntity 
 	 * @param hitBlock
 	 * @param projectile
@@ -14,13 +14,13 @@ public interface IProjectile {
 	public void Hit(LivingEntity hitEntity, Block hitBlock, CustomProjectile projectile);
 
 	/**
-	 *Lorsque le projectile a atteint sa durée de vie maximale
+	 *Lorsque le projectile a atteint sa durÃ©e de vie maximale
 	 * @param projectile
 	 */
 	public void Faded(CustomProjectile projectile);
 	
 	/**
-	 * Lorsque le projectile a manuellement été déclenché
+	 * Lorsque le projectile a manuellement Ã©tÃ© dÃ©clenchÃ©
 	 * @param projectile
 	 */
 	public void Triggered(CustomProjectile projectile);
