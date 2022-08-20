@@ -40,6 +40,13 @@
 	  	<scope>provided</scope>
   	</dependency>
 
+	<dependency>
+        <groupId>dev.jorel</groupId>
+        <artifactId>commandapi-core</artifactId>
+        <version>8.5.1</version>
+        <scope>provided</scope>
+    </dependency>
+
   </dependencies>
 
 	<build>

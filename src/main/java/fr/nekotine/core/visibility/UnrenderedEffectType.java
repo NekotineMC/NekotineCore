@@ -35,7 +35,6 @@ public class UnrenderedEffectType implements CustomEffectType{
 		return false;
 	}
 	
-	
 	public static UnrenderedEffectType UnrenderedFor(EntityVisibilityModule visibilityModule, Player unrenderedFor) {
 		return new UnrenderedEffectType(visibilityModule, unrenderedFor);
 	}

@@ -44,7 +44,7 @@ Voici la liste des modules:
 	
 	> XxGoldenbluexX devra jetter un oeil.
 	
-- `CustomEffectModule` ⧖
+- `CustomEffectModule` ✓
 
 	Module pour gérer des effets s'appliquant à une cible pour une personne.  
 	Les effets sont superposables et sont définits par une duration, une puissance, une cible et un observateur.
