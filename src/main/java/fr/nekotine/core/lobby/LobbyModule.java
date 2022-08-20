@@ -37,6 +37,34 @@ public class LobbyModule extends PluginModule{
 			new CustomArgument<Lobby,String>(new StringArgument("lobbyName"), info -> {
 				for (Lobby lobby : lobbyList) {
 					if (MiniMessage.miniMessage().stripTags(lobby.getName()).equals(info.currentInput())) {
+						if (lobby.isFreeToJoin()) {
+							return lobby;
+						}else {
+							throw new CustomArgumentException(
+									new MessageBuilder("Ce lobby ne peut être rejoint: ").appendArgInput()
+									);
+						}
+					}
+				}
+				throw new CustomArgumentException(
+						new MessageBuilder("Nom de lobby invalide: ").appendArgInput()
+						);
+			}).replaceSuggestions(ArgumentSuggestions.stringsWithTooltips(info -> {
+				List<StringTooltip> list = new LinkedList<>();
+				for (Lobby lobby : lobbyList) {
+					if (lobby.isFreeToJoin()) {
+						list.add(StringTooltip.of(
+								MiniMessage.miniMessage().stripTags(lobby.getName()),
+								String.format("[%d/%d]", lobby.getPlayerList().size(), lobby.getPlayerCap())));
+					}
+				}
+				return lobbyList.toArray(StringTooltip[]::new);
+			}));
+	
+	private final Argument<Lobby> anyLobbyArgument =
+			new CustomArgument<Lobby,String>(new StringArgument("lobbyName"), info -> {
+				for (Lobby lobby : lobbyList) {
+					if (MiniMessage.miniMessage().stripTags(lobby.getName()).equals(info.currentInput())) {
 						return lobby;
 					}
 				}
@@ -46,11 +74,9 @@ public class LobbyModule extends PluginModule{
 			}).replaceSuggestions(ArgumentSuggestions.stringsWithTooltips(info -> {
 				List<StringTooltip> list = new LinkedList<>();
 				for (Lobby lobby : lobbyList) {
-					if (lobby.freeToJoin()) {
-						list.add(StringTooltip.of(
-								MiniMessage.miniMessage().stripTags(lobby.getName()),
-								String.format("[%d/%d]", lobby.getPlayerList().size(), lobby.getPlayerCap())));
-					}
+					list.add(StringTooltip.of(
+							MiniMessage.miniMessage().stripTags(lobby.getName()),
+							String.format("[%d/%d]", lobby.getPlayerList().size(), lobby.getPlayerCap())));
 				}
 				return lobbyList.toArray(StringTooltip[]::new);
 			}));
@@ -79,17 +105,25 @@ public class LobbyModule extends PluginModule{
 	}
 	
 	@SuppressWarnings("unchecked")
+	/**
+	 * Le retour des commandes n'agissant pas sur soit est de la couleur dark_purple
+	 */
 	private void registerCommands() {
-		// lobby create
-		CommandAPICommand c_lobby_create = new CommandAPICommand("create");
-		c_lobby_create.withArguments(new StringArgument("lobbyName"));
-		c_lobby_create.executes((sender, args) -> {
-			lobbyList.add(new Lobby(this, (String)args[0]));
+		// create
+		CommandAPICommand c_create = new CommandAPICommand("create");
+		c_create.withArguments(new StringArgument("lobbyName"));
+		c_create.executes((sender, args) -> {
+			String rawName = (String) args[0];
+			lobbyList.add(new Lobby(this, rawName));
+			sender.sendMessage(
+					Component.text("Un lobby nommé ").color(NamedTextColor.DARK_PURPLE)
+					.append(MiniMessage.miniMessage().deserialize(rawName))
+					.append(Component.text(" a été créé").color(NamedTextColor.DARK_PURPLE)));
 			});
-		// lobby join
-		CommandAPICommand c_lobby_join = new CommandAPICommand("join");
-		c_lobby_create.withArguments(freeToJoinLobbyArgument);
-		c_lobby_create.executesPlayer((sender, args) -> {
+		// join
+		CommandAPICommand c_join = new CommandAPICommand("join");
+		c_join.withArguments(freeToJoinLobbyArgument);
+		c_join.executesPlayer((sender, args) -> {
 			Lobby lobby = (Lobby) args[0];
 			if (lobby != null) {
 				lobby.AddPlayer(sender);
@@ -97,20 +131,83 @@ public class LobbyModule extends PluginModule{
 				throw CommandAPI.fail("Lobby invalide");
 			}
 		});
-		// lobby join @a
-		CommandAPICommand c_lobby_join_player = new CommandAPICommand("join");
-		c_lobby_create.withArguments(freeToJoinLobbyArgument, new EntitySelectorArgument<Collection<Player>>("players" ,EntitySelector.MANY_PLAYERS));
-		c_lobby_create.executesPlayer((sender, args) -> {
+		// join @a
+		CommandAPICommand c_join_player = new CommandAPICommand("join");
+		c_join_player.withArguments(
+				freeToJoinLobbyArgument,
+				new EntitySelectorArgument<Collection<Player>>("players" ,EntitySelector.MANY_PLAYERS)/*FEATURE suggestion*/);
+		c_join_player.executes((sender, args) -> {
 			Lobby lobby = (Lobby) args[0];
 			if (lobby != null) {
+				int nbAdded = 0;
 				for (Player p : (Collection<Player>) args[1]) {
 					if (!isPlayerInLobby(p)) {
 						lobby.AddPlayer(p);
 					}
 				}
+				sender.sendMessage(
+						Component.text(String.format("%d joueurs ont été ajoutés au lobby ",nbAdded)).color(NamedTextColor.DARK_PURPLE)
+						.append(MiniMessage.miniMessage().deserialize(lobby.getName())));
 			}else {
 				throw CommandAPI.fail("Lobby invalide");
 			}
+		});
+		// leave
+		CommandAPICommand c_leave = new CommandAPICommand("leave");
+		c_leave.withRequirement(sender -> isPlayerInLobby((Player)sender));
+		c_leave.executesPlayer((sender, args) -> {
+			Lobby lobby = getPlayerLobby(sender);
+			if (lobby != null) {
+				lobby.RemovePlayer(sender);
+			}else {
+				throw CommandAPI.fail("Vous n'êtes pas dans un lobby");
+			}
+		});
+		// leave @a
+		CommandAPICommand c_leave_player = new CommandAPICommand("leave");
+		c_leave_player.withArguments(
+				anyLobbyArgument,
+				new EntitySelectorArgument<Collection<Player>>("players" ,EntitySelector.MANY_PLAYERS)/*FEATURE suggestion*/);
+		c_leave_player.executes((sender, args) -> {
+			Lobby lobby = (Lobby) args[0];
+			if (lobby != null) {
+				int nbKicked = 0;
+				for (Player p : (Collection<Player>) args[1]) {
+					if (lobby.getPlayerList().contains(p)) {
+						lobby.RemovePlayer(p);
+						nbKicked++;
+					}
+				}
+				sender.sendMessage(
+						Component.text(String.format("%d joueurs ont été retirés du lobby ",nbKicked)).color(NamedTextColor.DARK_PURPLE)
+						.append(MiniMessage.miniMessage().deserialize(lobby.getName())));
+			}else {
+				throw CommandAPI.fail("Lobby invalide");
+			}
+		});
+		// remove
+		CommandAPICommand c_remove = new CommandAPICommand("remove");
+		c_remove.withArguments(anyLobbyArgument);
+		c_remove.executes((sender, args) -> {
+			Lobby lobby = (Lobby) args[0];
+			if (lobby != null) {
+				lobby.Remove();
+				sender.sendMessage(
+						Component.text("Le lobby nommé ").color(NamedTextColor.DARK_PURPLE)
+						.append(MiniMessage.miniMessage().deserialize(lobby.getName()))
+						.append(Component.text(" a été supprimé").color(NamedTextColor.DARK_PURPLE)));
+			}else {
+				throw CommandAPI.fail("Lobby invalide");
+			}
+		});
+		// list
+		CommandAPICommand c_list = new CommandAPICommand("lobby");
+		c_list.executesPlayer((sender, args) -> {
+			sender.sendMessage(Component.text("Un menu de type inventaire doit être fait ici").color(NamedTextColor.YELLOW));
+			sendLobbyList(sender, args);
+		});
+		c_list.executesConsole((sender, args) -> {
+			sendLobbyList(sender, args);
 		});
 		// lobby
 		CommandAPICommand c_lobby = new CommandAPICommand("lobby");
@@ -118,10 +215,17 @@ public class LobbyModule extends PluginModule{
 			sender.sendMessage(Component.text("Un menu de type inventaire doit être fait ici").color(NamedTextColor.YELLOW));
 			sendLobbyList(sender, args);
 		});
+		c_lobby.executesConsole((sender, args) -> {
+			sendLobbyList(sender, args);
+		});
 		c_lobby.withSubcommands(
-				c_lobby_create,
-				c_lobby_join,
-				c_lobby_join_player
+				c_create,
+				c_join,
+				c_join_player,
+				c_leave,
+				c_leave_player,
+				c_remove,
+				c_list
 				);
 		c_lobby.register();
 	}
@@ -169,5 +273,14 @@ public class LobbyModule extends PluginModule{
 			}
 		}
 		return false;
+	}
+	
+	public Lobby getPlayerLobby(Player player) {
+		for (Lobby lobby : lobbyList) {
+			if (lobby.getPlayerList().contains(player)) {
+				return lobby;
+			}
+		}
+		return null;
 	}
 }

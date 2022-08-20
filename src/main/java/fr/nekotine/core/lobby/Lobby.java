@@ -5,6 +5,7 @@ import java.util.List;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import dev.jorel.commandapi.CommandAPI;
 import fr.nekotine.core.minigame.Game;
 import fr.nekotine.core.minigame.GameEventListener;
 import net.kyori.adventure.audience.Audience;
@@ -61,27 +62,46 @@ public class Lobby implements GameEventListener, ForwardingAudience{
 		return _game;
 	}
 	
+	/**
+	 * Supprime le lobby
+	 */
 	public void Remove() {
 		if (_game != null && _game.isPlaying()) {
 			_game.Abort();
 		}
 	}
 	
-	public boolean freeToJoin() {
+	public boolean isFreeToJoin() {
 		return (_players.size() < _playerCap && (_game == null || !_game.isPlaying()));
 	}
 	
 	/**
 	 * Ajoute le joueur au lobby sans tests au préalable.
-	 * Cette fonction notifie les joueurs du lobby et le joueur ayant rejoin
+	 * Cette fonction notifie les joueurs du lobby et le joueur ayant rejoint
 	 * @param player
 	 */
 	public void AddPlayer(Player player) {
-		sendMessage(Component.text(String.format("%s a rejoint le lobby", player.getName())).color(NamedTextColor.GRAY));
+		sendMessage(Component.text(String.format("▶ %s a rejoint le lobby", player.getName())).color(NamedTextColor.GRAY));
 		_players.add(player);
 		player.sendMessage(
 				Component.text("Vous avez rejoint le lobby ").color(NamedTextColor.YELLOW)
 				.append(MiniMessage.miniMessage().deserialize(_name)));
+		CommandAPI.updateRequirements(player);
+	}
+	
+	/**
+	 * Retire le joueur de la partie, s'il est dedans
+	 * @param player
+	 */
+	public void RemovePlayer(Player player) {
+		if (_players.contains(player)) {
+			_players.remove(player);
+			sendMessage(Component.text(String.format("◀ %s a quitté le lobby", player.getName())).color(NamedTextColor.GRAY));
+			player.sendMessage(
+					Component.text("Vous avez quitté le lobby ").color(NamedTextColor.YELLOW)
+					.append(MiniMessage.miniMessage().deserialize(_name)));
+			CommandAPI.updateRequirements(player);
+		}
 	}
 
 	@Override
