@@ -1,6 +1,8 @@
 package fr.nekotine.core.module;
 
 import java.lang.reflect.Field;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
@@ -63,16 +65,16 @@ public abstract class PluginModule implements Listener {
 	 * Affiche du texte informatif dans la console.
 	 * @param text
 	 */
-	public void logInfo(String text) {
-		_plugin.getLogger().info(Text.moduleLog(this,text));
+	public void log(Level level, String text) {
+		_plugin.getLogger().log(level,Text.moduleLog(this,text));
 	}
 	
 	/**
 	 * Affiche du texte informatif dans la console.
 	 * @param text
 	 */
-	public void logWarning(Exception e) {
-		_plugin.getLogger().throwing(getClass().getName(), "", e);
+	public void logException(Level level, String text, Exception e) {
+		_plugin.getLogger().log(level, Text.moduleLog(this,text), e);
 	}
 	
 	/**
@@ -120,9 +122,13 @@ public abstract class PluginModule implements Listener {
 	 */
 	public final void enable() {
 		final long epoch = System.currentTimeMillis();
-		logInfo("début du chargement...");
-		onEnable();
-		logInfo(String.format("le module est chargé! (%d ms)", System.currentTimeMillis()-epoch));
+		log(Level.FINE,"debut du chargement...");
+		try {
+			onEnable();
+		}catch(Exception e) {
+			logException(Level.WARNING, "Une erreur est survenue lors du chargement du module", e);
+		}
+		log(Level.FINE, String.format("le module est charge! (%d ms)", System.currentTimeMillis()-epoch));
 	}
 	
 	/**
@@ -130,9 +136,13 @@ public abstract class PluginModule implements Listener {
 	 */
 	public final void disable() {
 		final long epoch = System.currentTimeMillis();
-		logInfo("début du déchargement...");
-		onDisable();
-		logInfo(String.format("le module est déchargé! (%d ms)", System.currentTimeMillis()-epoch));
+		log(Level.FINE,"debut du dechargement...");
+		try {
+			onDisable();
+		}catch(Exception e) {
+			logException(Level.WARNING, "Une erreur est survenue lors du dechargement du module", e);
+		}
+		log(Level.FINE, String.format("le module est decharge! (%d ms)", System.currentTimeMillis()-epoch));
 	}
 	
 	/**
@@ -157,10 +167,10 @@ public abstract class PluginModule implements Listener {
 				}
 			}
 		}catch(Exception e) {
-			logWarning(e);
+			logException(Level.WARNING, "Une erreur est survenue lors de la recuperation des dependances de ce module", e);
 		}
 		//
-		UtilEvent.Register(getPlugin(), this);
+		UtilEvent.Register(_plugin, this);
 	}
 	
 	/**
