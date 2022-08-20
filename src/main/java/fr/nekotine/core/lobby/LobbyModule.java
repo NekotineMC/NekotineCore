@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -135,7 +136,13 @@ public class LobbyModule extends PluginModule{
 		CommandAPICommand c_join_player = new CommandAPICommand("join");
 		c_join_player.withArguments(
 				freeToJoinLobbyArgument,
-				new EntitySelectorArgument<Collection<Player>>("players" ,EntitySelector.MANY_PLAYERS)/*FEATURE suggestion*/);
+				new EntitySelectorArgument<Collection<Player>>("players" ,EntitySelector.MANY_PLAYERS)
+					.replaceSuggestions(ArgumentSuggestions.strings(
+							info -> Bukkit.getServer().getOnlinePlayers().stream()
+								.filter(p -> !isPlayerInLobby(p))
+								.map(p -> p.getName())
+								.toArray(String[]::new)
+							)));
 		c_join_player.executes((sender, args) -> {
 			Lobby lobby = (Lobby) args[0];
 			if (lobby != null) {
@@ -167,7 +174,13 @@ public class LobbyModule extends PluginModule{
 		CommandAPICommand c_leave_player = new CommandAPICommand("leave");
 		c_leave_player.withArguments(
 				anyLobbyArgument,
-				new EntitySelectorArgument<Collection<Player>>("players" ,EntitySelector.MANY_PLAYERS)/*FEATURE suggestion*/);
+				new EntitySelectorArgument<Collection<Player>>("players" ,EntitySelector.MANY_PLAYERS)
+				.replaceSuggestions(ArgumentSuggestions.strings(
+						info -> Bukkit.getServer().getOnlinePlayers().stream()
+							.filter(p -> ((Lobby)info.previousArgs()[0]).getPlayerList().contains(p))
+							.map(p -> p.getName())
+							.toArray(String[]::new)
+						)));
 		c_leave_player.executes((sender, args) -> {
 			Lobby lobby = (Lobby) args[0];
 			if (lobby != null) {
