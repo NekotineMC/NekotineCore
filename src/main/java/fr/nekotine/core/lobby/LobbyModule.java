@@ -94,7 +94,7 @@ public class LobbyModule extends PluginModule{
 	
 	@Override
 	protected void onDisable() {
-		for (Lobby lobby : lobbyList) {
+		for (Lobby lobby : new LinkedList<Lobby>(lobbyList)/*Éviter les ConcurentModificationException*/) {
 			try {
 				lobby.Remove();
 			}catch(Exception e) {
@@ -103,6 +103,10 @@ public class LobbyModule extends PluginModule{
 		}
 		lobbyList.clear();
 		super.onDisable();
+	}
+	
+	public List<Lobby> getLobbyList(){
+		return lobbyList;
 	}
 	
 	@SuppressWarnings("unchecked")

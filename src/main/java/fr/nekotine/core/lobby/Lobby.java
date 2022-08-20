@@ -1,5 +1,6 @@
 package fr.nekotine.core.lobby;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import org.bukkit.entity.Player;
@@ -63,12 +64,16 @@ public class Lobby implements GameEventListener, ForwardingAudience{
 	}
 	
 	/**
-	 * Supprime le lobby
+	 * Supprime le lobby de la liste des lobby après l'avoir vidé
 	 */
 	public void Remove() {
 		if (_game != null && _game.isPlaying()) {
 			_game.Abort();
 		}
+		for (Player player : new LinkedList<Player>(_players)) {
+			RemovePlayer(player);
+		}//TODO register/unregister ?
+		_module.getLobbyList().remove(this);
 	}
 	
 	public boolean isFreeToJoin() {
