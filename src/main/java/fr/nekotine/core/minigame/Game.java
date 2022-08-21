@@ -80,7 +80,7 @@ public abstract class Game implements Listener, ForwardingAudience{
 		}catch(Exception e) {
 			var msg = "Une erreur est survenue lors du demarrage de la partie";
 			if (_holder != null) msg += ' ' + _holder.logName();
-			_plugin.getLogger().log(Level.WARNING, msg, e);
+			_plugin.getLogger().log(Level.SEVERE, msg, e);
 			return false;
 		}
 		UtilEvent.Register(plugin, this);
@@ -109,7 +109,6 @@ public abstract class Game implements Listener, ForwardingAudience{
 			var msg = "Une erreur est survenue lors de la recuperation des donnees de la partie";
 			if (_holder != null) msg += ' ' + _holder.logName();
 			_plugin.getLogger().log(Level.WARNING, msg, e);
-			return false;
 		}
 		// end phase
 		try {
@@ -117,7 +116,7 @@ public abstract class Game implements Listener, ForwardingAudience{
 		}catch(Exception e) {
 			var msg = "Une erreur est survenue lors de l'arret de la partie";
 			if (_holder != null) msg += ' ' + _holder.logName();
-			_plugin.getLogger().log(Level.WARNING, msg, e);
+			_plugin.getLogger().log(Level.SEVERE, msg, e);
 			return false;
 		}
 		// manage game data
@@ -135,7 +134,6 @@ public abstract class Game implements Listener, ForwardingAudience{
 			var msg = "Une erreur est survenue lors de la gestion des donnees de la partie";
 			if (_holder != null) msg += ' ' + _holder.logName();
 			_plugin.getLogger().log(Level.WARNING, msg, e);
-			return false;
 		}
 		UtilEvent.Unregister(this);
 		_isPlaying = false;
@@ -150,6 +148,15 @@ public abstract class Game implements Listener, ForwardingAudience{
 	 * aucun traitement pour un quelconque classement est fait. La partie "compte pour du beure".
 	 */
 	public final boolean Abort() {
+		if (!_isPlaying) return false;
+		try {
+			end();
+		}catch(Exception e) {
+			var msg = "Une erreur est survenue lors de l'arret de la partie";
+			if (_holder != null) msg += ' ' + _holder.logName();
+			_plugin.getLogger().log(Level.SEVERE, msg, e);
+			return false;
+		}
 		UtilEvent.Unregister(this);
 		_isPlaying = false;
 		if (_holder != null) {
