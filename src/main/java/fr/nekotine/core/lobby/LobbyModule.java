@@ -96,7 +96,7 @@ public class LobbyModule extends PluginModule{
 	protected void onDisable() {
 		for (Lobby lobby : new LinkedList<Lobby>(lobbyList)/*Éviter les ConcurentModificationException*/) {
 			try {
-				lobby.Remove();
+				lobby.unregister();
 			}catch(Exception e) {
 				logException(Level.WARNING, "Une erreur est survenue lors de la suppression du lobby "+lobby.getName(), e);
 			}
@@ -119,7 +119,7 @@ public class LobbyModule extends PluginModule{
 		c_create.withArguments(new StringArgument("lobbyName"));
 		c_create.executes((sender, args) -> {
 			String rawName = (String) args[0];
-			lobbyList.add(new Lobby(this, rawName));
+			new Lobby(rawName).register(this);
 			sender.sendMessage(
 					Component.text("Un lobby nommé ").color(NamedTextColor.DARK_PURPLE)
 					.append(MiniMessage.miniMessage().deserialize(rawName))
@@ -127,6 +127,7 @@ public class LobbyModule extends PluginModule{
 			});
 		// join
 		CommandAPICommand c_join = new CommandAPICommand("join");
+		c_join.withRequirement(sender -> !isPlayerInLobby((Player)sender));
 		c_join.withArguments(freeToJoinLobbyArgument);
 		c_join.executesPlayer((sender, args) -> {
 			Lobby lobby = (Lobby) args[0];
@@ -142,8 +143,7 @@ public class LobbyModule extends PluginModule{
 				freeToJoinLobbyArgument,
 				new EntitySelectorArgument<Collection<Player>>("players" ,EntitySelector.MANY_PLAYERS)
 					.replaceSuggestions(ArgumentSuggestions.strings(
-							info -> Bukkit.getServer().getOnlinePlayers().stream()
-								.filter(p -> !isPlayerInLobby(p))
+							info -> getPlayersWithNoLobby().stream()
 								.map(p -> p.getName())
 								.toArray(String[]::new)
 							)));
@@ -180,8 +180,7 @@ public class LobbyModule extends PluginModule{
 				anyLobbyArgument,
 				new EntitySelectorArgument<Collection<Player>>("players" ,EntitySelector.MANY_PLAYERS)
 				.replaceSuggestions(ArgumentSuggestions.strings(
-						info -> Bukkit.getServer().getOnlinePlayers().stream()
-							.filter(p -> ((Lobby)info.previousArgs()[0]).getPlayerList().contains(p))
+						info -> ((Lobby)info.previousArgs()[0]).getPlayerList().stream()
 							.map(p -> p.getName())
 							.toArray(String[]::new)
 						)));
@@ -208,7 +207,7 @@ public class LobbyModule extends PluginModule{
 		c_remove.executes((sender, args) -> {
 			Lobby lobby = (Lobby) args[0];
 			if (lobby != null) {
-				lobby.Remove();
+				lobby.unregister();
 				sender.sendMessage(
 						Component.text("Le lobby nommé ").color(NamedTextColor.DARK_PURPLE)
 						.append(MiniMessage.miniMessage().deserialize(lobby.getName()))
@@ -299,5 +298,22 @@ public class LobbyModule extends PluginModule{
 			}
 		}
 		return null;
+	}
+	
+	public List<Player> getPlayersWithLobby(){
+		List<Player> list = new LinkedList<>();
+		for (Lobby lobby : lobbyList) {
+			list.addAll(lobby.getPlayerList());
+		}
+		return list;
+	}
+	
+	public List<Player> getPlayersWithNoLobby(){
+		List<Player> list = new LinkedList<>();
+		list.addAll(Bukkit.getOnlinePlayers());
+		for (Lobby lobby : lobbyList) {
+			list.removeAll(lobby.getPlayerList());
+		}
+		return list;
 	}
 }
