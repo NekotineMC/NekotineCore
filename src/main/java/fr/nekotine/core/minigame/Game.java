@@ -1,8 +1,13 @@
 package fr.nekotine.core.minigame;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
+import org.bukkit.plugin.Plugin;
+
+import fr.nekotine.core.util.UtilEvent;
 
 /**
  * Représente le mode de jeu actif tout au long de la partie
@@ -10,24 +15,15 @@ import org.bukkit.entity.Player;
  * @author XxGoldenbluexX
  *
  */
-public abstract class Game {
+public abstract class Game implements Listener{
 
-	private final GameEventListener _holder;
+	private GameEventListener _holder;
 	
-	private final List<GameTeam> _teams;
+	protected List<GameTeam> _teams = new LinkedList<>();
 	
 	private boolean _isPlaying = false;
 	
-	private int _playerCap = 10;
-	
-	public Game(GameEventListener holder, List<GameTeam> teams) {
-		_holder = holder;
-		_teams = teams;
-	}
-	
-	public Game(List<GameTeam> teams) {
-		this(null, teams);
-	}
+	protected int _playerCap = 10;
 	
 	public List<GameTeam> getTeams(){
 		return _teams;
@@ -61,7 +57,8 @@ public abstract class Game {
 	/**
 	 * Démarre la partie
 	 */
-	public void Start() {
+	public void Start(Plugin plugin) {
+		UtilEvent.Register(plugin, this);
 		_isPlaying = true;
 		if (_holder != null) {
 			_holder.onGameStart(this);
@@ -74,6 +71,7 @@ public abstract class Game {
 	 * Cette fonction est utile pour les modes de jeu qui ne peuvent se finir seul (un mode de jeu sans fin par exemple).
 	 */
 	public void Stop() {
+		UtilEvent.Unregister(this);
 		_isPlaying = false;
 		if (_holder != null) {
 			_holder.onGameStop(this);
