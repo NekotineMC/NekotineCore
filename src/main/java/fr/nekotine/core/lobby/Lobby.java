@@ -1,14 +1,21 @@
 package fr.nekotine.core.lobby;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Nonnull;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import dev.jorel.commandapi.CommandAPI;
+import fr.nekotine.core.inventory.PlayerInventorySnapshot;
 import fr.nekotine.core.minigame.Game;
 import fr.nekotine.core.minigame.GameEventListener;
+import fr.nekotine.core.minigame.GameTeam;
+import fr.nekotine.core.util.UtilInventory;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.text.Component;
@@ -17,39 +24,55 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
+/**
+ * Un lobby englobant une Game.
+ * 
+ * On peut voir le lobby comme un "GameBuilder" car il permet aux joueurs de configurer la partie avant de la lancer.
+ * 
+ * Le lobby est un outil pour configurer une game, il ne reçois de la game que
+ * les événements spécifiés dans {@link fr.nekotine.core.minigame.GameEventListener GameEventListener}
+ * 
+ * @author XxGoldenbluexX
+ *
+ */
 public class Lobby implements GameEventListener, ForwardingAudience{
 
 	private LobbyModule _module;
 	
+	private boolean isRegistered = false;
+	
 	private String _name;
 	
-	private GameModeIdentifier _gamemodeid;
+	@Nonnull
+	private  GameMode _gamemode;
+
+	private boolean _isGameLaunched = false;
+		
+	// Player status saving
+	private Map<Player, PlayerInventorySnapshot> _playersOldInv = new HashMap<>();
+	private Map<Player, org.bukkit.GameMode> _playersOldGameMode = new HashMap<>();
 	
-	private int _playerCap = 10; //TODO ne pas oublier de le mettre a jour
-	
-	private List<Player> _players;
-	
+	@Nonnull
 	private Game _game;
-	
-	private boolean isRegistered = false;
 	
 	public Lobby(String name) {
 		_name = name;
-		_gamemodeid = GameModeIdentifier.getGameModeList().get(0);
+		_gamemode = GameMode.getGameModeList().get(0);
+		_game = _gamemode.generateTypedGame();
 	}
 	
 	public List<Player> getPlayerList(){
-		return _players;
+		List<Player> list = new LinkedList<>();
+		for (GameTeam team : _game.getTeams()) {
+			list.addAll(team.getPlayerList());
+		}
+		return list;
 	}
 	
-	public int getPlayerCap() {
-		return _playerCap;
-	}
-	
-	public GameModeIdentifier getGameModeId() {
-		return _gamemodeid;
-	}
-	
+	/**
+	 * Le nom du lobby peut être sous un format MiniMessage
+	 * @param name
+	 */
 	public String getName() {
 		return _name;
 	}
@@ -62,8 +85,22 @@ public class Lobby implements GameEventListener, ForwardingAudience{
 		_name = name;
 	}
 	
-	public Game getGame() {
-		return _game;
+	public int getPlayerCap() {
+		return _game.getPlayerCap();
+	}
+	
+	/**
+	 * Cette fonction est plus efficace que prendre la taille de la liste de joueur,
+	 * car elle évite la construction d'une liste représentant tous les joueurs du lobby (la Game stock les joueurs séparément).
+	 * 
+	 * @return le nombre de joueurs dans le lobby
+	 */
+	public int getNumberOfPlayer() {
+		return _game.getNumberOfPlayer();
+	}
+	
+	public boolean isGameLaunched() {
+		return _isGameLaunched;
 	}
 	
 	/**
@@ -83,18 +120,18 @@ public class Lobby implements GameEventListener, ForwardingAudience{
 	 * Supprime le lobby de la liste des lobby après l'avoir vidé
 	 */
 	public void unregister() {
-		if (_game != null && _game.isPlaying()) {
+		if (_game.isPlaying()) {
 			_game.Abort();
 		}
-		for (Player player : new LinkedList<Player>(_players)) {
-			RemovePlayer(player);
+		for (GameTeam team : _game.getTeams()) {
+			team.clear();
 		}
 		_module.getLobbyList().remove(this);
 		isRegistered = false;
 	}
 	
 	public boolean isFreeToJoin() {
-		return (_players.size() < _playerCap && (_game == null || !_game.isPlaying()));
+		return (getNumberOfPlayer() < getPlayerCap() && !_game.isPlaying());
 	}
 	
 	/**
@@ -104,11 +141,18 @@ public class Lobby implements GameEventListener, ForwardingAudience{
 	 */
 	public void AddPlayer(Player player) {
 		if (!isRegistered) return;
+		// Notify players
 		sendMessage(Component.text(String.format("▶ %s a rejoint le lobby", player.getName())).color(NamedTextColor.GRAY));
-		_players.add(player);
 		player.sendMessage(
 				Component.text("Vous avez rejoint le lobby ").color(NamedTextColor.YELLOW)
 				.append(MiniMessage.miniMessage().deserialize(_name)));
+		// Save player status
+		_playersOldInv.put(player, UtilInventory.snapshot(player));
+		_playersOldGameMode.put(player, player.getGameMode());
+		// Add player
+		_game.addPlayerToOptimalTeam(player);
+		player.getInventory().clear();
+		// Update commands
 		CommandAPI.updateRequirements(player);
 	}
 	
@@ -117,29 +161,47 @@ public class Lobby implements GameEventListener, ForwardingAudience{
 	 * @param player
 	 */
 	public void RemovePlayer(Player player) {
-		if (_players.contains(player)) {
-			_players.remove(player);
+		if (getPlayerList().contains(player)) {
+			// Remove player
+			_game.removePlayer(player);
+			// Change player status back to normal
+			UtilInventory.fill(player, _playersOldInv.get(player));
+			_playersOldInv.remove(player);
+			player.setGameMode(_playersOldGameMode.get(player));
+			_playersOldGameMode.remove(player);
+			// Notify players
 			sendMessage(Component.text(String.format("◀ %s a quitté le lobby", player.getName())).color(NamedTextColor.GRAY));
 			player.sendMessage(
 					Component.text("Vous avez quitté le lobby ").color(NamedTextColor.YELLOW)
 					.append(MiniMessage.miniMessage().deserialize(_name)));
+			// Update commands
 			CommandAPI.updateRequirements(player);
 		}
 	}
 
 	@Override
 	public @NotNull Iterable<? extends Audience> audiences() {
-		return _players;
+		return getPlayerList();
 	}
 	
 	public Component makeEasyJoinMessage() {
-		Component prefix = Component.text("Le lobby ").color(NamedTextColor.GREEN);
-		Component name = MiniMessage.miniMessage().deserialize(_name);
-		Component suffix = Component.text(String.format(" peut être rejoint [%d/%d]", _players.size(), _playerCap)).color(NamedTextColor.GREEN);
-		Component fin = prefix.append(name).append(suffix);
+		var prefix = Component.text("Le lobby ").color(NamedTextColor.GREEN);
+		var name = MiniMessage.miniMessage().deserialize(_name);
+		var suffix = Component.text(String.format(" peut être rejoint [%d/%d]", getNumberOfPlayer(), getPlayerCap())).color(NamedTextColor.GREEN);
+		var fin = prefix.append(name).append(suffix);
 		fin.hoverEvent(HoverEvent.showText(Component.text("Cliquez pour rejoindre le lobby").color(NamedTextColor.GRAY)));
 		fin.clickEvent(ClickEvent.runCommand("lobby join " + name));
 		return fin;
+	}
+
+	@Override
+	public void onGameStart(Game game) {
+		_isGameLaunched = true;
+	}
+
+	@Override
+	public void onGameStop(Game game) {
+		_isGameLaunched = false;
 	}
 	
 }

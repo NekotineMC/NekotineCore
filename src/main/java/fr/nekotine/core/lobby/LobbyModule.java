@@ -20,7 +20,6 @@ import dev.jorel.commandapi.arguments.CustomArgument.MessageBuilder;
 import dev.jorel.commandapi.arguments.EntitySelector;
 import dev.jorel.commandapi.arguments.EntitySelectorArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
-import fr.nekotine.core.minigame.Game;
 import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
 import net.kyori.adventure.text.Component;
@@ -205,8 +204,7 @@ public class LobbyModule extends PluginModule{
 		CommandAPICommand c_remove = new CommandAPICommand("remove");
 		c_remove.withArguments(anyLobbyArgument);
 		c_remove.executes((sender, args) -> {
-			Lobby lobby = (Lobby) args[0];
-			if (lobby != null) {
+			if (args[0] instanceof Lobby lobby) {
 				lobby.unregister();
 				sender.sendMessage(
 						Component.text("Le lobby nommé ").color(NamedTextColor.DARK_PURPLE)
@@ -250,13 +248,12 @@ public class LobbyModule extends PluginModule{
 		e.sendMessage(Component.text("[- Liste des lobby -]").color(NamedTextColor.DARK_AQUA));
 		for (Lobby lobby : lobbyList) {
 			
-			int nbPlayer = lobby.getPlayerList().size();
+			int nbPlayer = lobby.getNumberOfPlayer();
 			int playerCap = lobby.getPlayerCap();
-			Game game = lobby.getGame();
 			String name = lobby.getName();
 			// Prefix
 			Component prefix = Component.text(String.format("[%d/%d] ", nbPlayer, playerCap));
-			if (game != null && game.isPlaying()) {
+			if (lobby.isGameLaunched()) {
 				prefix.color(NamedTextColor.GOLD);
 			}else {
 				if (nbPlayer >= playerCap) {
@@ -267,7 +264,7 @@ public class LobbyModule extends PluginModule{
 			}
 			// final construction
 			prefix.append(MiniMessage.miniMessage().deserialize(name));
-			if (game != null && game.isPlaying()) {
+			if (lobby.isGameLaunched()) {
 				prefix.hoverEvent(HoverEvent.showText(Component.text("La partie est lancée").color(NamedTextColor.RED)));
 			}else {
 				if (nbPlayer >= playerCap) {

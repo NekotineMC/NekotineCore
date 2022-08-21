@@ -6,6 +6,12 @@ import org.bukkit.inventory.InventoryHolder;
 import fr.nekotine.core.inventory.InventorySnapshot;
 import fr.nekotine.core.inventory.PlayerInventorySnapshot;
 
+/**
+ * Classe utilitaire pour les inventaires minecraft
+ * 
+ * @author XxGoldenbluexX
+ *
+ */
 public class UtilInventory {
 
 	/**
@@ -16,7 +22,7 @@ public class UtilInventory {
 	 * @param holder
 	 * @return la snapshot
 	 */
-	public InventorySnapshot snapshot(InventoryHolder holder) {
+	public static InventorySnapshot snapshot(InventoryHolder holder) {
 		var snap = new InventorySnapshot();
 		snap.snapshot(holder.getInventory());
 		return snap;
@@ -29,7 +35,7 @@ public class UtilInventory {
 	 * @param holder
 	 * @return la snapshot
 	 */
-	public InventorySnapshot deepSnapshot(InventoryHolder holder) {
+	public static InventorySnapshot deepSnapshot(InventoryHolder holder) {
 		var snap = new InventorySnapshot();
 		snap.deepSnapshot(holder.getInventory());
 		return snap;
@@ -43,7 +49,7 @@ public class UtilInventory {
 	 * @param holder
 	 * @return la snapshot
 	 */
-	public PlayerInventorySnapshot snapshot(HumanEntity holder) {
+	public static PlayerInventorySnapshot snapshot(HumanEntity holder) {
 		var snap = new PlayerInventorySnapshot();
 		snap.snapshot(holder.getInventory());
 		return snap;
@@ -56,7 +62,7 @@ public class UtilInventory {
 	 * @param holder
 	 * @return la snapshot
 	 */
-	public PlayerInventorySnapshot deepSnapshot(HumanEntity holder) {
+	public static PlayerInventorySnapshot deepSnapshot(HumanEntity holder) {
 		var snap = new PlayerInventorySnapshot();
 		snap.deepSnapshot(holder.getInventory());
 		return snap;
@@ -67,7 +73,7 @@ public class UtilInventory {
 	 * @param holder
 	 * @param snapshot
 	 */
-	public void fill(InventoryHolder holder, InventorySnapshot snapshot) {
+	public static void fill(InventoryHolder holder, InventorySnapshot snapshot) {
 		snapshot.fill(holder.getInventory());
 	}
 	/**
@@ -75,7 +81,7 @@ public class UtilInventory {
 	 * @param holder
 	 * @param snapshot
 	 */
-	public void fill(HumanEntity holder, PlayerInventorySnapshot snapshot) {
+	public static void fill(HumanEntity holder, PlayerInventorySnapshot snapshot) {
 		snapshot.fill(holder.getInventory());
 	}
 	
