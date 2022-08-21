@@ -26,5 +26,21 @@ public class GM_TeamDeathMatch extends Game{
 			return new GM_TeamDeathMatch();
 		}
 	};
+
+	@Override
+	protected void setup() {
+	}
+
+	@Override
+	protected void end() {
+	}
+
+	@Override
+	protected void collectGameData() {
+	}
+
+	@Override
+	protected void asyncManageGameData() {
+	}
 	
 }

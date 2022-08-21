@@ -53,7 +53,7 @@ public abstract class PluginModule implements Listener {
 	}
 	
 	/**
-	 * Execute le runnable sur un thread séparé.
+	 * Execute le runnable sur le thread server au prochain tick
 	 * @param runnable
 	 */
 	public void RunSync(Runnable runnable) {

@@ -1,6 +1,6 @@
 package fr.nekotine.core.minigame;
 
-public interface GameEventListener {
+public interface GameHolder {
 
 	/**
 	 * Événement lancé juste après le démarrage de la partie.
@@ -15,5 +15,12 @@ public interface GameEventListener {
 	 * @param game
 	 */
 	public void onGameStop(Game game);
+	
+	/**
+	 * Retourne le nom du GameHolder utilisé pour représenter la game dans les logs
+	 * 
+	 * @return nom dans les logs
+	 */
+	public String logName();
 	
 }

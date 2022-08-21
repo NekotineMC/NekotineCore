@@ -1,7 +1,6 @@
 package fr.nekotine.core.lobby;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -13,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import dev.jorel.commandapi.CommandAPI;
 import fr.nekotine.core.inventory.PlayerInventorySnapshot;
 import fr.nekotine.core.minigame.Game;
-import fr.nekotine.core.minigame.GameEventListener;
+import fr.nekotine.core.minigame.GameHolder;
 import fr.nekotine.core.minigame.GameTeam;
 import fr.nekotine.core.util.UtilInventory;
 import net.kyori.adventure.audience.Audience;
@@ -29,13 +28,13 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
  * 
  * On peut voir le lobby comme un "GameBuilder" car il permet aux joueurs de configurer la partie avant de la lancer.
  * 
- * Le lobby est un outil pour configurer une game, il ne reçois de la game que
- * les événements spécifiés dans {@link fr.nekotine.core.minigame.GameEventListener GameEventListener}
+ * Le lobby est un outil pour configurer une game et la lancer, il ne reçois de la game que
+ * les événements spécifiés dans {@link fr.nekotine.core.minigame.GameHolder GameEventListener}
  * 
  * @author XxGoldenbluexX
  *
  */
-public class Lobby implements GameEventListener, ForwardingAudience{
+public class Lobby implements GameHolder, ForwardingAudience{
 
 	private LobbyModule _module;
 	
@@ -62,11 +61,7 @@ public class Lobby implements GameEventListener, ForwardingAudience{
 	}
 	
 	public List<Player> getPlayerList(){
-		List<Player> list = new LinkedList<>();
-		for (GameTeam team : _game.getTeams()) {
-			list.addAll(team.getPlayerList());
-		}
-		return list;
+		return _game.getPlayerList();
 	}
 	
 	/**
@@ -190,7 +185,7 @@ public class Lobby implements GameEventListener, ForwardingAudience{
 		var suffix = Component.text(String.format(" peut être rejoint [%d/%d]", getNumberOfPlayer(), getPlayerCap())).color(NamedTextColor.GREEN);
 		var fin = prefix.append(name).append(suffix);
 		fin.hoverEvent(HoverEvent.showText(Component.text("Cliquez pour rejoindre le lobby").color(NamedTextColor.GRAY)));
-		fin.clickEvent(ClickEvent.runCommand("lobby join " + name));
+		fin.clickEvent(ClickEvent.runCommand("lobby join " + MiniMessage.miniMessage().stripTags(_name)));
 		return fin;
 	}
 
@@ -202,6 +197,11 @@ public class Lobby implements GameEventListener, ForwardingAudience{
 	@Override
 	public void onGameStop(Game game) {
 		_isGameLaunched = false;
+	}
+
+	@Override
+	public String logName() {
+		return MiniMessage.miniMessage().stripTags(_name);
 	}
 	
 }
