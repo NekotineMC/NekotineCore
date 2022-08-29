@@ -3,4 +3,4 @@ version: 1.0
 main: fr.nekotine.core.plugin.CorePlugin
 api-version: 1.18
 author: XxGoldenbluexX
-depend: [ProtocolLib]
+softdepend: [ProtocolLib,CommandAPI]

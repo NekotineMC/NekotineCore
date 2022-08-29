@@ -12,9 +12,11 @@ public abstract class GameMode {
 	
 	private static final List<GameMode> AVAILABLE_GAMEMODES = new LinkedList<>();
 	
-	public static void registerGameMode(GameMode gamemode) {
-		if (!AVAILABLE_GAMEMODES.contains(gamemode)) {
-			AVAILABLE_GAMEMODES.add(gamemode);
+	public static void registerGameMode(GameMode... gamemode) {
+		for (GameMode gm : gamemode) {
+			if (!AVAILABLE_GAMEMODES.contains(gm)) {
+				AVAILABLE_GAMEMODES.add(gm);
+			}
 		}
 	}
 	

@@ -155,7 +155,7 @@ public abstract class PluginModule implements Listener {
 				InheritedModuleAnnotation annotation = field.getAnnotation(InheritedModuleAnnotation.class);
 				if (annotation != null) {
 					if (PluginModule.class.isAssignableFrom(field.getType())) {
-						if (!field.canAccess(field)) {
+						if (!field.canAccess(this)) {
 							field.setAccessible(true);
 						}
 						try {

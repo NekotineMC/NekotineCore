@@ -31,7 +31,7 @@ public abstract class Game implements Listener, ForwardingAudience{
 	
 	private boolean _isPlaying = false;
 	
-	protected int _playerCap = 10;
+	private int _playerCap = 10;
 	
 	public List<GameTeam> getTeams(){
 		return _teams;
