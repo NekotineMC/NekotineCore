@@ -3,9 +3,11 @@ package fr.nekotine.core.lobby;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import javax.annotation.Nonnull;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -56,7 +58,19 @@ public class Lobby implements GameHolder, ForwardingAudience{
 	
 	public Lobby(String name) {
 		_name = name;
-		_gamemode = GameMode.getGameModeList().get(0);
+		List<GameMode> gamemodes = GameMode.getGameModeList();
+		if (gamemodes.size() <= 0) {
+			Bukkit.getLogger().log(Level.WARNING, "Aucun mode de jeu n'a ete enregistre lors de la creation du lobby " + name);
+		}else {
+			setGameMode(gamemodes.get(0));
+		}
+	}
+	
+	public void setGameMode(GameMode gamemode) {
+		_gamemode = gamemode;
+		if (_game != null) {
+			_game.destroy();
+		}
 		_game = _gamemode.generateTypedGame();
 	}
 	
@@ -104,6 +118,7 @@ public class Lobby implements GameHolder, ForwardingAudience{
 	 */
 	public void register(LobbyModule module) {
 		_module = module;
+		_module.getLobbyList().add(this);
 		Component msg = makeEasyJoinMessage();
 		for (Player player : _module.getPlayersWithNoLobby()) {
 			player.sendMessage(msg);
@@ -183,9 +198,9 @@ public class Lobby implements GameHolder, ForwardingAudience{
 		var prefix = Component.text("Le lobby ").color(NamedTextColor.GREEN);
 		var name = MiniMessage.miniMessage().deserialize(_name);
 		var suffix = Component.text(String.format(" peut être rejoint [%d/%d]", getNumberOfPlayer(), getPlayerCap())).color(NamedTextColor.GREEN);
-		var fin = prefix.append(name).append(suffix);
-		fin.hoverEvent(HoverEvent.showText(Component.text("Cliquez pour rejoindre le lobby").color(NamedTextColor.GRAY)));
-		fin.clickEvent(ClickEvent.runCommand("lobby join " + MiniMessage.miniMessage().stripTags(_name)));
+		var fin = prefix.append(name).append(suffix)
+				.hoverEvent(HoverEvent.showText(Component.text("Cliquez pour rejoindre le lobby").color(NamedTextColor.GRAY)))
+				.clickEvent(ClickEvent.runCommand("/lobby join " + MiniMessage.miniMessage().stripTags(_name)));
 		return fin;
 	}
 

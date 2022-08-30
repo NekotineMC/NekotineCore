@@ -4,47 +4,50 @@ plugins {
 
 repositories {
     mavenLocal()
+    mavenCentral()
+    // PAPERMC
     maven {
-        url = uri('https://papermc.io/repo/repository/maven-public/')
+        url = uri("https://repo.papermc.io/repository/maven-public/")
     }
-
+    // PROTOCOLIB
     maven {
         url = uri('https://repo.dmulloy2.net/repository/public/')
     }
-
+    // NBT-API for CommandAPI
     maven {
-        url = uri('https://repo.maven.apache.org/maven2/')
+    	url = "https://repo.codemc.org/repository/maven-public/"
     }
 }
 
 dependencies {
-    implementation 'com.comphenix.protocol:ProtocolLib:4.7.0'
-    compileOnly 'io.papermc.paper:paper-api:1.18.2-R0.1-SNAPSHOT'
+	compileOnly group: "com.comphenix.protocol", name: "ProtocolLib", version: "4.8.0"
+	compileOnly group: "dev.jorel", name: "commandapi-core", version: "8.5.1"
+	compileOnly group: "io.papermc.paper", name: "paper-api", version: "1.18.2-R0.1-SNAPSHOT"
 }
+
+// CONFIGURATION
 
 group = 'fr.nekotine'
 version = '0.0.1-SNAPSHOT'
 description = 'NekotineCore'
-java.sourceCompatibility = JavaVersion.VERSION_1_8
+
+java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+}
+
+// DEFAULT TASKS
+
+defaultTasks 'build'
+
+// "UBER" TASKS
+
+tasks.register('dev') {
+	dependsOn('assemble', 'copyToDevServer')
+}
 
 // TASKS
 
-task customBuild {
-	
-}
-
-processResources{
-	doFirst{
-		file("$buildDir/resources/main").listFiles().each{
-			it.delete();
-		}
-	}
-}
-
-if (project.hasProperty('TestServerPluginDirectory')){
-	task copyJarToTestEnvironement(type: Copy) {  
-	    from "./build/libs"
-	    into "$TestServerPluginDirectory"
-	    outputs.upToDateWhen { false }
-	}
+tasks.register('copyToDevServer', Copy) {
+	from jar
+	into DevServerPluginDirectory
 }

@@ -20,6 +20,7 @@ import dev.jorel.commandapi.arguments.CustomArgument.MessageBuilder;
 import dev.jorel.commandapi.arguments.EntitySelector;
 import dev.jorel.commandapi.arguments.EntitySelectorArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
+import dev.jorel.commandapi.arguments.TextArgument;
 import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
 import net.kyori.adventure.text.Component;
@@ -28,6 +29,14 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
+/**
+ * Module permettant aux joueurs de créer des lobby pour héberger des parties.
+ * 
+ * Ce module utilise CommandAPI, veillez a l'activer via {@link CommandAPI#onEnable CommandAPI::onEnable} 
+ * 
+ * @author XxGoldenbluexX
+ *
+ */
 @ModuleNameAnnotation(Name = "EntityVisibilityModule")
 public class LobbyModule extends PluginModule{
 	
@@ -58,7 +67,7 @@ public class LobbyModule extends PluginModule{
 								String.format("[%d/%d]", lobby.getPlayerList().size(), lobby.getPlayerCap())));
 					}
 				}
-				return lobbyList.toArray(StringTooltip[]::new);
+				return list.toArray(StringTooltip[]::new);
 			}));
 	
 	private final Argument<Lobby> anyLobbyArgument =
@@ -78,7 +87,7 @@ public class LobbyModule extends PluginModule{
 							MiniMessage.miniMessage().stripTags(lobby.getName()),
 							String.format("[%d/%d]", lobby.getPlayerList().size(), lobby.getPlayerCap())));
 				}
-				return lobbyList.toArray(StringTooltip[]::new);
+				return list.toArray(StringTooltip[]::new);
 			}));
 	
 	@Override
@@ -115,7 +124,7 @@ public class LobbyModule extends PluginModule{
 	private void registerCommands() {
 		// create
 		CommandAPICommand c_create = new CommandAPICommand("create");
-		c_create.withArguments(new StringArgument("lobbyName"));
+		c_create.withArguments(new TextArgument("lobbyName"));
 		c_create.executes((sender, args) -> {
 			String rawName = (String) args[0];
 			new Lobby(rawName).register(this);
@@ -215,7 +224,7 @@ public class LobbyModule extends PluginModule{
 			}
 		});
 		// list
-		CommandAPICommand c_list = new CommandAPICommand("lobby");
+		CommandAPICommand c_list = new CommandAPICommand("list");
 		c_list.executesPlayer((sender, args) -> {
 			sender.sendMessage(Component.text("Un menu de type inventaire doit être fait ici").color(NamedTextColor.YELLOW));
 			sendLobbyList(sender, args);
@@ -252,29 +261,30 @@ public class LobbyModule extends PluginModule{
 			int playerCap = lobby.getPlayerCap();
 			String name = lobby.getName();
 			// Prefix
-			Component prefix = Component.text(String.format("[%d/%d] ", nbPlayer, playerCap));
+			var prefixBuilder = Component.text();
+			prefixBuilder.content(String.format("[%d/%d] ", nbPlayer, playerCap));
 			if (lobby.isGameLaunched()) {
-				prefix.color(NamedTextColor.GOLD);
+				prefixBuilder.color(NamedTextColor.GOLD);
 			}else {
 				if (nbPlayer >= playerCap) {
-					prefix.color(NamedTextColor.YELLOW);
+					prefixBuilder.color(NamedTextColor.YELLOW);
 				}else {
-					prefix.color(NamedTextColor.DARK_GREEN);
+					prefixBuilder.color(NamedTextColor.DARK_GREEN);
 				}
 			}
 			// final construction
-			prefix.append(MiniMessage.miniMessage().deserialize(name));
+			prefixBuilder.append(MiniMessage.miniMessage().deserialize(name));
 			if (lobby.isGameLaunched()) {
-				prefix.hoverEvent(HoverEvent.showText(Component.text("La partie est lancée").color(NamedTextColor.RED)));
+				prefixBuilder.hoverEvent(HoverEvent.showText(Component.text("La partie est lancée").color(NamedTextColor.RED)));
 			}else {
 				if (nbPlayer >= playerCap) {
-					prefix.hoverEvent(HoverEvent.showText(Component.text("Le lobby est plein").color(NamedTextColor.RED)));
+					prefixBuilder.hoverEvent(HoverEvent.showText(Component.text("Le lobby est plein").color(NamedTextColor.RED)));
 				}else {
-					prefix.clickEvent(ClickEvent.runCommand("lobby join " + name));
-					prefix.hoverEvent(HoverEvent.showText(Component.text("Cliquez pour rejoindre le lobby").color(NamedTextColor.GRAY)));
+					prefixBuilder.clickEvent(ClickEvent.runCommand("/lobby join " + MiniMessage.miniMessage().stripTags(name)));
+					prefixBuilder.hoverEvent(HoverEvent.showText(Component.text("Cliquez pour rejoindre le lobby").color(NamedTextColor.GRAY)));
 				}
 			}
-			e.sendMessage(prefix);
+			e.sendMessage(prefixBuilder);
 		}
 		e.sendMessage(Component.text("[- Fin de la liste -]").color(NamedTextColor.DARK_AQUA));
 	}
