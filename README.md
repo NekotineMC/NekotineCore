@@ -68,6 +68,16 @@ Voici la liste des modules:
 	
 	> XxGoldenbluexX devra jetter un oeil.
 	
+- `LobbyModule` ⧖
+
+	Module pour configurer une partie avant de la lancer.
+	Il permet aux joueurs de créer un lobby, y rentrer et d'y configurer une partie avec des interfaces graphiques 	avant de la lancer.
+	
+- `MapModule` ⧖
+
+	Module pour permettant au développeurs de créer facilement une carte pour un mode de jeu à partir de composants de    	base.
+	Ce module gère les commandes pour éditer les cartes et pour les enregistrer.
+	
 ***
 
 ## Autres
@@ -82,6 +92,7 @@ Le NekotineCore propose aussi d'autres outils tel que:
 - `UtilMobAi` Classe utilitaire pour faciliter la gestion des IA des mobs.
 - `UtilTime` pour réaliser et faires des tests sur des données temporelles.
 - `UtilParticle` pour réaliser des paternes prédéfinis avec des particules.
+- `UtilInventory` pour interragire facilement avec les inventaires et pour créer facilement des interfaces graphiques (Menu type coffre).
 - `AutoWrapper` et `WrapperBase` pour avoir un système de Wrapping générique.
 
 ***
