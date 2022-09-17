@@ -6,21 +6,21 @@ import java.util.List;
 import fr.nekotine.core.minigame.Game;
 import net.kyori.adventure.text.Component;
 
-public abstract class GameMode {
+public abstract class GameModeIdentifier {
 
 	// Static part
 	
-	private static final List<GameMode> AVAILABLE_GAMEMODES = new LinkedList<>();
+	private static final List<GameModeIdentifier> AVAILABLE_GAMEMODES = new LinkedList<>();
 	
-	public static void registerGameMode(GameMode... gamemode) {
-		for (GameMode gm : gamemode) {
+	public static void registerGameMode(GameModeIdentifier... gamemode) {
+		for (GameModeIdentifier gm : gamemode) {
 			if (!AVAILABLE_GAMEMODES.contains(gm)) {
 				AVAILABLE_GAMEMODES.add(gm);
 			}
 		}
 	}
 	
-	public static List<GameMode> getGameModeList(){
+	public static List<GameModeIdentifier> getGameModeList(){
 		return AVAILABLE_GAMEMODES;
 	}
 	
@@ -30,7 +30,7 @@ public abstract class GameMode {
 	
 	private final Component _name;
 	
-	public GameMode(String id, Component name) {
+	public GameModeIdentifier(String id, Component name) {
 		_id = id;
 		_name = name;
 	}
@@ -47,8 +47,8 @@ public abstract class GameMode {
 	
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof GameMode) {
-			GameMode gm = (GameMode)obj;
+		if (obj instanceof GameModeIdentifier) {
+			GameModeIdentifier gm = (GameModeIdentifier)obj;
 			return gm._id.equals(_id);
 		}
 		return false;

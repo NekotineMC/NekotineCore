@@ -32,7 +32,7 @@ public abstract class PluginModule implements Listener {
 	 * @return Le module souhaité.
 	 */
 	public PluginModule GetPluginModule(String name) {
-		return _manager.Get(_name);
+		return _manager.getModule(_name);
 	}
 	
 	/**
@@ -41,7 +41,7 @@ public abstract class PluginModule implements Listener {
 	 * @return Le module souhaité.
 	 */
 	public <T extends PluginModule> T GetPluginModule(Class<T> moduleType) {
-		return _manager.Get(moduleType);
+		return _manager.getModule(moduleType);
 	}
 	
 	/**
@@ -148,6 +148,7 @@ public abstract class PluginModule implements Listener {
 	 * Méhode à ne pas appeler, utilisez plutôt {@link #enable()}
 	 * Cette méthode est destinée à être surchargée par la classe enfant.
 	 */
+	@SuppressWarnings("unchecked")
 	protected void onEnable() {
 		// loading dependecies
 		try {
@@ -159,7 +160,7 @@ public abstract class PluginModule implements Listener {
 							field.setAccessible(true);
 						}
 						try {
-							field.set(this, _manager.Get(field.getType()));
+							field.set(this, _manager.getAbstractModule((Class<? extends PluginModule>) field.getType()));
 						} catch (Exception e) {
 						}
 					}

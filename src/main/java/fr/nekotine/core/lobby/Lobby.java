@@ -45,7 +45,7 @@ public class Lobby implements GameHolder, ForwardingAudience{
 	private String _name;
 	
 	@Nonnull
-	private  GameMode _gamemode;
+	private  GameModeIdentifier _gamemode;
 
 	private boolean _isGameLaunched = false;
 		
@@ -58,7 +58,7 @@ public class Lobby implements GameHolder, ForwardingAudience{
 	
 	public Lobby(String name) {
 		_name = name;
-		List<GameMode> gamemodes = GameMode.getGameModeList();
+		List<GameModeIdentifier> gamemodes = GameModeIdentifier.getGameModeList();
 		if (gamemodes.size() <= 0) {
 			Bukkit.getLogger().log(Level.WARNING, "Aucun mode de jeu n'a ete enregistre lors de la creation du lobby " + name);
 		}else {
@@ -66,7 +66,7 @@ public class Lobby implements GameHolder, ForwardingAudience{
 		}
 	}
 	
-	public void setGameMode(GameMode gamemode) {
+	public void setGameMode(GameModeIdentifier gamemode) {
 		_gamemode = gamemode;
 		if (_game != null) {
 			_game.destroy();
@@ -161,7 +161,6 @@ public class Lobby implements GameHolder, ForwardingAudience{
 		_playersOldGameMode.put(player, player.getGameMode());
 		// Add player
 		_game.addPlayerToOptimalTeam(player);
-		player.getInventory().clear();
 		// Update commands
 		CommandAPI.updateRequirements(player);
 	}

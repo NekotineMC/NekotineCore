@@ -20,9 +20,9 @@ repositories {
 }
 
 dependencies {
+	compileOnly group: "io.papermc.paper", name: "paper-api", version: "1.18.2-R0.1-SNAPSHOT"
 	compileOnly group: "com.comphenix.protocol", name: "ProtocolLib", version: "4.8.0"
 	compileOnly group: "dev.jorel", name: "commandapi-core", version: "8.5.1"
-	compileOnly group: "io.papermc.paper", name: "paper-api", version: "1.18.2-R0.1-SNAPSHOT"
 }
 
 // CONFIGURATION
@@ -30,6 +30,8 @@ dependencies {
 group = 'fr.nekotine'
 version = '0.0.1-SNAPSHOT'
 description = 'NekotineCore'
+
+compileJava.options.encoding = 'UTF-8'
 
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(17))
@@ -41,13 +43,17 @@ defaultTasks 'build'
 
 // "UBER" TASKS
 
-tasks.register('dev') {
+task dev {
+	group = "developpement"
+	description = "Compile un jar et l'envoie sur le server de développement"
 	dependsOn('assemble', 'copyToDevServer')
 }
 
 // TASKS
 
-tasks.register('copyToDevServer', Copy) {
+task copyToDevServer(type: Copy) {
+	group = "developpement"
+	description = "Envoie le jar sur le server de développement"
 	from jar
 	into DevServerPluginDirectory
 }

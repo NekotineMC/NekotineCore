@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.bukkit.entity.Player;
 
-import fr.nekotine.core.lobby.GameMode;
+import fr.nekotine.core.lobby.GameModeIdentifier;
 import fr.nekotine.core.minigame.Game;
 import fr.nekotine.core.minigame.GameTeam;
 import net.kyori.adventure.text.Component;
@@ -20,7 +20,7 @@ public class GM_TeamDeathMatch extends Game{
 		teamClone.get(0).addPlayer(player);
 	}
 	
-	public static final GameMode IDENTIFIER = new GameMode("tdm", Component.text("Match à mort en équipe").color(TextColor.color(255, 45, 45))) {
+	public static final GameModeIdentifier IDENTIFIER = new GameModeIdentifier("tdm", Component.text("Match à mort en équipe").color(TextColor.color(255, 45, 45))) {
 		@Override
 		public Game generateTypedGame() {
 			return new GM_TeamDeathMatch();

@@ -23,6 +23,7 @@ import dev.jorel.commandapi.arguments.StringArgument;
 import dev.jorel.commandapi.arguments.TextArgument;
 import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
+import fr.nekotine.core.text.Colors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -37,7 +38,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
  * @author XxGoldenbluexX
  *
  */
-@ModuleNameAnnotation(Name = "EntityVisibilityModule")
+@ModuleNameAnnotation(Name = "LobbyModule")
 public class LobbyModule extends PluginModule{
 	
 	private final List<Lobby> lobbyList = new LinkedList<>();
@@ -129,9 +130,9 @@ public class LobbyModule extends PluginModule{
 			String rawName = (String) args[0];
 			new Lobby(rawName).register(this);
 			sender.sendMessage(
-					Component.text("Un lobby nommé ").color(NamedTextColor.DARK_PURPLE)
+					Component.text("Un lobby nommé ").color(Colors.COMMAND_FEEDBACK)
 					.append(MiniMessage.miniMessage().deserialize(rawName))
-					.append(Component.text(" a été créé").color(NamedTextColor.DARK_PURPLE)));
+					.append(Component.text(" a été créé").color(Colors.COMMAND_FEEDBACK)));
 			});
 		// join
 		CommandAPICommand c_join = new CommandAPICommand("join");
@@ -165,7 +166,7 @@ public class LobbyModule extends PluginModule{
 					}
 				}
 				sender.sendMessage(
-						Component.text(String.format("%d joueurs ont été ajoutés au lobby ",nbAdded)).color(NamedTextColor.DARK_PURPLE)
+						Component.text(String.format("%d joueurs ont été ajoutés au lobby ",nbAdded)).color(Colors.COMMAND_FEEDBACK)
 						.append(MiniMessage.miniMessage().deserialize(lobby.getName())));
 			}else {
 				throw CommandAPI.fail("Lobby invalide");
@@ -203,7 +204,7 @@ public class LobbyModule extends PluginModule{
 					}
 				}
 				sender.sendMessage(
-						Component.text(String.format("%d joueurs ont été retirés du lobby ",nbKicked)).color(NamedTextColor.DARK_PURPLE)
+						Component.text(String.format("%d joueurs ont été retirés du lobby ",nbKicked)).color(Colors.COMMAND_FEEDBACK)
 						.append(MiniMessage.miniMessage().deserialize(lobby.getName())));
 			}else {
 				throw CommandAPI.fail("Lobby invalide");
@@ -216,9 +217,9 @@ public class LobbyModule extends PluginModule{
 			if (args[0] instanceof Lobby lobby) {
 				lobby.unregister();
 				sender.sendMessage(
-						Component.text("Le lobby nommé ").color(NamedTextColor.DARK_PURPLE)
+						Component.text("Le lobby nommé ").color(Colors.COMMAND_FEEDBACK)
 						.append(MiniMessage.miniMessage().deserialize(lobby.getName()))
-						.append(Component.text(" a été supprimé").color(NamedTextColor.DARK_PURPLE)));
+						.append(Component.text(" a été supprimé").color(Colors.COMMAND_FEEDBACK)));
 			}else {
 				throw CommandAPI.fail("Lobby invalide");
 			}
@@ -275,13 +276,13 @@ public class LobbyModule extends PluginModule{
 			// final construction
 			prefixBuilder.append(MiniMessage.miniMessage().deserialize(name));
 			if (lobby.isGameLaunched()) {
-				prefixBuilder.hoverEvent(HoverEvent.showText(Component.text("La partie est lancée").color(NamedTextColor.RED)));
+				prefixBuilder.hoverEvent(HoverEvent.showText(Component.text("La partie est lancée").color(Colors.HOVER_INVALID)));
 			}else {
 				if (nbPlayer >= playerCap) {
-					prefixBuilder.hoverEvent(HoverEvent.showText(Component.text("Le lobby est plein").color(NamedTextColor.RED)));
+					prefixBuilder.hoverEvent(HoverEvent.showText(Component.text("Le lobby est plein").color(Colors.HOVER_INVALID)));
 				}else {
 					prefixBuilder.clickEvent(ClickEvent.runCommand("/lobby join " + MiniMessage.miniMessage().stripTags(name)));
-					prefixBuilder.hoverEvent(HoverEvent.showText(Component.text("Cliquez pour rejoindre le lobby").color(NamedTextColor.GRAY)));
+					prefixBuilder.hoverEvent(HoverEvent.showText(Component.text("Cliquez pour rejoindre le lobby").color(Colors.HOVER_INFO)));
 				}
 			}
 			e.sendMessage(prefixBuilder);

@@ -10,13 +10,34 @@ import org.bukkit.plugin.java.JavaPlugin;
 import fr.nekotine.core.module.annotation.InheritedModuleAnnotation;
 import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
 
+/**
+ * Ioc pour les modules (des genres de service quoi).
+ * 
+ * @author XxGoldenbluexX
+ *
+ */
 public class ModuleManager{
 
+	private static ModuleManager instance = new ModuleManager();
+	
+	public static ModuleManager getInstance() {
+		if (instance == null) {
+			instance = new ModuleManager();
+		}
+		return instance;
+	}
+	
+	private ModuleManager() {};
+	
 	private Map<Class<? extends PluginModule>,PluginModule> modules = new HashMap<>();
 	private Map<String, Class<? extends PluginModule>> nameMappings = new HashMap<>();
 	
+	public static void Load(JavaPlugin plugin, @SuppressWarnings("unchecked") Class<? extends PluginModule>... moduleTypes) {
+		getInstance().load(plugin, moduleTypes);
+	}
+	
 	@SuppressWarnings("unchecked")
-	public void Load(JavaPlugin plugin, Class<? extends PluginModule>... moduleTypes) {
+	public void load(JavaPlugin plugin, Class<? extends PluginModule>... moduleTypes) {
 		for (Class<? extends PluginModule> moduleType : moduleTypes) {
 			for (Field field : moduleType.getDeclaredFields()) {
 				InheritedModuleAnnotation annotation = field.getAnnotation(InheritedModuleAnnotation.class);
@@ -57,17 +78,16 @@ public class ModuleManager{
 	 * @param moduleType Type du module à récuperer.
 	 * @return Le module désiré.
 	 */
+	public static <T extends PluginModule> T GetModule(Class<T> moduleType) {
+		return getInstance().getModule(moduleType);
+	}
+	
 	@SuppressWarnings("unchecked")
-	public <T extends PluginModule> T Get(Class<T> moduleType) {
+	public <T extends PluginModule> T getModule(Class<T> moduleType) {
 		return (T) modules.get(moduleType);
 	}
 	
-	/**
-	 * Récupère un module à partir de sa classe.
-	 * @param moduleType Type du module à récuperer.
-	 * @return Le module désiré.
-	 */
-	public PluginModule Get(Object moduleType) {
+	public PluginModule getAbstractModule(Class<? extends PluginModule> moduleType) {
 		return modules.get(moduleType);
 	}
 	
@@ -76,7 +96,16 @@ public class ModuleManager{
 	 * @param name Nom du module.
 	 * @return Le module souhaité.
 	 */
-	public PluginModule Get(String name) {
+	public static PluginModule GetModule(String name) {
+		return getInstance().getModule(name);
+	}
+	
+	/**
+	 * Récupère le module souhaité par son nom.
+	 * @param name Nom du module.
+	 * @return Le module souhaité.
+	 */
+	public PluginModule getModule(String name) {
 		Class<? extends PluginModule> clazz = nameMappings.get(name);
 		if (clazz != null) {
 			return modules.get(clazz);
@@ -87,10 +116,24 @@ public class ModuleManager{
 	/**
 	 * Active tous les modules.
 	 */
+	public static void EnableAll() {
+		getInstance().enableAll();
+	}
+	
+	/**
+	 * Active tous les modules.
+	 */
 	public void enableAll() {
 		for (PluginModule module : modules.values()) {
 			module.enable();
 		}
+	}
+	
+	/**
+	 * Désactive tous les modules.
+	 */
+	public static void DisableAll() {
+		getInstance().disableAll();
 	}
 	
 	/**

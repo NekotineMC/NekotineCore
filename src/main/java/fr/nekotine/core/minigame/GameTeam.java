@@ -6,16 +6,23 @@ import java.util.List;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import fr.nekotine.core.text.Colors;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 
 public class GameTeam implements ForwardingAudience{
 
 	private Component _name;
 	
 	private List<Player> _players = new LinkedList<>();
+	
+	public GameTeam() {}
+	
+	public GameTeam(Component name) {
+		this();
+		setName(name);
+	}
 	
 	public List<Player> getPlayerList(){
 		return _players;
@@ -36,7 +43,7 @@ public class GameTeam implements ForwardingAudience{
 	public void addPlayer(Player player) {
 		_players.add(player);
 		player.sendMessage(
-				Component.text("Vous avez rejoint l'équipe ").color(NamedTextColor.LIGHT_PURPLE)
+				Component.text("Vous avez rejoint l'équipe ").color(Colors.SELF_STATUS_CHANGE)
 				.append(_name));
 	}
 	
