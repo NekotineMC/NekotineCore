@@ -9,7 +9,7 @@ public final class MapComponentList<ComponentType extends MapComponent> extends 
 	private Class<ComponentType> _contentType;
 	
 	public MapComponentList(MapModule module,MapComponent owner, String name, Class<ComponentType> contentType) {
-		super(module, owner, name);
+		super(null, name);
 		_contentType = contentType;
 	}
 

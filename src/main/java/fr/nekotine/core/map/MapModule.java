@@ -2,7 +2,6 @@ package fr.nekotine.core.map;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
@@ -15,6 +14,7 @@ import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.StringArgument;
 import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
+import net.kyori.adventure.text.Component;
 
 @ModuleNameAnnotation(Name = "MappingModule")
 public class MapModule extends PluginModule{
@@ -69,7 +69,7 @@ public class MapModule extends PluginModule{
 			super.onEnable();
 			ConfigurationSerialization.registerClass(MapIdentifier.class);
 			mapFolder = new File(getPlugin().getDataFolder(), "Maps");
-			mapRegistryFile = new File(mapFolder,"maps.yaml");
+			mapRegistryFile = new File(mapFolder,"maps.yml");
 			try {
 				mapFolder.createNewFile();
 				mapRegistryFile.createNewFile();
@@ -87,7 +87,8 @@ public class MapModule extends PluginModule{
 				logException(Level.WARNING, "Un erreur est survenue lors du chargement du fichier maps.yaml, est-il au bon format?", e);
 				return;
 			}
-			for (var item : config.getList("maps", new ArrayList<MapIdentifier>(0))) {
+			for (var mapName : config.getStringList("mapList")) {
+				var item = config.get("map."+mapName);
 				if (item instanceof MapIdentifier map) {
 					AVAILABLE_MAPS.removeIf(m -> map.name().contentEquals(m.name()));
 					AVAILABLE_MAPS.add(map);
@@ -100,35 +101,63 @@ public class MapModule extends PluginModule{
 		 */
 		public void generateCommands() {
 			
-			new CommandAPICommand("map").withSubcommands(
-					new CommandAPICommand("add")
+			var mapCommand = new CommandAPICommand("map");
+			var addCommand = new CommandAPICommand("add")
 					.withArguments(new StringArgument("mapName"))
 					.executes((sender,args) -> {
 						//TODO addMap
-					})
-					,new CommandAPICommand("remove")
+					});
+			var removeCommand = new CommandAPICommand("remove")
 					.withArguments(new StringArgument("mapName"))
 					.executes((sender,args) -> {
 						//TODO removeMap
-					})
-					);
-			
+					});
+			var editCommand = new CommandAPICommand("edit").executes((sender,args)-> {
+				sender.sendMessage(Component.text("Oui"));
+			});
 			for (var mapType : AVAILABLE_MAP_TYPES) {
+				log(Level.INFO, "MAP TYPE = " + mapType.getId());
 				try {
-					for (var command : MapCommandGenerator.generateFor(mapType)) {
-						command.register();
-					}
+					editCommand.withSubcommands(MapCommandGenerator.generateFor(mapType).toArray(CommandAPICommand[]::new));
 				}catch(Exception e) {
 					logException(Level.WARNING, "Une erreur est survenue lors de la génération des commandes pour le type de map " + mapType.getId(), e);
 				}
 			}
+			mapCommand.withSubcommands(addCommand, removeCommand, editCommand);
+			try {
+				mapCommand.register();
+			}catch(Exception e) {
+				logException(Level.WARNING, "Une erreur est survenue lors de l'ajout des commandes de map au registre.", e);
+			}
 		}
 		
-		public void addMap(String mapName, Object[] more) {
-			
+		private void saveMapList() {
+			var config = new YamlConfiguration();
+			for (var map : getAvailableMaps()) {
+				config.getStringList("mapList").add(map.name());
+				config.addDefault("map."+map.name(), map);
+			}
+			try {
+				config.save(mapRegistryFile);
+			} catch (IOException e) {
+				logException(Level.WARNING, "Un erreur est survenue lors de l'enregistrement du fichier maps.yaml", e);
+			}
+		}
+		
+		public void addMap(MapIdentifier identifier) {
+			getAvailableMaps().add(identifier);
+			RunAsync(() -> saveMapList());
+		}
+		
+		public void removeMap(MapIdentifier identifier) {
+			getAvailableMaps().remove(identifier);
+			RunAsync(() -> saveMapList());
 		}
 		
 		public void removeMap(String mapName) {
-			
+			var map = getAvailableMaps().stream().filter(m -> m.name().contentEquals(mapName)).findFirst();
+			if (map.isPresent()) {
+				removeMap(map.get());
+			}
 		}
 }

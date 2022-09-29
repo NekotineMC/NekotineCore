@@ -6,12 +6,20 @@ public abstract class Map extends MapComponent{
 	
 	private MapIdentifier _id;
 	
-	public Map(MapModule module, MapIdentifier id, String name) {
-		super(module, null, id.name());
-		_id = id;
+	public Map(MapIdentifier type) {
+		super(null,type.name());
+		_id = type;
 	}
 	
-	public MapIdentifier getId() {
+	public MapIdentifier getType() {
 		return _id;
+	}
+	
+	public void load() {
+		
+	}
+	
+	public void save() {
+		
 	}
 }

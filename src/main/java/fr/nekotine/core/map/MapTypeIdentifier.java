@@ -19,7 +19,7 @@ public abstract class MapTypeIdentifier {
 		return mapType;
 	}
 	
-	public abstract Map generateTypedMap();
+	public abstract Map generateTypedMap(MapIdentifier id);
 	
 	@Override
 	public boolean equals(Object obj) {
