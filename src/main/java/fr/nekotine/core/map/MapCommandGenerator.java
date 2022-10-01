@@ -1,6 +1,7 @@
 package fr.nekotine.core.map;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,8 +15,11 @@ import dev.jorel.commandapi.arguments.LiteralArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
 import fr.nekotine.core.map.annotation.ComposingMap;
 import fr.nekotine.core.map.component.MapComponent;
+import fr.nekotine.core.map.component.MapComponentList;
 import fr.nekotine.core.map.component.MapElement;
 import fr.nekotine.core.map.component.PlaceMapElement;
+import fr.nekotine.core.map.graph.MapComponentListGraphNode;
+import fr.nekotine.core.map.graph.MapGraphNode;
 import fr.nekotine.core.map.graph.MapPlaceGraphNode;
 import fr.nekotine.core.module.ModuleManager;
 
@@ -67,39 +71,58 @@ public class MapCommandGenerator {
 		for (var componentField : clazz.getDeclaredFields()) {
 			ComposingMap annotation = componentField.getAnnotation(ComposingMap.class);
 			if (annotation != null) {
-				System.out.println("Valid component field = " + annotation.Name());
-				var litArg = new LiteralArgument(annotation.Name());
-				try {
-					componentField.setAccessible(true);
-					if (MapComponent.class.isAssignableFrom(componentField.getType())) {
-						System.out.println("phase 1");
-						List<MapCommand> fieldCommands = null;
-						if (MapElement.class.isAssignableFrom(componentField.getType())) {
-							System.out.println("phase 2");
-							fieldCommands = generateForElement((Class<? extends MapComponent>) componentField.getType(), componentField);
-							for (var fieldCommand : fieldCommands) {
-								System.out.println("phase 5 - oui");
-								fieldCommand.getArgumentList().add(0, litArg);
-								list.add(fieldCommand);
-							}
-						}else {
-							fieldCommands = generateForComponent((Class<? extends MapComponent>) componentField.getType());
-							for (var fieldCommand : fieldCommands) {
-								System.out.println("phase 5 - oui");
-								fieldCommand.getArgumentList().add(0, litArg);
-								fieldCommand.getNodeStack().add(0, new MapCommandGraphNode(componentField));
-								list.add(fieldCommand);
-							}
-						}
-					}
-				}catch(Exception e) {
-					System.out.println("wtf");
-					ModuleManager.GetModule(MapModule.class).logException(Level.WARNING,
-							"Erreur lors de la génération de commande pour le champ" + annotation.Name() + "de la classe " + clazz.getName(), e);
+				if (MapComponent.class.isAssignableFrom(componentField.getType())) {
+					list.addAll(generateForNode(annotation.Name(), (Class<? extends MapComponent>) componentField.getType(), componentField));
 				}
 			}
 		}
 		//
+		return list;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private static List<MapCommand> generateForNode(String nodeName, Class<? extends MapComponent> nodeType, Field gotoNode) {
+		var list = new LinkedList<MapCommand>();
+		LiteralArgument litArg = null;
+		if (nodeName != null) {
+			litArg = new LiteralArgument(nodeName);
+		}
+		try {
+			List<MapCommand> fieldCommands = null;
+			if (MapElement.class.isAssignableFrom(nodeType)) {
+				fieldCommands = generateForElement(nodeType, gotoNode);
+				for (var fieldCommand : fieldCommands) {
+					if (litArg != null) {
+						fieldCommand.getArgumentList().add(0, litArg);
+					}
+					list.add(fieldCommand);
+				}
+			}else {
+				if (MapComponentList.class.isAssignableFrom(nodeType)) {
+					var genericType = (Class<? extends MapComponent>)((ParameterizedType)nodeType.getGenericSuperclass()).getActualTypeArguments()[0];
+					fieldCommands = generateForNode(null, genericType, null);
+					for (var fieldCommand : fieldCommands) {
+						if (litArg != null) {
+							fieldCommand.getArgumentList().add(0, litArg);
+						}
+						fieldCommand.getNodeStack().add(0, new MapComponentListGraphNode(gotoNode));
+						list.add(fieldCommand);
+					}
+				}else {
+					fieldCommands = generateForComponent((Class<? extends MapComponent>) nodeType);
+					for (var fieldCommand : fieldCommands) {
+						if (litArg != null) {
+							fieldCommand.getArgumentList().add(0, litArg);
+						}
+						fieldCommand.getNodeStack().add(0, new MapGraphNode(gotoNode));
+						list.add(fieldCommand);
+					}
+				}
+			}
+		}catch(Exception e) {
+			ModuleManager.GetModule(MapModule.class).logException(Level.WARNING,
+					"Erreur lors de la génération de commande pour le champ " + nodeName + " de type " + nodeType.getName(), e);
+		}
 		return list;
 	}
 	

@@ -4,19 +4,20 @@ import java.util.LinkedList;
 import java.util.List;
 
 import dev.jorel.commandapi.arguments.Argument;
+import fr.nekotine.core.map.graph.MapGraphNode;
 
 public class MapCommand {
 
 	private List<Argument<?>> argumentStack;
 	
-	private List<MapCommandGraphNode> nodeStack;
+	private List<MapGraphNode> nodeStack;
 	
 	public MapCommand() {
 		argumentStack = new LinkedList<>();
 		nodeStack = new LinkedList<>();
 	}
 	
-	public MapCommand(List<Argument<?>> arguments, List<MapCommandGraphNode> nodes) {
+	public MapCommand(List<Argument<?>> arguments, List<MapGraphNode> nodes) {
 		argumentStack = new LinkedList<>(arguments);
 		nodeStack = new LinkedList<>(nodes);
 	}
@@ -25,7 +26,7 @@ public class MapCommand {
 		return argumentStack;
 	}
 	
-	public List<MapCommandGraphNode> getNodeStack() {
+	public List<MapGraphNode> getNodeStack() {
 		return nodeStack;
 	}
 	

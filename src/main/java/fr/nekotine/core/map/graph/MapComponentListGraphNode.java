@@ -5,19 +5,17 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 
-import org.bukkit.Location;
-
 import dev.jorel.commandapi.arguments.Argument;
 import dev.jorel.commandapi.arguments.LocationArgument;
 import dev.jorel.commandapi.arguments.LocationType;
 import fr.nekotine.core.map.MapModule;
 import fr.nekotine.core.map.component.MapComponent;
-import fr.nekotine.core.map.component.PlaceMapElement;
+import fr.nekotine.core.map.component.MapComponentList;
 import fr.nekotine.core.module.ModuleManager;
 
-public class MapPlaceGraphNode extends MapGraphNode{
+public final class MapComponentListGraphNode extends MapGraphNode {
 
-	public MapPlaceGraphNode(Field fromLastNode) {
+	public MapComponentListGraphNode(Field fromLastNode) {
 		super(fromLastNode);
 	}
 	
@@ -27,14 +25,15 @@ public class MapPlaceGraphNode extends MapGraphNode{
 		return list;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public MapComponent applyNode(MapComponent lastNode, LinkedList<Object> args) {
 		try {
+			MapComponentList<MapComponent> node = (MapComponentList<MapComponent>) lastNode;
 			if (_fromLastNode != null) {
-				var node = (PlaceMapElement)_fromLastNode.get(lastNode);
-				node.setValue((Location)args.get(0));
-				return node;
+				node = (MapComponentList<MapComponent>)_fromLastNode.get(lastNode);
 			}
+			var componentName = (String)args.pollFirst();
 		} catch (Exception e) {
 			ModuleManager.GetModule(MapModule.class).logException(Level.SEVERE, "Une erreur est survenue lors du parcours du graph de commande lors de son execution", e);
 		}
