@@ -35,7 +35,7 @@ Voici la liste des modules:
 
 - `UsableModule` ✓
 
-	Module pour faciliter la gestion des interactions entre le joueur et l'item dans sa main.
+	Module pour faciliter la gestion des interactions entre un joueur et un ItemStack.
 
 - `ItemChargeModule` ✓
 
@@ -94,6 +94,7 @@ Le NekotineCore propose aussi d'autres outils tel que:
 - `UtilParticle` pour réaliser des paternes prédéfinis avec des particules.
 - `UtilInventory` pour interragire facilement avec les inventaires et pour créer facilement des interfaces graphiques (Menu type coffre).
 - `AutoWrapper` et `WrapperBase` pour avoir un système de Wrapping générique.
+- `Snapshot` pour permettre la sauvegarde d'un élément à un instant précis.
 
 ***
 

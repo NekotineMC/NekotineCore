@@ -5,9 +5,9 @@ import java.util.List;
 
 import org.bukkit.entity.Player;
 
+import fr.nekotine.core.game.Game;
+import fr.nekotine.core.game.GameTeam;
 import fr.nekotine.core.lobby.GameModeIdentifier;
-import fr.nekotine.core.minigame.Game;
-import fr.nekotine.core.minigame.GameTeam;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 

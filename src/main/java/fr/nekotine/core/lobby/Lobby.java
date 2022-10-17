@@ -12,10 +12,9 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import dev.jorel.commandapi.CommandAPI;
-import fr.nekotine.core.inventory.PlayerInventorySnapshot;
-import fr.nekotine.core.minigame.Game;
-import fr.nekotine.core.minigame.GameHolder;
-import fr.nekotine.core.minigame.GameTeam;
+import fr.nekotine.core.game.Game;
+import fr.nekotine.core.game.GameTeam;
+import fr.nekotine.core.snapshot.PlayerInventorySnapshot;
 import fr.nekotine.core.util.UtilInventory;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
@@ -36,7 +35,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
  * @author XxGoldenbluexX
  *
  */
-public class Lobby implements GameHolder, ForwardingAudience{
+public class Lobby implements ForwardingAudience{
 
 	private LobbyModule _module;
 	
@@ -201,21 +200,6 @@ public class Lobby implements GameHolder, ForwardingAudience{
 				.hoverEvent(HoverEvent.showText(Component.text("Cliquez pour rejoindre le lobby").color(NamedTextColor.GRAY)))
 				.clickEvent(ClickEvent.runCommand("/lobby join " + MiniMessage.miniMessage().stripTags(_name)));
 		return fin;
-	}
-
-	@Override
-	public void onGameStart(Game game) {
-		_isGameLaunched = true;
-	}
-
-	@Override
-	public void onGameStop(Game game) {
-		_isGameLaunched = false;
-	}
-
-	@Override
-	public String logName() {
-		return MiniMessage.miniMessage().stripTags(_name);
 	}
 	
 }

@@ -1,7 +1,11 @@
 package fr.nekotine.core.map;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
@@ -159,5 +163,36 @@ public class MapModule extends PluginModule{
 			if (map.isPresent()) {
 				removeMap(map.get());
 			}
+		}
+		
+		public synchronized void saveMapInstance(GameMap map) {
+			File mapFile = new File(mapFolder, map.getId().name());
+			try (var fos = new FileOutputStream(mapFile);
+					var oos = new ObjectOutputStream(fos)){
+				oos.writeObject(map);
+				oos.flush();
+			}catch (Exception e) {
+				logException(Level.SEVERE, "Une erreur est survenue lors de la sauvegarde de la carte "+map.getId().name(), e);
+			}
+		}
+		
+		/**
+		 * Charge la carte a partir de s,on fichier, retourne une nouvelle carte en cas échéant.
+		 * @param identifier
+		 * @return
+		 */
+		public GameMap loadMap(MapIdentifier identifier) {
+			File mapFile = new File(mapFolder, identifier.name());
+			try (var fis = new FileInputStream(mapFile);
+					var ois = new ObjectInputStream(fis)){
+				return (GameMap) ois.readObject();
+			}catch (Exception e) {
+				logException(Level.SEVERE, "Une erreur est survenue lors du chargement de la carte "+identifier.name(), e);
+			}
+			return identifier.type().generateTypedMap(identifier);
+		}
+		
+		public void saveMapInstanceAsync(GameMap map) {
+			RunAsync(() -> saveMapInstance(map));
 		}
 }

@@ -2,20 +2,20 @@ package fr.nekotine.core.map.component;
 
 import java.io.Serializable;
 
-import fr.nekotine.core.map.Map;
+import fr.nekotine.core.map.GameMap;
 
 public abstract class MapComponent implements Serializable{
 
 	private String _name;
 	
-	private Map _map;
+	private GameMap _map;
 	
 	/**
 	 * Un constructeur utilisé lors de la construction de l'arbre de commands, NE PAS SURCHARGER DANS LES CLASSES ENFANTS
 	 * @param owner
 	 * @param name
 	 */
-	public MapComponent(Map map, String name) {
+	public MapComponent(GameMap map, String name) {
 		_name = name;
 		_map = map;
 	}
@@ -24,9 +24,9 @@ public abstract class MapComponent implements Serializable{
 		return _name;
 	}
 	
-	public Map getMap() {
-		if (_map == null && Map.class.isAssignableFrom(getClass())) {
-			_map = (Map) this;
+	public GameMap getMap() {
+		if (_map == null && GameMap.class.isAssignableFrom(getClass())) {
+			_map = (GameMap) this;
 		}
 		return _map;
 	}

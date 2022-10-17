@@ -1,4 +1,4 @@
-package fr.nekotine.core.minigame;
+package fr.nekotine.core.game;
 
 import java.util.LinkedList;
 import java.util.List;

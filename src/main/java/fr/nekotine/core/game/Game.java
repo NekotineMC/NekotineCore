@@ -1,37 +1,98 @@
-package fr.nekotine.core.minigame;
+package fr.nekotine.core.game;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
+import fr.nekotine.core.game.event.GameStartEvent;
+import fr.nekotine.core.plugin.CorePlugin;
 import fr.nekotine.core.util.UtilEvent;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 
 /**
- * Représente le mode de jeu actif tout au long de la partie
+ * Représente le mode de jeu actif tout au long de la partie.
+ * Cette classe implemente org.bukkit.event.Listener.
+ * Elle est apte à recevoir des évenements Bukkit SEULEMENT QUAND LA PARTIE EST EN COURS.
  * 
  * @author XxGoldenbluexX
  *
  */
 public abstract class Game implements Listener, ForwardingAudience{
-
-	protected JavaPlugin _plugin;
 	
-	private GameHolder _holder;
+	private List<GameTeam> _teams = new LinkedList<>();
 	
-	protected List<GameTeam> _teams = new LinkedList<>();
+	private Map<String, GamePhase> _gamePhases = new HashMap<>();
+	
+	private GamePhase currentGamePhase;
 	
 	private boolean _isPlaying = false;
 	
 	private int _playerCap = 10;
+	
+	public Game() {
+		registerTeams(_teams);
+		registerGamePhases(_gamePhases);
+	}
+	
+	/**
+	 * Cette fonction est appelée à la création de la partie pour mettre en place les équipes.
+	 * @param teamList liste des équipes a completer.
+	 */
+	public abstract void registerTeams(List<GameTeam> teamList);
+	
+	/**
+	 * Cette fonction est appelée à la création de la partie pour mettre en place les différentes phases de jeu.
+	 * @param _gamePhasesMap
+	 */
+	public abstract void registerGamePhases(Map<String, GamePhase> _gamePhasesMap);
+	
+	/**
+	 * Changement de phase pour la phase indiquée par la clef donnée en argument.
+	 * @param phaseKey la clef pointant vers la phase voulue
+	 */
+	public void GotoGamePhase(String phaseKey){
+		var phase = _gamePhases.get(phaseKey);
+		if (phase != null) {
+			if (currentGamePhase != null) {
+				try {
+					currentGamePhase.end();
+				}catch(Exception e) {
+					var plugin = CorePlugin.getCorePluginInstance();
+					var msg = "Une erreur est survenue lors de la fin de la GamePhase actuelle.";
+					for (var key : _gamePhases.keySet()) {
+						if (_gamePhases.get(key) == currentGamePhase) {
+							msg = "Une erreur est survenue lors de la fin de la GamePhase "+key;
+							break;
+						}
+					}
+					plugin.getLogger().log(Level.SEVERE, msg, e);
+				}
+			}
+			currentGamePhase = phase;
+			try {
+				currentGamePhase.begin();
+			}catch(Exception e) {
+				var plugin = CorePlugin.getCorePluginInstance();
+				var msg = "Une erreur est survenue lors du début de la GamePhase " + phaseKey;
+				plugin.getLogger().log(Level.SEVERE, msg, e);
+			}
+		}
+	}
+	
+	/**
+	 * Méthode appelée naturellement au début de la partie.
+	 * Elle permet d'aller vers la première phase.
+	 */
+	public abstract void GotoFirstPhase();
 	
 	public List<GameTeam> getTeams(){
 		return _teams;
@@ -72,22 +133,21 @@ public abstract class Game implements Listener, ForwardingAudience{
 	 * @param plugin Une référence au plugin
 	 * @return Si oui ou non le démarrage est un succes.
 	 */
-	public final boolean Start(JavaPlugin plugin) {
+	public final boolean Start() {
 		if (_isPlaying) return true;
-		_plugin = plugin;
+		var plugin = CorePlugin.getCorePluginInstance();
 		try {
 			setup();
 		}catch(Exception e) {
 			var msg = "Une erreur est survenue lors du demarrage de la partie";
-			if (_holder != null) msg += ' ' + _holder.logName();
-			_plugin.getLogger().log(Level.SEVERE, msg, e);
+			plugin.getLogger().log(Level.SEVERE, msg, e);
 			return false;
 		}
+		GotoFirstPhase();
 		UtilEvent.Register(plugin, this);
 		_isPlaying = true;
-		if (_holder != null) {
-			_holder.onGameStart(this);
-		}
+		var startEvent = new GameStartEvent(this);
+		startEvent.callEvent();
 		return true;
 	}
 	
@@ -103,43 +163,37 @@ public abstract class Game implements Listener, ForwardingAudience{
 	public final boolean Stop() {
 		if (!_isPlaying) return false;
 		// collect game data
+		var plugin = CorePlugin.getCorePluginInstance();
 		try {
 			collectGameData();
 		}catch(Exception e) {
 			var msg = "Une erreur est survenue lors de la recuperation des donnees de la partie";
-			if (_holder != null) msg += ' ' + _holder.logName();
-			_plugin.getLogger().log(Level.WARNING, msg, e);
+			plugin.getLogger().log(Level.WARNING, msg, e);
 		}
 		// end phase
 		try {
 			end();
 		}catch(Exception e) {
 			var msg = "Une erreur est survenue lors de l'arret de la partie";
-			if (_holder != null) msg += ' ' + _holder.logName();
-			_plugin.getLogger().log(Level.SEVERE, msg, e);
+			plugin.getLogger().log(Level.SEVERE, msg, e);
 			return false;
 		}
 		// manage game data
 		try {
-			final Logger log = _plugin.getLogger();
-			final String suffix = _holder != null ? ' ' + _holder.logName() : "";
-			Bukkit.getScheduler().runTaskAsynchronously(_plugin, () -> {
+			final Logger log = plugin.getLogger();
+			Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
 				try {
 					asyncManageGameData();
 				}catch(Exception e) {
-					log.log(Level.WARNING, "Une erreur est survenue de façon asynchrone lors de la gestion des donnees de la partie" + suffix, e);
+					log.log(Level.WARNING, "Une erreur est survenue de façon asynchrone lors de la gestion des donnees de la partie", e);
 				}
 			});
 		}catch(Exception e) {
 			var msg = "Une erreur est survenue lors de la gestion des donnees de la partie";
-			if (_holder != null) msg += ' ' + _holder.logName();
-			_plugin.getLogger().log(Level.WARNING, msg, e);
+			plugin.getLogger().log(Level.WARNING, msg, e);
 		}
 		UtilEvent.Unregister(this);
 		_isPlaying = false;
-		if (_holder != null) {
-			_holder.onGameStop(this);
-		}
 		return true;
 	}
 	
@@ -149,19 +203,16 @@ public abstract class Game implements Listener, ForwardingAudience{
 	 */
 	public final boolean Abort() {
 		if (!_isPlaying) return false;
+		var plugin = CorePlugin.getCorePluginInstance();
 		try {
 			end();
 		}catch(Exception e) {
 			var msg = "Une erreur est survenue lors de l'arret de la partie";
-			if (_holder != null) msg += ' ' + _holder.logName();
-			_plugin.getLogger().log(Level.SEVERE, msg, e);
+			plugin.getLogger().log(Level.SEVERE, msg, e);
 			return false;
 		}
 		UtilEvent.Unregister(this);
 		_isPlaying = false;
-		if (_holder != null) {
-			_holder.onGameStop(this);
-		}
 		return true;
 	}
 	
@@ -223,5 +274,7 @@ public abstract class Game implements Listener, ForwardingAudience{
 	public @NotNull Iterable<? extends Audience> audiences() {
 		return getPlayerList();
 	}
+	
+
 	
 }

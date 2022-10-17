@@ -48,13 +48,12 @@ public class MapCommandGenerator {
 						var argList = new LinkedList<Object>();
 						argList.addAll(Arrays.asList(args));
 						MapIdentifier mapId = (MapIdentifier) argList.pollFirst();
-						var map = mapId.type().generateTypedMap(mapId);
-						map.load();
+						var map = mapId.loadMap();//TODO Changer 
 						MapComponent prevNode = map;
 						for (var node : mapCom.getNodeStack()) {
 							prevNode = node.applyNode(prevNode, argList);
 						}
-						map.save();
+						map.saveAsync();
 					})
 					);
 		}

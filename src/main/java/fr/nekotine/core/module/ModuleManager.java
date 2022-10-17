@@ -32,7 +32,8 @@ public class ModuleManager{
 	private Map<Class<? extends PluginModule>,PluginModule> modules = new HashMap<>();
 	private Map<String, Class<? extends PluginModule>> nameMappings = new HashMap<>();
 	
-	public static void Load(JavaPlugin plugin, @SuppressWarnings("unchecked") Class<? extends PluginModule>... moduleTypes) {
+	@SafeVarargs
+	public static void Load(JavaPlugin plugin, Class<? extends PluginModule>... moduleTypes) {
 		getInstance().load(plugin, moduleTypes);
 	}
 	

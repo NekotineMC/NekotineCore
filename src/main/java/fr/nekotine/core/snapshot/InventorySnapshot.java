@@ -1,11 +1,11 @@
-package fr.nekotine.core.inventory;
+package fr.nekotine.core.snapshot;
 
 import java.util.Arrays;
 
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-public class InventorySnapshot{
+public class InventorySnapshot implements Snapshot<Inventory>{
 	
 	protected ItemStack[] content;
 	
@@ -17,8 +17,9 @@ public class InventorySnapshot{
 	 * @param holder
 	 * @return la snapshot
 	 */
-	public void snapshot(Inventory inventory) {
+	public Snapshot<Inventory> snapshot(Inventory inventory) {
 		content = inventory.getContents();
+		return this;
 	}
 	
 	/**
@@ -28,11 +29,12 @@ public class InventorySnapshot{
 	 * @param holder
 	 * @return la snapshot
 	 */
-	public void deepSnapshot(Inventory inventory) {
+	public Snapshot<Inventory> deepSnapshot(Inventory inventory) {
 		content = Arrays.asList(inventory.getContents()).stream().map(base -> base.clone()).toArray(ItemStack[]::new);
+		return this;
 	}
 	
-	public void fill(Inventory inventory) {
+	public void patch(Inventory inventory) {
 		inventory.setContents(content);
 	}
 	

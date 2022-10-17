@@ -1,4 +1,4 @@
-package fr.nekotine.core.inventory;
+package fr.nekotine.core.snapshot;
 
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -9,7 +9,9 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-public class PlayerInventorySnapshot extends InventorySnapshot{
+public class PlayerInventorySnapshot implements Snapshot<PlayerInventory>{
+	
+	protected ItemStack[] content;
 	
 	private Map<EquipmentSlot, ItemStack> equipmentSlots = new HashMap<>();
 	
@@ -24,21 +26,23 @@ public class PlayerInventorySnapshot extends InventorySnapshot{
 			EquipmentSlot.OFF_HAND
 			);
 	
-	public void snapshot(PlayerInventory inventory) {
+	public Snapshot<PlayerInventory> snapshot(PlayerInventory inventory) {
 		content = inventory.getContents();
 		for (EquipmentSlot slot : savedSlots) {
 			equipmentSlots.put(slot, inventory.getItem(slot));
 		}
+		return this;
 	}
 	
-	public void deepSnapshot(PlayerInventory inventory) {
+	public Snapshot<PlayerInventory> deepSnapshot(PlayerInventory inventory) {
 		content = Arrays.asList(inventory.getContents()).stream().map(base -> base.clone()).toArray(ItemStack[]::new);
 		for (EquipmentSlot slot : savedSlots) {
 			equipmentSlots.put(slot, inventory.getItem(slot).clone());
 		}
+		return this;
 	}
 	
-	public void fill(PlayerInventory inventory) {
+	public void patch(PlayerInventory inventory) {
 		inventory.setContents(content);
 		for (EquipmentSlot slot : savedSlots) {
 			inventory.setItem(slot, equipmentSlots.get(slot));

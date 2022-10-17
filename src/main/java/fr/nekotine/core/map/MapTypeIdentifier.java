@@ -4,9 +4,9 @@ public abstract class MapTypeIdentifier {
 
 	private final String _id;
 	
-	private final Class<? extends Map> mapType;
+	private final Class<? extends GameMap> mapType;
 	
-	public MapTypeIdentifier(String id, Class<? extends Map> mapTypeClass) {
+	public MapTypeIdentifier(String id, Class<? extends GameMap> mapTypeClass) {
 		_id = id;
 		mapType = mapTypeClass;
 	}
@@ -15,11 +15,11 @@ public abstract class MapTypeIdentifier {
 		return _id;
 	}
 	
-	public Class<? extends Map> getMapTypeClass(){
+	public Class<? extends GameMap> getMapTypeClass(){
 		return mapType;
 	}
 	
-	public abstract Map generateTypedMap(MapIdentifier id);
+	public abstract GameMap generateTypedMap(MapIdentifier id);
 	
 	@Override
 	public boolean equals(Object obj) {

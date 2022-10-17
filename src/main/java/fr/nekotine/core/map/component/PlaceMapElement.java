@@ -2,11 +2,11 @@ package fr.nekotine.core.map.component;
 
 import org.bukkit.Location;
 
-import fr.nekotine.core.map.Map;
+import fr.nekotine.core.map.GameMap;
 
 public class PlaceMapElement extends MapComponent implements MapElement {
 
-	public PlaceMapElement(Map map, String name) {
+	public PlaceMapElement(GameMap map, String name) {
 		super(map, name);
 	}
 

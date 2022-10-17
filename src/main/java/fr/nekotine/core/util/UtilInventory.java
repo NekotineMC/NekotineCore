@@ -1,10 +1,13 @@
 package fr.nekotine.core.util;
 
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.PlayerInventory;
 
-import fr.nekotine.core.inventory.InventorySnapshot;
-import fr.nekotine.core.inventory.PlayerInventorySnapshot;
+import fr.nekotine.core.snapshot.InventorySnapshot;
+import fr.nekotine.core.snapshot.PlayerInventorySnapshot;
+import fr.nekotine.core.snapshot.Snapshot;
 
 /**
  * Classe utilitaire pour les inventaires minecraft
@@ -22,7 +25,7 @@ public class UtilInventory {
 	 * @param holder
 	 * @return la snapshot
 	 */
-	public static InventorySnapshot snapshot(InventoryHolder holder) {
+	public static Snapshot<Inventory> snapshot(InventoryHolder holder) {
 		var snap = new InventorySnapshot();
 		snap.snapshot(holder.getInventory());
 		return snap;
@@ -35,7 +38,7 @@ public class UtilInventory {
 	 * @param holder
 	 * @return la snapshot
 	 */
-	public static InventorySnapshot deepSnapshot(InventoryHolder holder) {
+	public static Snapshot<Inventory> deepSnapshot(InventoryHolder holder) {
 		var snap = new InventorySnapshot();
 		snap.deepSnapshot(holder.getInventory());
 		return snap;
@@ -49,7 +52,7 @@ public class UtilInventory {
 	 * @param holder
 	 * @return la snapshot
 	 */
-	public static PlayerInventorySnapshot snapshot(HumanEntity holder) {
+	public static Snapshot<PlayerInventory> snapshot(HumanEntity holder) {
 		var snap = new PlayerInventorySnapshot();
 		snap.snapshot(holder.getInventory());
 		return snap;
@@ -62,7 +65,7 @@ public class UtilInventory {
 	 * @param holder
 	 * @return la snapshot
 	 */
-	public static PlayerInventorySnapshot deepSnapshot(HumanEntity holder) {
+	public static Snapshot<PlayerInventory> deepSnapshot(HumanEntity holder) {
 		var snap = new PlayerInventorySnapshot();
 		snap.deepSnapshot(holder.getInventory());
 		return snap;
@@ -73,16 +76,16 @@ public class UtilInventory {
 	 * @param holder
 	 * @param snapshot
 	 */
-	public static void fill(InventoryHolder holder, InventorySnapshot snapshot) {
-		snapshot.fill(holder.getInventory());
+	public static void fill(InventoryHolder holder, Snapshot<Inventory> snapshot) {
+		snapshot.patch(holder.getInventory());
 	}
 	/**
 	 * Remplis l'inventaire avec les {@link org.bukkit.inventory.ItemStack ItemStack} de la snapshot.
 	 * @param holder
 	 * @param snapshot
 	 */
-	public static void fill(HumanEntity holder, PlayerInventorySnapshot snapshot) {
-		snapshot.fill(holder.getInventory());
+	public static void fill(HumanEntity holder, Snapshot<PlayerInventory> snapshot) {
+		snapshot.patch(holder.getInventory());
 	}
 	
 }

@@ -3,7 +3,7 @@ package fr.nekotine.core.lobby;
 import java.util.LinkedList;
 import java.util.List;
 
-import fr.nekotine.core.minigame.Game;
+import fr.nekotine.core.game.Game;
 import net.kyori.adventure.text.Component;
 
 public abstract class GameModeIdentifier {
