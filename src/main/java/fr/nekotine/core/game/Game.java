@@ -32,9 +32,9 @@ public abstract class Game implements Listener, ForwardingAudience{
 	
 	private List<GameTeam> _teams = new LinkedList<>();
 	
-	private Map<String, GamePhase> _gamePhases = new HashMap<>();
+	private Map<String, GamePhase<? extends Game>> _gamePhases = new HashMap<>();
 	
-	private GamePhase currentGamePhase;
+	private GamePhase<? extends Game> currentGamePhase;
 	
 	private boolean _isPlaying = false;
 	
@@ -55,7 +55,7 @@ public abstract class Game implements Listener, ForwardingAudience{
 	 * Cette fonction est appelée à la création de la partie pour mettre en place les différentes phases de jeu.
 	 * @param _gamePhasesMap
 	 */
-	public abstract void registerGamePhases(Map<String, GamePhase> _gamePhasesMap);
+	public abstract void registerGamePhases(Map<String, GamePhase<? extends Game>> _gamePhasesMap);
 	
 	/**
 	 * Changement de phase pour la phase indiquée par la clef donnée en argument.
@@ -296,7 +296,7 @@ public abstract class Game implements Listener, ForwardingAudience{
 		
 	}
 	
-	public GamePhase getCurrentGamePhase() {
+	public GamePhase<? extends Game> getCurrentGamePhase() {
 		return currentGamePhase;
 	}
 	

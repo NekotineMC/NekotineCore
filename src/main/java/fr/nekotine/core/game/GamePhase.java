@@ -2,15 +2,15 @@ package fr.nekotine.core.game;
 
 import org.bukkit.entity.Player;
 
-public abstract class GamePhase {
+public abstract class GamePhase<GameType extends Game>{
 	
-	public GamePhase(Game game) {
+	public GamePhase(GameType game) {
 		_game = game;
 	}
 	
-	private final Game _game;
+	private final GameType _game;
 	
-	public Game getGame() {
+	public GameType getGame() {
 		return _game;
 	}
 	
