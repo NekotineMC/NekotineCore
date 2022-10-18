@@ -12,6 +12,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Llama;
 import org.bukkit.entity.Slime;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 public class EntityUtil {
@@ -126,5 +127,15 @@ public class EntityUtil {
 			}
 		});
 		return nearby;
+	}
+	
+	/**
+	 * Retire tous les effets de potion minecraft à cette {@link org.bukkit.entity.LivingEntity LicingEntity}.
+	 * @param entity l'entitée vidée de ses effets.
+	 */
+	public static void clearPotionEffects(LivingEntity entity) {
+		for (var effectType : PotionEffectType.values()) {
+			entity.removePotionEffect(effectType);
+		}
 	}
 }
