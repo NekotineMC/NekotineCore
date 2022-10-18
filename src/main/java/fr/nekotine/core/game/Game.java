@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 
+import fr.nekotine.core.game.event.GamePlayerLeaveEvent;
 import fr.nekotine.core.game.event.GameStartEvent;
 import fr.nekotine.core.plugin.CorePlugin;
 import fr.nekotine.core.util.UtilEvent;
@@ -172,6 +173,7 @@ public abstract class Game implements Listener, ForwardingAudience{
 		}
 		// end phase
 		try {
+			currentGamePhase.end();
 			end();
 		}catch(Exception e) {
 			var msg = "Une erreur est survenue lors de l'arret de la partie";
@@ -205,6 +207,7 @@ public abstract class Game implements Listener, ForwardingAudience{
 		if (!_isPlaying) return false;
 		var plugin = CorePlugin.getCorePluginInstance();
 		try {
+			currentGamePhase.end();
 			end();
 		}catch(Exception e) {
 			var msg = "Une erreur est survenue lors de l'arret de la partie";
@@ -257,9 +260,21 @@ public abstract class Game implements Listener, ForwardingAudience{
 	}
 	
 	public void removePlayer(Player player) {
+		onPlayerPreLeave(player);
 		for (GameTeam team : _teams) {
 			team.removePlayer(player);
 		}
+		var event = new GamePlayerLeaveEvent(this, player);
+		event.callEvent();
+	}
+	
+	/**
+	 * Methode appelée lors juste avant le retrait d'un joueur.
+	 * Cette methode est utile pour arrêter la partie ou équilibrer les équipes si la partie est en cours.
+	 * @param player le joueur allant quitter.
+	 */
+	public void onPlayerPreLeave(Player player) {
+		
 	}
 	
 	public List<Player> getPlayerList(){
