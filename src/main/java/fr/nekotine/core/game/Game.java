@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 
 import fr.nekotine.core.game.event.GamePlayerLeaveEvent;
 import fr.nekotine.core.game.event.GameStartEvent;
+import fr.nekotine.core.game.exception.PlayerNotInGameException;
 import fr.nekotine.core.plugin.CorePlugin;
 import fr.nekotine.core.util.UtilEvent;
 import net.kyori.adventure.audience.Audience;
@@ -256,16 +257,34 @@ public abstract class Game implements Listener, ForwardingAudience{
 	 * @param player
 	 */
 	public void addPlayerToOptimalTeam(Player player) {
-		_teams.get(0).addPlayer(player);
+		if (!containsPlayer(player)) {
+			_teams.get(0).addPlayer(player);
+		}
 	}
 	
 	public void removePlayer(Player player) {
-		onPlayerPreLeave(player);
-		for (GameTeam team : _teams) {
-			team.removePlayer(player);
+		if (containsPlayer(player)) {
+			onPlayerPreLeave(player);
+			for (GameTeam team : _teams) {
+				team.removePlayer(player);
+			}
+			var event = new GamePlayerLeaveEvent(this, player);
+			event.callEvent();
 		}
-		var event = new GamePlayerLeaveEvent(this, player);
-		event.callEvent();
+	}
+	
+	/**
+	 * Retourne si oui ou non le joueur est dans cette partie.
+	 * @param player
+	 * @return
+	 */
+	public boolean containsPlayer(Player player) {
+		for (var team : getTeams()) {
+			if (team.containsPlayer(player)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	/**
@@ -275,6 +294,10 @@ public abstract class Game implements Listener, ForwardingAudience{
 	 */
 	public void onPlayerPreLeave(Player player) {
 		
+	}
+	
+	public GamePhase getCurrentGamePhase() {
+		return currentGamePhase;
 	}
 	
 	public List<Player> getPlayerList(){
@@ -290,6 +313,13 @@ public abstract class Game implements Listener, ForwardingAudience{
 		return getPlayerList();
 	}
 	
-
+	public GameTeam getPlayerTeam(Player player){
+		for (var team : getTeams()) {
+			if (team.containsPlayer(player)) {
+				return team;
+			}
+		}
+		throw new PlayerNotInGameException();
+	}
 	
 }

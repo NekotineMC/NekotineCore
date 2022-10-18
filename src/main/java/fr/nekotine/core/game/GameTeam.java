@@ -61,6 +61,15 @@ public class GameTeam implements ForwardingAudience{
 	public void clear() {
 		_players.clear();
 	}
+	
+	/**
+	 * Retourne si oui ou non le joueur est dans cette équipe.
+	 * @param player
+	 * @return
+	 */
+	public boolean containsPlayer(Player player){
+		return _players.contains(player);
+	}
 
 	@Override
 	public @NotNull Iterable<? extends Audience> audiences() {
