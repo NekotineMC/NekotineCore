@@ -15,7 +15,7 @@ import dev.jorel.commandapi.CommandAPI;
 import fr.nekotine.core.game.Game;
 import fr.nekotine.core.game.GameTeam;
 import fr.nekotine.core.snapshot.PlayerInventorySnapshot;
-import fr.nekotine.core.util.UtilInventory;
+import fr.nekotine.core.util.InventoryUtil;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.text.Component;
@@ -156,7 +156,7 @@ public class Lobby implements ForwardingAudience{
 				Component.text("Vous avez rejoint le lobby ").color(NamedTextColor.YELLOW)
 				.append(MiniMessage.miniMessage().deserialize(_name)));
 		// Save player status
-		_playersOldInv.put(player, UtilInventory.snapshot(player));
+		_playersOldInv.put(player, InventoryUtil.snapshot(player));
 		_playersOldGameMode.put(player, player.getGameMode());
 		// Add player
 		_game.addPlayerToOptimalTeam(player);
@@ -173,7 +173,7 @@ public class Lobby implements ForwardingAudience{
 			// Remove player
 			_game.removePlayer(player);
 			// Change player status back to normal
-			UtilInventory.fill(player, _playersOldInv.get(player));
+			InventoryUtil.fill(player, _playersOldInv.get(player));
 			_playersOldInv.remove(player);
 			player.setGameMode(_playersOldGameMode.get(player));
 			_playersOldGameMode.remove(player);

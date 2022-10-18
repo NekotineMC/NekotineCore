@@ -4,7 +4,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.Vector;
 
-public class UtilMath {
+public class MathUtil {
 	public static Vector GetTrajectory2d(Entity from, Entity to) {
 		return GetTrajectory2d(from.getLocation().toVector(), to.getLocation().toVector());
 	}

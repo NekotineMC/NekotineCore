@@ -9,7 +9,7 @@ import org.bukkit.entity.Mob;
  * @author XxGoldenbluexX
  *
  */
-public final class UtilMobAi {
+public final class MobAiUtil {
 
 	/**
 	 * Retire tout les goals du brain du mob donné.

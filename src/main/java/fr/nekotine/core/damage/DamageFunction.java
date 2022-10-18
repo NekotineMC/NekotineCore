@@ -21,8 +21,8 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
-import fr.nekotine.core.util.UtilEntity;
-import fr.nekotine.core.util.UtilMath;
+import fr.nekotine.core.util.EntityUtil;
+import fr.nekotine.core.util.MathUtil;
 
 public enum DamageFunction {
 	NEKOTINE(
@@ -171,7 +171,7 @@ public enum DamageFunction {
 				}
 				
 				if(e.GetDamage() >= 0) {
-					UtilEntity.PlayDamageSound(e.GetDamaged());
+					EntityUtil.PlayDamageSound(e.GetDamaged());
 					return;
 				}
 				
@@ -199,14 +199,14 @@ public enum DamageFunction {
 					}
 
 					//Vec
-					Vector trajectory = UtilMath.GetTrajectory2d(origin, e.GetDamaged().getLocation());
+					Vector trajectory = MathUtil.GetTrajectory2d(origin, e.GetDamaged().getLocation());
 					trajectory.multiply(0.6 * knockback);
 					trajectory.setY(Math.abs(trajectory.getY()));
 
 					//Apply
 					double vel = 0.2 + trajectory.length() * 0.8;
 
-					UtilEntity.ApplyVelocity(e.GetDamaged(), trajectory, vel, false, 0, Math.abs(0.2 * knockback), 0.4 + (0.04 * knockback), true);
+					EntityUtil.ApplyVelocity(e.GetDamaged(), trajectory, vel, false, 0, Math.abs(0.2 * knockback), 0.4 + (0.04 * knockback), true);
 				}
 			}
 		};

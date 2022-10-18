@@ -7,13 +7,13 @@ import org.bukkit.inventory.ItemStack;
 
 import fr.nekotine.core.charge.ICharge;
 import fr.nekotine.core.util.CustomAction;
-import fr.nekotine.core.util.UtilEvent;
-import fr.nekotine.core.util.UtilGear;
-import fr.nekotine.core.util.UtilTime;
+import fr.nekotine.core.util.EventUtil;
+import fr.nekotine.core.util.GearUtil;
+import fr.nekotine.core.util.TimeUtil;
 
 public class ItemCharge implements ICharge{
 	
-	//Délai maximal entre deux appel d'Interract Event afin de constater la fin de la charge
+	//Dï¿½lai maximal entre deux appel d'Interract Event afin de constater la fin de la charge
 	private final long RELEASE_DELAY_MS = 350;
 	
 	private boolean released;
@@ -51,7 +51,7 @@ public class ItemCharge implements ICharge{
 		this.released = false;
 		
 		if(activated){
-			lastFired = UtilTime.GetTime();
+			lastFired = TimeUtil.GetTime();
 			swordChargeManager.AddCharge(user, chargeName, duration, displayOnExpBar, withAudio, audioBipNumber, this);
 		}
 	}
@@ -59,8 +59,8 @@ public class ItemCharge implements ICharge{
 	//
 	
 	public boolean Update() {
-		if(activated && UtilTime.Passed(lastFired) > RELEASE_DELAY_MS) released = true;
-		if(activated && bindToItem && !UtilGear.HasInAnyHand(user, bindItem)) released = true;
+		if(activated && TimeUtil.Passed(lastFired) > RELEASE_DELAY_MS) released = true;
+		if(activated && bindToItem && !GearUtil.HasInAnyHand(user, bindItem)) released = true;
 		
 		if(released) {
 			iSwordCharge.Released(user, chargeName, GetTimeLeft());
@@ -77,14 +77,14 @@ public class ItemCharge implements ICharge{
 	public void Action(PlayerInteractEvent e) {
 		if(released) return;
 		if(!user.equals(e.getPlayer())) return;
-		if(!UtilEvent.IsAction(e.getAction(), action)) return;
-		if(bindToItem && !UtilGear.IsItem(bindItem, e.getItem())) return;
+		if(!EventUtil.IsAction(e.getAction(), action)) return;
+		if(bindToItem && !GearUtil.IsItem(bindItem, e.getItem())) return;
 		
 		if(!activated) {
 			activated = true;
 			swordChargeManager.AddCharge(user, chargeName, duration, displayOnExpBar, withAudio, audioBipNumber, this);
 		}
-		lastFired = UtilTime.GetTime();
+		lastFired = TimeUtil.GetTime();
 	}
 	
 	//

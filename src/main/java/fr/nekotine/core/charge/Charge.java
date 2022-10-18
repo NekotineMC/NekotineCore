@@ -4,7 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
-import fr.nekotine.core.util.UtilTime;
+import fr.nekotine.core.util.TimeUtil;
 
 public class Charge {
 	
@@ -69,13 +69,13 @@ public class Charge {
 		this.cancelled = cancelled;
 	}
 	protected long GetTimeLeft() {
-		return duration - (UtilTime.GetTime() - started);
+		return duration - (TimeUtil.GetTime() - started);
 	}
 	protected void SetPaused(boolean paused) {
 		if(this.paused && !paused) {
-			duration += UtilTime.Passed(pausedTime);
+			duration += TimeUtil.Passed(pausedTime);
 		}else if(!this.paused && paused) {
-			pausedTime = UtilTime.GetTime();
+			pausedTime = TimeUtil.GetTime();
 		}
 		this.paused = paused;
 	}
@@ -107,7 +107,7 @@ public class Charge {
 		player.playSound(player, Sound.BLOCK_DISPENSER_DISPENSE, 0.2f, ratio);
 	}
 	private void PlayAudio() {
-		float ratio = (float)(UtilTime.GetTime() - started) / duration;
+		float ratio = (float)(TimeUtil.GetTime() - started) / duration;
 		PlayAudio(ratio);
 	}
 	private void SetExp() {
@@ -116,7 +116,7 @@ public class Charge {
 		Player player = Bukkit.getPlayer(user);
 		if(player == null) return;
 		
-		float ratio = (float)(UtilTime.GetTime() - started) / duration;
+		float ratio = (float)(TimeUtil.GetTime() - started) / duration;
 		player.setExp(ratio);
 	}
 	private void PlayUncheckedAudio(float ratio) {

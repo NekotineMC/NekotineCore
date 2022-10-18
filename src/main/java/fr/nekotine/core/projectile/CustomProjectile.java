@@ -12,7 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 
-import fr.nekotine.core.util.UtilTime;
+import fr.nekotine.core.util.TimeUtil;
 
 public class CustomProjectile {
 	private final Entity projectile;
@@ -42,7 +42,7 @@ public class CustomProjectile {
 		TransferBlackLists(entityBlacklist, blockBlacklist);
 		
 		
-		this.startedTime = UtilTime.GetTime();
+		this.startedTime = TimeUtil.GetTime();
 		this.triggered = false;
 		this.cancelled = false;
 		ConfigureProjectile(projectile, velocity);
@@ -88,7 +88,7 @@ public class CustomProjectile {
 			iProj.Triggered(this);
 			return true;
 		}
-		if(expireTime != -1 && UtilTime.Difference(UtilTime.GetTime(), startedTime) >  expireTime) {
+		if(expireTime != -1 && TimeUtil.Difference(TimeUtil.GetTime(), startedTime) >  expireTime) {
 			cancelled = false;
 			iProj.Faded(this);
 			return !cancelled;

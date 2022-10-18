@@ -6,12 +6,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.plugin.Plugin;
 
-public class UtilEvent {
+public class EventUtil {
 	
 	/**
 	 * 
 	 * @param action L'action 1
-	 * @param customAction L'action customisée
+	 * @param customAction L'action customisï¿½e
 	 * @return True si l'action fait partie de la customAction
 	 */
 	public static boolean IsAction(Action action, CustomAction customAction) {

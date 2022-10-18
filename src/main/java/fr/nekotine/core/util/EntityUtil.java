@@ -14,7 +14,7 @@ import org.bukkit.entity.Slime;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.util.Vector;
 
-public class UtilEntity {
+public class EntityUtil {
 	/**
 	 * Crée un slime de la taille donnée.
 	 * 

@@ -15,7 +15,7 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 
 import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
-import fr.nekotine.core.util.UtilEntity;
+import fr.nekotine.core.util.EntityUtil;
 
 @ModuleNameAnnotation(Name = "DamageModule")
 public class DamageModule extends PluginModule{
@@ -117,7 +117,7 @@ public class DamageModule extends PluginModule{
 	 */
 	public ArrayList<LivingEntityDamageEvent> Explode(LivingEntity damager, double radius, DamageCause cause, double damage, boolean ignoreArmor, boolean knockback, Location origin, LivingEntity[] toIgnore) {
 		ArrayList<LivingEntityDamageEvent> events = new ArrayList<>();
-		for(LivingEntity damaged : UtilEntity.GetNearbyLivingEntities(origin, radius)) {
+		for(LivingEntity damaged : EntityUtil.GetNearbyLivingEntities(origin, radius)) {
 			if(Contains(toIgnore, damaged)) continue;
 			events.add(Damage(damaged, damager, null, cause, damage, ignoreArmor, knockback, origin));
 		}
@@ -173,7 +173,7 @@ public class DamageModule extends PluginModule{
 	}
 	private void Damage(LivingEntityDamageEvent event) {
 		double health = Math.max(0, event.GetDamaged().getHealth() - event.GetDamage());
-		health = Math.min(health, UtilEntity.GetMaxHealth(event.GetDamaged()));
+		health = Math.min(health, EntityUtil.GetMaxHealth(event.GetDamaged()));
 		
 		event.GetDamaged().setLastDamage(event.GetDamage());
 		event.GetDamaged().setLastDamageCause(new EntityDamageEvent(event.GetDamaged(), event.GetCause(), event.GetDamage()));

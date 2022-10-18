@@ -9,7 +9,7 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import com.destroystokyo.paper.event.player.PlayerReadyArrowEvent;
 
 import fr.nekotine.core.charge.ICharge;
-import fr.nekotine.core.util.UtilGear;
+import fr.nekotine.core.util.GearUtil;
 
 public class BowCharge implements ICharge{
 	
@@ -59,7 +59,7 @@ public class BowCharge implements ICharge{
 			SetCancelled();
 			return true;
 		}
-		if(activated && !UtilGear.HasInAnyHand(user, Material.BOW)) cancelled = true;
+		if(activated && !GearUtil.HasInAnyHand(user, Material.BOW)) cancelled = true;
 		if(cancelled) {
 			iBowCharge.Cancelled(this.user, chargeName, GetTimeLeft());
 			SetCancelled();

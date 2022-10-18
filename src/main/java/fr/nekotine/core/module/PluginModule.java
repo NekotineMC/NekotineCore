@@ -9,7 +9,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import fr.nekotine.core.module.annotation.InheritedModuleAnnotation;
 import fr.nekotine.core.text.Text;
-import fr.nekotine.core.util.UtilEvent;
+import fr.nekotine.core.util.EventUtil;
 
 /**
  * Classe abstraite représentant un module utilisable par un plugin.
@@ -170,7 +170,7 @@ public abstract class PluginModule implements Listener {
 			logException(Level.WARNING, "Une erreur est survenue lors de la recuperation des dependances de ce module", e);
 		}
 		//
-		UtilEvent.Register(_plugin, this);
+		EventUtil.Register(_plugin, this);
 	}
 	
 	/**
@@ -178,7 +178,7 @@ public abstract class PluginModule implements Listener {
 	 * Cette méthode est destinée à être surchargée par la classe enfant.
 	 */
 	protected void onDisable() {
-		UtilEvent.Unregister(this);
+		EventUtil.Unregister(this);
 	}
 	
 }

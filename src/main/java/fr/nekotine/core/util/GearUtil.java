@@ -10,7 +10,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.NotNull;
 
-public class UtilGear {
+public class GearUtil {
 	
 	/**
 	 * Compare le Material de l'item & celui donn�

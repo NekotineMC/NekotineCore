@@ -1,6 +1,6 @@
 package fr.nekotine.core.util;
 
-public class UtilTime {
+public class TimeUtil {
 	
 	/**
 	 * 

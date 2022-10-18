@@ -15,13 +15,13 @@ import fr.nekotine.core.snapshot.Snapshot;
  * @author XxGoldenbluexX
  *
  */
-public class UtilInventory {
+public class InventoryUtil {
 
 	/**
 	 * Prend une capture de tous les ItemStack de l'inventaire.
 	 * Contrairement à une copie profonde, les {@link org.bukkit.inventory.ItemStack ItemStack} sont ceux de l'inventaire et peuvent
 	 * être modifiés.
-	 * @see UtilInventory#deepSnapshot
+	 * @see InventoryUtil#deepSnapshot
 	 * @param holder
 	 * @return la snapshot
 	 */
@@ -34,7 +34,7 @@ public class UtilInventory {
 	/**
 	 * Prend une capture de tous les ItemStack de l'inventaire.
 	 * Contrairement à une copie de surface, les {@link org.bukkit.inventory.ItemStack ItemStack} sont clonés.
-	 * @see UtilInventory#snapshot
+	 * @see InventoryUtil#snapshot
 	 * @param holder
 	 * @return la snapshot
 	 */
@@ -48,7 +48,7 @@ public class UtilInventory {
 	 * Prend une capture de tous les ItemStack de l'inventaire.
 	 * Contrairement à une copie profonde, les {@link org.bukkit.inventory.ItemStack ItemStack} sont ceux de l'inventaire et peuvent
 	 * être modifiés.
-	 * @see UtilInventory#deepSnapshot
+	 * @see InventoryUtil#deepSnapshot
 	 * @param holder
 	 * @return la snapshot
 	 */
@@ -61,7 +61,7 @@ public class UtilInventory {
 	/**
 	 * Prend une capture de tous les ItemStack de l'inventaire.
 	 * Contrairement à une copie de surface, les {@link org.bukkit.inventory.ItemStack ItemStack} sont clonés.
-	 * @see UtilInventory#snapshot
+	 * @see InventoryUtil#snapshot
 	 * @param holder
 	 * @return la snapshot
 	 */

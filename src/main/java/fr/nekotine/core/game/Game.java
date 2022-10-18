@@ -16,7 +16,7 @@ import fr.nekotine.core.game.event.GamePlayerLeaveEvent;
 import fr.nekotine.core.game.event.GameStartEvent;
 import fr.nekotine.core.game.exception.PlayerNotInGameException;
 import fr.nekotine.core.plugin.CorePlugin;
-import fr.nekotine.core.util.UtilEvent;
+import fr.nekotine.core.util.EventUtil;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 
@@ -146,7 +146,7 @@ public abstract class Game implements Listener, ForwardingAudience{
 			return false;
 		}
 		GotoFirstPhase();
-		UtilEvent.Register(plugin, this);
+		EventUtil.Register(plugin, this);
 		_isPlaying = true;
 		var startEvent = new GameStartEvent(this);
 		startEvent.callEvent();
@@ -195,7 +195,7 @@ public abstract class Game implements Listener, ForwardingAudience{
 			var msg = "Une erreur est survenue lors de la gestion des donnees de la partie";
 			plugin.getLogger().log(Level.WARNING, msg, e);
 		}
-		UtilEvent.Unregister(this);
+		EventUtil.Unregister(this);
 		_isPlaying = false;
 		return true;
 	}
@@ -215,7 +215,7 @@ public abstract class Game implements Listener, ForwardingAudience{
 			plugin.getLogger().log(Level.SEVERE, msg, e);
 			return false;
 		}
-		UtilEvent.Unregister(this);
+		EventUtil.Unregister(this);
 		_isPlaying = false;
 		return true;
 	}

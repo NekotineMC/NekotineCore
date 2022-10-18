@@ -3,7 +3,7 @@ package fr.nekotine.core.util;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 
-public class UtilParticle {
+public class ParticleUtil {
 	/**
 	 * 
 	 * @param center Centre du cercle
