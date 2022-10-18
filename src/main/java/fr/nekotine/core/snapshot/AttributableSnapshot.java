@@ -21,6 +21,7 @@ public class AttributableSnapshot implements Snapshot<Attributable> {
 				attributes.put(attr, snap);
 			}
 		}
+		attributes = new HashMap<>(attributes); // Trim HashMap
 		return this;
 	}
 
@@ -35,6 +36,7 @@ public class AttributableSnapshot implements Snapshot<Attributable> {
 				attributes.put(attr, snap);
 			}
 		}
+		attributes = new HashMap<>(attributes); // Trim HashMap
 		return this;
 	}
 

@@ -23,13 +23,14 @@ public class AdvancementOwnerSnapshot implements Snapshot<Player>{
 
 	@Override
 	public Snapshot<Player> deepSnapshot(Player item) {
-		advancements = new HashMap<>(140);// J'ai compté 102 achevements sur le wiki
+		advancements = new HashMap<>();
 		var ite = Bukkit.getServer().advancementIterator();
 		while (ite.hasNext()) {
 			var adv = ite.next();
 			var advProg = item.getAdvancementProgress(adv);
 			advancements.put(adv, new AdvancementProgressSnapshot().deepSnapshot(advProg));
 		}
+		advancements = new HashMap<>(advancements); // Trim HashMap size, sont temps de vie est plutôt long
 		return this;
 	}
 
