@@ -3,8 +3,10 @@ package fr.nekotine.core.util;
 import java.util.Collection;
 import java.util.function.Predicate;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
+import org.bukkit.attribute.Attributable;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -131,11 +133,26 @@ public class EntityUtil {
 	
 	/**
 	 * Retire tous les effets de potion minecraft à cette {@link org.bukkit.entity.LivingEntity LicingEntity}.
-	 * @param entity l'entitée vidée de ses effets.
+	 * @param target l'entitée vidée de ses effets.
 	 */
-	public static void clearPotionEffects(LivingEntity entity) {
+	public static void clearPotionEffects(LivingEntity target) {
 		for (var effectType : PotionEffectType.values()) {
-			entity.removePotionEffect(effectType);
+			target.removePotionEffect(effectType);
+		}
+	}
+	
+	/**
+	 * Change la valeur de tous les attributs listés dans {@link org.bukkit.attribute.Attribute Attribute} pour leurs valeur de base.
+	 * Supprime également tous les {@link org.bukkit.attribute.AttributeModifier AttributeModifier}.
+	 * @param target
+	 */
+	public static void defaultAllAttributes(Attributable target) {
+		for (var attrType : Attribute.values()) {
+			var attrInstance = target.getAttribute(attrType);
+			attrInstance.setBaseValue(attrInstance.getDefaultValue());
+			for (var modifier : attrInstance.getModifiers()) {
+				attrInstance.removeModifier(modifier);
+			}
 		}
 	}
 }
