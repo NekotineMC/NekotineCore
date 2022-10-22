@@ -156,7 +156,7 @@ public class Lobby implements ForwardingAudience{
 				Component.text("Vous avez rejoint le lobby ").color(NamedTextColor.YELLOW)
 				.append(MiniMessage.miniMessage().deserialize(_name)));
 		// Save player status
-		_playersOldInv.put(player, InventoryUtil.snapshot(player));
+		//_playersOldInv.put(player, InventoryUtil.snapshot(player));
 		_playersOldGameMode.put(player, player.getGameMode());
 		// Add player
 		_game.addPlayerToOptimalTeam(player);

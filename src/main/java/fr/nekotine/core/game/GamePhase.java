@@ -22,7 +22,7 @@ public abstract class GamePhase<GameType extends Game>{
 	
 	public abstract void playerEnd(Player player, GameTeam team);
 	
-	public final void begin() {
+	public final void Begin() {
 		globalBegin();
 		for (var team : _game.getTeams()) {
 			for (var player : team.getPlayerList()) {
@@ -31,7 +31,7 @@ public abstract class GamePhase<GameType extends Game>{
 		}
 	}
 	
-	public final void end() {
+	public final void End() {
 		for (var team : _game.getTeams()) {
 			for (var player : team.getPlayerList()) {
 				playerEnd(player, team);

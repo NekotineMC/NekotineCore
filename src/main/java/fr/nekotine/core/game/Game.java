@@ -66,7 +66,7 @@ public abstract class Game implements Listener, ForwardingAudience{
 		if (phase != null) {
 			if (currentGamePhase != null) {
 				try {
-					currentGamePhase.end();
+					currentGamePhase.End();
 				}catch(Exception e) {
 					var plugin = CorePlugin.getCorePluginInstance();
 					var msg = "Une erreur est survenue lors de la fin de la GamePhase actuelle.";
@@ -81,7 +81,7 @@ public abstract class Game implements Listener, ForwardingAudience{
 			}
 			currentGamePhase = phase;
 			try {
-				currentGamePhase.begin();
+				currentGamePhase.Begin();
 			}catch(Exception e) {
 				var plugin = CorePlugin.getCorePluginInstance();
 				var msg = "Une erreur est survenue lors du début de la GamePhase " + phaseKey;
@@ -139,7 +139,12 @@ public abstract class Game implements Listener, ForwardingAudience{
 		if (_isPlaying) return true;
 		var plugin = CorePlugin.getCorePluginInstance();
 		try {
-			setup();
+			globalSetup();
+			for (var team : _teams) {
+				for (var player : team.getPlayerList()) {
+					playerSetup(player, team);
+				}
+			}
 		}catch(Exception e) {
 			var msg = "Une erreur est survenue lors du demarrage de la partie";
 			plugin.getLogger().log(Level.SEVERE, msg, e);
@@ -174,8 +179,13 @@ public abstract class Game implements Listener, ForwardingAudience{
 		}
 		// end phase
 		try {
-			currentGamePhase.end();
-			end();
+			currentGamePhase.End();
+			for (var team : _teams) {
+				for (var player : team.getPlayerList()) {
+					playerEnd(player, team);
+				}
+			}
+			globalEnd();
 		}catch(Exception e) {
 			var msg = "Une erreur est survenue lors de l'arret de la partie";
 			plugin.getLogger().log(Level.SEVERE, msg, e);
@@ -208,8 +218,13 @@ public abstract class Game implements Listener, ForwardingAudience{
 		if (!_isPlaying) return false;
 		var plugin = CorePlugin.getCorePluginInstance();
 		try {
-			currentGamePhase.end();
-			end();
+			currentGamePhase.End();
+			for (var team : _teams) {
+				for (var player : team.getPlayerList()) {
+					playerEnd(player, team);
+				}
+			}
+			globalEnd();
 		}catch(Exception e) {
 			var msg = "Une erreur est survenue lors de l'arret de la partie";
 			plugin.getLogger().log(Level.SEVERE, msg, e);
@@ -225,13 +240,28 @@ public abstract class Game implements Listener, ForwardingAudience{
 	 * Le chargement d'une sauvegarde ou de données peut aussi être fait ici (ou lancé de manière asynchrone depuis cette fonction)
 	 * <br><br>Cette methode est appelée par {@link Game#Start Start}
 	 */
-	protected abstract void setup();
+	protected abstract void globalSetup();
 	
 	/**
-	 * Arret des mechaniques de jeu et désabonnement aux services utilisés. Affichage aux joueurs les résultats de la partie.
+	 * Mise en place de chaque joueur avant le début de la partie.
+	 * Cette methode est appelée pour chaque joueur.
+	 * Le chargement d'une sauvegarde ou de données peut aussi être fait ici (ou lancé de manière asynchrone depuis cette fonction)
+	 * <br><br>Cette methode est appelée par {@link Game#Start Start}
+	 */
+	protected abstract void playerSetup(Player player, GameTeam team);
+	
+	/**
+	 * Arret des mechaniques de jeu et désabonnement aux services utilisés.
 	 * <br><br>Cette methode est appelée par {@link Game#Stop Stop} et {@link Game#Abort Abort}
 	 */
-	protected abstract void end();
+	protected abstract void globalEnd();
+	
+	/**
+	 * Arret des mechaniques de jeu pour chaque joueur.
+	 * Cette methode est appelée pour chaque joueur.
+	 * <br><br>Cette methode est appelée par {@link Game#Stop Stop} et {@link Game#Abort Abort}
+	 */
+	protected abstract void playerEnd(Player player, GameTeam team);
 	
 	/**
 	 * Détermination d'un éventuel gagnant ou d'un score atteint. Récuperation des données pour les statistiques
@@ -264,10 +294,10 @@ public abstract class Game implements Listener, ForwardingAudience{
 	
 	public void removePlayer(Player player) {
 		if (containsPlayer(player)) {
-			onPlayerPreLeave(player);
 			for (GameTeam team : _teams) {
 				team.removePlayer(player);
 			}
+			onPlayerPostLeave(player);
 			var event = new GamePlayerLeaveEvent(this, player);
 			event.callEvent();
 		}
@@ -292,7 +322,7 @@ public abstract class Game implements Listener, ForwardingAudience{
 	 * Cette methode est utile pour arrêter la partie ou équilibrer les équipes si la partie est en cours.
 	 * @param player le joueur allant quitter.
 	 */
-	public void onPlayerPreLeave(Player player) {
+	public void onPlayerPostLeave(Player player) {
 		
 	}
 	
