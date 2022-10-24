@@ -19,10 +19,12 @@ import fr.nekotine.core.map.component.MapComponent;
 import fr.nekotine.core.map.component.MapComponentList;
 import fr.nekotine.core.map.component.MapElement;
 import fr.nekotine.core.map.component.MapPlaceElement;
+import fr.nekotine.core.map.component.MapRectangleAreaElement;
 import fr.nekotine.core.map.graph.MapBlockPlaceGraphNode;
 import fr.nekotine.core.map.graph.MapComponentListGraphNode;
 import fr.nekotine.core.map.graph.MapGraphNode;
 import fr.nekotine.core.map.graph.MapPlaceGraphNode;
+import fr.nekotine.core.map.graph.MapRectangleAreaGraphNode;
 import fr.nekotine.core.module.ModuleManager;
 
 public class MapCommandGenerator {
@@ -138,6 +140,11 @@ public class MapCommandGenerator {
 			var com = new MapCommand();
 			com.getArgumentList().addAll(MapBlockPlaceGraphNode.getArguments());
 			com.getNodeStack().add(new MapBlockPlaceGraphNode(transitionField));
+			list.add(com);
+		}else if (MapRectangleAreaElement.class.isAssignableFrom(clazz)) {
+			var com = new MapCommand();
+			com.getArgumentList().addAll(MapRectangleAreaGraphNode.getArguments());
+			com.getNodeStack().add(new MapRectangleAreaGraphNode(transitionField));
 			list.add(com);
 		}
 		return list;

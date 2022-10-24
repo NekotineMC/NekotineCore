@@ -18,7 +18,6 @@ public class MapPlaceElement extends MapComponent implements MapElement {
 	
 	public void setValue(Location place) {
 		value = place;
-		System.out.println("Value set to "+ place.toString());
 	}
 
 }

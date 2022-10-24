@@ -11,19 +11,20 @@ import dev.jorel.commandapi.arguments.Argument;
 import dev.jorel.commandapi.arguments.LocationArgument;
 import dev.jorel.commandapi.arguments.LocationType;
 import fr.nekotine.core.map.MapModule;
-import fr.nekotine.core.map.component.MapBlockPlaceElement;
 import fr.nekotine.core.map.component.MapComponent;
+import fr.nekotine.core.map.component.MapRectangleAreaElement;
 import fr.nekotine.core.module.ModuleManager;
 
-public class MapBlockPlaceGraphNode extends MapGraphNode{
+public class MapRectangleAreaGraphNode extends MapGraphNode{
 
-	public MapBlockPlaceGraphNode(Field fromLastNode) {
+	public MapRectangleAreaGraphNode(Field fromLastNode) {
 		super(fromLastNode);
 	}
 	
 	public static List<Argument<?>> getArguments(){
 		var list = new LinkedList<Argument<?>>();
-		list.add(new LocationArgument("place", LocationType.BLOCK_POSITION));
+		list.add(new LocationArgument("corner1", LocationType.PRECISE_POSITION));
+		list.add(new LocationArgument("corner2", LocationType.PRECISE_POSITION));
 		return list;
 	}
 	
@@ -31,8 +32,9 @@ public class MapBlockPlaceGraphNode extends MapGraphNode{
 	public MapComponent applyNode(MapComponent lastNode, LinkedList<Object> args) {
 		try {
 			if (_fromLastNode != null) {
-				var node = (MapBlockPlaceElement)_fromLastNode.get(lastNode);
-				node.setValue((Location)args.get(0));
+				var node = (MapRectangleAreaElement)_fromLastNode.get(lastNode);
+				node.setCorner1((Location)args.get(0));
+				node.setCorner2((Location)args.get(1));
 				return node;
 			}
 		} catch (Exception e) {
