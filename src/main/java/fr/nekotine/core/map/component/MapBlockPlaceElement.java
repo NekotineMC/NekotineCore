@@ -4,9 +4,9 @@ import org.bukkit.Location;
 
 import fr.nekotine.core.map.GameMap;
 
-public class PlaceMapElement extends MapComponent implements MapElement {
+public class MapBlockPlaceElement extends MapComponent implements MapElement {
 
-	public PlaceMapElement(GameMap map, String name) {
+	public MapBlockPlaceElement(GameMap map, String name) {
 		super(map, name);
 	}
 

@@ -14,10 +14,12 @@ import dev.jorel.commandapi.arguments.CustomArgument;
 import dev.jorel.commandapi.arguments.LiteralArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
 import fr.nekotine.core.map.annotation.ComposingMap;
+import fr.nekotine.core.map.component.MapBlockPlaceElement;
 import fr.nekotine.core.map.component.MapComponent;
 import fr.nekotine.core.map.component.MapComponentList;
 import fr.nekotine.core.map.component.MapElement;
-import fr.nekotine.core.map.component.PlaceMapElement;
+import fr.nekotine.core.map.component.MapPlaceElement;
+import fr.nekotine.core.map.graph.MapBlockPlaceGraphNode;
 import fr.nekotine.core.map.graph.MapComponentListGraphNode;
 import fr.nekotine.core.map.graph.MapGraphNode;
 import fr.nekotine.core.map.graph.MapPlaceGraphNode;
@@ -127,11 +129,15 @@ public class MapCommandGenerator {
 	
 	private static List<MapCommand> generateForElement(Class<? extends MapComponent> clazz, Field transitionField){
 		var list = new LinkedList<MapCommand>();
-		if (PlaceMapElement.class.isAssignableFrom(clazz)) {
-			System.out.println("phase 4");
+		if (MapPlaceElement.class.isAssignableFrom(clazz)) { // pas encore le type switch (voir update java 17)
 			var com = new MapCommand();
 			com.getArgumentList().addAll(MapPlaceGraphNode.getArguments());
 			com.getNodeStack().add(new MapPlaceGraphNode(transitionField));
+			list.add(com);
+		}else if (MapBlockPlaceElement.class.isAssignableFrom(clazz)) {
+			var com = new MapCommand();
+			com.getArgumentList().addAll(MapBlockPlaceGraphNode.getArguments());
+			com.getNodeStack().add(new MapBlockPlaceGraphNode(transitionField));
 			list.add(com);
 		}
 		return list;

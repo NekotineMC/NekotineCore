@@ -12,7 +12,7 @@ import dev.jorel.commandapi.arguments.LocationArgument;
 import dev.jorel.commandapi.arguments.LocationType;
 import fr.nekotine.core.map.MapModule;
 import fr.nekotine.core.map.component.MapComponent;
-import fr.nekotine.core.map.component.PlaceMapElement;
+import fr.nekotine.core.map.component.MapPlaceElement;
 import fr.nekotine.core.module.ModuleManager;
 
 public class MapPlaceGraphNode extends MapGraphNode{
@@ -31,7 +31,7 @@ public class MapPlaceGraphNode extends MapGraphNode{
 	public MapComponent applyNode(MapComponent lastNode, LinkedList<Object> args) {
 		try {
 			if (_fromLastNode != null) {
-				var node = (PlaceMapElement)_fromLastNode.get(lastNode);
+				var node = (MapPlaceElement)_fromLastNode.get(lastNode);
 				node.setValue((Location)args.get(0));
 				return node;
 			}
