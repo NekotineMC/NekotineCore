@@ -2,42 +2,50 @@ package fr.nekotine.core.game;
 
 import org.bukkit.entity.Player;
 
-public abstract class GamePhase<GameType extends Game>{
+/**
+ * Une phase d'un mode de jeu.
+ * 
+ * @author XxGoldenbluexX
+ *
+ * @param <GD>
+ * @param <GM>
+ */
+public abstract class GamePhase<GD extends GameData,GM extends GameMode<GD>>{
 	
-	public GamePhase(GameType game) {
-		_game = game;
+	private final GM gamemode;
+	
+	public GamePhase(GM gamemode) {
+		this.gamemode = gamemode;
 	}
 	
-	private final GameType _game;
-	
-	public GameType getGame() {
-		return _game;
+	public GM getGameMode() {
+		return gamemode;
 	}
 	
-	public abstract void globalBegin();
+	protected abstract void globalBegin(GD gamedata);
 	
-	public abstract void globalEnd();
+	protected abstract void globalEnd(GD gamedata);
 	
-	public abstract void playerBegin(Player player, GameTeam team);
+	protected abstract void playerBegin(GD gamedata, Player player, GameTeam team);
 	
-	public abstract void playerEnd(Player player, GameTeam team);
+	protected abstract void playerEnd(GD gamedata, Player player, GameTeam team);
 	
-	public final void Begin() {
-		globalBegin();
-		for (var team : _game.getTeams()) {
+	public final void Begin(GD gamedata) {
+		globalBegin(gamedata);
+		for (var team : gamedata.getTeams()) {
 			for (var player : team.getPlayerList()) {
-				playerBegin(player, team);
+				playerBegin(gamedata, player, team);
 			}
 		}
 	}
 	
-	public final void End() {
-		for (var team : _game.getTeams()) {
+	public final void End(GD gamedata) {
+		for (var team : gamedata.getTeams()) {
 			for (var player : team.getPlayerList()) {
-				playerEnd(player, team);
+				playerEnd(gamedata, player, team);
 			}
 		}
-		globalEnd();
+		globalEnd(gamedata);
 	}
 	
 }

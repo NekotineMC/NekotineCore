@@ -25,7 +25,7 @@ public record MapIdentifier(
 		map.put("name", name);
 		map.put("displayName", displayName);
 		map.put("description", description);
-		map.put("icon", icon);
+		map.put("icon", icon.toString());
 		return map;
 	}
 

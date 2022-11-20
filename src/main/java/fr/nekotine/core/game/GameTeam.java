@@ -11,6 +11,11 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.text.Component;
 
+/**
+ * 
+ * @author XxGoldenbluexX
+ *
+ */
 public class GameTeam implements ForwardingAudience{
 
 	private Component _name;

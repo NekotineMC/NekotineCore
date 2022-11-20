@@ -13,7 +13,11 @@ import org.jetbrains.annotations.NotNull;
 
 import dev.jorel.commandapi.CommandAPI;
 import fr.nekotine.core.game.Game;
+import fr.nekotine.core.game.GameData;
+import fr.nekotine.core.game.GameMode;
+import fr.nekotine.core.game.GameModeModule;
 import fr.nekotine.core.game.GameTeam;
+import fr.nekotine.core.module.ModuleManager;
 import fr.nekotine.core.snapshot.PlayerInventorySnapshot;
 import fr.nekotine.core.util.InventoryUtil;
 import net.kyori.adventure.audience.Audience;
@@ -44,7 +48,7 @@ public class Lobby implements ForwardingAudience{
 	private String _name;
 	
 	@Nonnull
-	private  GameModeIdentifier _gamemode;
+	private  GameMode<? extends GameData> _gamemode;
 
 	private boolean _isGameLaunched = false;
 		
@@ -53,24 +57,24 @@ public class Lobby implements ForwardingAudience{
 	private Map<Player, org.bukkit.GameMode> _playersOldGameMode = new HashMap<>();
 	
 	@Nonnull
-	private Game _game;
+	private Game<? extends GameData> _game;
 	
 	public Lobby(String name) {
 		_name = name;
-		List<GameModeIdentifier> gamemodes = GameModeIdentifier.getGameModeList();
-		if (gamemodes.size() <= 0) {
+		var gamemode = ModuleManager.GetModule(GameModeModule.class).getGameMode();
+		if (gamemode == null) {
 			Bukkit.getLogger().log(Level.WARNING, "Aucun mode de jeu n'a ete enregistre lors de la creation du lobby " + name);
 		}else {
-			setGameMode(gamemodes.get(0));
+			setGameMode(gamemode);
 		}
 	}
 	
-	public void setGameMode(GameModeIdentifier gamemode) {
+	public void setGameMode(GameMode<? extends GameData> gamemode) {
 		_gamemode = gamemode;
 		if (_game != null) {
 			_game.destroy();
 		}
-		_game = _gamemode.generateTypedGame();
+		_game = _gamemode.createGame(null);
 	}
 	
 	public List<Player> getPlayerList(){
@@ -130,7 +134,7 @@ public class Lobby implements ForwardingAudience{
 	 */
 	public void unregister() {
 		if (_game.isPlaying()) {
-			_game.Abort();
+			_game.destroy();
 		}
 		for (GameTeam team : _game.getTeams()) {
 			team.clear();

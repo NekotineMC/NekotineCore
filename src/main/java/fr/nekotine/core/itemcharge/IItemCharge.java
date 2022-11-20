@@ -4,14 +4,14 @@ import org.bukkit.entity.Player;
 
 public interface IItemCharge {
 	/**
-	 * Lorsque la charge est terminée (ne veut pas dire que le joueur a arrêté l'action)
+	 * Lorsque la charge est terminÃ©e (ne veut pas dire que le joueur a arrÃªtÃ© l'action)
 	 * @param player
 	 * @param chargeName
 	 */
 	public void Ended(Player player, String chargeName);
 	
 	/**
-	 * Lorsque le joueur a arrêté l'action
+	 * Lorsque le joueur a arrÃªtÃ© l'action
 	 * @param player
 	 * @param chargeName
 	 * @param left Temps en ms restant de la charge

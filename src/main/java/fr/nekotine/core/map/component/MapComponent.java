@@ -1,10 +1,8 @@
 package fr.nekotine.core.map.component;
 
-import java.io.Serializable;
-
 import fr.nekotine.core.map.GameMap;
 
-public abstract class MapComponent implements Serializable{
+public abstract class MapComponent{
 
 	private String _name;
 	

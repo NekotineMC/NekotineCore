@@ -29,12 +29,28 @@ import fr.nekotine.core.module.ModuleManager;
 
 public class MapCommandGenerator {
 	
-	private static Argument<MapIdentifier> mapArgument(String nodeName, MapTypeIdentifier typeFilter){
+	protected static Argument<MapIdentifier> existingMapArgument(String nodeName, MapTypeIdentifier typeFilter){
 		return new CustomArgument<MapIdentifier, String>(new StringArgument(nodeName), (info) -> {
 			return MapModule.getMap(info.input());
 		}).replaceSuggestions(ArgumentSuggestions.strings(info -> {
 			return MapModule.getMapsForType(typeFilter).stream().map(MapIdentifier::name).toArray(String[]::new);
 		}));
+	}
+	
+	protected static Argument<MapIdentifier> existingMapArgument(String nodeName){
+		return new CustomArgument<MapIdentifier, String>(new StringArgument(nodeName), (info) -> {
+			return MapModule.getMap(info.input());
+		}).replaceSuggestions(ArgumentSuggestions.strings(info -> {
+			return MapModule.getAvailableMaps().stream().map(MapIdentifier::name).toArray(String[]::new);
+		}));
+	}
+	
+	protected static Argument<MapTypeIdentifier> registeredMapTypeArgument(String nodeName) {
+		return new CustomArgument<MapTypeIdentifier, String>(new StringArgument(nodeName), (info) -> {
+			return MapModule.getMapTypeById(info.input());
+	}).replaceSuggestions(ArgumentSuggestions.strings(info -> {
+		return MapModule.getAvailableMapTypes().stream().map(MapTypeIdentifier::getId).toArray(String[]::new);
+	}));
 	}
 	
 	public static List<CommandAPICommand> generateFor(MapTypeIdentifier mapTypeId){
@@ -46,13 +62,13 @@ public class MapCommandGenerator {
 		for (var mapCom : mapComList) {
 			list.add(
 					new CommandAPICommand(mapTypeId.getId())
-					.withArguments(mapArgument("mapName", mapTypeId))
+					.withArguments(existingMapArgument("mapName", mapTypeId))
 					.withArguments(mapCom.getArgumentList())
 					.executes((sender, args) -> {
 						var argList = new LinkedList<Object>();
 						argList.addAll(Arrays.asList(args));
 						MapIdentifier mapId = (MapIdentifier) argList.pollFirst();
-						var map = mapId.loadMap();//TODO Changer 
+						var map = mapId.loadMap();
 						MapComponent prevNode = map;
 						for (var node : mapCom.getNodeStack()) {
 							prevNode = node.applyNode(prevNode, argList);
@@ -75,6 +91,7 @@ public class MapCommandGenerator {
 			ComposingMap annotation = componentField.getAnnotation(ComposingMap.class);
 			if (annotation != null) {
 				if (MapComponent.class.isAssignableFrom(componentField.getType())) {
+					componentField.trySetAccessible();
 					list.addAll(generateForNode(annotation.Name(), (Class<? extends MapComponent>) componentField.getType(), componentField));
 				}
 			}
