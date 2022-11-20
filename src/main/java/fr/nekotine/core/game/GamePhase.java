@@ -22,30 +22,30 @@ public abstract class GamePhase<GD extends GameData,GM extends GameMode<GD>>{
 		return gamemode;
 	}
 	
-	protected abstract void globalBegin(GD gamedata);
+	protected abstract void globalBegin(Game<GD> game);
 	
-	protected abstract void globalEnd(GD gamedata);
+	protected abstract void globalEnd(Game<GD> game);
 	
-	protected abstract void playerBegin(GD gamedata, Player player, GameTeam team);
+	protected abstract void playerBegin(Game<GD> game, Player player, GameTeam team);
 	
-	protected abstract void playerEnd(GD gamedata, Player player, GameTeam team);
+	protected abstract void playerEnd(Game<GD> game, Player player, GameTeam team);
 	
-	public final void Begin(GD gamedata) {
-		globalBegin(gamedata);
-		for (var team : gamedata.getTeams()) {
+	public final void Begin(Game<GD> game) {
+		globalBegin(game);
+		for (var team : game.getTeams()) {
 			for (var player : team.getPlayerList()) {
-				playerBegin(gamedata, player, team);
+				playerBegin(game, player, team);
 			}
 		}
 	}
 	
-	public final void End(GD gamedata) {
-		for (var team : gamedata.getTeams()) {
+	public final void End(Game<GD> game) {
+		for (var team : game.getTeams()) {
 			for (var player : team.getPlayerList()) {
-				playerEnd(gamedata, player, team);
+				playerEnd(game, player, team);
 			}
 		}
-		globalEnd(gamedata);
+		globalEnd(game);
 	}
 	
 }

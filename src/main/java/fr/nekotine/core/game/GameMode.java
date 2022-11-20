@@ -1,6 +1,7 @@
 package fr.nekotine.core.game;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,7 +26,7 @@ public abstract class GameMode<GD extends GameData> implements Listener
 	private Map<String, GamePhase<GD,? extends GameMode<GD>>> _gamePhases = new HashMap<>();
 	
 	private GamePhase<GD,? extends GameMode<GD>> currentGamePhase;
-
+	
 	public GameMode(){
 		registerGamePhases(_gamePhases);
 	}
@@ -45,7 +46,7 @@ public abstract class GameMode<GD extends GameData> implements Listener
 		if (phase != null) {
 			if (currentGamePhase != null) {
 				try {
-					currentGamePhase.End(game.getGameData());
+					currentGamePhase.End(game);
 				}catch(Exception e) {
 					var plugin = CorePlugin.getCorePluginInstance();
 					var msg = "Une erreur est survenue lors de la fin de la GamePhase actuelle.";
@@ -60,7 +61,7 @@ public abstract class GameMode<GD extends GameData> implements Listener
 			}
 			currentGamePhase = phase;
 			try {
-				currentGamePhase.Begin(game.getGameData());
+				currentGamePhase.Begin(game);
 			}catch(Exception e) {
 				var plugin = CorePlugin.getCorePluginInstance();
 				var msg = "Une erreur est survenue lors du début de la GamePhase " + phaseKey;
@@ -127,7 +128,7 @@ public abstract class GameMode<GD extends GameData> implements Listener
 		}
 		// end phase
 		try {
-			currentGamePhase.End(game.getGameData());
+			currentGamePhase.End(game);
 			for (var team : game.getTeams()) {
 				for (var player : team.getPlayerList()) {
 					playerEnd(game, player, team);
@@ -165,7 +166,7 @@ public abstract class GameMode<GD extends GameData> implements Listener
 		if (!game.isPlaying()) return false;
 		var plugin = CorePlugin.getCorePluginInstance();
 		try {
-			currentGamePhase.End(game.getGameData());
+			currentGamePhase.End(game);
 			for (var team : game.getTeams()) {
 				for (var player : team.getPlayerList()) {
 					playerEnd(game, player, team);
@@ -244,5 +245,11 @@ public abstract class GameMode<GD extends GameData> implements Listener
 	 * @param player le joueur ayant quitter.
 	 */
 	public abstract void onPlayerPostLeave(Game<GD> game, Player player);
+	
+	/**
+	 * Cette fonction est appelée à la création de la partie pour mettre en place les équipes.
+	 * @param teamList liste des équipes a completer.
+	 */
+	public abstract void registerTeams(List<GameTeam> teamList);
 	
 }

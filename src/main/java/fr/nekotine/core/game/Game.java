@@ -22,24 +22,28 @@ public abstract class Game<GD extends GameData> implements ForwardingAudience{
 	
 	private GD gamedata;
 	
-	private boolean _isPlaying = false;
+	private List<GameTeam> teams = new LinkedList<>();
 	
-	private int _playerCap = 10;
+	private boolean isPlaying = false;
 	
-	public Game(GD gamedata) {
+	private int playerCap = 10;
+	
+	public Game(GameMode<GD> gamemode, GD gamedata) {
+		this.gamemode = gamemode;
 		this.gamedata = gamedata;
+		gamemode.registerTeams(teams);
 	}
 	
 	public List<GameTeam> getTeams(){
-		return gamedata.getTeams();
+		return teams;
 	}
 	
 	public boolean isPlaying() {
-		return _isPlaying;
+		return isPlaying;
 	}
 	
 	public void setIsPlaying(boolean isPlaying) {
-		_isPlaying = isPlaying;
+		this.isPlaying = isPlaying;
 	}
 	
 	public GD getGameData() {
@@ -53,7 +57,7 @@ public abstract class Game<GD extends GameData> implements ForwardingAudience{
 	 */
 	public int getNumberOfPlayer() {
 		int nb = 0;
-		for (GameTeam team : gamedata.getTeams()) {
+		for (GameTeam team : teams) {
 			nb += team.getPlayerList().size();
 		}
 		return nb;
@@ -64,16 +68,16 @@ public abstract class Game<GD extends GameData> implements ForwardingAudience{
 	}
 	
 	public void destroy() {
-		if (_isPlaying) {
+		if (isPlaying) {
 			gamemode.Abort(this);
 		}
-		for (GameTeam team : gamedata.getTeams()) {
+		for (GameTeam team : teams) {
 			team.clear();
 		}
 	}
 	
 	public int getPlayerCap() {
-		return _playerCap;
+		return playerCap;
 	}
 	
 	/**
@@ -97,7 +101,7 @@ public abstract class Game<GD extends GameData> implements ForwardingAudience{
 	
 	public void removePlayer(Player player) {
 		if (containsPlayer(player)) {
-			for (GameTeam team : gamedata.getTeams()) {
+			for (GameTeam team : teams) {
 				team.removePlayer(player);
 			}
 			gamemode.onPlayerPostLeave(this, player);
@@ -122,7 +126,7 @@ public abstract class Game<GD extends GameData> implements ForwardingAudience{
 	
 	public List<Player> getPlayerList(){
 		List<Player> list = new LinkedList<>();
-		for (GameTeam team : gamedata.getTeams()) {
+		for (GameTeam team : teams) {
 			list.addAll(team.getPlayerList());
 		}
 		return list;
@@ -134,7 +138,7 @@ public abstract class Game<GD extends GameData> implements ForwardingAudience{
 	}
 	
 	public GameTeam getPlayerTeam(Player player){
-		for (var team : gamedata.getTeams()) {
+		for (var team : teams) {
 			if (team.containsPlayer(player)) {
 				return team;
 			}
