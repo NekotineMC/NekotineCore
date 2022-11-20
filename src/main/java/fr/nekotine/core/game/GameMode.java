@@ -1,7 +1,6 @@
 package fr.nekotine.core.game;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -74,7 +73,7 @@ public abstract class GameMode<GD extends GameData> implements Listener
 	 * Méthode appelée naturellement au début de la partie.
 	 * Elle permet d'aller vers la première phase.
 	 */
-	public abstract void GotoFirstPhase();
+	public abstract void GotoFirstPhase(Game<GD> game);
 	
 	public GamePhase<GD,? extends GameMode<GD>> getCurrentGamePhase() {
 		return currentGamePhase;
@@ -100,7 +99,7 @@ public abstract class GameMode<GD extends GameData> implements Listener
 			plugin.getLogger().log(Level.SEVERE, msg, e);
 			return false;
 		}
-		GotoFirstPhase();
+		GotoFirstPhase(game);
 		game.setIsPlaying(true);
 		var startEvent = new GameStartEvent(game);
 		startEvent.callEvent();
@@ -239,7 +238,7 @@ public abstract class GameMode<GD extends GameData> implements Listener
 	}
 
 	/**
-	 * Methode appelée lors juste avant le retrait d'un joueur.
+	 * Methode appelée juste après le retrait d'un joueur.
 	 * Cette methode est utile pour arrêter la partie ou équilibrer les équipes si la partie est en cours.
 	 * @param game la partie.
 	 * @param player le joueur ayant quitter.
@@ -250,6 +249,6 @@ public abstract class GameMode<GD extends GameData> implements Listener
 	 * Cette fonction est appelée à la création de la partie pour mettre en place les équipes.
 	 * @param teamList liste des équipes a completer.
 	 */
-	public abstract void registerTeams(List<GameTeam> teamList);
+	public abstract void registerTeams(Game<GD> game);
 	
 }

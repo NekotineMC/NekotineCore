@@ -16,7 +16,7 @@ import net.kyori.adventure.audience.ForwardingAudience;
  * @author XxGoldenbluexX
  *
  */
-public abstract class Game<GD extends GameData> implements ForwardingAudience{
+public class Game<GD extends GameData> implements ForwardingAudience{
 	
 	private GameMode<GD> gamemode;
 	
@@ -31,7 +31,7 @@ public abstract class Game<GD extends GameData> implements ForwardingAudience{
 	public Game(GameMode<GD> gamemode, GD gamedata) {
 		this.gamemode = gamemode;
 		this.gamedata = gamedata;
-		gamemode.registerTeams(teams);
+		gamemode.registerTeams(this);
 	}
 	
 	public List<GameTeam> getTeams(){

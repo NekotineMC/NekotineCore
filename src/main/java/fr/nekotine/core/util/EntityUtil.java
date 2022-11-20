@@ -3,7 +3,6 @@ package fr.nekotine.core.util;
 import java.util.Collection;
 import java.util.function.Predicate;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.attribute.Attributable;

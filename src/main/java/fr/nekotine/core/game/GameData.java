@@ -3,6 +3,7 @@ package fr.nekotine.core.game;
 import java.util.Map;
 
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Classe qui stock les données de la partie.
@@ -14,7 +15,7 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable;
  */
 public abstract class GameData implements ConfigurationSerializable{
 	
-	public GameData(Map<String, Object> flattenedGameData) {
+	public GameData(@Nullable Map<String, Object> flattenedGameData) {
 	}
 
 }
