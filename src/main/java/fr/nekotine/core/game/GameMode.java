@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 
 import fr.nekotine.core.game.event.GameStartEvent;
@@ -26,8 +27,15 @@ public abstract class GameMode<GD extends GameData> implements Listener
 	
 	private GamePhase<GD,? extends GameMode<GD>> currentGamePhase;
 	
-	public GameMode(){
+	private JavaPlugin plugin;
+	
+	public GameMode(JavaPlugin plugin){
+		this.plugin = plugin;
 		registerGamePhases(_gamePhases);
+	}
+	
+	public JavaPlugin getPlugin() {
+		return plugin;
 	}
 	
 	/**

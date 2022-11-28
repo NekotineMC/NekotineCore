@@ -30,7 +30,7 @@ public class WrappingModule extends PluginModule{
 		return srcMap.containsKey(wrapperType);
 	}
 	
-	public <U, T extends WrapperBase<U>> T get(Object source, Class<T> wrapperType) {
+	public <U, T extends WrapperBase<U>> T getWrapper(Object source, Class<T> wrapperType) {
 		try {
 			var entityStore = store.get(source);
 			return wrapperType.cast(entityStore.get(wrapperType));
@@ -39,7 +39,7 @@ public class WrappingModule extends PluginModule{
 		}
 	}
 	
-	public <U, T extends WrapperBase<U>> void put(Object source, Class<T> wrapperType, T wrapper) {
+	public <U, T extends WrapperBase<U>> void putWrapper(Object source, Class<T> wrapperType, T wrapper) {
 		if (store == null) {
 			logException(Level.WARNING, "Impossible d'ajouter un wrapper car le module n'est probablement pas chargé.", new IllegalStateException());
 			return;

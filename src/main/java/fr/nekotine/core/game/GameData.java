@@ -15,7 +15,8 @@ import org.jetbrains.annotations.Nullable;
  */
 public abstract class GameData implements ConfigurationSerializable{
 	
-	public GameData(@Nullable Map<String, Object> flattenedGameData) {
+	public GameData(@Nullable Map<String, Object> flattenedgameData){
+		
 	}
-
+	
 }
