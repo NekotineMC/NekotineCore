@@ -148,9 +148,15 @@ public class EntityUtil {
 	public static void defaultAllAttributes(Attributable target) {
 		for (var attrType : Attribute.values()) {
 			var attrInstance = target.getAttribute(attrType);
-			attrInstance.setBaseValue(attrInstance.getDefaultValue());
-			for (var modifier : attrInstance.getModifiers()) {
-				attrInstance.removeModifier(modifier);
+			if (attrInstance != null) { // Toutes les entitées n'ont pas tous les attributs
+				if (attrType == Attribute.GENERIC_MOVEMENT_SPEED) {
+					attrInstance.setBaseValue(0.1);
+				}else {
+					attrInstance.setBaseValue(attrInstance.getDefaultValue());
+				}
+				for (var modifier : attrInstance.getModifiers()) {
+					attrInstance.removeModifier(modifier);
+				}
 			}
 		}
 	}

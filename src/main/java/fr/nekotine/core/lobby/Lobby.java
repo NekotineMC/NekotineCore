@@ -1,8 +1,6 @@
 package fr.nekotine.core.lobby;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 
 import javax.annotation.Nonnull;
@@ -18,8 +16,6 @@ import fr.nekotine.core.game.GameMode;
 import fr.nekotine.core.game.GameModeModule;
 import fr.nekotine.core.game.GameTeam;
 import fr.nekotine.core.module.ModuleManager;
-import fr.nekotine.core.snapshot.PlayerInventorySnapshot;
-import fr.nekotine.core.util.InventoryUtil;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.text.Component;
@@ -46,16 +42,7 @@ public class Lobby implements ForwardingAudience{
 	private boolean isRegistered = false;
 	
 	private String _name;
-	
-	@Nonnull
-	private  GameMode<? extends GameData> _gamemode;
-
-	private boolean _isGameLaunched = false;
 		
-	// Player status saving
-	private Map<Player, PlayerInventorySnapshot> _playersOldInv = new HashMap<>();
-	private Map<Player, org.bukkit.GameMode> _playersOldGameMode = new HashMap<>();
-	
 	@Nonnull
 	private Game<? extends GameData> _game;
 	
@@ -69,12 +56,17 @@ public class Lobby implements ForwardingAudience{
 		}
 	}
 	
+	public Game<? extends GameData> getGame(){
+		return _game;
+	}
+	
 	public void setGameMode(GameMode<? extends GameData> gamemode) {
-		_gamemode = gamemode;
+		if (_game != null && _game.isPlaying()) return;
 		if (_game != null) {
+			if (_game.isPlaying()) return;
 			_game.destroy();
 		}
-		_game = _gamemode.createGame(null);
+		_game = gamemode.createGame(null);
 	}
 	
 	public List<Player> getPlayerList(){
@@ -112,7 +104,7 @@ public class Lobby implements ForwardingAudience{
 	}
 	
 	public boolean isGameLaunched() {
-		return _isGameLaunched;
+		return _game.isPlaying();
 	}
 	
 	/**
@@ -159,9 +151,6 @@ public class Lobby implements ForwardingAudience{
 		player.sendMessage(
 				Component.text("Vous avez rejoint le lobby ").color(NamedTextColor.YELLOW)
 				.append(MiniMessage.miniMessage().deserialize(_name)));
-		// Save player status
-		//_playersOldInv.put(player, InventoryUtil.snapshot(player));
-		_playersOldGameMode.put(player, player.getGameMode());
 		// Add player
 		_game.addPlayerToOptimalTeam(player);
 		// Update commands
@@ -176,11 +165,6 @@ public class Lobby implements ForwardingAudience{
 		if (getPlayerList().contains(player)) {
 			// Remove player
 			_game.removePlayer(player);
-			// Change player status back to normal
-			InventoryUtil.fill(player, _playersOldInv.get(player));
-			_playersOldInv.remove(player);
-			player.setGameMode(_playersOldGameMode.get(player));
-			_playersOldGameMode.remove(player);
 			// Notify players
 			sendMessage(Component.text(String.format("◀ %s a quitté le lobby", player.getName())).color(NamedTextColor.GRAY));
 			player.sendMessage(
@@ -197,7 +181,8 @@ public class Lobby implements ForwardingAudience{
 	}
 	
 	public Component makeEasyJoinMessage() {
-		var prefix = Component.text("Le lobby ").color(NamedTextColor.GREEN);
+		var gamemodeName = ModuleManager.GetModule(GameModeModule.class).getGameModeKey(_game.getGameMode());
+		var prefix = Component.text(String.format("Le lobby (%s) ", gamemodeName)).color(NamedTextColor.GREEN);
 		var name = MiniMessage.miniMessage().deserialize(_name);
 		var suffix = Component.text(String.format(" peut être rejoint [%d/%d]", getNumberOfPlayer(), getPlayerCap())).color(NamedTextColor.GREEN);
 		var fin = prefix.append(name).append(suffix)

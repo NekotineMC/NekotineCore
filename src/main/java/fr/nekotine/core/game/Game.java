@@ -86,6 +86,10 @@ public class Game<GD extends GameData> implements ForwardingAudience{
 	public void start() {
 		gamemode.Start(this);
 	}
+	
+	public void abort() {
+		gamemode.Abort(this);
+	}
 
 	/**
 	 * Ajoute le joueur dans la partie.

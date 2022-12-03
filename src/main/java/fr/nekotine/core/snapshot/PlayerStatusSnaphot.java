@@ -33,8 +33,6 @@ public class PlayerStatusSnaphot implements Snapshot<Player>{
 	
 	private Snapshot<HumanEntity> hungerSnapshot;
 	
-	private Snapshot<Player> advancementProgress;
-	
 	/**
 	 * @implNote c'est l'équivalent du {@link fr.nekotine.core.snapshot.PlayerStatusSnaphot#deepSnapshot deepSnapshot}
 	 */
@@ -57,7 +55,6 @@ public class PlayerStatusSnaphot implements Snapshot<Player>{
 		allowFlight = item.getAllowFlight();
 		flySpeed = item.getFlySpeed();
 		walkSpeed = item.getWalkSpeed();
-		advancementProgress = new AdvancementOwnerSnapshot().deepSnapshot(item);
 		return this;
 	}
 
@@ -74,7 +71,6 @@ public class PlayerStatusSnaphot implements Snapshot<Player>{
 		item.setAllowFlight(allowFlight);
 		item.setFlySpeed(flySpeed);
 		item.setWalkSpeed(walkSpeed);
-		advancementProgress.patch(item);
 	}
 
 }

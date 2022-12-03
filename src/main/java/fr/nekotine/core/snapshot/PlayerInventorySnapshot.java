@@ -35,7 +35,7 @@ public class PlayerInventorySnapshot implements Snapshot<PlayerInventory>{
 	}
 	
 	public Snapshot<PlayerInventory> deepSnapshot(PlayerInventory inventory) {
-		content = Arrays.asList(inventory.getContents()).stream().map(base -> base.clone()).toArray(ItemStack[]::new);
+		content = Arrays.asList(inventory.getContents()).stream().map(base -> base != null ? base.clone() : base).toArray(ItemStack[]::new);
 		for (EquipmentSlot slot : savedSlots) {
 			equipmentSlots.put(slot, inventory.getItem(slot).clone());
 		}

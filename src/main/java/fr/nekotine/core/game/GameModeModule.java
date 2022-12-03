@@ -2,6 +2,8 @@ package fr.nekotine.core.game;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.logging.Level;
 
 import org.jetbrains.annotations.Nullable;
@@ -51,6 +53,24 @@ public class GameModeModule extends PluginModule{
 	 */
 	public @Nullable GameMode<? extends GameData> getGameMode(){
 		return registeredGameModes.values().stream().findAny().orElse(null);
+	}
+	
+	public Set<String> getGameModesKeys(){
+		return registeredGameModes.keySet();
+	}
+	
+	/**
+	 * Retourne la clef par lequel ce GameMode a été enregistré.
+	 * @param gamemode
+	 * @return
+	 */
+	public String getGameModeKey(GameMode<? extends GameData> gamemode) {
+		for (var key : registeredGameModes.keySet()) {
+			if (registeredGameModes.get(key) == gamemode) {
+				return key;
+			}
+		}
+		return "";
 	}
 	
 }
