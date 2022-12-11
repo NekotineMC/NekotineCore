@@ -330,6 +330,39 @@ public class LobbyModule extends PluginModule{
 				throw CommandAPI.fail("Lobby invalide");
 			}
 		});
+		// gamemode get 
+		CommandAPICommand c_gamemode_get = new CommandAPICommand("gamemode");
+		c_gamemode_get.withArguments(anyLobbyArgument);
+		c_gamemode_get.executes((sender, args) -> {
+			if (args[0] instanceof Lobby lobby) {
+				sender.sendMessage(
+						Component.text("Le mode de jeu du lobby nommé ")
+						.color(Colors.COMMAND_FEEDBACK)
+						.append(MiniMessage.miniMessage().deserialize(lobby.getName()))
+						.append(Component.text(String.format(" est : %s",lobby.getGame().getGameMode().getRegisteringKey()))
+								.color(Colors.COMMAND_FEEDBACK)));
+			}else {
+				throw CommandAPI.fail("Lobby invalide");
+			}
+		});
+		// gamemode set
+		CommandAPICommand c_gamemode_set = new CommandAPICommand("gamemode");
+		c_gamemode_set.withArguments(anyStoppedLobbyArgument);
+		c_gamemode_set.withArguments(availableGameModeArgument);
+		c_gamemode_set.executes((sender, args) -> {
+			if (args[0] instanceof Lobby lobby) {
+				var gm = (GameMode<? extends GameData>) args[1];
+				lobby.setGameMode(gm);
+				sender.sendMessage(
+						Component.text("Le mode de jeu du lobby nommé ")
+						.color(Colors.COMMAND_FEEDBACK)
+						.append(MiniMessage.miniMessage().deserialize(lobby.getName()))
+						.append(Component.text(String.format(" est désormais: %s",lobby.getGame().getGameMode().getRegisteringKey()))
+								.color(Colors.COMMAND_FEEDBACK)));
+			}else {
+				throw CommandAPI.fail("Lobby invalide");
+			}
+		});
 		// list
 		CommandAPICommand c_list = new CommandAPICommand("list");
 		c_list.executesPlayer((sender, args) -> {
@@ -358,6 +391,8 @@ public class LobbyModule extends PluginModule{
 				c_remove,
 				c_start,
 				c_stop,
+				c_gamemode_get,
+				c_gamemode_set,
 				c_list
 				);
 		c_lobby.register();
@@ -371,36 +406,32 @@ public class LobbyModule extends PluginModule{
 			int playerCap = lobby.getPlayerCap();
 			String name = lobby.getName();
 			// Prefix
-			var gamemode = "";
-			var game = lobby.getGame();
-			if (game != null) {
-				gamemode = GetPluginModule(GameModeModule.class).getGameModeKey(game.getGameMode());
-			}
-			var prefixBuilder = Component.text(String.format("(%s)", gamemode));
-			prefixBuilder.color(NamedTextColor.DARK_GRAY);
-			prefixBuilder.append(Component.text(String.format("[%d/%d] ", nbPlayer, playerCap)));
+			var builder = Component.text();
+			builder.append(Component.text(String.format("(%s)", lobby.getGame().getGameMode().getRegisteringKey())));
+			builder.color(NamedTextColor.DARK_GRAY);
+			builder.append(Component.text(String.format("[%d/%d] ", nbPlayer, playerCap)));
 			if (lobby.isGameLaunched()) {
-				prefixBuilder.color(NamedTextColor.GOLD);
+				builder.color(NamedTextColor.GOLD);
 			}else {
 				if (nbPlayer >= playerCap) {
-					prefixBuilder.color(NamedTextColor.YELLOW);
+					builder.color(NamedTextColor.YELLOW);
 				}else {
-					prefixBuilder.color(NamedTextColor.DARK_GREEN);
+					builder.color(NamedTextColor.DARK_GREEN);
 				}
 			}
 			// final construction
-			prefixBuilder.append(MiniMessage.miniMessage().deserialize(name));
+			builder.append(MiniMessage.miniMessage().deserialize(name).clickEvent(null));
 			if (lobby.isGameLaunched()) {
-				prefixBuilder.hoverEvent(HoverEvent.showText(Component.text("La partie est lancée").color(Colors.HOVER_INVALID)));
+				builder.hoverEvent(HoverEvent.showText(Component.text("La partie est lancée").color(Colors.HOVER_INVALID)));
 			}else {
 				if (nbPlayer >= playerCap) {
-					prefixBuilder.hoverEvent(HoverEvent.showText(Component.text("Le lobby est plein").color(Colors.HOVER_INVALID)));
+					builder.hoverEvent(HoverEvent.showText(Component.text("Le lobby est plein").color(Colors.HOVER_INVALID)));
 				}else {
-					prefixBuilder.clickEvent(ClickEvent.runCommand(String.format("/lobby join \"%s\"", MiniMessage.miniMessage().stripTags(name))));
-					prefixBuilder.hoverEvent(HoverEvent.showText(Component.text("Cliquez pour rejoindre le lobby").color(Colors.HOVER_INFO)));
+					builder.clickEvent(ClickEvent.runCommand(String.format("/lobby join \"%s\"", MiniMessage.miniMessage().stripTags(name))));
+					builder.hoverEvent(HoverEvent.showText(Component.text("Cliquez pour rejoindre le lobby").color(Colors.HOVER_INFO)));
 				}
 			}
-			e.sendMessage(prefixBuilder);
+			e.sendMessage(builder);
 		}
 		e.sendMessage(Component.text("[- Fin de la liste -]").color(NamedTextColor.DARK_AQUA));
 	}

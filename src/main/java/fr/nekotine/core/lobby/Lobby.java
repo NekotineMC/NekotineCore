@@ -181,13 +181,12 @@ public class Lobby implements ForwardingAudience{
 	}
 	
 	public Component makeEasyJoinMessage() {
-		var gamemodeName = ModuleManager.GetModule(GameModeModule.class).getGameModeKey(_game.getGameMode());
-		var prefix = Component.text(String.format("Le lobby (%s) ", gamemodeName)).color(NamedTextColor.GREEN);
-		var name = MiniMessage.miniMessage().deserialize(_name);
+		var prefix = Component.text(String.format("Le lobby (%s) ", _game.getGameMode().getRegisteringKey())).color(NamedTextColor.GREEN);
+		var name = MiniMessage.miniMessage().deserialize(_name).clickEvent(null);
 		var suffix = Component.text(String.format(" peut être rejoint [%d/%d]", getNumberOfPlayer(), getPlayerCap())).color(NamedTextColor.GREEN);
 		var fin = prefix.append(name).append(suffix)
 				.hoverEvent(HoverEvent.showText(Component.text("Cliquez pour rejoindre le lobby").color(NamedTextColor.GRAY)))
-				.clickEvent(ClickEvent.runCommand("/lobby join " + MiniMessage.miniMessage().stripTags(_name)));
+				.clickEvent(ClickEvent.runCommand(String.format("/lobby join \"%s\"", MiniMessage.miniMessage().stripTags(_name))));
 		return fin;
 	}
 	

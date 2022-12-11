@@ -22,7 +22,7 @@ public class WrappingModule extends PluginModule{
 		store = null;
 	}
 	
-	public <U, T extends WrapperBase<U>> boolean hasWrapper(Object source, Class<T> wrapperType) {
+	public <U, T extends WrapperBase<U>> boolean hasWrapper(U source, Class<T> wrapperType) {
 		var srcMap = store.get(source);
 		if (srcMap == null) {
 			return false;
@@ -30,7 +30,7 @@ public class WrappingModule extends PluginModule{
 		return srcMap.containsKey(wrapperType);
 	}
 	
-	public <U, T extends WrapperBase<U>> T getWrapper(Object source, Class<T> wrapperType) {
+	public <U, T extends WrapperBase<U>> T getWrapper(U source, Class<T> wrapperType) {
 		try {
 			var entityStore = store.get(source);
 			return wrapperType.cast(entityStore.get(wrapperType));
@@ -39,7 +39,7 @@ public class WrappingModule extends PluginModule{
 		}
 	}
 	
-	public <U, T extends WrapperBase<U>> void putWrapper(Object source, Class<T> wrapperType, T wrapper) {
+	public <U, T extends WrapperBase<U>> void putWrapper(U source, T wrapper) {
 		if (store == null) {
 			logException(Level.WARNING, "Impossible d'ajouter un wrapper car le module n'est probablement pas chargé.", new IllegalStateException());
 			return;
@@ -47,10 +47,10 @@ public class WrappingModule extends PluginModule{
 		try {
 			var entityStore = store.get(source);
 			if (entityStore != null) {
-				entityStore.put(wrapperType, wrapper);
+				entityStore.put(wrapper.getClass(), wrapper);
 			}else {
 				entityStore = new WeakHashMap<>();
-				entityStore.put(wrapperType, wrapper);
+				entityStore.put(wrapper.getClass(), wrapper);
 				store.put(source, entityStore);
 			}
 		}catch(Exception e) {

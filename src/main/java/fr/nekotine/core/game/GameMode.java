@@ -12,6 +12,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 
 import fr.nekotine.core.game.event.GameStartEvent;
+import fr.nekotine.core.module.ModuleManager;
 import fr.nekotine.core.plugin.CorePlugin;
 
 /**
@@ -259,4 +260,11 @@ public abstract class GameMode<GD extends GameData> implements Listener
 	 */
 	public abstract void registerTeams(Game<GD> game);
 	
+	/**
+	 * Obtient la clef utilisée lors de l'enregistrement si le lobby a bien été enregistré.
+	 * @return
+	 */
+	public String getRegisteringKey() {
+		return ModuleManager.GetModule(GameModeModule.class).getGameModeKey(this);
+	}
 }
