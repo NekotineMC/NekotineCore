@@ -1,6 +1,9 @@
 package fr.nekotine.core.game;
 
 import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
+
+import fr.nekotine.core.util.EventUtil;
 
 /**
  * Une phase d'un mode de jeu.
@@ -10,7 +13,7 @@ import org.bukkit.entity.Player;
  * @param <GD>
  * @param <GM>
  */
-public abstract class GamePhase<GD extends GameData,GM extends GameMode<GD>>{
+public abstract class GamePhase<GD extends GameData,GM extends GameMode<GD>> implements Listener{
 	
 	private final GM gamemode;
 	
@@ -37,9 +40,11 @@ public abstract class GamePhase<GD extends GameData,GM extends GameMode<GD>>{
 				playerBegin(game, player, team);
 			}
 		}
+		EventUtil.Register(gamemode.getPlugin(), this);
 	}
 	
 	public final void End(Game<GD> game) {
+		EventUtil.Unregister(this);
 		for (var team : game.getTeams()) {
 			for (var player : team.getPlayerList()) {
 				playerEnd(game, player, team);

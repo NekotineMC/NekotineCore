@@ -1,8 +1,11 @@
 package fr.nekotine.core.util;
 
+import java.util.List;
+
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 import fr.nekotine.core.snapshot.InventorySnapshot;
@@ -86,6 +89,75 @@ public class InventoryUtil {
 	 */
 	public static void fill(HumanEntity holder, Snapshot<PlayerInventory> snapshot) {
 		snapshot.patch(holder.getInventory());
+	}
+	
+	/**
+	 * Forme un rectangle dans l'inventaire aux coordonnées données avec l'ItemStack donné.
+	 * L'axe x est l'axe horizontale et l'axe y le vertical.
+	 * Le point (0,0) est en haut a gauche dans l'inventaire.
+	 * @param inventory
+	 * @param itemStack
+	 * @param x1
+	 * @param y1
+	 * @param x2
+	 * @param y2
+	 */
+	public static void paintRectangle(Inventory inventory, ItemStack itemStack, int x1, int y1, int x2, int y2) {
+		var minx = x1;
+		var maxx = x2;
+		var miny = y1;
+		var maxy = y2;
+		if (minx > maxx) {
+			minx = x2;
+			maxx = x1;
+		}
+		if (miny < maxy) {
+			miny = y2;
+			maxy = y1;
+		}
+		for (var x = minx; x < maxx; x++) {
+			for (var y = miny; y < maxy; y++) {
+				inventory.setItem((y * 9) + x, itemStack);
+			}
+		}
+		inventory.setItem(y2, itemStack);
+	}
+	
+	/**
+	 * Remplis le rectangle spécifié avec les items spécifiés. Il peut y avoir moins d'ItemStack que l'aire du rectangle.
+	 * Dans le cas ou il y a plus d'ItemStack que l'aire du rectangle permet d'en montrer, les ItemStack restant ne sont pas affichés.
+	 * L'axe x est l'axe horizontale et l'axe y le vertical.
+	 * Le point (0,0) est en haut a gauche dans l'inventaire.
+	 * @param inventory
+	 * @param content
+	 * @param x1
+	 * @param y1
+	 * @param x2
+	 * @param y2
+	 */
+	public static void fillRectangle(Inventory inventory, List<ItemStack> content, int x1, int y1, int x2, int y2) {
+		var minx = x1;
+		var maxx = x2;
+		var miny = y1;
+		var maxy = y2;
+		if (minx > maxx) {
+			minx = x2;
+			maxx = x1;
+		}
+		if (miny < maxy) {
+			miny = y2;
+			maxy = y1;
+		}
+		var ite = content.iterator();
+		for (var x = minx; x < maxx; x++) {
+			for (var y = miny; y < maxy; y++) {
+				if (ite.hasNext()) {
+					inventory.setItem((y * 9) + x, ite.next());
+				}else {
+					return;
+				}
+			}
+		}
 	}
 	
 }

@@ -1,106 +1,40 @@
 package fr.nekotine.core.usable;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
-import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.NotNull;
 
 import com.destroystokyo.paper.event.player.PlayerReadyArrowEvent;
 
+import fr.nekotine.core.util.ItemStackUtil;
 import net.kyori.adventure.text.Component;
 
 public class Usable {
-	private UsableModule _module;
-	private ItemStack item;
-	private Inventory _inventory;
-	
-	private final NamespacedKey key;
 	
 	private static final Enchantment GLOW_ENCHANT = Enchantment.DURABILITY;
 	
-	//
+	@NotNull
+	private ItemStack item;
 	
-	public Usable(UsableModule module, ItemStack item) {
+	public Usable(@NotNull ItemStack item) {
 		this.item = item;
-		_module = module;
-		key = new NamespacedKey(_module.getPlugin(), "Unstackable");
-		SetUnstackable();
 	}
 	
-	/**
-	 * Enregistre ce Usable pour qu'il recoive les événements.
-	 * Si l'ItemStack utilisé par ce Usable à déja un Usable associé, l'ajout au registre échoue.
-	 * @return si oui ou non le Usable à été ajouté au registre.
-	 */
-	public boolean register() {
-		return _module.register(this);
+	public @NotNull ItemStack getItemStack() {
+		return item;
 	}
-	
-	/**
-	 * Retire ce Usable du registre s'il y est présent.
-	 * @return Si oui ou non l'Usable a été retiré du registre.
-	 */
-	public boolean unregister() {
-		return _module.unregister(this);
-	}
-	
-	/**
-	 * Ajout l'item Usable à l'inventaire.
-	 * @param inventory l'inventaire auquel doit être fait l'ajout.
-	 */
-	public void Give(Inventory inventory) {
-		if (_inventory == null) {
-			inventory.addItem(item);
-			_inventory = inventory;
-		}
-	}
-	
-	/**
-	 * Supprime l'item Usable de l'inventaire ou il est. Cette methode ne fait rien si l'item n'y est plus.
-	 * @param inventory L'inventaire auquel supprimer l'item.
-	 */
-	public void Remove() {
-		if (_inventory != null) {
-			_inventory.remove(item);
-			_inventory = null;
-		}
-	}
-	
-	public void Update(ItemStack previous) {
-		if (_inventory != null) {
-			if (_inventory instanceof PlayerInventory) {
-				PlayerInventory pi = (PlayerInventory)_inventory;
-				for (EquipmentSlot es : EquipmentSlot.values()) {
-					if (pi.getItem(es).isSimilar(previous)) {
-						pi.setItem(es, item);
-						return;
-					}
-				}
-			}
-			int slot = _inventory.first(previous);
-			if (slot != -1) {
-				_inventory.setItem(slot, item);
-			}
-		}
-	}
-	
-	//
 	
 	protected void OnInteract(PlayerInteractEvent e) {
 	}
@@ -115,229 +49,161 @@ public class Usable {
 	protected void OnBowShoot(EntityShootBowEvent e) {
 	}
 	
-	//
-	
-	/**
-	 * Ajoute un nombre d'items dans l'objet 
-	 * @param quantity
-	 */
-	public void AddAmount(int quantity) {
-		ItemStack previous = item.clone();
-		
-		item.add(quantity);
-		
-		Update(previous);
-	}
 	/**
 	 * Modifie le nombre d'items dans l'objet
 	 * @param quantity
 	 */
-	public void SetAmount(int quantity) {
-		ItemStack previous = item.clone();
-		
+	public @NotNull Usable setAmount(int quantity) {
 		item.setAmount(quantity);
-		
-		Update(previous);
+		return this;
 	}
 	/**
 	 * Si l'objet doit afficher le texte de ses enchantements
 	 * @param text
 	 */
-	public void SetEnchantedText(boolean text) {
-		ItemStack previous = item.clone();
-		
-		if(text) {
-			item.removeItemFlags(ItemFlag.HIDE_ENCHANTS);
-		}else {
+	public @NotNull Usable hideEnchants(boolean hide) {
+		if(hide) {
 			item.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+		}else {
+			item.removeItemFlags(ItemFlag.HIDE_ENCHANTS);
 		}
-
-		Update(previous);
+		return this;
 	}
+	
 	/**
 	 * Si l'objet doit briller (SI L'OBJET A DEJA UN ENCHANTEMENT IL EST IMPOSSIBLE DE CACHER CE BRILLEMENT)
 	 * @param glow
 	 */
-	public void SetEnchantedGlow(boolean glow) {
-		ItemStack previous = item.clone();
-		
+	public @NotNull Usable forceEnchantGlint(boolean glow) {
 		if(glow) {
 			item.addUnsafeEnchantment(GLOW_ENCHANT, 1);
 		}else {
 			item.removeEnchantment(GLOW_ENCHANT);
 		}
-		
-		Update(previous);
+		return null;
 	}
 	/**
 	 * Ajoute un enchantement
 	 * @param enchantement
 	 * @param level
 	 */
-	public void AddEnchant(Enchantment enchantement, int level) {
-		ItemStack previous = item.clone();
-		
+	public @NotNull Usable addEnchant(Enchantment enchantement, int level) {
 		item.addUnsafeEnchantment(enchantement, level);
-		
-		Update(previous);
+		return this;
 	}
+	
 	/**
 	 * Si l'objet doit être incassable
 	 * @param unbreakable
 	 */
-	public void SetUnbreakable(boolean unbreakable) {
-		ItemStack previous = item.clone();
-		
+	public @NotNull Usable setUnbreakable(boolean unbreakable) {
 		ItemMeta meta = item.getItemMeta();
 		meta.setUnbreakable(unbreakable);
 		item.setItemMeta(meta);
-		
-		Update(previous);
+		return this;
 	}
+	
 	/**
 	 * Si l'objet doit cacher qu'il est incassable
 	 * @param hide
 	 */
-	public void HideUnbreakable(boolean hide) {
-		ItemStack previous = item.clone();
-		
+	public @NotNull Usable hideUnbreakable(boolean hide) {
 		if(hide) {
 			item.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
 		}else {
 			item.removeItemFlags(ItemFlag.HIDE_UNBREAKABLE);
 		}
-		
-		Update(previous);
+		return this;
+	}
+	
+	/**
+	 * Change le nom de l'objet
+	 * @param name
+	 */
+	public @NotNull Usable setName(String name) {
+		setName(Component.text(name));
+		return this;
 	}
 	/**
 	 * Change le nom de l'objet
 	 * @param name
 	 */
-	public void SetName(String name) {
-		SetName(Component.text(name));
-	}
-	/**
-	 * Change le nom de l'objet
-	 * @param name
-	 */
-	public void SetName(Component name) {
-		ItemStack previous = item.clone();
+	public @NotNull Usable setName(Component name) {
 		ItemMeta meta = item.getItemMeta();
 		meta.displayName(name);
 		item.setItemMeta(meta);
-		Update(previous);
+		return this;
 	}
 	/**
 	 * Change la description de l'objet
 	 * @param lore
 	 */
-	public void SetLore(String... lore) {
-		List<Component> loreList = new ArrayList<>(); 
-		for(String line : lore) {
-			if(line!="") {
-				loreList.add(Component.text(line));
-			}
-		}
-		SetLore(loreList);
+	public @NotNull Usable setLore(String... lore) {
+		setLore(Arrays.stream(lore).map(s -> Component.text(s)).toArray(Component[]::new));
+		return this;
 	}
 	
 	/**
 	 * Change la description de l'objet
 	 * @param lore
 	 */
-	public void SetLore(Component... lore) {
-		SetLore(Arrays.asList(lore));
+	public @NotNull Usable setLore(Component... lore) {
+		setLore(Arrays.asList(lore));
+		return this;
 	}
+	
 	/**
 	 * Change la description de l'objet
 	 * @param lore
 	 */
-	public void SetLore(List<Component> lore) {
-		ItemStack previous = item.clone();
+	public @NotNull Usable setLore(List<Component> lore) {
 		ItemMeta meta = item.getItemMeta();
 		meta.lore(lore);
 		item.setItemMeta(meta);
-		Update(previous);
+		return this;
 	}
 	
 	/**
 	 * Change le matériau de l'objet
 	 * @param material
 	 */
-	public void SetMaterial(Material material) {
-		ItemStack previous = item.clone();
-		
-		ItemStack newItem = new ItemStack(material, item.getAmount());
-		newItem.setItemMeta(item.getItemMeta());
-		item = newItem;
-		
-		Update(previous);
+	public @NotNull Usable setMaterial(Material material) {
+		item.setType(material);
+		return this;
 	}
+	
 	/**
 	 * Ne fonctionne qu'avec les objets ayant une durabilité
 	 * @param durability La durabilité restante de l'objet
 	 */
-	public void SetDurability(int durability) {
-		if(!(item.getItemMeta() instanceof Damageable)) return;
-			
-		ItemStack previous = item.clone();
-		
-		Damageable meta = (Damageable)item.getItemMeta();
-		meta.setDamage(durability);
-		item.setItemMeta(meta);
-			
-		Update(previous);
+	public @NotNull Usable setDurability(int durability) {
+		var meta = item.getItemMeta();
+		if (meta instanceof Damageable damageable) {
+			damageable.setDamage(durability);
+			item.setItemMeta(damageable);
+		}
+		return this;
 	}
+	
 	/**
 	 * Ne fonctionne qu'avec les objets ayant une durabilité
 	 * @param durability Le pourcentage de durabilité de l'objet
 	 */
-	public void SetDurabilityPercentage(float percentage) {
-		if(!(item.getItemMeta() instanceof Damageable)) return;
-			
-		ItemStack previous = item.clone();
-		
-		Damageable meta = (Damageable)item.getItemMeta();
-		meta.setDamage((int)Math.ceil(item.getType().getMaxDurability() * percentage));
-		item.setItemMeta(meta);
-			
-		Update(previous);
+	public @NotNull Usable setDurabilityPercentage(float percentage) {
+		if (percentage < 0 || percentage > 1) {
+			throw new IllegalArgumentException("le pourcentage donné (" + percentage + ") doit être compris entre 0 et 1.");
+		}
+		var meta = item.getItemMeta();
+		if (meta instanceof Damageable damageable) {
+			damageable.setDamage((int) (item.getType().getMaxDurability() * percentage));
+			item.setItemMeta(damageable);
+		}
+		return this;
 	}
 	
-	//
-	
-	/**
-	 * 
-	 * @return Le nombre d'items dans l'objet
-	 */
-	public int GetAmount() {
-		return item.getAmount();
-	}
-	/**
-	 * 
-	 * @return Le matériau de l'objet
-	 */
-	public Material GetMaterial() {
-		return item.getType();
-	}
-	/**
-	 * 
-	 * @return L'item utilisé comme Usable
-	 */
-	public ItemStack getItem() {
-		return item;
-	}
-	
-	//
-	
-	private void SetUnstackable() {
-		ItemStack previous = item.clone();
-		
-		ItemMeta meta = item.getItemMeta();
-		meta.getPersistentDataContainer().set(key, PersistentDataType.DOUBLE, Math.random());
-		item.setItemMeta(meta);
-		
-		Update(previous);
+	public @NotNull Usable setUnstackable() {
+		ItemStackUtil.setUnstackable(item);
+		return this;
 	}
 	
 	

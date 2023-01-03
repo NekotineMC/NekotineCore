@@ -43,32 +43,39 @@ public class ItemStackBuilder {
 		enchantments = new HashMap<>(other.enchantments);
 	}
 	
-	public void material(Material material) {
+	public ItemStackBuilder material(Material material) {
 		this.material = material;
+		return this;
 	}
 	
-	public void title(@Nullable Component title) {
+	public ItemStackBuilder title(@Nullable Component title) {
 		this.name = title;
+		return this;
 	}
 	
-	public void name(@Nullable Component title) {
+	public ItemStackBuilder name(@Nullable Component title) {
 		this.name = title;
+		return this;
 	}
 	
-	public void amount(int amount) {
+	public ItemStackBuilder amount(int amount) {
 		this.amount = amount;
+		return this;
 	}
 	
-	public void lore(List<Component> lore) {
+	public ItemStackBuilder lore(List<Component> lore) {
 		this.lore = lore;
+		return this;
 	}
 	
-	public void appendLore(Component loreLine) {
+	public ItemStackBuilder appendLore(Component loreLine) {
 		this.lore.add(loreLine);
+		return this;
 	}
 	
-	public void enchant(Enchantment enchant, int level) {
+	public ItemStackBuilder enchant(Enchantment enchant, int level) {
 		enchantments.put(enchant, level);
+		return this;
 	}
 	
 	/**

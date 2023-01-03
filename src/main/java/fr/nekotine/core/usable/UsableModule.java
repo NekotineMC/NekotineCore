@@ -1,6 +1,7 @@
 package fr.nekotine.core.usable;
 
-import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityShootBowEvent;
@@ -8,7 +9,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
-import org.bukkit.inventory.ItemStack;
 
 import com.destroystokyo.paper.event.player.PlayerReadyArrowEvent;
 
@@ -18,7 +18,7 @@ import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
 @ModuleNameAnnotation(Name = "UsableModule")
 public class UsableModule extends PluginModule{
 	
-	private final HashMap<ItemStack, Usable> usables = new HashMap<ItemStack, Usable>();
+	private final Set<Usable> usables = new LinkedHashSet<>();
 
 	@Override
 	protected void onDisable() {
@@ -27,23 +27,20 @@ public class UsableModule extends PluginModule{
 	
 	/**
 	 * Enregistre ce Usable pour qu'il recoive les événements.
-	 * Si l'ItemStack utilisé par ce Usable à déja un Usable associé, l'ajout au registre échoue.
 	 * @param usable L'usable à ajouter au registre.
 	 * @return si oui ou non le Usable à été ajouté au registre.
 	 */
 	public boolean register(Usable usable) {
-		if (haveRegisteredUsable(usable.getItem())) return false;
-		usables.put(usable.getItem(), usable);
-		return true;
+		return usables.add(usable);
 	}
 	
 	/**
-	 * Retourne si oui ou non un Usable est associé à cet ItemStack
+	 * Retourne si oui ou non l'usable est dans le registre.
 	 * @param item
 	 * @return
 	 */
-	public boolean haveRegisteredUsable(ItemStack item) {
-		return usables.containsKey(item);
+	public boolean isRegistered(Usable usable) {
+		return usables.contains(usable);
 	}
 	
 	/**
@@ -52,15 +49,15 @@ public class UsableModule extends PluginModule{
 	 * @return Si oui ou non l'Usable a été retiré du registre.
 	 */
 	public boolean unregister(Usable usable) {
-		return usables.remove(usable.getItem()) != null;
+		return usables.remove(usable);
 	}
 	
 	// --- Events
 	
 	@EventHandler
 	public void OnInteract(PlayerInteractEvent e) {
-		for (Usable u : usables.values()) {
-			if (u.getItem().equals(e.getItem())) {
+		for (Usable u : usables) {
+			if (u.getItemStack().equals(e.getItem())) {
 				u.OnInteract(e);
 			}
 		}
@@ -68,8 +65,8 @@ public class UsableModule extends PluginModule{
 	
 	@EventHandler
 	public void OnDrop(PlayerDropItemEvent e) {
-		for (Usable u : usables.values()) {
-			if (u.getItem().isSimilar(e.getItemDrop().getItemStack())) {
+		for (Usable u : usables) {
+			if (u.getItemStack().isSimilar(e.getItemDrop().getItemStack())) {
 				u.OnDrop(e);
 			}
 		}
@@ -77,8 +74,8 @@ public class UsableModule extends PluginModule{
 	
 	@EventHandler
 	public void OnInventoryClick(InventoryClickEvent e) {
-		for (Usable u : usables.values()) {
-			if (u.getItem().equals(e.getCurrentItem())) {
+		for (Usable u : usables) {
+			if (u.getItemStack().equals(e.getCurrentItem())) {
 				u.OnInventoryClick(e);
 			}
 		}
@@ -86,8 +83,8 @@ public class UsableModule extends PluginModule{
 	
 	@EventHandler
 	public void OnConsume(PlayerItemConsumeEvent e) {
-		for (Usable u : usables.values()) {
-			if (u.getItem().equals(e.getItem())) {
+		for (Usable u : usables) {
+			if (u.getItemStack().equals(e.getItem())) {
 				u.OnConsume(e);
 			}
 		}
@@ -95,16 +92,16 @@ public class UsableModule extends PluginModule{
 	
 	@EventHandler
 	public void OnReadyArrow(PlayerReadyArrowEvent e) {
-		for (Usable u : usables.values()) {
-			if (u.getItem().equals(e.getArrow())) {
+		for (Usable u : usables) {
+			if (u.getItemStack().equals(e.getArrow())) {
 				u.OnReadyArrow(e);
 			}
 		}
 	}
 	@EventHandler
 	public void OnBowShoot(EntityShootBowEvent e) {
-		for (Usable u : usables.values()) {
-			if (u.getItem().equals(e.getBow())) {
+		for (Usable u : usables) {
+			if (u.getItemStack().equals(e.getBow())) {
 				u.OnBowShoot(e);
 			}
 		}
