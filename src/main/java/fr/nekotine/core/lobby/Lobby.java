@@ -125,9 +125,7 @@ public class Lobby implements ForwardingAudience{
 	 * Supprime le lobby de la liste des lobby après l'avoir vidé
 	 */
 	public void unregister() {
-		if (_game.isPlaying()) {
-			_game.destroy();
-		}
+		_game.destroy();
 		for (GameTeam team : _game.getTeams()) {
 			team.clear();
 		}

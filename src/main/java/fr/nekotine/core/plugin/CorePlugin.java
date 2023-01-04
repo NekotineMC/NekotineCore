@@ -26,4 +26,9 @@ public class CorePlugin extends JavaPlugin {
 				);
 	}
 	
+	@Override
+	public void onDisable() {
+		ModuleManager.DisableAll();
+	}
+	
 }

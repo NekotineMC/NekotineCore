@@ -10,50 +10,57 @@ import fr.nekotine.core.module.ModuleManager;
 import net.kyori.adventure.text.Component;
 
 /**
- * Menu créé avec un coffre.
- * Un menu est supposé servir un seul joueur.
+ * Menu créé avec un coffre. Un menu est supposé servir un seul joueur.
+ * 
  * @author XxGoldenbluexX
  *
  */
 public class MenuInventory {
 
 	private Inventory inventory;
-	
+
 	private MenuLayout layout;
-	
+
 	private int nbRow;
-	
+
 	public MenuInventory(@NotNull MenuLayout layout, int nbRow) {
 		this.layout = layout;
 		this.nbRow = nbRow;
-		inventory = Bukkit.createInventory(null, nbRow);
+		inventory = Bukkit.createInventory(null, nbRow * 9);
 		ModuleManager.GetModule(MenuModule.class).registerMenu(this);
 	}
-	
+
 	public MenuInventory(@NotNull MenuLayout layout, int nbRow, @NotNull Component title) {
 		this.layout = layout;
 		this.nbRow = nbRow;
-		inventory = Bukkit.createInventory(null, nbRow, title);
+		inventory = Bukkit.createInventory(null, nbRow * 9, title);
 		ModuleManager.GetModule(MenuModule.class).registerMenu(this);
 	}
-	
+
 	/**
-	 * Ouvre le menu pour le joueur.
-	 * Pour rappel, un menu est supposé servire pour un seul joueur.
-	 * Si un menu est ouvert pour plusieurs joueurs, il sera synchronisé entre les deux.
+	 * Ouvre le menu pour le joueur. Pour rappel, un menu est supposé servire pour
+	 * un seul joueur. Si un menu est ouvert pour plusieurs joueurs, il sera
+	 * synchronisé entre les deux.
+	 * 
 	 * @param player
 	 */
 	public void displayTo(@NotNull Player player) {
 		layout.arrange(inventory, nbRow);
 		player.openInventory(inventory);
 	}
-	
+
 	public Inventory getInventory() {
 		return inventory;
 	}
-	
+
 	public void OnItemStackClicked(@NotNull ItemStack itemStack) {
-		layout.toMenuItem(itemStack).getAction().run();
+		var item = layout.toMenuItem(itemStack);
+		if (item != null) {
+			var action = item.getAction();
+			if (action != null) {
+				action.run();
+			}
+		}
 	}
-	
+
 }

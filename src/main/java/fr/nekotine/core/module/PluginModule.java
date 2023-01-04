@@ -134,9 +134,9 @@ public abstract class PluginModule implements Listener {
 	public final void enable() {
 		final long epoch = System.currentTimeMillis();
 		if (isEnabled) {
-			log(Level.FINE, "le module est déja chargé.");
+			log(Level.INFO, "le module est déja chargé.");
 		} else {
-			log(Level.FINE, "debut du chargement...");
+			log(Level.INFO, "debut du chargement...");
 			try {
 				onEnable();
 			} catch (Exception e) {
@@ -144,7 +144,7 @@ public abstract class PluginModule implements Listener {
 			}
 			isEnabled = true;
 		}
-		log(Level.FINE, String.format("le module est charge! (%d ms)", System.currentTimeMillis() - epoch));
+		log(Level.INFO, String.format("le module est charge! (%d ms)", System.currentTimeMillis() - epoch));
 	}
 
 	/**
@@ -152,10 +152,10 @@ public abstract class PluginModule implements Listener {
 	 */
 	public final void disable() {
 		final long epoch = System.currentTimeMillis();
-		if (isEnabled) {
-			log(Level.FINE, "le module n'est pas chargé.");
+		if (!isEnabled) {
+			log(Level.INFO, "le module n'est pas chargé.");
 		} else {
-			log(Level.FINE, "debut du dechargement...");
+			log(Level.INFO, "debut du dechargement...");
 			try {
 				onDisable();
 			} catch (Exception e) {
@@ -163,7 +163,7 @@ public abstract class PluginModule implements Listener {
 			}
 			isEnabled = false;
 		}
-		log(Level.FINE, String.format("le module est decharge! (%d ms)", System.currentTimeMillis() - epoch));
+		log(Level.INFO, String.format("le module est decharge! (%d ms)", System.currentTimeMillis() - epoch));
 	}
 
 	public boolean IsEnabled() {

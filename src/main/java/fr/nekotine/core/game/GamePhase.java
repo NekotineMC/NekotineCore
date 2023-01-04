@@ -35,10 +35,15 @@ public abstract class GamePhase<GD extends GameData,GM extends GameMode<GD>> imp
 	
 	public final void Begin(Game<GD> game) {
 		globalBegin(game);
+		try {
 		for (var team : game.getTeams()) {
 			for (var player : team.getPlayerList()) {
 				playerBegin(game, player, team);
 			}
+		}
+		}catch(Exception e) {
+			globalEnd(game);
+			throw e;
 		}
 		EventUtil.Register(gamemode.getPlugin(), this);
 	}

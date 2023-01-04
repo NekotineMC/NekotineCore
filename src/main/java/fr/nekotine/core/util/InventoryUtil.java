@@ -111,16 +111,15 @@ public class InventoryUtil {
 			minx = x2;
 			maxx = x1;
 		}
-		if (miny < maxy) {
+		if (miny > maxy) {
 			miny = y2;
 			maxy = y1;
 		}
-		for (var x = minx; x < maxx; x++) {
-			for (var y = miny; y < maxy; y++) {
+		for (var x = minx; x <= maxx; x++) {
+			for (var y = miny; y <= maxy; y++) {
 				inventory.setItem((y * 9) + x, itemStack);
 			}
 		}
-		inventory.setItem(y2, itemStack);
 	}
 	
 	/**
@@ -144,13 +143,13 @@ public class InventoryUtil {
 			minx = x2;
 			maxx = x1;
 		}
-		if (miny < maxy) {
+		if (miny > maxy) {
 			miny = y2;
 			maxy = y1;
 		}
 		var ite = content.iterator();
-		for (var x = minx; x < maxx; x++) {
-			for (var y = miny; y < maxy; y++) {
+		for (var x = minx; x <= maxx; x++) {
+			for (var y = miny; y <= maxy; y++) {
 				if (ite.hasNext()) {
 					inventory.setItem((y * 9) + x, ite.next());
 				}else {
