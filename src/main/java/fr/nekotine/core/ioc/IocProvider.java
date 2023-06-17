@@ -11,21 +11,22 @@ public class IocProvider implements IIocProvider{
 	private Map<Object, Supplier<Object>> factoryMap = new HashMap<>();
 	
 	@Override
-	public <T> void registerSingleton(T singleton) {
+	public <T> IIocProvider registerSingleton(T singleton) {
 		singletonMap.put(singleton.getClass(), singleton);
+		return this;
 	}
 
 	@Override
-	public <T, D extends T> void registerSingletonAs(D singleton, Class<T> asType) {
+	public <T, D extends T> IIocProvider registerSingletonAs(D singleton, Class<T> asType) {
 		singletonMap.put(asType, singleton);
+		return this;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public <T> void registerTransient(Supplier<T> factory) {
-	}
-
-	@Override
-	public <T, D extends T> void registerTransientAs(Supplier<D> factory, Class<T> asType) {
+	public <T, D extends T> IIocProvider registerTransientAs(Supplier<D> factory, Class<T> asType) {
+		factoryMap.put(asType, (Supplier<Object>) factory);
+		return this;
 	}
 
 	@Override
