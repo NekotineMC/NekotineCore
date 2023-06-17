@@ -4,15 +4,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import fr.nekotine.core.util.TypeHashMap;
+import fr.nekotine.core.util.TypeMap;
+
 public class IocProvider implements IIocProvider{
 
-	private Map<Object, Object> singletonMap = new HashMap<>();
+	private TypeMap singletonMap = new TypeHashMap();
 	
 	private Map<Object, Supplier<Object>> factoryMap = new HashMap<>();
 	
 	@Override
 	public <T> IIocProvider registerSingleton(T singleton) {
-		singletonMap.put(singleton.getClass(), singleton);
+		singletonMap.put(singleton);
 		return this;
 	}
 
@@ -32,7 +35,7 @@ public class IocProvider implements IIocProvider{
 	@Override
 	public <T> T resolve(Class<T> type) {
 		if (singletonMap.containsKey(type)) {
-			return type.cast(singletonMap.get(type));
+			return singletonMap.get(type);
 		}
 		if (factoryMap.containsKey(type)) {
 			return type.cast(factoryMap.get(type).get());
