@@ -8,5 +8,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface ComposingMap {
-	String Name() default "UnNamedComponent";
+	String value() default "UnNamedComponent";
 }

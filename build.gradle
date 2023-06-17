@@ -33,27 +33,6 @@ description = 'NekotineCore'
 
 compileJava.options.encoding = 'UTF-8'
 
-java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
-}
-
 // DEFAULT TASKS
 
 defaultTasks 'build'
-
-// "UBER" TASKS
-
-task dev {
-	group = "developpement"
-	description = "Compile un jar et l'envoie sur le server de développement"
-	dependsOn('assemble', 'copyToDevServer')
-}
-
-// TASKS
-
-task copyToDevServer(type: Copy) {
-	group = "developpement"
-	description = "Envoie le jar sur le server de développement"
-	from jar
-	into DevServerPluginDirectory
-}

@@ -92,7 +92,7 @@ public class MapCommandGenerator {
 			if (annotation != null) {
 				if (MapComponent.class.isAssignableFrom(componentField.getType())) {
 					componentField.trySetAccessible();
-					list.addAll(generateForNode(annotation.Name(), (Class<? extends MapComponent>) componentField.getType(), componentField));
+					list.addAll(generateForNode(annotation.value(), (Class<? extends MapComponent>) componentField.getType(), componentField));
 				}
 			}
 		}
