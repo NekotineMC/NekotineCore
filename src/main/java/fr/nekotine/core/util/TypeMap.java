@@ -4,6 +4,11 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.Map.Entry;
 
+/**
+ * Une Map spécifique, dont la clef est le type de la valeur.
+ * @author XxGoldenbluexX
+ *
+ */
 public interface TypeMap{
 	
 	public boolean containsKey(Class<?> key);
