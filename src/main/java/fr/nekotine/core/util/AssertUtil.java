@@ -14,14 +14,15 @@ public class AssertUtil {
 		}
 	}
 	
-	public static <T> void nonNull(Optional<T> optional) {
-		nonNull(optional, "L'objet donné ("+optional.getClass()+") est null.");
+	public static <T> T nonNull(Optional<T> optional) {
+		return nonNull(optional, "L'objet donné ("+optional.getClass()+") est null.");
 	}
 	
-	public static <T> void nonNull(Optional<T> optional, String message) {
+	public static <T> T nonNull(Optional<T> optional, String message) {
 		if (optional.isEmpty()) {
 			throw new AssertionError(message);
 		}
+		return optional.get();
 	}
 	
 }
