@@ -2,6 +2,7 @@ package fr.nekotine.core.ioc;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import fr.nekotine.core.util.TypeHashMap;
@@ -41,6 +42,17 @@ public class IocProvider implements IIocProvider{
 			return type.cast(factoryMap.get(type).get());
 		}
 		throw new IllegalArgumentException("Aucune resolution pour le type "+type.getName());
+	}
+	
+	@Override
+	public <T> Optional<T> tryResolve(Class<T> type) {
+		if (singletonMap.containsKey(type)) {
+			return Optional.of(singletonMap.get(type));
+		}
+		if (factoryMap.containsKey(type)) {
+			return Optional.of(type.cast(factoryMap.get(type).get()));
+		}
+		return Optional.empty();
 	}
 
 }
