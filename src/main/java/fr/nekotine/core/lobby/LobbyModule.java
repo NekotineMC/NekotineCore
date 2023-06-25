@@ -1,37 +1,11 @@
 package fr.nekotine.core.lobby;
 
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Level;
-
-import org.bukkit.Bukkit;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import dev.jorel.commandapi.CommandAPI;
-import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.StringTooltip;
-import dev.jorel.commandapi.arguments.Argument;
-import dev.jorel.commandapi.arguments.ArgumentSuggestions;
-import dev.jorel.commandapi.arguments.CustomArgument;
-import dev.jorel.commandapi.arguments.CustomArgument.CustomArgumentException;
-import dev.jorel.commandapi.arguments.CustomArgument.MessageBuilder;
-import dev.jorel.commandapi.arguments.EntitySelector;
-import dev.jorel.commandapi.arguments.EntitySelectorArgument;
-import dev.jorel.commandapi.arguments.StringArgument;
-import dev.jorel.commandapi.arguments.TextArgument;
-import fr.nekotine.core.game.GameData;
-import fr.nekotine.core.game.GameMode;
-import fr.nekotine.core.game.GameModeModule;
 import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
-import fr.nekotine.core.text.Colors;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 
 /**
  * Module permettant aux joueurs de créer des lobby pour héberger des parties.
@@ -45,7 +19,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 public class LobbyModule extends PluginModule{
 	
 	private final List<Lobby> lobbyList = new LinkedList<>();
-	
+	/*
 	private final Argument<Lobby> freeToJoinLobbyArgument =
 			new CustomArgument<Lobby,String>(new TextArgument("lobbyName"), info -> {
 				for (Lobby lobby : lobbyList) {
@@ -165,7 +139,7 @@ public class LobbyModule extends PluginModule{
 	
 	@Override
 	protected void onDisable() {
-		for (Lobby lobby : new LinkedList<Lobby>(lobbyList)/*Éviter les ConcurentModificationException*/) {
+		for (Lobby lobby : new LinkedList<Lobby>(lobbyList)/*Éviter les ConcurentModificationException*//*) {
 			try {
 				lobby.unregister();
 			}catch(Exception e) {
@@ -183,7 +157,7 @@ public class LobbyModule extends PluginModule{
 	@SuppressWarnings("unchecked")
 	/**
 	 * Le retour des commandes n'agissant pas sur soit est de la couleur dark_purple
-	 */
+	 *//*
 	public void registerCommands() {
 		// create
 		CommandAPICommand c_create = new CommandAPICommand("create");
@@ -469,5 +443,5 @@ public class LobbyModule extends PluginModule{
 			list.removeAll(lobby.getPlayerList());
 		}
 		return list;
-	}
+	}*/
 }

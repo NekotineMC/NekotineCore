@@ -1,5 +1,6 @@
 package fr.nekotine.core.ioc;
 
+
 import java.util.Optional;
 import java.util.function.Supplier;
 

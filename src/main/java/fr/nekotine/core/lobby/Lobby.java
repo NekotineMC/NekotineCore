@@ -112,25 +112,25 @@ public class Lobby implements ForwardingAudience{
 	 * @param module
 	 */
 	public void register(LobbyModule module) {
-		_module = module;
+		_module = module;/*
 		_module.getLobbyList().add(this);
 		Component msg = makeEasyJoinMessage();
 		for (Player player : _module.getPlayersWithNoLobby()) {
 			player.sendMessage(msg);
 		}
-		isRegistered = true;
+		isRegistered = true;*/
 	}
 	
 	/**
 	 * Supprime le lobby de la liste des lobby après l'avoir vidé
 	 */
-	public void unregister() {
+	public void unregister() {/*
 		_game.destroy();
 		for (GameTeam team : _game.getTeams()) {
 			team.clear();
 		}
 		_module.getLobbyList().remove(this);
-		isRegistered = false;
+		isRegistered = false;*/
 	}
 	
 	public boolean isFreeToJoin() {

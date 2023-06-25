@@ -1,34 +1,123 @@
 package fr.nekotine.core.map;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.logging.Level;
 
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.Argument;
-import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.CustomArgument;
-import dev.jorel.commandapi.arguments.LiteralArgument;
+import dev.jorel.commandapi.arguments.CustomArgument.CustomArgumentException;
+import dev.jorel.commandapi.arguments.CustomArgument.MessageBuilder;
 import dev.jorel.commandapi.arguments.StringArgument;
-import fr.nekotine.core.map.annotation.ComposingMap;
-import fr.nekotine.core.map.component.MapBlockPlaceElement;
-import fr.nekotine.core.map.component.MapComponent;
-import fr.nekotine.core.map.component.MapComponentList;
-import fr.nekotine.core.map.component.MapElement;
-import fr.nekotine.core.map.component.MapPlaceElement;
-import fr.nekotine.core.map.component.MapRectangleAreaElement;
-import fr.nekotine.core.map.graph.MapBlockPlaceGraphNode;
-import fr.nekotine.core.map.graph.MapComponentListGraphNode;
-import fr.nekotine.core.map.graph.MapGraphNode;
-import fr.nekotine.core.map.graph.MapPlaceGraphNode;
-import fr.nekotine.core.map.graph.MapRectangleAreaGraphNode;
-import fr.nekotine.core.module.ModuleManager;
+import dev.jorel.commandapi.executors.CommandExecutor;
+import dev.jorel.commandapi.executors.ExecutorType;
+import fr.nekotine.core.NekotineCore;
+import fr.nekotine.core.map.element.MapBlockPositionElement;
+import fr.nekotine.core.map.element.MapDictionaryElement;
+import fr.nekotine.core.map.element.MapPositionElement;
+import fr.nekotine.core.map.generator.BlockPositionCommandGenerator;
+import fr.nekotine.core.map.generator.DefaultMapElementCommandGenerator;
+import fr.nekotine.core.map.generator.DictionaryCommandGenerator;
+import fr.nekotine.core.map.generator.PositionCommandGenerator;
+import fr.nekotine.core.util.AssertUtil;
 
 public class MapCommandGenerator {
 	
+	private static boolean needToAddDefaultResolvers = true;
+	
+	@SafeVarargs
+	public static void generateFor(Class<?> ...mapTypes) {
+		try {
+			if (needToAddDefaultResolvers) {
+				setupDefaultResolver();
+			}
+			var mapCommand = makeMapCommand();
+			var editCommand = new CommandAPICommand("edit");
+			editCommand.executes((CommandExecutor)(sender, args) -> sender.sendMessage("Usage: /map edit <mapType> <mapName>"), ExecutorType.ALL);
+			for (var mapType : mapTypes) {
+				try {
+					
+					var mapTypeName = mapType.getSimpleName();
+					var mapTypeArgument = makeMapArgument(mapType);
+					var generatorResolverOptional = NekotineCore.IOC.tryResolve(IMapElementCommandGeneratorResolver.class);
+					var generatorResolver = AssertUtil.nonNull(generatorResolverOptional,
+							"Veillez à bien définir un résolveur de générateur de commande ou à initialiser celui par défaut avec MapCommandGenerator.setupDefaultResolver()");
+					var generator = generatorResolver.resolve(mapType);
+					for (var branch : generator.generateFor(mapType)) {
+						var command = new CommandAPICommand(mapTypeName);
+						command.withArguments(mapTypeArgument);
+						command.withArguments(branch.arguments());
+						CommandExecutor executor = (sender, args)->{
+							branch.consumer().accept(args.get(0)/*map*/, sender, args);
+						};
+						command.executes(executor, ExecutorType.ALL);
+						editCommand.withSubcommand(command);
+					}
+					NekotineCore.LOGGER.info("[MapCommandGenerator] Commandes générées pour le type de carte "+mapTypeName);
+				}catch(Exception e) {
+					throw new Exception("[MapCommandGenerator] Erreur lors de la génération de commande pour le type de map "+mapType.getName(), e);
+				}
+			}
+			mapCommand.withSubcommand(editCommand);
+			mapCommand.register();
+			
+			NekotineCore.LOGGER.info("[MapCommandGenerator] Des commandes ont été automatiquement générées pour gérer des types cartes.");
+		}catch(Exception e) {
+			NekotineCore.LOGGER.logp(Level.SEVERE,
+					"MapCommandGenerator",
+					"void generateFor(Class<? extends MapElement> ...element)",
+					"[MapCommandGenerator] Une erreur est survenue lors de la génération des commandes de map",
+					e);
+		}
+	}
+	
+	private static <T> Argument<T> makeMapArgument(Class<T> mapType){
+		return new CustomArgument<T,String>(new StringArgument("mapName"),info ->{
+			T map;
+			try {
+				var storage = NekotineCore.IOC.tryResolve(IMapStorage.class);
+				if (storage.isPresent()) {
+					map = storage.get().get(mapType, info.currentInput());
+				}else {
+					var newStorage = new BufferMapStorage();
+					map = newStorage.get(mapType, info.currentInput());
+					NekotineCore.IOC.registerSingletonAs(newStorage, IMapStorage.class);
+				}
+			}catch(Exception e) {
+				NekotineCore.LOGGER.logp(Level.WARNING,
+						"MapCommandGenerator",
+						"<T> Argument<T> makeMapArgument(Class<T> mapType)",
+						"Erreur lors de la récupération de la carte", e);
+				throw CustomArgumentException.fromString("Erreur interne lors de la récupération de la carte.");
+			}
+			if (map == null) {
+				throw CustomArgumentException.fromMessageBuilder(new MessageBuilder("Carte inconnue: ").appendArgInput().appendHere());
+			}
+			return map;
+		});
+	}
+
+	/**
+	 * Create map command with add,remove and list subcommands
+	 * @return
+	 */
+	private static CommandAPICommand makeMapCommand() {
+		var command = new CommandAPICommand("map");
+		command.executes((CommandExecutor)(sender, args) -> sender.sendMessage("Usage: /map <action>"), ExecutorType.ALL);
+		return command;
+	}
+	
+	public static void setupDefaultResolver() {
+		needToAddDefaultResolvers = false;
+		NekotineCore.IOC.registerSingletonAs(
+				new MapElementCommandGeneratorResolver(new DefaultMapElementCommandGenerator())
+				.registerGenerator(MapDictionaryElement.class, new DictionaryCommandGenerator())
+				.registerGenerator(MapPositionElement.class, new PositionCommandGenerator())
+				.registerGenerator(MapBlockPositionElement.class, new BlockPositionCommandGenerator()),
+				IMapElementCommandGeneratorResolver.class);
+	}
+	
+	/*OLD*/
+	/*
 	protected static Argument<MapIdentifier> existingMapArgument(String nodeName, MapTypeIdentifier typeFilter){
 		return new CustomArgument<MapIdentifier, String>(new StringArgument(nodeName), (info) -> {
 			return MapModule.getMap(info.input());
@@ -166,5 +255,5 @@ public class MapCommandGenerator {
 		}
 		return list;
 	}
-	
+	*/
 }

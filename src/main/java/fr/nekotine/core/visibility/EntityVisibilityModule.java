@@ -74,7 +74,7 @@ public class EntityVisibilityModule extends PluginModule{
 					}
 					try {
 						pmanager.sendServerPacket(vd.blind, updatePacket);
-					} catch (InvocationTargetException e) {
+					} catch (Exception e) {
 					}
 					iterator.remove();
 				}

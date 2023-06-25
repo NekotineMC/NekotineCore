@@ -11,13 +11,13 @@ import fr.nekotine.core.module.ModuleManager;
 
 @SerializableAs("MapIdentifier")
 public record MapIdentifier(
-		MapTypeIdentifier type,
+		String type,
 		String name,
 		String displayName,
 		String description,
 		Material icon
-		) implements ConfigurationSerializable{
-	
+		) /*implements ConfigurationSerializable*/{
+	/*
 	@Override
 	public @NotNull java.util.Map<String, Object> serialize() {
 		java.util.Map<String, Object> map = new HashMap<>();
@@ -40,5 +40,5 @@ public record MapIdentifier(
 	
 	public GameMap loadMap() {
 		return ModuleManager.GetModule(MapModule.class).loadMap(this);
-	}
+	}*/
 }
