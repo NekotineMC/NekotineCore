@@ -23,6 +23,11 @@ dependencies {
 	compileOnly group: "io.papermc.paper", name: "paper-api", version: "1.+"
 	compileOnly group: "com.comphenix.protocol", name: "ProtocolLib", version: "+"
 	compileOnly group: "dev.jorel", name: "commandapi-bukkit-core", version: "+"
+	testImplementation group: "org.junit.jupiter", name:"junit-jupiter-engine", version:"5.+"
+}
+
+test {
+    useJUnitPlatform()
 }
 
 // CONFIGURATION
