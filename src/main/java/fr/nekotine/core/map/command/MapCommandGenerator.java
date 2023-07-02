@@ -1,4 +1,4 @@
-package fr.nekotine.core.map;
+package fr.nekotine.core.map.command;
 
 import java.util.logging.Level;
 
@@ -11,6 +11,8 @@ import dev.jorel.commandapi.arguments.StringArgument;
 import dev.jorel.commandapi.executors.CommandExecutor;
 import dev.jorel.commandapi.executors.ExecutorType;
 import fr.nekotine.core.NekotineCore;
+import fr.nekotine.core.map.BufferMapStorage;
+import fr.nekotine.core.map.IMapStorage;
 import fr.nekotine.core.map.element.MapBlockPositionElement;
 import fr.nekotine.core.map.element.MapDictionaryElement;
 import fr.nekotine.core.map.element.MapPositionElement;

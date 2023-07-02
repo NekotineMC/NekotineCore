@@ -5,12 +5,12 @@ import java.util.LinkedList;
 import dev.jorel.commandapi.arguments.Argument;
 import dev.jorel.commandapi.arguments.LiteralArgument;
 import fr.nekotine.core.NekotineCore;
-import fr.nekotine.core.map.IMapElementCommandGeneratorResolver;
-import fr.nekotine.core.map.MapCommandBranch;
-import fr.nekotine.core.map.MapCommandExecutor;
-import fr.nekotine.core.map.MapElementCommandGenerator;
 import fr.nekotine.core.map.annotation.ComposingMap;
 import fr.nekotine.core.map.annotation.MapDictionaryElementType;
+import fr.nekotine.core.map.command.IMapElementCommandGeneratorResolver;
+import fr.nekotine.core.map.command.MapCommandBranch;
+import fr.nekotine.core.map.command.MapCommandExecutor;
+import fr.nekotine.core.map.command.MapElementCommandGenerator;
 import fr.nekotine.core.map.element.MapDictionaryElement;
 import fr.nekotine.core.util.CollectionUtil;
 

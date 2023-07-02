@@ -1,4 +1,4 @@
-package fr.nekotine.core.map;
+package fr.nekotine.core.map.command;
 
 import org.bukkit.command.CommandSender;
 

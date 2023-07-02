@@ -1,4 +1,4 @@
-package fr.nekotine.core.map;
+package fr.nekotine.core.map.command;
 
 import dev.jorel.commandapi.arguments.Argument;
 
