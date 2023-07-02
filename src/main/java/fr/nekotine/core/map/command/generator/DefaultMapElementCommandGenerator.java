@@ -1,4 +1,4 @@
-package fr.nekotine.core.map.generator;
+package fr.nekotine.core.map.command.generator;
 
 import java.util.LinkedList;
 
@@ -11,7 +11,7 @@ import fr.nekotine.core.map.command.IMapElementCommandGeneratorResolver;
 import fr.nekotine.core.map.command.MapCommandBranch;
 import fr.nekotine.core.map.command.MapCommandExecutor;
 import fr.nekotine.core.map.command.MapElementCommandGenerator;
-import fr.nekotine.core.map.element.MapDictionaryElement;
+import fr.nekotine.core.map.command.element.MapDictionaryElement;
 import fr.nekotine.core.util.CollectionUtil;
 
 public class DefaultMapElementCommandGenerator extends MapElementCommandGenerator{
