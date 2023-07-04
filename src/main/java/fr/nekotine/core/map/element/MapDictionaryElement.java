@@ -1,4 +1,4 @@
-package fr.nekotine.core.map.command.element;
+package fr.nekotine.core.map.element;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -13,13 +13,13 @@ import dev.jorel.commandapi.executors.ExecutorType;
 import fr.nekotine.core.NekotineCore;
 import fr.nekotine.core.map.BufferMapStorage;
 import fr.nekotine.core.map.IMapStorage;
-import fr.nekotine.core.map.command.element.MapBlockPositionElement;
-import fr.nekotine.core.map.command.element.MapDictionaryElement;
-import fr.nekotine.core.map.command.element.MapPositionElement;
 import fr.nekotine.core.map.command.generator.BlockPositionCommandGenerator;
 import fr.nekotine.core.map.command.generator.DefaultMapElementCommandGenerator;
 import fr.nekotine.core.map.command.generator.DictionaryCommandGenerator;
 import fr.nekotine.core.map.command.generator.PositionCommandGenerator;
+import fr.nekotine.core.map.element.MapBlockPositionElement;
+import fr.nekotine.core.map.element.MapDictionaryElement;
+import fr.nekotine.core.map.element.MapPositionElement;
 import fr.nekotine.core.util.AssertUtil;
 
 public class MapCommandGenerator {

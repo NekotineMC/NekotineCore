@@ -9,7 +9,7 @@ import fr.nekotine.core.NekotineCore;
 import fr.nekotine.core.map.command.MapCommandBranch;
 import fr.nekotine.core.map.command.MapCommandExecutor;
 import fr.nekotine.core.map.command.MapElementCommandGenerator;
-import fr.nekotine.core.map.command.element.MapPositionElement;
+import fr.nekotine.core.map.element.MapPositionElement;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 

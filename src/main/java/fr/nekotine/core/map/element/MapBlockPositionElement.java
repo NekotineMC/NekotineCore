@@ -1,4 +1,4 @@
-package fr.nekotine.core.map.command.element;
+package fr.nekotine.core.map.element;
 
 import org.bukkit.Location;
 import org.bukkit.World;
