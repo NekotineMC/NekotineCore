@@ -1,7 +1,12 @@
 package fr.nekotine.core.map.element;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Une élément de carte qui représente un point désigné par une valeur sur trois axes (x,y,z).
@@ -9,7 +14,7 @@ import org.bukkit.World;
  * @author XxGoldenbluexX
  *
  */
-public class MapPositionElement{
+public class MapPositionElement implements ConfigurationSerializable{
 
 	public MapPositionElement() {}
 	
@@ -63,6 +68,22 @@ public class MapPositionElement{
 
 	public void setZ(double z) {
 		this.z = z;
+	}
+
+	@Override
+	public @NotNull Map<String, Object> serialize() {
+		var map = new HashMap<String,Object>();
+		map.put("x", x);
+		map.put("y", y);
+		map.put("z", z);
+		return map;
+	}
+	
+	public static MapPositionElement deserialize(Map<String,Object> map) {
+		var x = (double)map.get("x");
+		var y = (double)map.get("y");
+		var z = (double)map.get("z");
+		return new MapPositionElement(x, y, z);
 	}
 	
 }

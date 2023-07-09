@@ -9,6 +9,7 @@ import java.io.ObjectOutputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -20,6 +21,8 @@ import com.google.common.io.Files;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.ItemStackArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
+import fr.nekotine.core.NekotineCore;
+import fr.nekotine.core.logging.FormatingRemoteLogger;
 import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
 import fr.nekotine.core.text.Colors;
@@ -30,6 +33,8 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 @ModuleNameAnnotation(Name = "MappingModule")
 public class MapModule extends PluginModule{
 
+	public Logger LOGGER = new FormatingRemoteLogger(NekotineCore.LOGGER, "[MapModule] %s");
+	
 	// Static part
 	/*
 		private static final List<MapTypeIdentifier> AVAILABLE_MAP_TYPES = new LinkedList<>();

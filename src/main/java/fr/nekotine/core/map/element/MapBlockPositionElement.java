@@ -1,9 +1,14 @@
 package fr.nekotine.core.map.element;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.jetbrains.annotations.NotNull;
 
-public class MapBlockPositionElement{
+public class MapBlockPositionElement implements ConfigurationSerializable{
 
 	public MapBlockPositionElement() {}
 	
@@ -57,6 +62,22 @@ public class MapBlockPositionElement{
 
 	public void setZ(int z) {
 		this.z = z;
+	}
+	
+	@Override
+	public @NotNull Map<String, Object> serialize() {
+		var map = new HashMap<String,Object>();
+		map.put("x", x);
+		map.put("y", y);
+		map.put("z", z);
+		return map;
+	}
+	
+	public static MapBlockPositionElement deserialize(Map<String,Object> map) {
+		var x = (int)map.get("x");
+		var y = (int)map.get("y");
+		var z = (int)map.get("z");
+		return new MapBlockPositionElement(x, y, z);
 	}
 	
 }
