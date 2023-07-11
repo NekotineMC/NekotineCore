@@ -1,11 +1,11 @@
 package fr.nekotine.core.map.save.saver.configurationserializable;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -14,7 +14,7 @@ import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import fr.nekotine.core.map.annotation.ComposingMap;
 import fr.nekotine.core.map.annotation.MapDictionaryElementType;
 import fr.nekotine.core.map.element.MapDictionaryElement;
-import fr.nekotine.core.tuple.Triplet;
+import fr.nekotine.core.tuple.Pair;
 
 public class ConfigurationSerializableAdapterSerializer {
 
@@ -54,7 +54,7 @@ public class ConfigurationSerializableAdapterSerializer {
 		if (ConfigurationSerializable.class.isAssignableFrom(node)) {
 			return obj -> obj != null ? ((ConfigurationSerializable)obj).serialize() : null;
 		}
-		var fieldsFunctions = new LinkedList<Triplet<String,Field,Function<Object, Map<String, Object>>>>();
+		var fieldsFunctions = new LinkedList<Pair<String,Function<Object, Map<String, Object>>>>();
 		for (var field : node.getDeclaredFields()) {
 			if (field.isAnnotationPresent(ComposingMap.class)) {
 				var fieldType = field.getType();
@@ -69,12 +69,11 @@ public class ConfigurationSerializableAdapterSerializer {
 						var annotation = field.getAnnotation(MapDictionaryElementType.class);
 						var typeDict = annotation.value();
 						var funcDict = makeSerializerForNode(typeDict);
-						fieldsFunctions.add(new Triplet(name,field,(Function<Object, Map<String, Object>>)obj -> {
+						fieldsFunctions.add(new Pair(name,(Function<Object, Map<String, Object>>)obj -> {
 							try {
 								if (obj == null) {
 									return null;
 								}
-								System.out.printf("obj type is %s\n",obj.getClass().getName());
 								var map = new HashMap<String, Object>();
 								var backingMap = ((MapDictionaryElement)(field.get(obj))).backingMap();
 								for (Entry entry : (Set<Entry>)backingMap.entrySet()) {
@@ -92,8 +91,8 @@ public class ConfigurationSerializableAdapterSerializer {
 						throw new IllegalArgumentException(String.format(msg,name,node.getName()));
 					}
 				}else {
-					var nodeSerializer = makeSerializerForNode(field.getType());
-					fieldsFunctions.add(new Triplet(name,field,(Function<Object, Map<String, Object>>)obj ->{
+					var nodeSerializer = getSerializerFor(field.getType());
+					fieldsFunctions.add(new Pair(name,(Function<Object, Map<String, Object>>)obj ->{
 						if (obj == null) {
 							return null;
 						}
@@ -108,14 +107,12 @@ public class ConfigurationSerializableAdapterSerializer {
 		}
 		return obj -> {
 			var map = new HashMap<String,Object>();
-			System.out.printf("Processing %s:\n", node.getName());
 			if (obj == null) {
 				return null;
 			}
-			for (var triplet : fieldsFunctions) {
-				System.out.printf("field %s\n", triplet.a());
+			for (var pair : fieldsFunctions) {
 				try {
-				map.put(triplet.a(), triplet.c().apply(obj));
+				map.put(pair.a(), pair.b().apply(obj));
 				}catch(Exception e) {
 					throw new RuntimeException(e);
 				}
@@ -124,10 +121,80 @@ public class ConfigurationSerializableAdapterSerializer {
 		};
 	}
 	
+	@SuppressWarnings("unchecked")
 	private Function<Map<String, Object>, Object> makeDeserializerForNode(Class<?> node){
 		if (ConfigurationSerializable.class.isAssignableFrom(node)) {
-			return ConfigurationSerialization::deserializeObject;
+			return map -> map != null ? ConfigurationSerialization.deserializeObject(map, (Class<? extends ConfigurationSerializable>)node) : null;
 		}
-		return null;
+		var fieldsFunctions = new LinkedList<BiConsumer<Object,Map<String, Object>>>();
+		for (var field : node.getDeclaredFields()) {
+			if (field.isAnnotationPresent(ComposingMap.class)) {
+				var fieldType = field.getType();
+				field.trySetAccessible();
+				var name = field.getAnnotation(ComposingMap.class).value();
+				if (name.isBlank()) {
+					name = field.getName();
+				}
+				final var finalName = name;
+				// special Dictionary case
+				if (MapDictionaryElement.class == fieldType) { // Type précis pour permettre l'héritage par l'utilisateur
+					if (field.isAnnotationPresent(MapDictionaryElementType.class)) {
+						var annotation = field.getAnnotation(MapDictionaryElementType.class);
+						var typeDict = annotation.value();
+						var funcDict = makeDeserializerForNode(typeDict);
+						fieldsFunctions.add((parent,map) -> {
+							try {
+								if (map == null) {
+									return;
+								}
+								var dict = new MapDictionaryElement<>();
+								var backing = dict.backingMap();
+								for (var key : map.keySet()) {
+									backing.put(key, funcDict.apply((Map<String, Object>) map.get(key)));
+								}
+							}catch(Exception e) {
+								throw new RuntimeException(e);
+							}
+							});
+					}else {
+						var msg = "[ConfigurationSerializable]->Default Le champ %s dans %s est de type dictionnaire mais n'a"
+								+ " pas l'annotation MapDictionaryElementType nécessaire pour sa génération.";
+						throw new IllegalArgumentException(String.format(msg,name,node.getName()));
+					}
+				}else {
+					var nodeDeserializer = getDeserializerFor(field.getType());
+					fieldsFunctions.add((parent,map) ->{
+						if (map == null) {
+							return;
+						}
+						try {
+							var obj = nodeDeserializer.apply((Map<String, Object>) map.get(finalName));
+							field.set(parent, obj);
+						}catch(Exception e) {
+							throw new RuntimeException(e);
+						}
+					});
+				}
+			}
+		}
+		try {
+			var ctor = node.getConstructor();
+			return map -> {
+				if (map == null) {
+					return null;
+				}
+				try {
+					var instance = ctor.newInstance();
+					for (var func : fieldsFunctions) {
+						func.accept(instance, map);
+					}
+					return instance;
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			};
+		}catch(Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 }
