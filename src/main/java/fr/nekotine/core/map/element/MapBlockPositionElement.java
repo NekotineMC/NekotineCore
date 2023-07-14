@@ -8,6 +8,9 @@ import org.bukkit.World;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.jetbrains.annotations.NotNull;
 
+import fr.nekotine.core.tuple.Pair;
+import fr.nekotine.core.tuple.Triplet;
+
 public class MapBlockPositionElement implements ConfigurationSerializable{
 
 	public MapBlockPositionElement() {}
@@ -62,6 +65,43 @@ public class MapBlockPositionElement implements ConfigurationSerializable{
 
 	public void setZ(int z) {
 		this.z = z;
+	}
+	
+	public void setXY(int x, int y) {
+		this.x = x;
+		this.y = y;
+	}
+	
+	public Pair<Integer,Integer> getXY(){
+		return new Pair<>(x,y);
+	}
+	
+	public void setXZ(int x, int z) {
+		this.x = x;
+		this.z = z;
+	}
+	
+	public Pair<Integer,Integer> getXZ(){
+		return new Pair<>(x,z);
+	}
+	
+	public void setYZ(int y, int z) {
+		this.y = y;
+		this.z = z;
+	}
+	
+	public Pair<Integer,Integer> getYZ(){
+		return new Pair<>(y,z);
+	}
+	
+	public void setXYZ(int x, int y, int z) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
+	}
+	
+	public Triplet<Integer,Integer,Integer> getXYZ(){
+		return new Triplet<>(x,y,z);
 	}
 	
 	@Override

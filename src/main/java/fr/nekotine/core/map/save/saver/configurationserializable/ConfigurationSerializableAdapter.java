@@ -4,10 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.jetbrains.annotations.NotNull;
 
 public class ConfigurationSerializableAdapter implements ConfigurationSerializable{
+	
+	private static final String contentTypeKey = "contentType";
 	
 	private static final String contentKey = "content";
 	
@@ -19,11 +20,12 @@ public class ConfigurationSerializableAdapter implements ConfigurationSerializab
 		this.content = content;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public ConfigurationSerializableAdapter(Map<String, Object> map) {
-		var mapTypeName = (String)map.get(ConfigurationSerialization.SERIALIZED_TYPE_KEY);
+		var mapTypeName = (String)map.get(contentTypeKey);
 		try {
 			var mapType = Class.forName(mapTypeName);
-			content = saver.getDeserializerFor(mapType).apply(map);
+			content = saver.getDeserializerFor(mapType).apply((Map<String, Object>) map.get(contentKey));
 		}catch(Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -33,7 +35,7 @@ public class ConfigurationSerializableAdapter implements ConfigurationSerializab
 	public @NotNull Map<String, Object> serialize() {
 		var map = new HashMap<String, Object>();
 		var mapType = content.getClass();
-		map.put(ConfigurationSerialization.SERIALIZED_TYPE_KEY, mapType.getName());
+		map.put(contentTypeKey, mapType.getName());
 		if (content instanceof ConfigurationSerializable serializable) {
 			map.put(contentKey, serializable.serialize());
 		}else {

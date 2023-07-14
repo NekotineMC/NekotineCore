@@ -8,4 +8,6 @@ public interface IMapSaver {
 	
 	public Object load(MapIdentifier identifier);
 	
+	public boolean delete(MapIdentifier identifier);
+	
 }

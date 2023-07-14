@@ -11,6 +11,7 @@ import java.util.function.Function;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 
+import fr.nekotine.core.map.MapIdentifier;
 import fr.nekotine.core.map.annotation.ComposingMap;
 import fr.nekotine.core.map.annotation.MapDictionaryElementType;
 import fr.nekotine.core.map.element.MapDictionaryElement;
@@ -28,7 +29,9 @@ public class ConfigurationSerializableAdapterSerializer {
 	}
 	
 	private ConfigurationSerializableAdapterSerializer() {
-		ConfigurationSerialization.registerClass(ConfigurationSerializableAdapter.class, "ConfigurationSerializableAdapter");
+		//ConfigurationSerialization.registerClass(ConfigurationSerializableAdapter.class, "ConfigurationSerializableAdapter");
+		ConfigurationSerialization.registerClass(ConfigurationSerializableAdapter.class);
+		ConfigurationSerialization.registerClass(MapIdentifier.class);
 	}
 	
 	private Map<Class<?>, Function<Object, Map<String, Object>>> serializers = new HashMap<>();
@@ -147,10 +150,14 @@ public class ConfigurationSerializableAdapterSerializer {
 								if (map == null) {
 									return;
 								}
+								var fieldMap = (Map<String, Object>) map.get(finalName);
+								if (fieldMap == null) {
+									return;
+								}
 								var dict = new MapDictionaryElement<>();
 								var backing = dict.backingMap();
 								for (var key : map.keySet()) {
-									backing.put(key, funcDict.apply((Map<String, Object>) map.get(key)));
+									backing.put(key, funcDict.apply((Map<String, Object>) fieldMap.get(key)));
 								}
 							}catch(Exception e) {
 								throw new RuntimeException(e);

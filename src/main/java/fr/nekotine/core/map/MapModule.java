@@ -36,7 +36,7 @@ public class MapModule extends PluginModule{
 	public Logger LOGGER = new FormatingRemoteLogger(NekotineCore.LOGGER, "[MapModule] %s");
 	
 	// Static part
-	/*
+	
 		private static final List<MapTypeIdentifier> AVAILABLE_MAP_TYPES = new LinkedList<>();
 		
 		public static void registerMapTypes(MapTypeIdentifier... mapType) {
@@ -57,11 +57,11 @@ public class MapModule extends PluginModule{
 		}
 		
 		private static final List<MapIdentifier> AVAILABLE_MAPS = new LinkedList<>();
-		*/
+		
 		/**
 		 * Methode thread safe pour retourner la liste des maps
 		 * @return
-		 *//*
+		 */
 		public static synchronized List<MapIdentifier> getAvailableMaps(){
 			return AVAILABLE_MAPS;
 		}
@@ -117,13 +117,13 @@ public class MapModule extends PluginModule{
 					AVAILABLE_MAPS.add(map);
 				}
 			};
-		}*/
+		}
 		
 		/**
 		 * Methode à appeler dans le {@link org.bukkit.plugin.java.JavaPlugin#onEnable JavaPlugin.onEnable()}
-		 *//*
-		public void generateCommands() {*/
-			/*
+		 */
+		public void generateCommands() {
+			
 			log(Level.INFO, "Generation de commandes pour les types de map enregistre:");
 			
 			var mapCommand = new CommandAPICommand("map");
@@ -218,7 +218,7 @@ public class MapModule extends PluginModule{
 				mapCommand.register();
 			}catch(Exception e) {
 				logException(Level.WARNING, "Une erreur est survenue lors de l'ajout des commandes de map au registre.", e);
-			}*//*
+			}
 		}
 		
 		private synchronized void saveMapList() {
@@ -281,7 +281,7 @@ public class MapModule extends PluginModule{
 		 * Charge la carte a partir de son fichier, retourne une nouvelle carte en cas échéant.
 		 * @param identifier
 		 * @return
-		 *//*
+		 */
 		public GameMap loadMap(MapIdentifier identifier) {
 			File mapFile = new File(mapFolder, identifier.name());
 			if (mapFile.exists()) {
@@ -297,5 +297,5 @@ public class MapModule extends PluginModule{
 		
 		public void saveMapInstanceAsync(GameMap map) {
 			RunAsync(() -> saveMapInstance(map));
-		}*/
+		}
 }

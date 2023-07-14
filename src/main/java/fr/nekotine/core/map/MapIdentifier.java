@@ -27,7 +27,7 @@ public class MapIdentifier implements ConfigurationSerializable{
 	
 	public MapIdentifier() {}
 	
-	public MapIdentifier(Class<?> type, String name, String displayName, String description, Material icon) {
+	public MapIdentifier(@NotNull Class<?> type, @NotNull String name, String displayName, String description, Material icon) {
 		super();
 		this.type = type;
 		this.name = name;
@@ -36,8 +36,8 @@ public class MapIdentifier implements ConfigurationSerializable{
 		this.icon = icon;
 	}
 	
-	public MapIdentifier(Class<?> type, String name, String displayName, String description, Material icon,
-			Class<? extends IMapSaver> saver) {
+	public MapIdentifier(@NotNull Class<?> type, @NotNull String name, String displayName, String description, Material icon,
+			@NotNull Class<? extends IMapSaver> saver) {
 		super();
 		this.type = type;
 		this.name = name;
@@ -54,7 +54,7 @@ public class MapIdentifier implements ConfigurationSerializable{
 		map.put("name", name);
 		map.put("displayName", displayName);
 		map.put("description", description);
-		map.put("icon", icon.toString());
+		map.put("icon", icon != null ? icon.toString() : null);
 		return map;
 	}
 
@@ -64,7 +64,8 @@ public class MapIdentifier implements ConfigurationSerializable{
 				(String)map.get("name"),
 				(String)map.get("displayName"),
 				(String)map.get("description"),
-				Material.valueOf((String) map.get("icon")),null);
+				map.containsKey("icon")?Material.valueOf((String) map.get("icon")):null,
+				null);
 	}
 
 	public Class<?> getType() {
