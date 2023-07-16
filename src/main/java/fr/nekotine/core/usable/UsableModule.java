@@ -13,15 +13,13 @@ import org.bukkit.event.player.PlayerItemConsumeEvent;
 import com.destroystokyo.paper.event.player.PlayerReadyArrowEvent;
 
 import fr.nekotine.core.module.PluginModule;
-import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
 
-@ModuleNameAnnotation(Name = "UsableModule")
 public class UsableModule extends PluginModule{
 	
 	private final Set<Usable> usables = new LinkedHashSet<>();
 
 	@Override
-	protected void onDisable() {
+	protected void unload() {
 		usables.clear();
 	}
 	

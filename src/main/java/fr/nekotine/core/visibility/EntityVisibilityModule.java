@@ -1,6 +1,5 @@
 package fr.nekotine.core.visibility;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -20,10 +19,9 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.events.PacketListener;
 
+import fr.nekotine.core.NekotineCore;
 import fr.nekotine.core.module.PluginModule;
-import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
 
-@ModuleNameAnnotation(Name = "EntityVisibilityModule")
 public class EntityVisibilityModule extends PluginModule{
 	
 	private PacketListener metadataListener;
@@ -80,6 +78,20 @@ public class EntityVisibilityModule extends PluginModule{
 				}
 			}
 		};
+		metadataListener = new PacketAdapter(NekotineCore.getAttachedPlugin(), PacketType.Play.Server.SPAWN_ENTITY_LIVING) {
+			@Override
+			public void onPacketSending(PacketEvent event) {
+				PacketContainer packet = event.getPacket();
+				if (currentVisibilityStatus.stream().anyMatch(
+						vs -> vs.blind.equals(event.getPlayer()) && vs.hidden.getEntityId() == packet.getIntegers().read(0)
+						))
+				{
+					event.setCancelled(true);
+				}
+			}
+		};
+		ProtocolLibrary.getProtocolManager().addPacketListener(metadataListener);
+		updateTask = updateVisibilityStatus.runTaskTimer(NekotineCore.getAttachedPlugin(), 0, 1);
 	}
 	
 	public void hideFrom(Entity hidden, Player blind) {
@@ -95,31 +107,12 @@ public class EntityVisibilityModule extends PluginModule{
 	}
 	
 	@Override
-	protected void onEnable() {
-		super.onEnable();
-		metadataListener = new PacketAdapter(getPlugin(), PacketType.Play.Server.SPAWN_ENTITY_LIVING) {
-			@Override
-			public void onPacketSending(PacketEvent event) {
-				PacketContainer packet = event.getPacket();
-				if (currentVisibilityStatus.stream().anyMatch(
-						vs -> vs.blind.equals(event.getPlayer()) && vs.hidden.getEntityId() == packet.getIntegers().read(0)
-						))
-				{
-					event.setCancelled(true);
-				}
-			}
-		};
-		ProtocolLibrary.getProtocolManager().addPacketListener(metadataListener);
-		updateTask = updateVisibilityStatus.runTaskTimer(getPlugin(), 0, 1);
-	}
-
-	@Override
-	protected void onDisable() {
+	protected void unload() {
 		if (updateTask != null && !updateTask.isCancelled()) {
 			updateTask.cancel();
 		}
 		ProtocolLibrary.getProtocolManager().removePacketListener(metadataListener);
-		super.onDisable();
+		super.unload();
 	}
 	
 	private class VisibilityData{

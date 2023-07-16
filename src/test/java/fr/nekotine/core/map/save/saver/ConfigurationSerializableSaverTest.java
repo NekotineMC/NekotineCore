@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.CleanupMode;
 import org.junit.jupiter.api.io.TempDir;
 
-import fr.nekotine.core.map.MapIdentifier;
+import fr.nekotine.core.map.MapMetadata;
 import fr.nekotine.core.map.MapTest;
 
 class ConfigurationSerializableSaverTest {
@@ -43,13 +43,13 @@ class ConfigurationSerializableSaverTest {
 	void testDeserialisation() {
 		var mapInst = new MapTest();
 		mapInst.getPoseUnnamed().setXYZ(10,20,30);
-		var mapId = new MapIdentifier();
+		var mapId = new MapMetadata();
 		mapId.setName("TestMap");
 		mapId.setDescription("Une carte de test");
 		mapId.setType(MapTest.class);
 		mapId.setIcon(Material.STONE);
 		saver.save(mapId, mapInst);
-		var deserialized = saver.load(mapId);
+		var deserialized = saver.load(mapId).b();
 		
 		assertInstanceOf(MapTest.class, deserialized);
 		var map = (MapTest)deserialized;

@@ -6,7 +6,7 @@ import java.io.IOException;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import fr.nekotine.core.map.MapIdentifier;
+import fr.nekotine.core.map.MapMetadata;
 import fr.nekotine.core.map.save.IMapSaver;
 import fr.nekotine.core.map.save.saver.configurationserializable.ConfigurationSerializableAdapter;
 import fr.nekotine.core.tuple.Pair;
@@ -29,13 +29,13 @@ public class ConfigurationSerializableSaver implements IMapSaver {
 	}
 	
 	@Override
-	public boolean delete(MapIdentifier identifier) {
+	public boolean delete(MapMetadata identifier) {
 		var file = new File(folder, identifier.getName() + fileExtention);
 		return file.delete();
 	}
 	
 	@Override
-	public void save(MapIdentifier identifier, Object map) {
+	public void save(MapMetadata identifier, Object map) {
 		var mapFile = new File(folder, identifier.getName() + fileExtention);
 		if (!mapFile.exists()) {
 			try {
@@ -55,23 +55,26 @@ public class ConfigurationSerializableSaver implements IMapSaver {
 	}
 
 	@Override
-	public Object load(MapIdentifier identifier) {
+	public Pair<MapMetadata,Object> load(MapMetadata identifier) {
 		var mapFile = new File(folder, identifier.getName() + fileExtention);
 		if (!mapFile.exists()) {
 			throw new RuntimeException(new FileNotFoundException(
 					String.format("Le fichier pour la carte %s n'existe pas. (Chemin: %s)", identifier.getName(), mapFile.getAbsolutePath())
 					));
 		}
-		YamlConfiguration config = YamlConfiguration.loadConfiguration(mapFile);
-		var map = config.get(contentKey);
-		if (map instanceof ConfigurationSerializableAdapter adapter) {
-			return adapter.getContent();
-		}
-		return map;
+		var result = loadFile(mapFile);
+		identifier.updateWith(result.a());
+		return result;
 	}
 	
-	public Pair<MapIdentifier,Object> loadFile(File file){
+	public Pair<MapMetadata,Object> loadFile(File file){
 		var config = YamlConfiguration.loadConfiguration(file);
-		return new Pair<>((MapIdentifier)config.get(identityKey), config.get(contentKey));
+		var identity = (MapMetadata)config.get(identityKey);
+		identity.setSaver(this);
+		var map = config.get(contentKey);
+		if (map instanceof ConfigurationSerializableAdapter adapter) {
+			map = adapter.getContent();
+		}
+		return new Pair<>(identity, map);
 	}
 }

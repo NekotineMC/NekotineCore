@@ -10,9 +10,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import fr.nekotine.core.module.PluginModule;
-import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
 
-@ModuleNameAnnotation(Name = "MenuModule")
 public class MenuModule extends PluginModule{
 	
 	private List<WeakReference<MenuInventory>> registeredMenus = new LinkedList<>();

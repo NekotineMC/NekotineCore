@@ -6,7 +6,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import fr.nekotine.core.module.ModuleManager;
+import fr.nekotine.core.NekotineCore;
 import net.kyori.adventure.text.Component;
 
 /**
@@ -27,14 +27,14 @@ public class MenuInventory {
 		this.layout = layout;
 		this.nbRow = nbRow;
 		inventory = Bukkit.createInventory(null, nbRow * 9);
-		ModuleManager.GetModule(MenuModule.class).registerMenu(this);
+		NekotineCore.MODULES.get(MenuModule.class).registerMenu(this);
 	}
 
 	public MenuInventory(@NotNull MenuLayout layout, int nbRow, @NotNull Component title) {
 		this.layout = layout;
 		this.nbRow = nbRow;
 		inventory = Bukkit.createInventory(null, nbRow * 9, title);
-		ModuleManager.GetModule(MenuModule.class).registerMenu(this);
+		NekotineCore.MODULES.get(MenuModule.class).registerMenu(this);
 	}
 
 	/**

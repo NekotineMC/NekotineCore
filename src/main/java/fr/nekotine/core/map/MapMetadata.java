@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import fr.nekotine.core.map.save.IMapSaver;
 
 @SerializableAs("MapIdentifier")
-public class MapIdentifier implements ConfigurationSerializable{
+public class MapMetadata implements ConfigurationSerializable{
 	
 	private Class<?> type;
 
@@ -23,11 +23,11 @@ public class MapIdentifier implements ConfigurationSerializable{
 	
 	private Material icon;
 	
-	private Class<? extends IMapSaver> saver;
+	private IMapSaver saver;
 	
-	public MapIdentifier() {}
+	public MapMetadata() {}
 	
-	public MapIdentifier(@NotNull Class<?> type, @NotNull String name, String displayName, String description, Material icon) {
+	public MapMetadata(@NotNull Class<?> type, @NotNull String name, String displayName, String description, Material icon) {
 		super();
 		this.type = type;
 		this.name = name;
@@ -36,8 +36,8 @@ public class MapIdentifier implements ConfigurationSerializable{
 		this.icon = icon;
 	}
 	
-	public MapIdentifier(@NotNull Class<?> type, @NotNull String name, String displayName, String description, Material icon,
-			@NotNull Class<? extends IMapSaver> saver) {
+	public MapMetadata(@NotNull Class<?> type, @NotNull String name, String displayName, String description, Material icon,
+			@NotNull IMapSaver saver) {
 		super();
 		this.type = type;
 		this.name = name;
@@ -58,8 +58,8 @@ public class MapIdentifier implements ConfigurationSerializable{
 		return map;
 	}
 
-	public static MapIdentifier deserialize(Map<String, Object> map) throws ClassNotFoundException {
-		return new MapIdentifier(
+	public static MapMetadata deserialize(Map<String, Object> map) throws ClassNotFoundException {
+		return new MapMetadata(
 				Class.forName((String)map.get("type")),
 				(String)map.get("name"),
 				(String)map.get("displayName"),
@@ -108,12 +108,21 @@ public class MapIdentifier implements ConfigurationSerializable{
 		this.icon = icon;
 	}
 
-	public Class<? extends IMapSaver> getSaver() {
+	public IMapSaver getSaver() {
 		return saver;
 	}
 
-	public void setSaver(Class<? extends IMapSaver> saver) {
+	public void setSaver(IMapSaver saver) {
 		this.saver = saver;
+	}
+	
+	public void updateWith(MapMetadata id) {
+		type = id.type;
+		name = id.name;
+		displayName = id.displayName;
+		description = id.description;
+		icon = id.icon;
+		saver = id.saver;
 	}
 	
 }

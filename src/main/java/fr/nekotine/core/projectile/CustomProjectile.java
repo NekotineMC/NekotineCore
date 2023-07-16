@@ -42,7 +42,7 @@ public class CustomProjectile {
 		TransferBlackLists(entityBlacklist, blockBlacklist);
 		
 		
-		this.startedTime = TimeUtil.GetTime();
+		this.startedTime = System.currentTimeMillis();
 		this.triggered = false;
 		this.cancelled = false;
 		ConfigureProjectile(projectile, velocity);
@@ -88,7 +88,7 @@ public class CustomProjectile {
 			iProj.Triggered(this);
 			return true;
 		}
-		if(expireTime != -1 && TimeUtil.Difference(TimeUtil.GetTime(), startedTime) >  expireTime) {
+		if(expireTime != -1 && TimeUtil.elapsedFromMillis(startedTime) >  expireTime) {
 			cancelled = false;
 			iProj.Faded(this);
 			return !cancelled;

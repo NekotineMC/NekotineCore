@@ -11,15 +11,18 @@ import org.bukkit.inventory.ItemStack;
 
 import com.comphenix.protocol.wrappers.Pair;
 
+import fr.nekotine.core.NekotineCore;
 import fr.nekotine.core.charge.ChargeModule;
 import fr.nekotine.core.charge.ICharge;
 import fr.nekotine.core.module.PluginModule;
-import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
 import fr.nekotine.core.ticking.event.TickElapsedEvent;
 import fr.nekotine.core.util.CustomAction;
 
-@ModuleNameAnnotation(Name = "ItemChargeModule")
 public class ItemChargeModule extends PluginModule{
+	
+	public ItemChargeModule() {
+		chargeManager = NekotineCore.MODULES.get(ChargeModule.class);
+	}
 	
 	private ChargeModule chargeManager;
 	private final HashMap<Pair<Player, String>, ItemCharge> itemCharges = new HashMap<Pair<Player, String>, ItemCharge>();
@@ -105,11 +108,6 @@ public class ItemChargeModule extends PluginModule{
 	public void Action(PlayerInteractEvent e) {
 		TransferBuffer();
 		itemCharges.values().forEach( (charge) -> charge.Action(e));
-	}
-	@Override
-	public void onEnable() {
-		super.onEnable();
-		this.chargeManager = GetPluginModule(ChargeModule.class);
 	}
 	
 	//

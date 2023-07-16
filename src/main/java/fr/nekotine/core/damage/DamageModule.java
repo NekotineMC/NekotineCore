@@ -14,11 +14,14 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 
 import fr.nekotine.core.module.PluginModule;
-import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
 import fr.nekotine.core.util.EntityUtil;
 
-@ModuleNameAnnotation(Name = "DamageModule")
 public class DamageModule extends PluginModule{
+	
+	public DamageModule() {
+		DamageFunction.SetDamageModule(this);
+	}
+	
 	private boolean disabled = false;
 	private DamageFunction damageFunction = DamageFunction.NEKOTINE;
 	
@@ -186,13 +189,5 @@ public class DamageModule extends PluginModule{
 			if(entity.equals(entities[i])) return true;
 		}
 		return false;
-	}
-	
-	//
-	
-	@Override
-	public void onEnable() {
-		super.onEnable();
-		DamageFunction.SetDamageModule(this);
 	}
 }

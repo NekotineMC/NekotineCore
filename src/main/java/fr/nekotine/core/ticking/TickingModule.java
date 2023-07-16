@@ -2,36 +2,34 @@ package fr.nekotine.core.ticking;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
 import org.bukkit.event.Event;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import fr.nekotine.core.NekotineCore;
 import fr.nekotine.core.module.PluginModule;
-import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
 import fr.nekotine.core.ticking.event.TickElapsedEvent;
 
-@ModuleNameAnnotation(Name = "TickingModule")
 public class TickingModule extends PluginModule{
 	
 	TickEventRunnable runningTask;
 	
-	Map<TickTimeStamp, Integer> stamps;
+	Map<TickTimeStamp, Integer> stamps = new HashMap<>();
 	
-	@Override
-	protected void onEnable() {
-		super.onEnable();
-		stamps = new HashMap<>();
+	public TickingModule() {
 		runningTask = new TickEventRunnable(this);
-		runningTask.runTaskTimer(getPlugin(), 0, 1);
+		runningTask.runTaskTimer(NekotineCore.getAttachedPlugin(), 0, 1);
 	}
-	
+
 	@Override
-	protected void onDisable() {
+	protected void unload() {
 		try {
 			runningTask.cancel();
 		}catch(Exception e) {
+			LOGGER.log(Level.WARNING, "Erreur lors de l'arret de l'horloge", e);
 		}
-		super.onDisable();
+		super.unload();
 	}
 	
 	private void Tick() {
@@ -45,7 +43,7 @@ public class TickingModule extends PluginModule{
 			}
 		}
 		Event tickEvent = new TickElapsedEvent(stampStatus);
-		getPlugin().getServer().getPluginManager().callEvent(tickEvent);
+		NekotineCore.getAttachedPlugin().getServer().getPluginManager().callEvent(tickEvent);
 	}
 	
 	private class TickEventRunnable extends BukkitRunnable{

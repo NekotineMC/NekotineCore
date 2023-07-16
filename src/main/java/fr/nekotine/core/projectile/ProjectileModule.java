@@ -16,13 +16,9 @@ import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
-import com.destroystokyo.paper.event.entity.ProjectileCollideEvent;
-
 import fr.nekotine.core.module.PluginModule;
-import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
 import fr.nekotine.core.ticking.event.TickElapsedEvent;
 
-@ModuleNameAnnotation(Name = "ProjectileModule")
 public class ProjectileModule extends PluginModule{
 	private final HashMap<Entity, CustomProjectile> projectiles = new HashMap<Entity, CustomProjectile>();
 	private final HashMap<Entity, CustomProjectile> projectilesBuffer = new HashMap<Entity, CustomProjectile>();
@@ -140,7 +136,7 @@ public class ProjectileModule extends PluginModule{
 		if(MainExist(e.getEntity())) projectiles.get(e.getEntity()).ProjectileHitBlock(e.getHitBlock());
 	}
 	@EventHandler
-	public void OnProjectileCollide(ProjectileCollideEvent e) {
+	public void OnProjectileCollide(ProjectileHitEvent e) {
 		TransferBuffer();
 		if(MainExist(e.getEntity())) e.setCancelled(true);
 	}

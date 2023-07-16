@@ -51,7 +51,7 @@ public class ItemCharge implements ICharge{
 		this.released = false;
 		
 		if(activated){
-			lastFired = TimeUtil.GetTime();
+			lastFired = System.currentTimeMillis();
 			swordChargeManager.AddCharge(user, chargeName, duration, displayOnExpBar, withAudio, audioBipNumber, this);
 		}
 	}
@@ -59,7 +59,7 @@ public class ItemCharge implements ICharge{
 	//
 	
 	public boolean Update() {
-		if(activated && TimeUtil.Passed(lastFired) > RELEASE_DELAY_MS) released = true;
+		if(activated && TimeUtil.elapsedFromMillis(lastFired) > RELEASE_DELAY_MS) released = true;
 		if(activated && bindToItem && !GearUtil.HasInAnyHand(user, bindItem)) released = true;
 		
 		if(released) {
@@ -84,7 +84,7 @@ public class ItemCharge implements ICharge{
 			activated = true;
 			swordChargeManager.AddCharge(user, chargeName, duration, displayOnExpBar, withAudio, audioBipNumber, this);
 		}
-		lastFired = TimeUtil.GetTime();
+		lastFired = System.currentTimeMillis();
 	}
 	
 	//

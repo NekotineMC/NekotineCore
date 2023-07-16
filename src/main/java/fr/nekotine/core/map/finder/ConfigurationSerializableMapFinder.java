@@ -8,7 +8,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import fr.nekotine.core.map.MapIdentifier;
+import fr.nekotine.core.map.MapMetadata;
 import fr.nekotine.core.map.save.saver.ConfigurationSerializableSaver;
 import fr.nekotine.core.util.AssertUtil;
 
@@ -27,7 +27,7 @@ public class ConfigurationSerializableMapFinder implements IMapFinder {
 	 * Constructeur
 	 * @param mapIndex fichier/dossier utilisé comme source de carte.
 	 */
-	private ConfigurationSerializableMapFinder(File mapIndex) {
+	public ConfigurationSerializableMapFinder(File mapIndex) {
 		if (mapIndex.isFile()) {
 			throw new NotImplementedException("Cette fonctionnalitée n'est pas encore implémentée, veuillez donner un dossier.");
 		}else {
@@ -37,12 +37,12 @@ public class ConfigurationSerializableMapFinder implements IMapFinder {
 	}
 	
 	@Override
-	public boolean delete(MapIdentifier identifier) {// Doit il être ici ou dans le saver?
+	public boolean delete(MapMetadata identifier) {// Doit il être ici ou dans le saver?
 		return saver.delete(identifier);
 	}
 	
 	@Override
-	public List<MapIdentifier> list() {
+	public List<MapMetadata> list() {
 		if (mapIndex.isDirectory()) {
 			return listFolder();
 		}else {
@@ -51,7 +51,7 @@ public class ConfigurationSerializableMapFinder implements IMapFinder {
 	}
 
 	@Override
-	public boolean add(@NotNull MapIdentifier identifier) {
+	public boolean add(@NotNull MapMetadata identifier) {
 		AssertUtil.nonNull(identifier, "L'identifier ne peut être null");
 		AssertUtil.nonNull(identifier.getName(), "Le nom ne peut être null");
 		AssertUtil.nonNull(identifier.getSaver(), "Le saver ne peut être null");
@@ -64,7 +64,7 @@ public class ConfigurationSerializableMapFinder implements IMapFinder {
 	}
 
 	@Override
-	public @Nullable MapIdentifier findByName(@NotNull String name) {
+	public @Nullable MapMetadata findByName(@NotNull String name) {
 		if (mapIndex.isDirectory()) {
 			return findByNameFolder(name);
 		}else {
@@ -72,29 +72,32 @@ public class ConfigurationSerializableMapFinder implements IMapFinder {
 		}
 	}
 	
-	private List<MapIdentifier> listFolder(){
-		var list = new LinkedList<MapIdentifier>();
+	private List<MapMetadata> listFolder(){
+		var list = new LinkedList<MapMetadata>();
 		for (var file : mapIndex.listFiles()) {
 			list.add(saver.loadFile(file).a());
 		}
 		return list;
 	}
 	
-	private List<MapIdentifier> listFile(){
+	private List<MapMetadata> listFile(){
 		throw new NotImplementedException("Cette fonctionnalitée n'est pas encore implémentée, veuillez donner un dossier.");
 	}
 
-	private boolean addFolder(MapIdentifier identifier) {
+	private boolean addFolder(MapMetadata identifier) {
 		var returns = new File(mapIndex, identifier.getName() + ConfigurationSerializableSaver.fileExtention).exists();
+		if (identifier.getSaver() == null) {
+			identifier.setSaver(saver);
+		}
 		saver.save(identifier, null);
 		return returns;
 	}
 	
-	private boolean addFile(MapIdentifier identifier) {
+	private boolean addFile(MapMetadata identifier) {
 		throw new NotImplementedException("Cette fonctionnalitée n'est pas encore implémentée, veuillez donner un dossier.");
 	}
 	
-	private @Nullable MapIdentifier findByNameFolder(@NotNull String name) {
+	private @Nullable MapMetadata findByNameFolder(@NotNull String name) {
 		AssertUtil.nonNull(name, "Le nom de ne peut être null");
 		for (var file : mapIndex.listFiles((dir, n) -> n.equals(name))) {
 			return saver.loadFile(file).a();
@@ -102,7 +105,7 @@ public class ConfigurationSerializableMapFinder implements IMapFinder {
 		return null;
 	}
 	
-	private @Nullable MapIdentifier findByNameFile(@NotNull String name) {
+	private @Nullable MapMetadata findByNameFile(@NotNull String name) {
 		throw new NotImplementedException("Cette fonctionnalitée n'est pas encore implémentée, veuillez donner un dossier.");
 	}
 

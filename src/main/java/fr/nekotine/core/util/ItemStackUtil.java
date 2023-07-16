@@ -14,14 +14,14 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
-import fr.nekotine.core.plugin.CorePlugin;
+import fr.nekotine.core.NekotineCore;
 import net.kyori.adventure.text.Component;
 
 public class ItemStackUtil {
 
 	private static int unstackableCounter = Integer.MIN_VALUE;
 	
-	private static final NamespacedKey unstackableKey = new NamespacedKey(CorePlugin.getProvidingPlugin(ItemStackUtil.class), "Unstackable");
+	private static final NamespacedKey unstackableKey = new NamespacedKey(NekotineCore.getAttachedPlugin(), "Unstackable");
 	
 	/**
 	 * Retire tous les enchantments de l'item.

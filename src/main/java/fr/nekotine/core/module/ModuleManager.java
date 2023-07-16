@@ -1,14 +1,13 @@
 package fr.nekotine.core.module;
 
-import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import org.bukkit.plugin.java.JavaPlugin;
-
-import fr.nekotine.core.module.annotation.InheritedModuleAnnotation;
-import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
+import fr.nekotine.core.logging.FormatingRemoteLogger;
+import fr.nekotine.core.text.Text;
+import fr.nekotine.core.util.Stopwatch;
+import fr.nekotine.core.util.TypeHashMap;
+import fr.nekotine.core.util.TypeMap;
 
 /**
  * Ioc pour les modules (des genres de service quoi).
@@ -16,134 +15,52 @@ import fr.nekotine.core.module.annotation.ModuleNameAnnotation;
  * @author XxGoldenbluexX
  *
  */
-public class ModuleManager{
+public class ModuleManager {
 
-	private static ModuleManager instance = new ModuleManager();
+	public Logger LOGGER = new FormatingRemoteLogger(Text.namedLoggerFormat("ModuleManager"));
 	
-	public static ModuleManager getInstance() {
-		if (instance == null) {
-			instance = new ModuleManager();
+	private TypeMap moduleMap = new TypeHashMap();
+
+	public <M extends PluginModule> M get(Class<M> type) {
+		if (!moduleMap.containsKey(type)) {
+			load(type);
 		}
-		return instance;
+		return moduleMap.get(type);
 	}
-	
-	private ModuleManager() {};
-	
-	private Map<Class<? extends PluginModule>,PluginModule> modules = new HashMap<>();
-	private Map<String, Class<? extends PluginModule>> nameMappings = new HashMap<>();
-	
-	@SafeVarargs
-	public static void Load(JavaPlugin plugin, Class<? extends PluginModule>... moduleTypes) {
-		getInstance().load(plugin, moduleTypes);
+
+	public <M extends PluginModule> void load(Class<M> type) {
+		var name = type.getSimpleName();
+		if (moduleMap.containsKey(type)) {
+			LOGGER.log(Level.WARNING, "Le module " + name + " est deja charge");
+			return;
+		}
+		LOGGER.log(Level.INFO, "Chargement du module "+name+"...");
+		try (var watch = new Stopwatch(w -> LOGGER.log(Level.INFO, "Le module "+name+" est charge ("+w.elapsedMillis()+"ms)"))){
+			var instance = type.getConstructor().newInstance();
+			moduleMap.put(type, instance);
+		}catch(Exception e) {
+			LOGGER.log(Level.SEVERE, "Impossible de charger le module "+name, e);
+		}
+	}
+
+	public <M extends PluginModule> void unload(Class<M> type) {
+		var name = type.getSimpleName();
+		if (!moduleMap.containsKey(type)) {
+			LOGGER.log(Level.WARNING, "Le module " + name + " n'est pas charge");
+			return;
+		}
+		try (var watch = new Stopwatch(w -> LOGGER.log(Level.INFO, "Le module "+name+" est decharge ("+w.elapsedMillis()+"ms)"))){
+			moduleMap.get(type).unload();
+		}catch(Exception e) {
+			LOGGER.log(Level.SEVERE, "Impossible de decharger le module "+name, e);
+		}
+		moduleMap.remove(type);
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void load(JavaPlugin plugin, Class<? extends PluginModule>... moduleTypes) {
-		for (Class<? extends PluginModule> moduleType : moduleTypes) {
-			for (Field field : moduleType.getDeclaredFields()) {
-				InheritedModuleAnnotation annotation = field.getAnnotation(InheritedModuleAnnotation.class);
-				if (annotation != null) {
-					Class<?> fieldType = field.getType();
-					if (PluginModule.class.isAssignableFrom(fieldType)) {
-						if (!modules.containsKey(fieldType)) {
-							tryLoadModule(plugin, (Class<? extends PluginModule>) fieldType);
-						}
-					}
-				}
-			}
-			if (!modules.containsKey(moduleType)) {
-				tryLoadModule(plugin, (Class<? extends PluginModule>) moduleType);
-			}
+	public void unloadAll() {
+		for (var type : moduleMap.keySet()) {
+			unload((Class<? extends PluginModule>) type);
 		}
 	}
-	
-	private void tryLoadModule(JavaPlugin plugin, Class<? extends PluginModule> moduleType) {
-		try {
-			PluginModule module = moduleType.getConstructor().newInstance();
-			module.setModuleManager(this);
-			module.setPlugin(plugin);
-			modules.put(moduleType,module);
-			ModuleNameAnnotation annotation = moduleType.getAnnotation(ModuleNameAnnotation.class);
-			if (annotation != null) {
-				module.setName(annotation.Name());
-				nameMappings.put(annotation.Name(), moduleType);
-			}
-		} catch (Exception e) {
-			plugin.getLogger().log(Level.WARNING,"Impossible de créer le module de type " + moduleType.getTypeName(), e);
-		}
-	}
-	
-	/**
-	 * Récupère un module à partir de sa classe.
-	 * @param <T> Type du module à récuperer.
-	 * @param moduleType Type du module à récuperer.
-	 * @return Le module désiré.
-	 */
-	public static <T extends PluginModule> T GetModule(Class<T> moduleType) {
-		return getInstance().getModule(moduleType);
-	}
-	
-	@SuppressWarnings("unchecked")
-	public <T extends PluginModule> T getModule(Class<T> moduleType) {
-		return (T) modules.get(moduleType);
-	}
-	
-	public PluginModule getAbstractModule(Class<? extends PluginModule> moduleType) {
-		return modules.get(moduleType);
-	}
-	
-	/**
-	 * Récupère le module souhaité par son nom.
-	 * @param name Nom du module.
-	 * @return Le module souhaité.
-	 */
-	public static PluginModule GetModule(String name) {
-		return getInstance().getModule(name);
-	}
-	
-	/**
-	 * Récupère le module souhaité par son nom.
-	 * @param name Nom du module.
-	 * @return Le module souhaité.
-	 */
-	public PluginModule getModule(String name) {
-		Class<? extends PluginModule> clazz = nameMappings.get(name);
-		if (clazz != null) {
-			return modules.get(clazz);
-		}
-		return null;
-	}
-	
-	/**
-	 * Active tous les modules.
-	 */
-	public static void EnableAll() {
-		getInstance().enableAll();
-	}
-	
-	/**
-	 * Active tous les modules.
-	 */
-	public void enableAll() {
-		for (PluginModule module : modules.values()) {
-			module.enable();
-		}
-	}
-	
-	/**
-	 * Désactive tous les modules.
-	 */
-	public static void DisableAll() {
-		getInstance().disableAll();
-	}
-	
-	/**
-	 * Désactive tous les modules.
-	 */
-	public void disableAll() {
-		for (PluginModule module : modules.values()) {
-			module.disable();
-		}
-	}
-	
 }

@@ -11,7 +11,7 @@ import java.util.function.Function;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 
-import fr.nekotine.core.map.MapIdentifier;
+import fr.nekotine.core.map.MapMetadata;
 import fr.nekotine.core.map.annotation.ComposingMap;
 import fr.nekotine.core.map.annotation.MapDictionaryElementType;
 import fr.nekotine.core.map.element.MapDictionaryElement;
@@ -31,7 +31,7 @@ public class ConfigurationSerializableAdapterSerializer {
 	private ConfigurationSerializableAdapterSerializer() {
 		//ConfigurationSerialization.registerClass(ConfigurationSerializableAdapter.class, "ConfigurationSerializableAdapter");
 		ConfigurationSerialization.registerClass(ConfigurationSerializableAdapter.class);
-		ConfigurationSerialization.registerClass(MapIdentifier.class);
+		ConfigurationSerialization.registerClass(MapMetadata.class);
 	}
 	
 	private Map<Class<?>, Function<Object, Map<String, Object>>> serializers = new HashMap<>();

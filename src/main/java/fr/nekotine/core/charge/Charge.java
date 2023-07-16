@@ -69,13 +69,13 @@ public class Charge {
 		this.cancelled = cancelled;
 	}
 	protected long GetTimeLeft() {
-		return duration - (TimeUtil.GetTime() - started);
+		return duration - (System.currentTimeMillis() - started);
 	}
 	protected void SetPaused(boolean paused) {
 		if(this.paused && !paused) {
-			duration += TimeUtil.Passed(pausedTime);
+			duration += TimeUtil.elapsedFromMillis(pausedTime);
 		}else if(!this.paused && paused) {
-			pausedTime = TimeUtil.GetTime();
+			pausedTime = System.currentTimeMillis();
 		}
 		this.paused = paused;
 	}
@@ -107,7 +107,7 @@ public class Charge {
 		player.playSound(player, Sound.BLOCK_DISPENSER_DISPENSE, 0.2f, ratio);
 	}
 	private void PlayAudio() {
-		float ratio = (float)(TimeUtil.GetTime() - started) / duration;
+		float ratio = (float)(System.currentTimeMillis() - started) / duration;
 		PlayAudio(ratio);
 	}
 	private void SetExp() {
@@ -116,7 +116,7 @@ public class Charge {
 		Player player = Bukkit.getPlayer(user);
 		if(player == null) return;
 		
-		float ratio = (float)(TimeUtil.GetTime() - started) / duration;
+		float ratio = (float)(System.currentTimeMillis() - started) / duration;
 		player.setExp(ratio);
 	}
 	private void PlayUncheckedAudio(float ratio) {
