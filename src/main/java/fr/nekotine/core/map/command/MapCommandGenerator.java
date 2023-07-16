@@ -2,6 +2,8 @@ package fr.nekotine.core.map.command;
 
 import java.util.logging.Level;
 
+import org.bukkit.Location;
+
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.Argument;
 import dev.jorel.commandapi.arguments.CustomArgument;
@@ -16,6 +18,7 @@ import fr.nekotine.core.map.IMapStorage;
 import fr.nekotine.core.map.command.generator.BlockPositionCommandGenerator;
 import fr.nekotine.core.map.command.generator.DefaultMapElementCommandGenerator;
 import fr.nekotine.core.map.command.generator.DictionaryCommandGenerator;
+import fr.nekotine.core.map.command.generator.LocationCommandGenerator;
 import fr.nekotine.core.map.command.generator.PositionCommandGenerator;
 import fr.nekotine.core.map.element.MapBlockPositionElement;
 import fr.nekotine.core.map.element.MapDictionaryElement;
@@ -31,7 +34,8 @@ public class MapCommandGenerator implements IMapCommandGenerator{
 		generatorResolver = new MapElementCommandGeneratorResolver(new DefaultMapElementCommandGenerator())
 				.registerGenerator(MapDictionaryElement.class, new DictionaryCommandGenerator())
 				.registerGenerator(MapPositionElement.class, new PositionCommandGenerator())
-				.registerGenerator(MapBlockPositionElement.class, new BlockPositionCommandGenerator());
+				.registerGenerator(MapBlockPositionElement.class, new BlockPositionCommandGenerator())
+				.registerGenerator(Location.class, new LocationCommandGenerator());
 	}
 	
 	public IMapElementCommandGeneratorResolver getGeneratorResolver() {

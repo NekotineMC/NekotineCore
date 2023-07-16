@@ -21,6 +21,6 @@ public interface IMapFinder {
 	 */
 	public boolean delete(MapMetadata identifier);
 	
-	public MapMetadata findByName(String name);
+	public MapMetadata findByName(Class<?> mapType, String name);
 	
 }

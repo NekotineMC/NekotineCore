@@ -64,7 +64,7 @@ public class ConfigurationSerializableMapFinder implements IMapFinder {
 	}
 
 	@Override
-	public @Nullable MapMetadata findByName(@NotNull String name) {
+	public @Nullable MapMetadata findByName(@NotNull Class<?> type, @NotNull String name) {
 		if (mapIndex.isDirectory()) {
 			return findByNameFolder(name);
 		}else {
