@@ -13,7 +13,7 @@ import org.bukkit.configuration.serialization.ConfigurationSerialization;
 
 import fr.nekotine.core.map.MapMetadata;
 import fr.nekotine.core.map.annotation.ComposingMap;
-import fr.nekotine.core.map.annotation.MapDictionaryElementType;
+import fr.nekotine.core.map.annotation.MapElementTyped;
 import fr.nekotine.core.map.element.MapDictionaryElement;
 import fr.nekotine.core.tuple.Pair;
 
@@ -68,8 +68,8 @@ public class ConfigurationSerializableAdapterSerializer {
 				}
 				// special Dictionary case
 				if (MapDictionaryElement.class == fieldType) { // Type précis pour permettre l'héritage par l'utilisateur
-					if (field.isAnnotationPresent(MapDictionaryElementType.class)) {
-						var annotation = field.getAnnotation(MapDictionaryElementType.class);
+					if (field.isAnnotationPresent(MapElementTyped.class)) {
+						var annotation = field.getAnnotation(MapElementTyped.class);
 						var typeDict = annotation.value();
 						var funcDict = makeSerializerForNode(typeDict);
 						fieldsFunctions.add(new Pair(name,(Function<Object, Map<String, Object>>)obj -> {
@@ -141,8 +141,8 @@ public class ConfigurationSerializableAdapterSerializer {
 				final var finalName = name;
 				// special Dictionary case
 				if (MapDictionaryElement.class == fieldType) { // Type précis pour permettre l'héritage par l'utilisateur
-					if (field.isAnnotationPresent(MapDictionaryElementType.class)) {
-						var annotation = field.getAnnotation(MapDictionaryElementType.class);
+					if (field.isAnnotationPresent(MapElementTyped.class)) {
+						var annotation = field.getAnnotation(MapElementTyped.class);
 						var typeDict = annotation.value();
 						var funcDict = makeDeserializerForNode(typeDict);
 						fieldsFunctions.add((parent,map) -> {

@@ -6,7 +6,7 @@ import dev.jorel.commandapi.arguments.Argument;
 import dev.jorel.commandapi.arguments.LiteralArgument;
 import fr.nekotine.core.NekotineCore;
 import fr.nekotine.core.map.annotation.ComposingMap;
-import fr.nekotine.core.map.annotation.MapDictionaryElementType;
+import fr.nekotine.core.map.annotation.MapElementTyped;
 import fr.nekotine.core.map.command.IMapElementCommandGeneratorResolver;
 import fr.nekotine.core.map.command.MapCommandBranch;
 import fr.nekotine.core.map.command.MapCommandExecutor;
@@ -35,9 +35,9 @@ public class DefaultMapElementCommandGenerator extends MapElementCommandGenerato
 				var generator = NekotineCore.IOC.resolve(IMapElementCommandGeneratorResolver.class).resolve(fieldType);
 				// special Dictionary case
 				if (MapDictionaryElement.class == fieldType && generator instanceof DictionaryCommandGenerator dictGenerator) { // Type précis pour permettre l'héritage par l'utilisateur
-					if (field.isAnnotationPresent(MapDictionaryElementType.class)) {
+					if (field.isAnnotationPresent(MapElementTyped.class)) {
 						dictGenerator.setNodeName(finalName);
-						dictGenerator.setNestedElementType(field.getAnnotation(MapDictionaryElementType.class).value());
+						dictGenerator.setNestedElementType(field.getAnnotation(MapElementTyped.class).value());
 					}else {
 						var msg = "[MapCommandGenerator]->Default Le champ %s dans %s est de type dictionnaire mais n'a"
 								+ " pas l'annotation MapDictionaryElementType nécessaire pour sa génération.";

@@ -1,7 +1,7 @@
 package fr.nekotine.core.map;
 
 import fr.nekotine.core.map.annotation.ComposingMap;
-import fr.nekotine.core.map.annotation.MapDictionaryElementType;
+import fr.nekotine.core.map.annotation.MapElementTyped;
 import fr.nekotine.core.map.element.MapBlockPositionElement;
 import fr.nekotine.core.map.element.MapDictionaryElement;
 import fr.nekotine.core.map.element.MapPositionElement;
@@ -19,11 +19,11 @@ public class MapTest {
 	@ComposingMap("blockPoseRenamed")
 	private MapBlockPositionElement blockPoseToRename = new MapBlockPositionElement();
 	
-	@MapDictionaryElementType(MapBlockPositionElement.class)
+	@MapElementTyped(MapBlockPositionElement.class)
 	@ComposingMap()
 	private MapDictionaryElement<MapBlockPositionElement> poseList = new MapDictionaryElement<>();
 	
-	@MapDictionaryElementType(MapTestComposite.class)
+	@MapElementTyped(MapTestComposite.class)
 	@ComposingMap()
 	private MapDictionaryElement<MapTestComposite> compositeList = new MapDictionaryElement<>();
 

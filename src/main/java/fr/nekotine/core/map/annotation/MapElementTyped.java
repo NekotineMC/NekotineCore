@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface MapDictionaryElementType {
+public @interface MapElementTyped {
 	
 	Class<?> value();
 	
