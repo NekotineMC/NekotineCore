@@ -1,4 +1,4 @@
-package fr.nekotine.core.map.save.saver.configurationserializable;
+package fr.nekotine.core.map.save.configurationserialization;
 
 import java.util.HashMap;
 import java.util.Map;

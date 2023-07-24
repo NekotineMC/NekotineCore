@@ -1,5 +1,6 @@
 package fr.nekotine.core.map.command;
 
+import java.util.function.Supplier;
 import java.util.logging.Level;
 
 import org.bukkit.Location;
@@ -13,8 +14,7 @@ import dev.jorel.commandapi.arguments.StringArgument;
 import dev.jorel.commandapi.executors.CommandExecutor;
 import dev.jorel.commandapi.executors.ExecutorType;
 import fr.nekotine.core.NekotineCore;
-import fr.nekotine.core.map.BufferMapStorage;
-import fr.nekotine.core.map.IMapStorage;
+import fr.nekotine.core.map.MapModule;
 import fr.nekotine.core.map.command.generator.BlockPositionCommandGenerator;
 import fr.nekotine.core.map.command.generator.DefaultMapElementCommandGenerator;
 import fr.nekotine.core.map.command.generator.DictionaryCommandGenerator;
@@ -23,6 +23,8 @@ import fr.nekotine.core.map.command.generator.PositionCommandGenerator;
 import fr.nekotine.core.map.element.MapBlockPositionElement;
 import fr.nekotine.core.map.element.MapDictionaryElement;
 import fr.nekotine.core.map.element.MapPositionElement;
+import fr.nekotine.core.util.AsyncUtil;
+import net.kyori.adventure.text.Component;
 
 public class MapCommandGenerator implements IMapCommandGenerator{
 	
@@ -54,15 +56,17 @@ public class MapCommandGenerator implements IMapCommandGenerator{
 			}
 			var editCommand = new CommandAPICommand("edit");
 			editCommand.executes((CommandExecutor)(sender, args) -> sender.sendMessage("Usage: /map edit <mapType> <mapName>"), ExecutorType.ALL);
+			var addCommand = new CommandAPICommand("add");
+			addCommand.executes((CommandExecutor)(sender, args) -> sender.sendMessage("Usage: /map add <mapType> <mapName>"), ExecutorType.ALL);
 			for (var mapType : mapTypes) {
 				try {
-					
+					//EDIT
 					var mapTypeName = mapType.getSimpleName();
-					var mapTypeArgument = makeMapArgument(mapType);
+					var mapNameArgument = makeMapArgument(mapType);
 					var generator = generatorResolver.resolve(mapType);
 					for (var branch : generator.generateFor(mapType)) {
 						var command = new CommandAPICommand(mapTypeName);
-						command.withArguments(mapTypeArgument);
+						command.withArguments(mapNameArgument);
 						command.withArguments(branch.arguments());
 						CommandExecutor executor = (sender, args)->{
 							branch.consumer().accept(args.get(0)/*map*/, sender, args);
@@ -70,6 +74,24 @@ public class MapCommandGenerator implements IMapCommandGenerator{
 						command.executes(executor, ExecutorType.ALL);
 						editCommand.withSubcommand(command);
 					}
+					//ADD
+					var typedAddCommand = new CommandAPICommand(mapTypeName);
+					typedAddCommand.withArguments(new StringArgument("mapName"));
+					typedAddCommand.executes(
+							(CommandExecutor)(sender, args) -> {
+								var mapModule = NekotineCore.MODULES.get(MapModule.class);
+								NekotineCore.MODULES.get(MapModule.class).addMapAsync(mapType, (String)args.get("mapName"),
+										handle -> sender.sendMessage(Component.text("La carte e bien été créé")));
+							}, ExecutorType.ALL);//TODO standardiser command messages
+					addCommand.withSubcommand(typedAddCommand);
+					//REMOVE
+					var typedRemoveCommand = new CommandAPICommand(mapTypeName);
+					typedRemoveCommand.withArguments(new StringArgument("mapName"));
+					typedRemoveCommand.executes(
+							(CommandExecutor)(sender, args) -> {
+								NekotineCore.MODULES.get(MapModule.class).addMapAsync(mapType, (String)args.get("mapName"));
+							}, ExecutorType.ALL);
+					addCommand.withSubcommand(typedAddCommand);
 					NekotineCore.LOGGER.info("[MapCommandGenerator] Commandes générées pour le type de carte "+mapTypeName);
 				}catch(Exception e) {
 					throw new Exception("[MapCommandGenerator] Erreur lors de la génération de commande pour le type de map "+mapType.getName(), e);
@@ -91,14 +113,9 @@ public class MapCommandGenerator implements IMapCommandGenerator{
 		return new CustomArgument<T,String>(new StringArgument("mapName"),info ->{
 			T map;
 			try {
-				var storage = NekotineCore.IOC.tryResolve(IMapStorage.class);
-				if (storage.isPresent()) {
-					map = storage.get().get(mapType, info.currentInput());
-				}else {
-					var newStorage = new BufferMapStorage();
-					map = newStorage.get(mapType, info.currentInput());
-					NekotineCore.IOC.registerSingletonAs(newStorage, IMapStorage.class);
-				}
+				var id = NekotineCore.MODULES.get(MapModule.class).getMapFinder().findByName(mapType, info.currentInput());
+				var untypedMap = id.loadConfig();
+				map = mapType.cast(untypedMap);
 			}catch(Exception e) {
 				NekotineCore.LOGGER.logp(Level.WARNING,
 						"MapCommandGenerator",

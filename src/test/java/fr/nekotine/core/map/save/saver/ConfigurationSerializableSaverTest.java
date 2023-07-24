@@ -16,10 +16,11 @@ import org.junit.jupiter.api.io.TempDir;
 
 import fr.nekotine.core.map.MapMetadata;
 import fr.nekotine.core.map.MapTest;
+import fr.nekotine.core.map.save.config.ConfigurationSerializableMapConfigSaver;
 
 class ConfigurationSerializableSaverTest {
 	
-	private ConfigurationSerializableSaver saver;
+	private ConfigurationSerializableMapConfigSaver saver;
 	
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
@@ -31,7 +32,7 @@ class ConfigurationSerializableSaverTest {
 
 	@BeforeEach
 	void setUp(@TempDir(cleanup = CleanupMode.ON_SUCCESS) File mapFolder) throws Exception {
-		saver = new ConfigurationSerializableSaver(mapFolder);
+		saver = new ConfigurationSerializableMapConfigSaver(mapFolder);
 	}
 
 	@AfterEach
