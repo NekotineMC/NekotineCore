@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 import java.io.File;
 
-import org.bukkit.Material;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -15,9 +14,7 @@ import org.junit.jupiter.api.io.CleanupMode;
 import org.junit.jupiter.api.io.TempDir;
 
 import fr.nekotine.core.map.MapHandle;
-import fr.nekotine.core.map.MapMetadata;
 import fr.nekotine.core.map.MapTest;
-import fr.nekotine.core.map.save.config.ConfigurationSerializableMapConfigSaver;
 
 class ConfigurationSerializableSaverTest {
 	
