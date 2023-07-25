@@ -16,7 +16,7 @@ import org.junit.jupiter.api.io.TempDir;
 import fr.nekotine.core.map.MapHandle;
 import fr.nekotine.core.map.MapTest;
 
-class ConfigurationSerializableSaverTest {
+class ConfigurationSerializableMapConfigSaverTest {
 	
 	private ConfigurationSerializableMapConfigSaver saver;
 	
@@ -53,8 +53,7 @@ class ConfigurationSerializableSaverTest {
 		
 		// TESTS
 		assertInstanceOf(MapTest.class, deserialized);
-		var map = (MapTest)deserialized;
-		var xyz = map.getPoseUnnamed().getXYZ();
+		var xyz = deserialized.getPoseUnnamed().getXYZ();
 		assertEquals(10, xyz.a());
 		assertEquals(20, xyz.b());
 		assertEquals(30, xyz.c());
