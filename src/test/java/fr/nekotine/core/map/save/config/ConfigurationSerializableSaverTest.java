@@ -1,4 +1,4 @@
-package fr.nekotine.core.map.save.saver;
+package fr.nekotine.core.map.save.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.CleanupMode;
 import org.junit.jupiter.api.io.TempDir;
 
+import fr.nekotine.core.map.MapHandle;
 import fr.nekotine.core.map.MapMetadata;
 import fr.nekotine.core.map.MapTest;
 import fr.nekotine.core.map.save.config.ConfigurationSerializableMapConfigSaver;
@@ -42,16 +43,18 @@ class ConfigurationSerializableSaverTest {
 
 	@Test
 	void testDeserialisation() {
+		// SETUP
+		var handle = new MapHandle<MapTest>(MapTest.class, "TestMap", null, saver, null);
 		var mapInst = new MapTest();
 		mapInst.getPoseUnnamed().setXYZ(10,20,30);
-		var mapId = new MapMetadata();
-		mapId.setName("TestMap");
-		mapId.setDescription("Une carte de test");
-		mapId.setType(MapTest.class);
-		mapId.setIcon(Material.STONE);
-		saver.save(mapId, mapInst);
-		var deserialized = saver.load(mapId).b();
 		
+		// SAVING
+		saver.save(handle, mapInst);
+		
+		// LOADING
+		var deserialized = saver.load(handle);
+		
+		// TESTS
 		assertInstanceOf(MapTest.class, deserialized);
 		var map = (MapTest)deserialized;
 		var xyz = map.getPoseUnnamed().getXYZ();
