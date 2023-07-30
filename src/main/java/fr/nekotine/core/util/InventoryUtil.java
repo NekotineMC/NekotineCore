@@ -117,7 +117,7 @@ public class InventoryUtil {
 		}
 		for (var x = minx; x <= maxx; x++) {
 			for (var y = miny; y <= maxy; y++) {
-				inventory.setItem((y * 9) + x, itemStack);
+				inventory.setItem(chestCoordinateToInventoryIndex(x,y), itemStack);
 			}
 		}
 	}
@@ -151,12 +151,16 @@ public class InventoryUtil {
 		for (var x = minx; x <= maxx; x++) {
 			for (var y = miny; y <= maxy; y++) {
 				if (ite.hasNext()) {
-					inventory.setItem((y * 9) + x, ite.next());
+					inventory.setItem(chestCoordinateToInventoryIndex(x,y), ite.next());
 				}else {
 					return;
 				}
 			}
 		}
+	}
+	
+	public static int chestCoordinateToInventoryIndex(int x, int y) {
+		return x + (y * 9);
 	}
 	
 }

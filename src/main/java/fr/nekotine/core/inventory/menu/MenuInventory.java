@@ -10,12 +10,12 @@ import fr.nekotine.core.NekotineCore;
 import net.kyori.adventure.text.Component;
 
 /**
- * Menu créé avec un coffre. Un menu est supposé servir un seul joueur.
+ * Menu créé avec un coffre.
  * 
  * @author XxGoldenbluexX
  *
  */
-public class MenuInventory {
+public abstract class MenuInventory {
 
 	private Inventory inventory;
 
@@ -25,6 +25,7 @@ public class MenuInventory {
 
 	public MenuInventory(@NotNull MenuLayout layout, int nbRow) {
 		this.layout = layout;
+		layout.setMenuInventory(this);
 		this.nbRow = nbRow;
 		inventory = Bukkit.createInventory(null, nbRow * 9);
 		NekotineCore.MODULES.get(MenuModule.class).registerMenu(this);
@@ -32,6 +33,7 @@ public class MenuInventory {
 
 	public MenuInventory(@NotNull MenuLayout layout, int nbRow, @NotNull Component title) {
 		this.layout = layout;
+		layout.setMenuInventory(this);
 		this.nbRow = nbRow;
 		inventory = Bukkit.createInventory(null, nbRow * 9, title);
 		NekotineCore.MODULES.get(MenuModule.class).registerMenu(this);
@@ -45,8 +47,13 @@ public class MenuInventory {
 	 * @param player
 	 */
 	public void displayTo(@NotNull Player player) {
-		layout.arrange(inventory, nbRow);
+		redraw();
 		player.openInventory(inventory);
+	}
+	
+	public void redraw() {
+		inventory.clear();
+		layout.draw(inventory, 0, 0, 9, nbRow);
 	}
 
 	public Inventory getInventory() {
@@ -54,12 +61,9 @@ public class MenuInventory {
 	}
 
 	public void OnItemStackClicked(@NotNull ItemStack itemStack) {
-		var item = layout.toMenuItem(itemStack);
+		var item = layout.getClickedMenuItem(itemStack);
 		if (item != null) {
-			var action = item.getAction();
-			if (action != null) {
-				action.run();
-			}
+			item.click();
 		}
 	}
 
