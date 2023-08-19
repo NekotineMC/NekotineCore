@@ -14,7 +14,7 @@ public class EventUtil {
 	 * @param customAction L'action customis�e
 	 * @return True si l'action fait partie de la customAction
 	 */
-	public static boolean IsAction(Action action, CustomAction customAction) {
+	public static boolean isAction(Action action, CustomAction customAction) {
 		switch(customAction) {
 		case RIGHT_CLICK:
 			if(action==Action.RIGHT_CLICK_AIR || action==Action.RIGHT_CLICK_BLOCK) {
@@ -31,7 +31,7 @@ public class EventUtil {
 	 * @param plugin
 	 * @param listener
 	 */
-	public static void Register(Plugin plugin, Listener listener) {
+	public static void register(Plugin plugin, Listener listener) {
 		Bukkit.getPluginManager().registerEvents(listener, plugin);
 	}
 	
@@ -39,7 +39,7 @@ public class EventUtil {
 	 * D&serengistre les Events pour le Listener
 	 * @param listener
 	 */
-	public static void Unregister(Listener listener) {
+	public static void unregister(Listener listener) {
 		HandlerList.unregisterAll(listener);
 	}
 }

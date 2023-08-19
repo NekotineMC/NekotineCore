@@ -77,7 +77,7 @@ public class ItemCharge implements ICharge{
 	public void Action(PlayerInteractEvent e) {
 		if(released) return;
 		if(!user.equals(e.getPlayer())) return;
-		if(!EventUtil.IsAction(e.getAction(), action)) return;
+		if(!EventUtil.isAction(e.getAction(), action)) return;
 		if(bindToItem && !GearUtil.IsItem(bindItem, e.getItem())) return;
 		
 		if(!activated) {

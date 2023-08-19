@@ -8,9 +8,9 @@ import dev.jorel.commandapi.arguments.Argument;
 import dev.jorel.commandapi.arguments.LiteralArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
 import fr.nekotine.core.NekotineCore;
-import fr.nekotine.core.map.command.IMapElementCommandGeneratorResolver;
 import fr.nekotine.core.map.command.MapCommandBranch;
 import fr.nekotine.core.map.command.MapCommandExecutor;
+import fr.nekotine.core.map.command.MapCommandGenerator;
 import fr.nekotine.core.map.command.MapElementCommandGenerator;
 import fr.nekotine.core.map.element.MapDictionaryElement;
 import fr.nekotine.core.util.CollectionUtil;
@@ -25,8 +25,11 @@ public class DictionaryCommandGenerator extends MapElementCommandGenerator{
 	
 	private String nodeName;
 	
-	public DictionaryCommandGenerator() {
+	private MapCommandGenerator globalGenerator;
+	
+	public DictionaryCommandGenerator(MapCommandGenerator generator) {
 		super(false);
+		globalGenerator = generator;
 	}
 
 	protected MapCommandBranch[] generateFor(Class<?> elementType) {
@@ -37,7 +40,7 @@ public class DictionaryCommandGenerator extends MapElementCommandGenerator{
 		final var finalNodeName = nodeName + nodeNameSuffix;
 		var nodeArg = new LiteralArgument("edit");
 		var nameArg = new StringArgument(finalNodeName);
-		var generator = NekotineCore.IOC.resolve(IMapElementCommandGeneratorResolver.class).resolve(nestedElementType);
+		var generator = globalGenerator.getGeneratorResolver().resolve(nestedElementType);
 		for (var branch : generator.getGenerated(nestedElementType)) {
 			var branchArgs = CollectionUtil.linkedList(branch.arguments());
 			branchArgs.add(0, nameArg);

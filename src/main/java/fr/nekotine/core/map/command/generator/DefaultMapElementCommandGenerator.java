@@ -7,17 +7,20 @@ import dev.jorel.commandapi.arguments.LiteralArgument;
 import fr.nekotine.core.NekotineCore;
 import fr.nekotine.core.map.annotation.ComposingMap;
 import fr.nekotine.core.map.annotation.MapElementTyped;
-import fr.nekotine.core.map.command.IMapElementCommandGeneratorResolver;
 import fr.nekotine.core.map.command.MapCommandBranch;
 import fr.nekotine.core.map.command.MapCommandExecutor;
+import fr.nekotine.core.map.command.MapCommandGenerator;
 import fr.nekotine.core.map.command.MapElementCommandGenerator;
 import fr.nekotine.core.map.element.MapDictionaryElement;
 import fr.nekotine.core.util.CollectionUtil;
 
 public class DefaultMapElementCommandGenerator extends MapElementCommandGenerator{
 
-	public DefaultMapElementCommandGenerator() {
+	private final MapCommandGenerator globalGenerator;
+	
+	public DefaultMapElementCommandGenerator(MapCommandGenerator generator) {
 		super(false);
+		this.globalGenerator = generator;
 	}
 
 	protected MapCommandBranch[] generateFor(Class<?> elementType) {
@@ -32,7 +35,7 @@ public class DefaultMapElementCommandGenerator extends MapElementCommandGenerato
 				}
 				final var finalName = name;
 				var selfArgument = new LiteralArgument(finalName);
-				var generator = NekotineCore.IOC.resolve(IMapElementCommandGeneratorResolver.class).resolve(fieldType);
+				var generator = globalGenerator.getGeneratorResolver().resolve(fieldType);
 				// special Dictionary case
 				if (MapDictionaryElement.class == fieldType && generator instanceof DictionaryCommandGenerator dictGenerator) { // Type précis pour permettre l'héritage par l'utilisateur
 					if (field.isAnnotationPresent(MapElementTyped.class)) {

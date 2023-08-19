@@ -1,6 +1,5 @@
 package fr.nekotine.core.map.command;
 
-import java.util.function.Supplier;
 import java.util.logging.Level;
 
 import org.bukkit.Location;
@@ -23,44 +22,47 @@ import fr.nekotine.core.map.command.generator.PositionCommandGenerator;
 import fr.nekotine.core.map.element.MapBlockPositionElement;
 import fr.nekotine.core.map.element.MapDictionaryElement;
 import fr.nekotine.core.map.element.MapPositionElement;
-import fr.nekotine.core.util.AsyncUtil;
 import net.kyori.adventure.text.Component;
 
-public class MapCommandGenerator implements IMapCommandGenerator{
-	
+public class MapCommandGenerator implements IMapCommandGenerator {
+
 	private CommandAPICommand mapCommand;
-	
+
 	private final IMapElementCommandGeneratorResolver generatorResolver;
-	
+
 	public MapCommandGenerator() {
-		generatorResolver = new MapElementCommandGeneratorResolver(new DefaultMapElementCommandGenerator())
-				.registerGenerator(MapDictionaryElement.class, new DictionaryCommandGenerator())
+		generatorResolver = new MapElementCommandGeneratorResolver(new DefaultMapElementCommandGenerator(this))
+				.registerGenerator(MapDictionaryElement.class, new DictionaryCommandGenerator(this))
 				.registerGenerator(MapPositionElement.class, new PositionCommandGenerator())
 				.registerGenerator(MapBlockPositionElement.class, new BlockPositionCommandGenerator())
 				.registerGenerator(Location.class, new LocationCommandGenerator());
 	}
-	
+
 	public IMapElementCommandGeneratorResolver getGeneratorResolver() {
 		return generatorResolver;
 	}
-	
+
 	@Override
 	public void register() {
 		mapCommand.register();
 	}
-	
-	public void generateFor(Class<?> ...mapTypes) {
+
+	public void generateFor(Class<?>... mapTypes) {
 		try {
 			if (mapCommand == null) {
 				makeMapCommand();
 			}
 			var editCommand = new CommandAPICommand("edit");
-			editCommand.executes((CommandExecutor)(sender, args) -> sender.sendMessage("Usage: /map edit <mapType> <mapName>"), ExecutorType.ALL);
+			editCommand.executes(
+					(CommandExecutor) (sender, args) -> sender.sendMessage("Usage: /map edit <mapType> <mapName>"),
+					ExecutorType.ALL);
 			var addCommand = new CommandAPICommand("add");
-			addCommand.executes((CommandExecutor)(sender, args) -> sender.sendMessage("Usage: /map add <mapType> <mapName>"), ExecutorType.ALL);
+			addCommand.executes(
+					(CommandExecutor) (sender, args) -> sender.sendMessage("Usage: /map add <mapType> <mapName>"),
+					ExecutorType.ALL);
 			for (var mapType : mapTypes) {
 				try {
-					//EDIT
+					// EDIT
 					var mapTypeName = mapType.getSimpleName();
 					var mapNameArgument = makeMapArgument(mapType);
 					var generator = generatorResolver.resolve(mapType);
@@ -68,63 +70,64 @@ public class MapCommandGenerator implements IMapCommandGenerator{
 						var command = new CommandAPICommand(mapTypeName);
 						command.withArguments(mapNameArgument);
 						command.withArguments(branch.arguments());
-						CommandExecutor executor = (sender, args)->{
-							branch.consumer().accept(args.get(0)/*map*/, sender, args);
+						CommandExecutor executor = (sender, args) -> {
+							branch.consumer().accept(args.get(0)/* map */, sender, args);
 						};
 						command.executes(executor, ExecutorType.ALL);
 						editCommand.withSubcommand(command);
 					}
-					//ADD
+					// ADD
 					var typedAddCommand = new CommandAPICommand(mapTypeName);
 					typedAddCommand.withArguments(new StringArgument("mapName"));
-					typedAddCommand.executes(
-							(CommandExecutor)(sender, args) -> {
-								var mapModule = NekotineCore.MODULES.get(MapModule.class);
-								NekotineCore.MODULES.get(MapModule.class).addMapAsync(mapType, (String)args.get("mapName"),
-										handle -> sender.sendMessage(Component.text("La carte e bien été créé")));
-							}, ExecutorType.ALL);//TODO standardiser command messages
+					typedAddCommand.executes((CommandExecutor) (sender, args) -> {
+						NekotineCore.MODULES.get(MapModule.class).addMapAsync(mapType, (String) args.get("mapName"),
+								handle -> sender.sendMessage(Component.text("La carte e bien été créé")));
+					}, ExecutorType.ALL);// TODO standardiser command messages
 					addCommand.withSubcommand(typedAddCommand);
-					//REMOVE
+					// REMOVE
 					var typedRemoveCommand = new CommandAPICommand(mapTypeName);
 					typedRemoveCommand.withArguments(new StringArgument("mapName"));
-					typedRemoveCommand.executes(
-							(CommandExecutor)(sender, args) -> {
-								NekotineCore.MODULES.get(MapModule.class).addMapAsync(mapType, (String)args.get("mapName"));
-							}, ExecutorType.ALL);
+					typedRemoveCommand.executes((CommandExecutor) (sender, args) -> {
+						NekotineCore.MODULES.get(MapModule.class).addMapAsync(mapType, (String) args.get("mapName"));
+					}, ExecutorType.ALL);
 					addCommand.withSubcommand(typedAddCommand);
-					NekotineCore.LOGGER.info("[MapCommandGenerator] Commandes générées pour le type de carte "+mapTypeName);
-				}catch(Exception e) {
-					throw new Exception("[MapCommandGenerator] Erreur lors de la génération de commande pour le type de map "+mapType.getName(), e);
+					NekotineCore.LOGGER
+							.info("[MapCommandGenerator] Commandes générées pour le type de carte " + mapTypeName);
+				} catch (Exception e) {
+					throw new Exception(
+							"[MapCommandGenerator] Erreur lors de la génération de commande pour le type de map "
+									+ mapType.getName(),
+							e);
 				}
 			}
 			mapCommand.withSubcommand(editCommand);
-			
-			NekotineCore.LOGGER.info("[MapCommandGenerator] Des commandes ont été automatiquement générées pour gérer des types cartes.");
-		}catch(Exception e) {
-			NekotineCore.LOGGER.logp(Level.SEVERE,
-					"MapCommandGenerator",
+
+			NekotineCore.LOGGER.info(
+					"[MapCommandGenerator] Des commandes ont été automatiquement générées pour gérer des types cartes.");
+		} catch (Exception e) {
+			NekotineCore.LOGGER.logp(Level.SEVERE, "MapCommandGenerator",
 					"void generateFor(Class<? extends MapElement> ...element)",
-					"[MapCommandGenerator] Une erreur est survenue lors de la génération des commandes de map",
-					e);
+					"[MapCommandGenerator] Une erreur est survenue lors de la génération des commandes de map", e);
 		}
 	}
-	
-	private <T> Argument<T> makeMapArgument(Class<T> mapType){
-		return new CustomArgument<T,String>(new StringArgument("mapName"),info ->{
+
+	private <T> Argument<T> makeMapArgument(Class<T> mapType) {
+		return new CustomArgument<T, String>(new StringArgument("mapName"), info -> {
 			T map;
 			try {
-				var id = NekotineCore.MODULES.get(MapModule.class).getMapFinder().findByName(mapType, info.currentInput());
+				var id = NekotineCore.MODULES.get(MapModule.class).getMapFinder().findByName(mapType,
+						info.currentInput());
 				var untypedMap = id.loadConfig();
 				map = mapType.cast(untypedMap);
-			}catch(Exception e) {
-				NekotineCore.LOGGER.logp(Level.WARNING,
-						"MapCommandGenerator",
+			} catch (Exception e) {
+				NekotineCore.LOGGER.logp(Level.WARNING, "MapCommandGenerator",
 						"<T> Argument<T> makeMapArgument(Class<T> mapType)",
 						"Erreur lors de la récupération de la carte", e);
 				throw CustomArgumentException.fromString("Erreur interne lors de la récupération de la carte.");
 			}
 			if (map == null) {
-				throw CustomArgumentException.fromMessageBuilder(new MessageBuilder("Carte inconnue: ").appendArgInput().appendHere());
+				throw CustomArgumentException
+						.fromMessageBuilder(new MessageBuilder("Carte inconnue: ").appendArgInput().appendHere());
 			}
 			return map;
 		});
@@ -132,10 +135,12 @@ public class MapCommandGenerator implements IMapCommandGenerator{
 
 	/**
 	 * Create map command with add,remove and list subcommands
+	 * 
 	 * @return
 	 */
 	private void makeMapCommand() {
 		mapCommand = new CommandAPICommand("map");
-		mapCommand.executes((CommandExecutor)(sender, args) -> sender.sendMessage("Usage: /map <action>"), ExecutorType.ALL);
+		mapCommand.executes((CommandExecutor) (sender, args) -> sender.sendMessage("Usage: /map <action>"),
+				ExecutorType.ALL);
 	}
 }

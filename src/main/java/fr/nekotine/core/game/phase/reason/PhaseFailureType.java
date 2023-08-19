@@ -10,6 +10,10 @@ public enum PhaseFailureType {
 	/**
 	 * La phase se termine prématurément. Contrairement à {@link #CANCELED}, l'état est laissé tel quel. 
 	 */
-	ABORTED;
+	ABORTED,
+	/**
+	 * La phase n'a pas pus se mettre en place. L'état est laissé tel quel.
+	 */
+	SETUP_FAILED;
 	
 }

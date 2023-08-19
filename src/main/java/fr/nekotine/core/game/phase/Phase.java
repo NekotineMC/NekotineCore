@@ -7,35 +7,79 @@ import fr.nekotine.core.game.phase.reason.PhaseFailureType;
 
 public abstract class Phase implements IPhase{
 
-	private final Runnable onSuccess;
+	private Runnable onSuccess = null;
 	
-	private final Consumer<PhaseFailureEventArgs> onFailure;
+	private Consumer<PhaseFailureEventArgs> onFailure = null;
+	
+	public Phase() {
+	}
+	
+	public Phase(Runnable onSuccess) {
+		this.onSuccess = onSuccess;
+	}
+	
+	public Phase(Consumer<PhaseFailureEventArgs> onFailure) {
+		this.onFailure = onFailure;
+	}
 	
 	public Phase(Runnable onSuccess, Consumer<PhaseFailureEventArgs> onFailure) {
 		this.onSuccess = onSuccess;
 		this.onFailure = onFailure;
 	}
 	
+	public void setOnSuccessCallback(Runnable callback) {
+		onSuccess = callback;
+	}
+	
+	public void setOnFailureCallback(Consumer<PhaseFailureEventArgs> callback) {
+		onFailure = callback;
+	}
+	
 	@Override
 	public final void complete() {
 		tearDown();
-		onSuccess.run();
+		postSuccess();
+		if (onSuccess != null) {
+			onSuccess.run();
+		}
 	}
 	
 	@Override
 	public final void abort(String info, Exception e) {
 		tearDown();
-		onFailure.accept(new PhaseFailureEventArgs(PhaseFailureType.ABORTED, info, e));
+		if (onFailure != null) {
+			onFailure.accept(new PhaseFailureEventArgs(PhaseFailureType.ABORTED, info, e));
+		}
 	}
 	
 	@Override
 	public void cancel(String info, Exception e) {
 		handleCancelation();
 		tearDown();
-		onFailure.accept(new PhaseFailureEventArgs(PhaseFailureType.CANCELED, info, e));
+		if (onFailure != null) {
+			onFailure.accept(new PhaseFailureEventArgs(PhaseFailureType.CANCELED, info, e));
+		}
 	}
 	
-	protected void handleCancelation() {
+	@Override
+	public final void abort(PhaseFailureEventArgs args) {
+		tearDown();
+		if (onFailure != null) {
+			onFailure.accept(new PhaseFailureEventArgs(PhaseFailureType.ABORTED, args.info(), args.exception()));
+		}
 	}
+	
+	@Override
+	public void cancel(PhaseFailureEventArgs args) {
+		handleCancelation();
+		tearDown();
+		if (onFailure != null) {
+			onFailure.accept(new PhaseFailureEventArgs(PhaseFailureType.CANCELED, args.info(), args.exception()));
+		}
+	}
+	
+	protected void handleCancelation() {};
+	
+	protected void postSuccess() {};
 	
 }
