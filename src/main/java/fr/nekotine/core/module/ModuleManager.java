@@ -35,7 +35,7 @@ public class ModuleManager {
 			return;
 		}
 		LOGGER.log(Level.INFO, "Chargement du module "+name+"...");
-		try (var watch = new Stopwatch(w -> LOGGER.log(Level.INFO, "Le module "+name+" est charge ("+w.elapsedMillis()+"ms)"))){
+		try (var watch = new Stopwatch(w -> LOGGER.log(Level.INFO, "Le module "+name+" est charge ("+w.elapsedMillis()+" ms)"))){
 			var instance = type.getConstructor().newInstance();
 			moduleMap.put(type, instance);
 		}catch(Exception e) {
@@ -59,8 +59,16 @@ public class ModuleManager {
 	
 	@SuppressWarnings("unchecked")
 	public void unloadAll() {
-		for (var type : moduleMap.keySet()) {
-			unload((Class<? extends PluginModule>) type);
+		var ite = moduleMap.keySet().iterator();
+		while(ite.hasNext()) {
+			var item = (Class<? extends PluginModule>)ite.next();
+			var name = item.getSimpleName();
+			try (var watch = new Stopwatch(w -> LOGGER.log(Level.INFO, "Le module "+name+" est decharge ("+w.elapsedMillis()+"ms)"))){
+				moduleMap.get(item).unload();
+			}catch(Exception e) {
+				LOGGER.log(Level.SEVERE, "Impossible de decharger le module "+name, e);
+			}
+			ite.remove();
 		}
 	}
 }

@@ -25,7 +25,7 @@ public class ActionMenuItem extends MenuElement implements ClickableMenuItem{
 	}
 	
 	public  @Nullable ClickableMenuItem getClickedMenuItem(ItemStack item) {
-		return item == itemStack ? this : null;
+		return item != null && item.isSimilar(itemStack) ? this : null;
 	}
 
 	@Override

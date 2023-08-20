@@ -4,6 +4,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -13,11 +14,16 @@ import org.bukkit.event.player.PlayerItemConsumeEvent;
 import com.destroystokyo.paper.event.player.PlayerReadyArrowEvent;
 
 import fr.nekotine.core.module.PluginModule;
+import fr.nekotine.core.util.EventUtil;
 
-public class UsableModule extends PluginModule{
+public class UsableModule extends PluginModule implements Listener{
 	
 	private final Set<Usable> usables = new LinkedHashSet<>();
 
+	public UsableModule() {
+		EventUtil.register(this);
+	}
+	
 	@Override
 	protected void unload() {
 		usables.clear();

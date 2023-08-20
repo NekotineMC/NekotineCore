@@ -6,6 +6,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.plugin.Plugin;
 
+import fr.nekotine.core.NekotineCore;
+
 public class EventUtil {
 	
 	/**
@@ -33,6 +35,14 @@ public class EventUtil {
 	 */
 	public static void register(Plugin plugin, Listener listener) {
 		Bukkit.getPluginManager().registerEvents(listener, plugin);
+	}
+	
+	/**
+	 * Enregistre les Events pour le Listener
+	 * @param listener
+	 */
+	public static void register(Listener listener) {
+		Bukkit.getPluginManager().registerEvents(listener, NekotineCore.getAttachedPlugin());
 	}
 	
 	/**

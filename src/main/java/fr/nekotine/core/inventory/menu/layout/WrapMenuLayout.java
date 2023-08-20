@@ -23,12 +23,12 @@ public class WrapMenuLayout extends MenuLayout{
 	}
 	
 	@Override
-		public void addMenuElement(MenuElement element) {
-			super.addMenuElement(element);
-			if (this.sorter != null) {
-				menuElements.sort(sorter);
-			}
+	public void addMenuElement(MenuElement element) {
+		super.addMenuElement(element);
+		if (this.sorter != null) {
+			menuElements.sort(sorter);
 		}
+	}
 
 	@Override
 	public void draw(Inventory inventory, int x, int y, int width, int height) {

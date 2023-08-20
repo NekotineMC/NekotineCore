@@ -5,15 +5,21 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import fr.nekotine.core.module.PluginModule;
+import fr.nekotine.core.util.EventUtil;
 
-public class MenuModule extends PluginModule{
+public class MenuModule extends PluginModule implements Listener{
 	
 	private List<WeakReference<MenuInventory>> registeredMenus = new LinkedList<>();
+	
+	public MenuModule() {
+		EventUtil.register(this);
+	}
 	
 	public void registerMenu(MenuInventory menu) {
 		registeredMenus.add(new WeakReference<>(menu));

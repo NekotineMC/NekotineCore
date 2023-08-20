@@ -15,7 +15,7 @@ import net.kyori.adventure.text.Component;
  * @author XxGoldenbluexX
  *
  */
-public abstract class MenuInventory {
+public class MenuInventory {
 
 	private Inventory inventory;
 

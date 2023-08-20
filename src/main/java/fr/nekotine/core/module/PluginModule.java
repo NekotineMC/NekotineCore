@@ -12,7 +12,7 @@ import fr.nekotine.core.text.Text;
  *
  */
 public abstract class PluginModule {
-
+	
 	public Logger LOGGER = new FormatingRemoteLogger(Text.namedLoggerFormat(getClass().getSimpleName()));
 
 	/**
