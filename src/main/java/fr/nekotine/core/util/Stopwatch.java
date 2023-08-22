@@ -18,6 +18,14 @@ public class Stopwatch implements AutoCloseable{
 	
 	public Stopwatch(Consumer<Stopwatch> stopCallback) {
 		this.stopCallback = stopCallback;
+		start();
+	}
+	
+	public Stopwatch(Consumer<Stopwatch> stopCallback, boolean autostart) {
+		this.stopCallback = stopCallback;
+		if (autostart) {
+			start();
+		}
 	}
 	
 	public void start() {
