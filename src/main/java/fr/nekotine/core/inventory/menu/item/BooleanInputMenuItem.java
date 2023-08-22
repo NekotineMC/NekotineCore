@@ -1,5 +1,7 @@
 package fr.nekotine.core.inventory.menu.item;
 
+import java.util.function.Consumer;
+
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -17,6 +19,8 @@ import fr.nekotine.core.util.InventoryUtil;
  */
 public class BooleanInputMenuItem extends MenuElement implements ClickableMenuItem{
 	
+	private Consumer<Boolean> valueChangedCallback;
+	
 	private ItemStack trueItem;
 	
 	private ItemStack falseItem;
@@ -24,8 +28,13 @@ public class BooleanInputMenuItem extends MenuElement implements ClickableMenuIt
 	private boolean value;
 	
 	public BooleanInputMenuItem(ItemStack trueItem, ItemStack falseItem) {
+		this(trueItem, falseItem, null);
+	}
+	
+	public BooleanInputMenuItem(ItemStack trueItem, ItemStack falseItem, Consumer<Boolean> valueChangedCallback) {
 		this.trueItem = trueItem;
 		this.falseItem = falseItem;
+		this.valueChangedCallback = valueChangedCallback;
 	}
 	
 	public boolean getValue() {
@@ -33,12 +42,20 @@ public class BooleanInputMenuItem extends MenuElement implements ClickableMenuIt
 	}
 	
 	public void setValue(boolean value) {
-		this.value = value;
-		askRedraw();
+		if (this.value != value) {
+			this.value = value;
+			if (valueChangedCallback != null) {
+				valueChangedCallback.accept(this.value);
+			}
+			askRedraw();
+		}
 	}
 	
 	public void toggleValue() {
 		value = !value;
+		if (valueChangedCallback != null) {
+			valueChangedCallback.accept(this.value);
+		}
 		askRedraw();
 	}
 

@@ -18,4 +18,6 @@ public interface IPhase {
 	
 	public void cancel(PhaseFailureEventArgs args);
 	
+	public boolean isRunning();
+	
 }

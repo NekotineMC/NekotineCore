@@ -1,6 +1,7 @@
 package fr.nekotine.core.util;
 
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -91,11 +92,29 @@ public class ItemStackUtil {
 		return itemStack;
 	}
 	
+	public static @NotNull ItemStack make(Material material, Component name, Component ... lore) {
+		var itemStack = new ItemStack(material);
+		var meta = itemStack.getItemMeta();
+		meta.displayName(name);
+		meta.lore(Arrays.asList(lore));
+		itemStack.setItemMeta(meta);
+		return itemStack;
+	}
+	
 	public static @NotNull ItemStack make(Material material, int amount, Component name, List<Component> lore) {
 		var itemStack = new ItemStack(material, amount);
 		var meta = itemStack.getItemMeta();
 		meta.displayName(name);
 		meta.lore(lore);
+		itemStack.setItemMeta(meta);
+		return itemStack;
+	}
+	
+	public static @NotNull ItemStack make(Material material, int amount, Component name, Component ... lore) {
+		var itemStack = new ItemStack(material, amount);
+		var meta = itemStack.getItemMeta();
+		meta.displayName(name);
+		meta.lore(Arrays.asList(lore));
 		itemStack.setItemMeta(meta);
 		return itemStack;
 	}

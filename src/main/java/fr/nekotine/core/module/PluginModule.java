@@ -2,6 +2,7 @@ package fr.nekotine.core.module;
 
 import java.util.logging.Logger;
 
+import fr.nekotine.core.NekotineCore;
 import fr.nekotine.core.logging.FormatingRemoteLogger;
 import fr.nekotine.core.text.Text;
 
@@ -13,7 +14,7 @@ import fr.nekotine.core.text.Text;
  */
 public abstract class PluginModule {
 	
-	public Logger LOGGER = new FormatingRemoteLogger(Text.namedLoggerFormat(getClass().getSimpleName()));
+	public Logger LOGGER = new FormatingRemoteLogger(NekotineCore.LOGGER,Text.namedLoggerFormat(getClass().getSimpleName()));
 
 	/**
 	 * Méthode à appeler pour décharger le module.

@@ -6,7 +6,9 @@ import fr.nekotine.core.game.phase.eventargs.PhaseFailureEventArgs;
 import fr.nekotine.core.game.phase.reason.PhaseFailureType;
 
 public abstract class Phase implements IPhase{
-
+	
+	protected boolean isRunning;
+	
 	private Runnable onSuccess = null;
 	
 	private Consumer<PhaseFailureEventArgs> onFailure = null;
@@ -36,6 +38,26 @@ public abstract class Phase implements IPhase{
 	}
 	
 	@Override
+	public final void setup() {
+		if (!isRunning) {
+			handleSetup();
+			isRunning = true;
+		}else {
+			throw new IllegalStateException("La phase a deja debutee");
+		}
+	}
+	
+	@Override
+	public final void tearDown() {
+		if (isRunning) {
+			handleTearDown();
+			isRunning = false;
+		}else {
+			throw new IllegalStateException("La phase n'a pas debutee");
+		}
+	}
+	
+	@Override
 	public final void complete() {
 		tearDown();
 		postSuccess();
@@ -53,7 +75,7 @@ public abstract class Phase implements IPhase{
 	}
 	
 	@Override
-	public void cancel(String info, Exception e) {
+	public final void cancel(String info, Exception e) {
 		handleCancelation();
 		tearDown();
 		if (onFailure != null) {
@@ -70,13 +92,22 @@ public abstract class Phase implements IPhase{
 	}
 	
 	@Override
-	public void cancel(PhaseFailureEventArgs args) {
+	public final void cancel(PhaseFailureEventArgs args) {
 		handleCancelation();
 		tearDown();
 		if (onFailure != null) {
 			onFailure.accept(new PhaseFailureEventArgs(PhaseFailureType.CANCELED, args.info(), args.exception()));
 		}
 	}
+	
+	@Override
+	public boolean isRunning() {
+		return isRunning;
+	}
+	
+	protected void handleSetup() {};
+	
+	protected void handleTearDown() {};
 	
 	protected void handleCancelation() {};
 	

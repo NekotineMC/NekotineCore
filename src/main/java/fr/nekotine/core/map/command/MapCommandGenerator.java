@@ -59,6 +59,10 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 			addCommand.executes(
 					(CommandExecutor) (sender, args) -> sender.sendMessage("Usage: /map add <mapType> <mapName>"),
 					ExecutorType.ALL);
+			var deleteCommand = new CommandAPICommand("remove");
+			addCommand.executes(
+					(CommandExecutor) (sender, args) -> sender.sendMessage("Usage: /map remove <mapType> <mapName>"),
+					ExecutorType.ALL);
 			for (var mapType : mapTypes) {
 				try {
 					// EDIT
@@ -80,16 +84,19 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 					typedAddCommand.withArguments(new StringArgument("mapName"));
 					typedAddCommand.executes((CommandExecutor) (sender, args) -> {
 						NekotineCore.MODULES.get(MapModule.class).addMapAsync(mapType, (String) args.get("mapName"),
-								handle -> sender.sendMessage(Component.text("La carte e bien été créé")));
+								handle -> sender.sendMessage(Component.text("La carte a bien été créé")));
+						sender.sendMessage(Component.text("Ajout de la map en cours..."));
 					}, ExecutorType.ALL);// TODO standardiser command messages
 					addCommand.withSubcommand(typedAddCommand);
 					// REMOVE
 					var typedRemoveCommand = new CommandAPICommand(mapTypeName);
 					typedRemoveCommand.withArguments(new StringArgument("mapName"));
 					typedRemoveCommand.executes((CommandExecutor) (sender, args) -> {
-						NekotineCore.MODULES.get(MapModule.class).addMapAsync(mapType, (String) args.get("mapName"));
+						NekotineCore.MODULES.get(MapModule.class).deleteMapAsync(mapType, (String) args.get("mapName"),
+								() -> sender.sendMessage(Component.text("La carte a bien été supprimée")));
+						sender.sendMessage(Component.text("Suppression de la map en cours..."));
 					}, ExecutorType.ALL);
-					addCommand.withSubcommand(typedAddCommand);
+					deleteCommand.withSubcommand(typedRemoveCommand);
 					NekotineCore.LOGGER
 							.info("[MapCommandGenerator] Commandes générées pour le type de carte " + mapTypeName);
 				} catch (Exception e) {
@@ -99,7 +106,7 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 							e);
 				}
 			}
-			mapCommand.withSubcommand(editCommand);
+			mapCommand.withSubcommands(editCommand, addCommand, deleteCommand);
 
 			NekotineCore.LOGGER.info(
 					"[MapCommandGenerator] Des commandes ont été automatiquement générées pour gérer des types cartes.");
@@ -141,5 +148,6 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 		mapCommand = new CommandAPICommand("map");
 		mapCommand.executes((CommandExecutor) (sender, args) -> sender.sendMessage("Usage: /map <action>"),
 				ExecutorType.ALL);
+		mapCommand.withSubcommand(mapCommand);
 	}
 }

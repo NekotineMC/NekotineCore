@@ -18,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.destroystokyo.paper.event.player.PlayerReadyArrowEvent;
 
+import fr.nekotine.core.NekotineCore;
 import fr.nekotine.core.util.ItemStackUtil;
 import net.kyori.adventure.text.Component;
 
@@ -34,6 +35,15 @@ public class Usable {
 	
 	public @NotNull ItemStack getItemStack() {
 		return item;
+	}
+	
+	public Usable register() {
+		NekotineCore.MODULES.get(UsableModule.class).register(this);
+		return this;
+	}
+	
+	public void unregister() {
+		NekotineCore.MODULES.get(UsableModule.class).unregister(this);
 	}
 	
 	protected void OnInteract(PlayerInteractEvent e) {

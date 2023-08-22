@@ -11,13 +11,13 @@ public abstract class CollectionPhase<T> extends Phase implements IPhase{
 	private Supplier<Stream<T>> source;
 	
 	@Override
-	public final void setup() {
+	public final void handleSetup() {
 		globalSetup();
 		source.get().forEach(this::itemSetup);
 	}
 
 	@Override
-	public final void tearDown() {
+	public final void handleTearDown() {
 		source.get().forEach(this::itemTearDown);
 		globalTearDown();
 	}
@@ -43,6 +43,10 @@ public abstract class CollectionPhase<T> extends Phase implements IPhase{
 	
 	public void setItemStreamSupplier(Supplier<Stream<T>> supplier) {
 		source = supplier;
+	}
+	
+	public boolean isRunning() {
+		return isRunning;
 	}
 	
 	protected abstract void globalSetup();
