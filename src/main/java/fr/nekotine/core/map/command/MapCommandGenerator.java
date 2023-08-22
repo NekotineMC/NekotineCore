@@ -1,27 +1,30 @@
 package fr.nekotine.core.map.command;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.Argument;
+import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.CustomArgument;
 import dev.jorel.commandapi.arguments.CustomArgument.CustomArgumentException;
-import dev.jorel.commandapi.arguments.CustomArgument.MessageBuilder;
 import dev.jorel.commandapi.arguments.StringArgument;
 import dev.jorel.commandapi.executors.CommandExecutor;
 import dev.jorel.commandapi.executors.ExecutorType;
 import fr.nekotine.core.NekotineCore;
+import fr.nekotine.core.map.MapHandle;
 import fr.nekotine.core.map.MapModule;
-import fr.nekotine.core.map.command.generator.BlockPositionCommandGenerator;
+import fr.nekotine.core.map.command.generator.BlockLocationCommandGenerator;
 import fr.nekotine.core.map.command.generator.BoundingBoxCommandGenerator;
 import fr.nekotine.core.map.command.generator.DefaultMapElementCommandGenerator;
 import fr.nekotine.core.map.command.generator.DictionaryCommandGenerator;
 import fr.nekotine.core.map.command.generator.PositionCommandGenerator;
-import fr.nekotine.core.map.element.MapBlockPositionElement;
+import fr.nekotine.core.map.element.MapBlockLocationElement;
 import fr.nekotine.core.map.element.MapBoundingBoxElement;
 import fr.nekotine.core.map.element.MapDictionaryElement;
 import fr.nekotine.core.map.element.MapPositionElement;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 public class MapCommandGenerator implements IMapCommandGenerator {
 
@@ -33,7 +36,7 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 		generatorResolver = new MapElementCommandGeneratorResolver(new DefaultMapElementCommandGenerator(this))
 				.registerGenerator(MapDictionaryElement.class, new DictionaryCommandGenerator(this))
 				.registerGenerator(MapPositionElement.class, new PositionCommandGenerator())
-				.registerGenerator(MapBlockPositionElement.class, new BlockPositionCommandGenerator())
+				.registerGenerator(MapBlockLocationElement.class, new BlockLocationCommandGenerator())
 				.registerGenerator(MapBoundingBoxElement.class, new BoundingBoxCommandGenerator());
 	}
 
@@ -74,7 +77,13 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 						command.withArguments(mapNameArgument);
 						command.withArguments(branch.arguments());
 						CommandExecutor executor = (sender, args) -> {
-							branch.consumer().accept(args.get(0)/* map */, sender, args);
+							@SuppressWarnings("unchecked")
+							var handle = (MapHandle<Object>) args.get(0);
+							var config = handle.loadConfig();
+							branch.consumer().accept(config/* map */, sender, args);
+							sender.sendMessage(Component.text("Sauvegarde de la carte...", NamedTextColor.BLUE));
+							NekotineCore.MODULES.get(MapModule.class).saveMapConfigAsync(handle, config,
+									() -> sender.sendMessage(Component.text("Sauvegarde effectuée.", NamedTextColor.GREEN)));
 						};
 						command.executes(executor, ExecutorType.ALL);
 						editCommand.withSubcommand(command);
@@ -117,26 +126,23 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 		}
 	}
 
-	private <T> Argument<T> makeMapArgument(Class<T> mapType) {
-		return new CustomArgument<T, String>(new StringArgument("mapName"), info -> {
-			T map;
+	private <T> Argument<MapHandle<T>> makeMapArgument(Class<T> mapType) {
+		return new CustomArgument<MapHandle<T>, String>(new StringArgument("mapName"), info -> {
 			try {
-				var id = NekotineCore.MODULES.get(MapModule.class).getMapFinder().findByName(mapType,
+				return NekotineCore.MODULES.get(MapModule.class).getMapFinder().findByName(mapType,
 						info.currentInput());
-				var untypedMap = id.loadConfig();
-				map = mapType.cast(untypedMap);
 			} catch (Exception e) {
-				NekotineCore.LOGGER.logp(Level.WARNING, "MapCommandGenerator",
-						"<T> Argument<T> makeMapArgument(Class<T> mapType)",
-						"Erreur lors de la récupération de la carte", e);
+				NekotineCore.LOGGER.log(Level.WARNING, "Erreur lors de la récupération de la carte", e);
 				throw CustomArgumentException.fromString("Erreur interne lors de la récupération de la carte.");
 			}
-			if (map == null) {
-				throw CustomArgumentException
-						.fromMessageBuilder(new MessageBuilder("Carte inconnue: ").appendArgInput().appendHere());
-			}
-			return map;
-		});
+		}).replaceSuggestions(ArgumentSuggestions.stringsAsync(info -> CompletableFuture.supplyAsync(
+				() -> {
+					return NekotineCore.MODULES.get(MapModule.class).getMapFinder().list()
+							.stream()
+							.filter(handle -> handle.getConfigType() == mapType)
+							.map(handle -> handle.getName())
+							.toArray(String[]::new);
+				})));
 	}
 
 	/**

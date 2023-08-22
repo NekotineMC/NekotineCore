@@ -6,22 +6,22 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class MenuElement {
 
-	private MenuInventory menuInventory;
+	private MenuLayout parent;
 	
 	public abstract void draw(Inventory inventory, int x, int y, int width, int height);
 	
 	public abstract @Nullable ClickableMenuItem getClickedMenuItem(ItemStack item);
 	
-	public void setMenuInventory(MenuInventory menu) {
-		menuInventory = menu;
+	public void setParent(MenuLayout parent) {
+		this.parent = parent;
 	}
 	
-	public MenuInventory getMenuInventory() {
-		return menuInventory;
+	public MenuLayout getParent() {
+		return parent;
 	}
 	
 	public void askRedraw() {
-		menuInventory.redraw();
+		parent.askRedraw();
 	}
 	
 }

@@ -11,17 +11,17 @@ import org.jetbrains.annotations.NotNull;
 import fr.nekotine.core.tuple.Pair;
 import fr.nekotine.core.tuple.Triplet;
 
-public class MapBlockPositionElement implements ConfigurationSerializable{
+public class MapBlockLocationElement implements ConfigurationSerializable{
 
-	public MapBlockPositionElement() {}
+	public MapBlockLocationElement() {}
 	
-	public MapBlockPositionElement(int x, int y, int z) {
+	public MapBlockLocationElement(int x, int y, int z) {
 		this.x = x;
 		this.y = y;
 		this.z = z;
 	}
 	
-	public MapBlockPositionElement(Location location) {
+	public MapBlockLocationElement(Location location) {
 		x = location.getBlockX();
 		y = location.getBlockY();
 		z = location.getBlockZ();
@@ -113,11 +113,11 @@ public class MapBlockPositionElement implements ConfigurationSerializable{
 		return map;
 	}
 	
-	public static MapBlockPositionElement deserialize(Map<String,Object> map) {
+	public static MapBlockLocationElement deserialize(Map<String,Object> map) {
 		var x = (int)map.get("x");
 		var y = (int)map.get("y");
 		var z = (int)map.get("z");
-		return new MapBlockPositionElement(x, y, z);
+		return new MapBlockLocationElement(x, y, z);
 	}
 	
 }

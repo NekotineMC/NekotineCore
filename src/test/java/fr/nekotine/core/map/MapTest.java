@@ -2,7 +2,7 @@ package fr.nekotine.core.map;
 
 import fr.nekotine.core.map.annotation.ComposingMap;
 import fr.nekotine.core.map.annotation.MapElementTyped;
-import fr.nekotine.core.map.element.MapBlockPositionElement;
+import fr.nekotine.core.map.element.MapBlockLocationElement;
 import fr.nekotine.core.map.element.MapDictionaryElement;
 import fr.nekotine.core.map.element.MapPositionElement;
 
@@ -17,11 +17,11 @@ public class MapTest {
 	private MapPositionElement poseUnnamed = new MapPositionElement();
 	
 	@ComposingMap("blockPoseRenamed")
-	private MapBlockPositionElement blockPoseToRename = new MapBlockPositionElement();
+	private MapBlockLocationElement blockPoseToRename = new MapBlockLocationElement();
 	
-	@MapElementTyped(MapBlockPositionElement.class)
+	@MapElementTyped(MapBlockLocationElement.class)
 	@ComposingMap()
-	private MapDictionaryElement<MapBlockPositionElement> poseList = new MapDictionaryElement<>();
+	private MapDictionaryElement<MapBlockLocationElement> poseList = new MapDictionaryElement<>();
 	
 	@MapElementTyped(MapTestComposite.class)
 	@ComposingMap()
@@ -51,19 +51,19 @@ public class MapTest {
 		this.poseUnnamed = poseUnnamed;
 	}
 
-	public MapBlockPositionElement getBlockPoseToRename() {
+	public MapBlockLocationElement getBlockPoseToRename() {
 		return blockPoseToRename;
 	}
 
-	public void setBlockPoseToRename(MapBlockPositionElement blockPoseToRename) {
+	public void setBlockPoseToRename(MapBlockLocationElement blockPoseToRename) {
 		this.blockPoseToRename = blockPoseToRename;
 	}
 
-	public MapDictionaryElement<MapBlockPositionElement> getPoseList() {
+	public MapDictionaryElement<MapBlockLocationElement> getPoseList() {
 		return poseList;
 	}
 
-	public void setPoseList(MapDictionaryElement<MapBlockPositionElement> poseList) {
+	public void setPoseList(MapDictionaryElement<MapBlockLocationElement> poseList) {
 		this.poseList = poseList;
 	}
 

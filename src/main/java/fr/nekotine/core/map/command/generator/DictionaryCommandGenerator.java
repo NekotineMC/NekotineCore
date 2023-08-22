@@ -50,6 +50,10 @@ public class DictionaryCommandGenerator extends MapElementCommandGenerator{
 				try {
 					@SuppressWarnings("unchecked")
 					var e = (MapDictionaryElement<Object>)element;
+					if (!e.backingMap().containsKey(mapKey)) {
+						sender.sendMessage(Component.text("Ce nom d'élément ("+mapKey+") n'existe pas"));
+						return;
+					}
 					branch.consumer().accept(e.backingMap().get(mapKey), sender, args);
 				}catch(Exception e) {
 					var ex = new RuntimeException("Impossible d'acceder a la valeur "+mapKey+" du dictionnaire "
@@ -80,6 +84,7 @@ public class DictionaryCommandGenerator extends MapElementCommandGenerator{
 			try {
 				e.backingMap().put(mapKey, constructor.newInstance());
 				sender.sendMessage(Component.text("L'ajout à bien été fait.", NamedTextColor.GREEN));
+				
 			} catch (Exception ex) {
 				NekotineCore.LOGGER.logp(Level.SEVERE, "DictionaryCommandGenerator", "makeAddCommand",
 						"Impossible d'instancier le nouvel element de carte a ajouter au dictionnaire "+nodeName + " du type "+element.getClass().getName(),

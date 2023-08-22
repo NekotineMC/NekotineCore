@@ -32,15 +32,15 @@ public class MenuModule extends PluginModule implements Listener{
 	 * @return ShouldCancelEvent
 	 */
 	private boolean onMenuClicked(Inventory inv, ItemStack itemStack) {
-		var ite = registeredMenus.iterator();
+		var tempList = new LinkedList<>(registeredMenus);
 		var shouldCancel = false;
-		while(ite.hasNext()) {
-			var val = ite.next().get();
-			if (val == null) {
-				ite.remove();
+		for (var item : tempList) {
+			var menu = item.get();
+			if (menu == null) {
+				registeredMenus.remove(item);
 			}else {
-				if (val.getInventory() == inv) {
-					val.OnItemStackClicked(itemStack);
+				if (menu.getInventory() == inv) {
+					menu.OnItemStackClicked(itemStack);
 					shouldCancel = true;
 				}
 			}

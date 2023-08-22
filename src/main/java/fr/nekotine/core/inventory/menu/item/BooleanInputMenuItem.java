@@ -71,7 +71,7 @@ public class BooleanInputMenuItem extends MenuElement implements ClickableMenuIt
 
 	@Override
 	public @Nullable ClickableMenuItem getClickedMenuItem(ItemStack item) {
-		if (item == trueItem || item == falseItem) {
+		if (item != null && (item.isSimilar(trueItem) || item.isSimilar(falseItem))) {
 			return this;
 		}
 		return null;

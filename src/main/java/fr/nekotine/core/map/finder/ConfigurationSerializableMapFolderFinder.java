@@ -66,7 +66,7 @@ public class ConfigurationSerializableMapFolderFinder implements IMapFinder {
 		for (var file : mapFolder.listFiles((f,fileName)->fileName.endsWith(fileExtension))) {
 			try {
 				config.load(file);
-				var mapConfigType = (Class<?>)config.get(mapConfigTypeKey);
+				var mapConfigType = Class.forName((String)config.get(mapConfigTypeKey));
 				list.add(new MapHandle(
 						mapConfigType,
 						FileUtil.fileNameWithoutExtension(file),
@@ -88,7 +88,7 @@ public class ConfigurationSerializableMapFolderFinder implements IMapFinder {
 			throw new RuntimeException(new FileAlreadyExistsException("Une carte de ce nom existe deja"));
 		}
 		var config = YamlConfiguration.loadConfiguration(mapFile);
-		config.set(mapConfigTypeKey, mapConfigType);
+		config.set(mapConfigTypeKey, mapConfigType.getName());
 		try {
 			config.save(mapFile);
 		} catch (IOException e) {

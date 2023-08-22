@@ -1,13 +1,8 @@
 package fr.nekotine.core.inventory.menu.layout;
 
-import java.util.logging.Level;
-
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.Nullable;
 
-import fr.nekotine.core.NekotineCore;
-import fr.nekotine.core.inventory.menu.ClickableMenuItem;
 import fr.nekotine.core.inventory.menu.InvalidLayoutSizeException;
 import fr.nekotine.core.inventory.menu.MenuElement;
 import fr.nekotine.core.inventory.menu.MenuLayout;
@@ -22,14 +17,11 @@ import fr.nekotine.core.util.InventoryUtil;
  */
 public class BorderMenuLayout extends MenuLayout{
 
-	private MenuElement child;
-	
 	private ItemStack brush;
 	
 	public BorderMenuLayout(ItemStack borderBrush, MenuElement child) {
 		brush = borderBrush;
-		this.child = child;
-		menuElements.add(child);
+		addMenuElement(child);
 	}
 	
 	@Override
@@ -41,7 +33,9 @@ public class BorderMenuLayout extends MenuLayout{
 		InventoryUtil.paintRectangle(inventory, brush, x + width-1, y, x + width-1, y + height-1);
 		InventoryUtil.paintRectangle(inventory, brush, x + 1, y, x + width-1, y);
 		InventoryUtil.paintRectangle(inventory, brush, x + 1, y+height-1, x + width-1, y + height-1);
-		child.draw(inventory, x+1, y+1, width-2, height-2);
+		if (menuElements.size()>0) {
+			menuElements.get(0).draw(inventory, x+1, y+1, width-2, height-2);
+		}
 	}
 
 }

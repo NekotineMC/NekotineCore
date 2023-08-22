@@ -62,6 +62,13 @@ public class ConfigurationSerializableMapConfigSaver implements IMapConfigSaver 
 		if (map instanceof ConfigurationSerializableAdapter adapter) {
 			map = adapter.getContent();
 		}
+		if (map == null) {
+			try {
+				map = handle.getConfigType().getConstructor().newInstance();
+			}catch(Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
 		return handle.getConfigType().cast(map);
 	}
 }

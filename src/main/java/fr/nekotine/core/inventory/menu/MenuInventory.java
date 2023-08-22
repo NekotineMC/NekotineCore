@@ -15,7 +15,7 @@ import net.kyori.adventure.text.Component;
  * @author XxGoldenbluexX
  *
  */
-public class MenuInventory {
+public class MenuInventory extends MenuLayout{
 
 	private Inventory inventory;
 
@@ -25,7 +25,7 @@ public class MenuInventory {
 
 	public MenuInventory(@NotNull MenuLayout layout, int nbRow) {
 		this.layout = layout;
-		layout.setMenuInventory(this);
+		this.layout.setParent(this);
 		this.nbRow = nbRow;
 		inventory = Bukkit.createInventory(null, nbRow * 9);
 		NekotineCore.MODULES.get(MenuModule.class).registerMenu(this);
@@ -33,7 +33,7 @@ public class MenuInventory {
 
 	public MenuInventory(@NotNull MenuLayout layout, int nbRow, @NotNull Component title) {
 		this.layout = layout;
-		layout.setMenuInventory(this);
+		this.layout.setParent(this);
 		this.nbRow = nbRow;
 		inventory = Bukkit.createInventory(null, nbRow * 9, title);
 		NekotineCore.MODULES.get(MenuModule.class).registerMenu(this);
@@ -51,9 +51,14 @@ public class MenuInventory {
 		player.openInventory(inventory);
 	}
 	
+	@Override
+	public void askRedraw() {
+		redraw();
+	}
+	
 	public void redraw() {
 		inventory.clear();
-		layout.draw(inventory, 0, 0, 9, nbRow);
+		draw(inventory, 0, 0, 9, nbRow);
 	}
 
 	public Inventory getInventory() {
@@ -65,6 +70,11 @@ public class MenuInventory {
 		if (item != null) {
 			item.click();
 		}
+	}
+
+	@Override
+	public void draw(Inventory inventory, int x, int y, int width, int height) {
+		layout.draw(inventory, x, y, width, height);
 	}
 
 }

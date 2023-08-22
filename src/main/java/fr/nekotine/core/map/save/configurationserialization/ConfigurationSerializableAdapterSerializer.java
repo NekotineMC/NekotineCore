@@ -11,7 +11,6 @@ import java.util.function.Function;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 
-import fr.nekotine.core.map.MapMetadata;
 import fr.nekotine.core.map.annotation.ComposingMap;
 import fr.nekotine.core.map.annotation.MapElementTyped;
 import fr.nekotine.core.map.element.MapDictionaryElement;
@@ -26,12 +25,6 @@ public class ConfigurationSerializableAdapterSerializer {
 			instance = new ConfigurationSerializableAdapterSerializer();
 		}
 		return instance;
-	}
-	
-	private ConfigurationSerializableAdapterSerializer() {
-		//ConfigurationSerialization.registerClass(ConfigurationSerializableAdapter.class, "ConfigurationSerializableAdapter");
-		ConfigurationSerialization.registerClass(ConfigurationSerializableAdapter.class);
-		ConfigurationSerialization.registerClass(MapMetadata.class);
 	}
 	
 	private Map<Class<?>, Function<Object, Map<String, Object>>> serializers = new HashMap<>();
@@ -154,9 +147,9 @@ public class ConfigurationSerializableAdapterSerializer {
 								if (fieldMap == null) {
 									return;
 								}
-								var dict = new MapDictionaryElement<>();
+								var dict = (MapDictionaryElement<Object>)field.get(parent);
 								var backing = dict.backingMap();
-								for (var key : map.keySet()) {
+								for (var key : fieldMap.keySet()) {
 									backing.put(key, funcDict.apply((Map<String, Object>) fieldMap.get(key)));
 								}
 							}catch(Exception e) {

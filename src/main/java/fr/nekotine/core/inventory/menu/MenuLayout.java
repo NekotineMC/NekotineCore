@@ -12,7 +12,7 @@ public abstract class MenuLayout extends MenuElement{
 	
 	public void addMenuElement(MenuElement element) {
 		menuElements.add(element);
-		element.setMenuInventory(getMenuInventory());
+		element.setParent(this);
 	}
 	
 	/**

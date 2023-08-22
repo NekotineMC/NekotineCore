@@ -3,11 +3,14 @@ package fr.nekotine.core.map;
 import java.io.File;
 import java.util.function.Consumer;
 
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
+
 import fr.nekotine.core.NekotineCore;
 import fr.nekotine.core.map.command.IMapCommandGenerator;
 import fr.nekotine.core.map.command.MapCommandGenerator;
 import fr.nekotine.core.map.finder.ConfigurationSerializableMapFolderFinder;
 import fr.nekotine.core.map.finder.IMapFinder;
+import fr.nekotine.core.map.save.configurationserialization.ConfigurationSerializableAdapter;
 import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.util.AsyncUtil;
 
@@ -18,6 +21,11 @@ public class MapModule extends PluginModule{
 	private IMapFinder finder = new ConfigurationSerializableMapFolderFinder(defaultMapFolder);
 	
 	private IMapCommandGenerator generator = new MapCommandGenerator();
+	
+	public MapModule() {
+		ConfigurationSerialization.registerClass(ConfigurationSerializableAdapter.class);
+		ConfigurationSerialization.registerClass(MapMetadata.class);
+	}
 	
 	public IMapFinder getMapFinder() {
 		return finder;
@@ -41,6 +49,10 @@ public class MapModule extends PluginModule{
 	
 	public <T> void saveMapConfigAsync(MapHandle<T> handle, T config) {
 		AsyncUtil.runAsync(()->handle.saveConfig(config));
+	}
+	
+	public <T> void saveMapConfigAsync(MapHandle<T> handle, T config, Runnable thenSync) {
+		AsyncUtil.runAsync(AsyncUtil.thenSync(()->handle.saveConfig(config), thenSync));
 	}
 	
 	public <T> void getMapMetadataAsync(MapHandle<T> handle, Consumer<MapMetadata> thenSync) {

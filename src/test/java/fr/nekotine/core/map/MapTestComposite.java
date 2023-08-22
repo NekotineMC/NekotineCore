@@ -1,7 +1,7 @@
 package fr.nekotine.core.map;
 
 import fr.nekotine.core.map.annotation.ComposingMap;
-import fr.nekotine.core.map.element.MapBlockPositionElement;
+import fr.nekotine.core.map.element.MapBlockLocationElement;
 import fr.nekotine.core.map.element.MapPositionElement;
 
 public class MapTestComposite {
@@ -10,7 +10,7 @@ public class MapTestComposite {
 	private MapPositionElement position;
 	
 	@ComposingMap("blockPositionRename")
-	private MapBlockPositionElement blockPosition;
+	private MapBlockLocationElement blockPosition;
 
 	public MapPositionElement getPosition() {
 		return position;
@@ -20,11 +20,11 @@ public class MapTestComposite {
 		this.position = position;
 	}
 
-	public MapBlockPositionElement getBlockPosition() {
+	public MapBlockLocationElement getBlockPosition() {
 		return blockPosition;
 	}
 
-	public void setBlockPosition(MapBlockPositionElement blockPosition) {
+	public void setBlockPosition(MapBlockLocationElement blockPosition) {
 		this.blockPosition = blockPosition;
 	}
 	
