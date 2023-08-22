@@ -20,6 +20,7 @@ public class MapHandle<MapConfigType>{
 			@NotNull IMapConfigSaver configSaver,
 			@NotNull IMapMetadataSaver metadataSaver){
 		this.configType = configType;
+		this.name = name;
 		this.finder = finder;
 		this.configSaver = configSaver;
 		this.metadataSaver = metadataSaver;
