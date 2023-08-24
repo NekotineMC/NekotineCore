@@ -2,8 +2,11 @@ package fr.nekotine.core.wrapper;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
+
+import org.jetbrains.annotations.Nullable;
 
 import fr.nekotine.core.module.PluginModule;
 
@@ -32,6 +35,22 @@ public class WrappingModule extends PluginModule{
 			LOGGER.log(Level.WARNING, "Une erreur est survenue lors de la récupération d'un wrapper de l'entitée.", e);
 			return null;
 		}
+	}
+	
+	public <U, T extends WrapperBase<U>> @Nullable T getWrapperNullable(U source, Class<T> wrapperType) {
+		var entityStore = store.get(source);
+		if (entityStore == null) {
+			return null;
+		}
+		return wrapperType.cast(entityStore.get(wrapperType));
+	}
+	
+	public <U, T extends WrapperBase<U>> Optional<T> getWrapperOptional(U source, Class<T> wrapperType) {
+		var entityStore = store.get(source);		
+		if (entityStore == null) {
+			return Optional.empty();
+		}
+		return Optional.of(wrapperType.cast(entityStore.get(wrapperType)));
 	}
 	
 	public <U, T extends WrapperBase<U>> void putWrapper(U source, T wrapper) {
