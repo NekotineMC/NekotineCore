@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.WeakHashMap;
+import java.util.function.Function;
 import java.util.logging.Level;
 
 import org.jetbrains.annotations.Nullable;
@@ -66,6 +67,10 @@ public class WrappingModule extends PluginModule{
 		}catch(Exception e) {
 			LOGGER.log(Level.WARNING, "Une erreur est survenue lors de l'ajout d'un wrapper à l'entitée.", e);
 		}
+	}
+	
+	public <U, T extends WrapperBase<U>> void putWrapper(U source, Function<U,T> wrapperProvider) {
+		putWrapper(source, wrapperProvider.apply(source));
 	}
 	
 	public <U, T extends WrapperBase<U>> void removeWrapper(U source, Class<T> wrapperType) {
