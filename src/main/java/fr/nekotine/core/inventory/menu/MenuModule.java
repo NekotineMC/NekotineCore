@@ -4,6 +4,7 @@ import java.lang.ref.WeakReference;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -31,7 +32,7 @@ public class MenuModule extends PluginModule implements Listener{
 	 * @param itemStack
 	 * @return ShouldCancelEvent
 	 */
-	private boolean onMenuClicked(Inventory inv, ItemStack itemStack) {
+	private boolean onMenuClicked(Inventory inv, ItemStack itemStack, Player player) {
 		var tempList = new LinkedList<>(registeredMenus);
 		var shouldCancel = false;
 		for (var item : tempList) {
@@ -40,7 +41,7 @@ public class MenuModule extends PluginModule implements Listener{
 				registeredMenus.remove(item);
 			}else {
 				if (menu.getInventory() == inv) {
-					menu.OnItemStackClicked(itemStack);
+					menu.OnItemStackClicked(itemStack, player);
 					shouldCancel = true;
 				}
 			}
@@ -54,7 +55,9 @@ public class MenuModule extends PluginModule implements Listener{
 	
 	@EventHandler
 	public void onInventoryClick(InventoryClickEvent event) {
-		event.setCancelled(onMenuClicked(event.getInventory(), event.getCurrentItem()));
+		if (event.getWhoClicked() instanceof Player player) {
+			event.setCancelled(onMenuClicked(event.getInventory(), event.getCurrentItem(), player));
+		}
 	}
 	
 }

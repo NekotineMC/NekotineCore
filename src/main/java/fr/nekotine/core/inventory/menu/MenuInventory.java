@@ -65,10 +65,10 @@ public class MenuInventory extends MenuLayout{
 		return inventory;
 	}
 
-	public void OnItemStackClicked(@NotNull ItemStack itemStack) {
+	public void OnItemStackClicked(@NotNull ItemStack itemStack, Player player) {
 		var item = layout.getClickedMenuItem(itemStack);
 		if (item != null) {
-			item.click();
+			item.click(player);
 		}
 	}
 

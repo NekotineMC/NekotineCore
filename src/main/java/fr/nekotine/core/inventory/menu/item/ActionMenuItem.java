@@ -1,5 +1,8 @@
 package fr.nekotine.core.inventory.menu.item;
 
+import java.util.function.Consumer;
+
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -12,11 +15,16 @@ public class ActionMenuItem extends MenuElement implements ClickableMenuItem{
 
 	ItemStack itemStack;
 	
-	Runnable runnable;
+	Consumer<Player> runnable;
+	
+	public ActionMenuItem(ItemStack itemStack, Consumer<Player> action) {
+		this.itemStack = itemStack;
+		runnable = action;
+	}
 	
 	public ActionMenuItem(ItemStack itemStack, Runnable action) {
 		this.itemStack = itemStack;
-		runnable = action;
+		runnable = p -> action.run();
 	}
 	
 	@Override
@@ -29,7 +37,7 @@ public class ActionMenuItem extends MenuElement implements ClickableMenuItem{
 	}
 
 	@Override
-	public void click() {
-		runnable.run();
+	public void click(Player player) {
+		runnable.accept(player);
 	}
 }
