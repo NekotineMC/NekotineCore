@@ -69,7 +69,7 @@ public class WrappingModule extends PluginModule{
 		}
 	}
 	
-	public <U, T extends WrapperBase<U>> void putWrapper(U source, Function<U,T> wrapperProvider) {
+	public <U, T extends WrapperBase<U>> void makeWrapper(U source, Function<U,T> wrapperProvider) {
 		putWrapper(source, wrapperProvider.apply(source));
 	}
 	
