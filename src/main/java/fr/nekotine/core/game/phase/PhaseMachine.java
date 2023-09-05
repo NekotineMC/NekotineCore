@@ -126,6 +126,7 @@ public class PhaseMachine implements IPhaseMachine{
 	public <P> void onPhaseComplete(IPhase<P> phase, Object outData) {
 		if (++currentPhaseIndex >= phaseOrder.size()) {
 			end();
+			return;
 		}
 		goTo(phaseOrder.get(currentPhaseIndex), outData);
 	}
