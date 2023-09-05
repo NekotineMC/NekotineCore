@@ -11,7 +11,7 @@ public abstract class CollectionPhase<P, T> extends Phase<P>{
 	
 	private final List<ItemState<T>> composingItemStates = makeAppliedItemStates();
 	
-	private ObservableCollection<T> itemCollection = getItemCollection();
+	protected ObservableCollection<T> itemCollection = getItemCollection();
 	
 	public CollectionPhase(IPhaseMachine machine) {
 		super(machine);

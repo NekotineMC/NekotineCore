@@ -2,6 +2,7 @@ package fr.nekotine.core.inventory.menu.item;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -13,97 +14,69 @@ import fr.nekotine.core.inventory.menu.MenuElement;
 import fr.nekotine.core.util.InventoryUtil;
 
 /**
- * Un layout basique, affichant juste des {@link fr.nekotine.core.inventory.menu.item.nekotinecore.inventory.menu.MenuItem MenuItem} comme dans un coffre.
+ * MenuElement pour interragire avec une valeur boolean
  * 
- * Ce layout offre la possibilité aux {@link fr.nekotine.core.inventory.menu.item.nekotinecore.inventory.menu.MenuItem MenuItem} d'être triés.
  * @author XxGoldenbluexX
  *
  */
 public class BooleanInputMenuItem extends MenuElement implements ClickableMenuItem{
 	
-	private BiConsumer<@Nullable Player, Boolean> valueChangedCallback;
+	private final Supplier<Boolean> valueSupplier;
+	
+	private final BiConsumer<@Nullable Player, Boolean> valueChangedCallback;
 	
 	private ItemStack trueItem;
 	
 	private ItemStack falseItem;
 	
-	private boolean value;
-	
-	public BooleanInputMenuItem(ItemStack trueItem, ItemStack falseItem) {
+	public BooleanInputMenuItem(ItemStack trueItem, ItemStack falseItem, Supplier<Boolean> valueSupplier, BiConsumer<@Nullable Player, Boolean> valueChangedCallback) {
 		this.trueItem = trueItem;
 		this.falseItem = falseItem;
-	}
-	
-	public BooleanInputMenuItem(ItemStack trueItem, ItemStack falseItem, BiConsumer<@Nullable Player, Boolean> valueChangedCallback) {
-		this.trueItem = trueItem;
-		this.falseItem = falseItem;
+		this.valueSupplier= valueSupplier; 
 		this.valueChangedCallback = valueChangedCallback;
 	}
 	
-	public BooleanInputMenuItem(ItemStack trueItem, ItemStack falseItem, Consumer<Boolean> valueChangedCallback) {
+	public BooleanInputMenuItem(ItemStack trueItem, ItemStack falseItem, Supplier<Boolean> valueSupplier, Consumer<Boolean> valueChangedCallback) {
 		this.trueItem = trueItem;
 		this.falseItem = falseItem;
+		this.valueSupplier = valueSupplier;
 		this.valueChangedCallback = (player, value) -> valueChangedCallback.accept(value);
-	}
-	
-	public BooleanInputMenuItem(ItemStack trueItem, ItemStack falseItem, boolean defaultValue) {
-		this.trueItem = trueItem;
-		this.falseItem = falseItem;
-		value = defaultValue;
-	}
-	
-	public BooleanInputMenuItem(ItemStack trueItem, ItemStack falseItem, boolean defaultValue, BiConsumer<@Nullable Player, Boolean> valueChangedCallback) {
-		this.trueItem = trueItem;
-		this.falseItem = falseItem;
-		this.valueChangedCallback = valueChangedCallback;
-		value = defaultValue;
-	}
-	
-	public BooleanInputMenuItem(ItemStack trueItem, ItemStack falseItem, boolean defaultValue, Consumer<Boolean> valueChangedCallback) {
-		this.trueItem = trueItem;
-		this.falseItem = falseItem;
-		this.valueChangedCallback = (player, value) -> valueChangedCallback.accept(value);
-		value = defaultValue;
 	}
 	
 	public boolean getValue() {
-		return value;
+		return valueSupplier.get();
 	}
 	
 	public void setValue(boolean value) {
-		if (this.value != value) {
-			this.value = value;
+		if (valueSupplier.get() != value) {
 			if (valueChangedCallback != null) {
-				valueChangedCallback.accept(null, this.value);
+				valueChangedCallback.accept(null, value);
+				askRedraw();
 			}
-			askRedraw();
 		}
 	}
 	
 	public void toggleValue() {
-		value = !value;
 		if (valueChangedCallback != null) {
-			valueChangedCallback.accept(null, this.value);
-		}
-		askRedraw();
-	}
-	
-	public void setValue(boolean value, Player source) {
-		if (this.value != value) {
-			this.value = value;
-			if (valueChangedCallback != null) {
-				valueChangedCallback.accept(source, this.value);
-			}
+			valueChangedCallback.accept(null, !getValue());
 			askRedraw();
 		}
 	}
 	
-	public void toggleValue(Player player) {
-		value = !value;
-		if (valueChangedCallback != null) {
-			valueChangedCallback.accept(player, this.value);
+	public void setValue(boolean value, Player source) {
+		if (valueSupplier.get() != value) {
+			if (valueChangedCallback != null) {
+				valueChangedCallback.accept(source, value);
+				askRedraw();
+			}
 		}
-		askRedraw();
+	}
+	
+	public void toggleValue(Player player) {
+		if (valueChangedCallback != null) {
+			valueChangedCallback.accept(player, !getValue());
+			askRedraw();
+		}
 	}
 
 	@Override
@@ -113,7 +86,7 @@ public class BooleanInputMenuItem extends MenuElement implements ClickableMenuIt
 
 	@Override
 	public void draw(Inventory inventory, int x, int y, int width, int height) {
-		inventory.setItem(InventoryUtil.chestCoordinateToInventoryIndex(x,y), value ? trueItem : falseItem);
+		inventory.setItem(InventoryUtil.chestCoordinateToInventoryIndex(x,y), getValue() ? trueItem : falseItem);
 	}
 
 	@Override
