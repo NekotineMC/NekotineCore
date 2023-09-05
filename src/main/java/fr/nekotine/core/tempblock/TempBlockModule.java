@@ -3,6 +3,7 @@ package fr.nekotine.core.tempblock;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.bukkit.block.Block;
 
@@ -38,6 +39,14 @@ public class TempBlockModule extends PluginModule{
 	
 	public void unpatch(AppliedBlockPatch patch) {
 		unpatch(patch, false);
+	}
+	
+	@Override
+	protected void unload() {
+		super.unload();
+		for (var patch : map.values().stream().flatMap(LinkedList::stream).collect(Collectors.toUnmodifiableSet())) {
+			unpatch(patch);
+		}
 	}
 	
 }

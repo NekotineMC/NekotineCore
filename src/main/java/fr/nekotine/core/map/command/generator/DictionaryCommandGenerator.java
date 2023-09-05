@@ -102,6 +102,9 @@ public class DictionaryCommandGenerator extends MapElementCommandGenerator{
 		MapCommandExecutor executor = (element, sender, args) ->{
 			var mapKey = (String)args.get("itemName");
 			var e = (MapDictionaryElement<?>)element;
+			if (!e.backingMap().containsKey(mapKey)) {
+				sender.sendMessage(Component.text("Ce nom d'élément ("+mapKey+") n'est pas présent.", NamedTextColor.GREEN));
+			}
 			e.backingMap().remove(mapKey);
 			sender.sendMessage(Component.text("La suppression à bien été faite.", NamedTextColor.GREEN));
 		};

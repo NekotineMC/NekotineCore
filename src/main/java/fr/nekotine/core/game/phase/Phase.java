@@ -1,116 +1,85 @@
 package fr.nekotine.core.game.phase;
 
-import java.util.function.Consumer;
+import java.util.Collections;
+import java.util.List;
 
-import fr.nekotine.core.game.phase.eventargs.PhaseFailureEventArgs;
-import fr.nekotine.core.game.phase.reason.PhaseFailureType;
+import fr.nekotine.core.exception.ExceptionCollector;
+import fr.nekotine.core.state.State;
 
-public abstract class Phase implements IPhase{
+public abstract class Phase<TParent> implements IPhase<TParent> {
+
+	private final IPhaseMachine machine;
 	
-	protected boolean isRunning;
+	private TParent parent;
 	
-	private Runnable onSuccess = null;
+	private final List<State> composingStates = makeAppliedStates();
 	
-	private Consumer<PhaseFailureEventArgs> onFailure = null;
-	
-	public Phase() {
-	}
-	
-	public Phase(Runnable onSuccess) {
-		this.onSuccess = onSuccess;
-	}
-	
-	public Phase(Consumer<PhaseFailureEventArgs> onFailure) {
-		this.onFailure = onFailure;
-	}
-	
-	public Phase(Runnable onSuccess, Consumer<PhaseFailureEventArgs> onFailure) {
-		this.onSuccess = onSuccess;
-		this.onFailure = onFailure;
-	}
-	
-	public void setOnSuccessCallback(Runnable callback) {
-		onSuccess = callback;
-	}
-	
-	public void setOnFailureCallback(Consumer<PhaseFailureEventArgs> callback) {
-		onFailure = callback;
+	public Phase(IPhaseMachine machine) {
+		this.machine = machine;
 	}
 	
 	@Override
-	public final void setup() {
-		if (!isRunning) {
-			handleSetup();
-			isRunning = true;
-		}else {
-			throw new IllegalStateException("La phase a deja debutee");
+	public void setup(Object inputData) {
+		var collector = new ExceptionCollector();
+		for (var s : composingStates) {
+			try {
+				s.setup();
+			}catch(Exception e) {
+				collector.collect(e);
+			}
 		}
-	}
-	
-	@Override
-	public final void tearDown() {
-		if (isRunning) {
-			handleTearDown();
-			isRunning = false;
-		}else {
-			throw new IllegalStateException("La phase n'a pas debutee");
+		try {
+			handleSetup(inputData);
+		}catch(Exception e) {
+			collector.collect(e);
 		}
+		collector.throwAsRuntime("Une erreur est survenue lors du setup des etats composants "+getClass());
 	}
-	
+
 	@Override
-	public final void complete() {
-		tearDown();
-		postSuccess();
-		if (onSuccess != null) {
-			onSuccess.run();
+	public void tearDown() {
+		var collector = new ExceptionCollector();
+		collector.collect(this::handleTearDown);
+		for (var s : composingStates) {
+			try {
+				s.teardown();
+			}catch(Exception e) {
+				collector.collect(e);
+			}
 		}
+		collector.throwAsRuntime("Une erreur est survenue lors du teardown des etats composants "+getClass());
+	}
+
+	@Override
+	public void complete() {
+		machine.onPhaseComplete(this, handleComplete());
 	}
 	
 	@Override
-	public final void abort(String info, Exception e) {
-		tearDown();
-		if (onFailure != null) {
-			onFailure.accept(new PhaseFailureEventArgs(PhaseFailureType.ABORTED, info, e));
-		}
+	public IPhaseMachine getMachine() {
+		return machine;
 	}
 	
 	@Override
-	public final void cancel(String info, Exception e) {
-		handleCancelation();
-		tearDown();
-		if (onFailure != null) {
-			onFailure.accept(new PhaseFailureEventArgs(PhaseFailureType.CANCELED, info, e));
-		}
+	public TParent getParent() {
+		return parent;
 	}
 	
 	@Override
-	public final void abort(PhaseFailureEventArgs args) {
-		tearDown();
-		if (onFailure != null) {
-			onFailure.accept(new PhaseFailureEventArgs(PhaseFailureType.ABORTED, args.info(), args.exception()));
-		}
+	public void setParent(TParent parent) {
+		this.parent = parent;
 	}
 	
-	@Override
-	public final void cancel(PhaseFailureEventArgs args) {
-		handleCancelation();
-		tearDown();
-		if (onFailure != null) {
-			onFailure.accept(new PhaseFailureEventArgs(PhaseFailureType.CANCELED, args.info(), args.exception()));
-		}
+	protected abstract void handleSetup(Object inputData);
+	
+	protected abstract void handleTearDown();
+	
+	protected Object handleComplete() {
+		return null;
 	}
 	
-	@Override
-	public boolean isRunning() {
-		return isRunning;
+	protected List<State> makeAppliedStates(){
+		return Collections.emptyList();
 	}
-	
-	protected void handleSetup() {};
-	
-	protected void handleTearDown() {};
-	
-	protected void handleCancelation() {};
-	
-	protected void postSuccess() {};
 	
 }

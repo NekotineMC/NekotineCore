@@ -18,10 +18,12 @@ import fr.nekotine.core.map.command.generator.BlockLocationCommandGenerator;
 import fr.nekotine.core.map.command.generator.BoundingBoxCommandGenerator;
 import fr.nekotine.core.map.command.generator.DefaultMapElementCommandGenerator;
 import fr.nekotine.core.map.command.generator.DictionaryCommandGenerator;
+import fr.nekotine.core.map.command.generator.LocationCommandGenerator;
 import fr.nekotine.core.map.command.generator.PositionCommandGenerator;
 import fr.nekotine.core.map.element.MapBlockLocationElement;
 import fr.nekotine.core.map.element.MapBoundingBoxElement;
 import fr.nekotine.core.map.element.MapDictionaryElement;
+import fr.nekotine.core.map.element.MapLocationElement;
 import fr.nekotine.core.map.element.MapPositionElement;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -36,6 +38,7 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 		generatorResolver = new MapElementCommandGeneratorResolver(new DefaultMapElementCommandGenerator(this))
 				.registerGenerator(MapDictionaryElement.class, new DictionaryCommandGenerator(this))
 				.registerGenerator(MapPositionElement.class, new PositionCommandGenerator())
+				.registerGenerator(MapLocationElement.class, new LocationCommandGenerator())
 				.registerGenerator(MapBlockLocationElement.class, new BlockLocationCommandGenerator())
 				.registerGenerator(MapBoundingBoxElement.class, new BoundingBoxCommandGenerator());
 	}

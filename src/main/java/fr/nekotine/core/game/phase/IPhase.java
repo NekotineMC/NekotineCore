@@ -1,23 +1,19 @@
 package fr.nekotine.core.game.phase;
 
-import fr.nekotine.core.game.phase.eventargs.PhaseFailureEventArgs;
+public interface IPhase<TParent> {
 
-public interface IPhase {
-
-	public void setup();
+	public void setup(Object inputData);
 	
 	public void tearDown();
 	
 	public void complete();
 	
-	public void abort(String info, Exception e);
+	public Class<TParent> getParentType();
 	
-	public void cancel(String info, Exception e);
+	public TParent getParent();
 	
-	public void abort(PhaseFailureEventArgs args);
+	public void setParent(TParent parent);
 	
-	public void cancel(PhaseFailureEventArgs args);
-	
-	public boolean isRunning();
+	public IPhaseMachine getMachine();
 	
 }
