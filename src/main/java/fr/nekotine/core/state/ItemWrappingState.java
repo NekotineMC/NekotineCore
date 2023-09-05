@@ -12,6 +12,11 @@ public class ItemWrappingState<U, T extends WrapperBase<U>> implements ItemState
 	
 	private final Class<T> wrapperType;
 	
+	public ItemWrappingState(Class<T> type, Function<U,T> wrapperProvider) {
+		this.wrapperProvider = wrapperProvider;
+		wrapperType = type;
+	}
+	
 	@SuppressWarnings("unchecked")
 	public ItemWrappingState(Function<U,T> wrapperProvider) {
 		this.wrapperProvider = wrapperProvider;

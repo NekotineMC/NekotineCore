@@ -5,7 +5,7 @@ import java.util.function.Function;
 public interface IPhaseMachine {
 	
 	@SuppressWarnings("rawtypes")
-	public <P extends Phase,T extends IPhase<P>> void registerPhase(Function<IPhaseMachine,T> phaseSupplier);
+	public <P extends Phase,T extends IPhase<P>> void registerPhase(Class<T> type, Function<IPhaseMachine,T> phaseSupplier);
 	
 	@SuppressWarnings("rawtypes")
 	public <P extends Phase, T extends IPhase<P>> void goTo(Class<T> phase, Object inputData);

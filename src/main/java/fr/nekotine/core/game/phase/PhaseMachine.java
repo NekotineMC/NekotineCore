@@ -31,8 +31,7 @@ public class PhaseMachine implements IPhaseMachine{
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public <P extends Phase, T extends IPhase<P>> void registerPhase(Function<IPhaseMachine, T> phaseSupplier) {
-		var type = phaseSupplier.apply(this).getClass();
+	public <P extends Phase, T extends IPhase<P>> void registerPhase(Class<T> type, Function<IPhaseMachine, T> phaseSupplier) {
 		registeredPhases.put(type, phaseSupplier);
 		phaseOrder.add(type);
 	}
@@ -46,6 +45,14 @@ public class PhaseMachine implements IPhaseMachine{
 		if (currentPhase == null) {
 			currentPhase = makePhase(phase);
 			currentPhaseIndex = phaseOrder.indexOf(phase);
+			var parents = getParents(currentPhase);
+			for (var p : parents) {
+				try {
+					p.setup(inputData);
+				}catch(Exception e) {
+					NekotineCore.LOGGER.log(Level.SEVERE, "Une erreur est survenue lors du setup de la phase "+p.getClass(), e);
+				}
+			}
 			currentPhase.setup(inputData);
 			return;
 		}
