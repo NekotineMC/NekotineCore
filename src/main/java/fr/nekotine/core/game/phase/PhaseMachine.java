@@ -71,8 +71,8 @@ public class PhaseMachine implements IPhaseMachine{
 		var curParents = getParents(currentPhase);
 		curParents.addLast(currentPhase);
 		while (curParents.getFirst() == nextParents.getFirst()) {
-			curParents.pollFirst();
-			nextParents.pollFirst();
+			curParents.removeFirst();
+			nextParents.removeFirst();
 		}
 		Collections.reverse(curParents);
 		for (var p : curParents) {
@@ -90,6 +90,7 @@ public class PhaseMachine implements IPhaseMachine{
 				LOGGER.log(Level.SEVERE, "Une erreur est survenue lors du setup de la phase "+p.getClass(), e);
 			}
 		}
+		currentPhase = nextPhase;
 		running = true;
 	}
 
@@ -158,9 +159,11 @@ public class PhaseMachine implements IPhaseMachine{
 		if (phase == null) {
 			throw new IllegalArgumentException("Le supplier pour la phase "+phaseType+" n'est pas valide (retourne null)");
 		}
-		var parent = runningPhases.get(phase.getParentType());
-		if (parent == null && phase.getParentType() != Void.class) {
-			parent = (P) makePhase((Class<T>) phase.getParentType());
+		if (phase.getParentType() != Void.class) {
+			var parent = runningPhases.get(phase.getParentType());
+			if (parent == null) {
+				parent = (P) makePhase((Class<T>) phase.getParentType());
+			}
 			phase.setParent(parent);
 		}
 		runningPhases.put(phase);
