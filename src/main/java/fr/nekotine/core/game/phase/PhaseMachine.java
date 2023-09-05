@@ -52,14 +52,14 @@ public class PhaseMachine implements IPhaseMachine{
 			currentPhase = makePhase(phase);
 			currentPhaseIndex = phaseOrder.indexOf(phase);
 			var parents = getParents(currentPhase);
+			parents.add(currentPhase);
 			for (var p : parents) {
-				try (var watch = new Stopwatch(w -> LOGGER.log(Level.INFO,"La phase "+p.getClass()+" est setup ("+w.elapsedMillis()+" ms)"))){
+				try (var watch = new Stopwatch(w -> LOGGER.log(Level.INFO,"La phase "+p.getClass().getSimpleName()+" est setup ("+w.elapsedMillis()+" ms)"))){
 					p.setup(inputData);
 				}catch(Exception e) {
 					LOGGER.log(Level.SEVERE, "Une erreur est survenue lors du setup de la phase "+p.getClass(), e);
 				}
 			}
-			currentPhase.setup(inputData);
 			return;
 		}
 		if (phase == currentPhase.getClass()) {
@@ -76,7 +76,7 @@ public class PhaseMachine implements IPhaseMachine{
 		}
 		Collections.reverse(curParents);
 		for (var p : curParents) {
-			try (var watch = new Stopwatch(w -> LOGGER.log(Level.INFO,"La phase "+p.getClass()+" est teardown ("+w.elapsedMillis()+" ms)"))){
+			try (var watch = new Stopwatch(w -> LOGGER.log(Level.INFO,"La phase "+p.getClass().getSimpleName()+" est teardown ("+w.elapsedMillis()+" ms)"))){
 				p.tearDown();
 			}catch(Exception e) {
 				LOGGER.log(Level.SEVERE, "Une erreur est survenue lors du teardown de la phase "+p.getClass(), e);
@@ -84,7 +84,7 @@ public class PhaseMachine implements IPhaseMachine{
 			runningPhases.remove(p.getClass());
 		}
 		for (var p : nextParents) {
-			try (var watch = new Stopwatch(w -> LOGGER.log(Level.INFO,"La phase "+p.getClass()+" est setup ("+w.elapsedMillis()+" ms)"))){
+			try (var watch = new Stopwatch(w -> LOGGER.log(Level.INFO,"La phase "+p.getClass().getSimpleName()+" est setup ("+w.elapsedMillis()+" ms)"))){
 				p.setup(inputData);
 			}catch(Exception e) {
 				LOGGER.log(Level.SEVERE, "Une erreur est survenue lors du setup de la phase "+p.getClass(), e);
@@ -102,7 +102,7 @@ public class PhaseMachine implements IPhaseMachine{
 		var all = getParents(currentPhase);
 		all.add(currentPhase);
 		for (var p : all) {
-			try (var watch = new Stopwatch(w -> LOGGER.log(Level.INFO,"La phase "+p.getClass()+" est teardown ("+w.elapsedMillis()+" ms)"))){
+			try (var watch = new Stopwatch(w -> LOGGER.log(Level.INFO,"La phase "+p.getClass().getSimpleName()+" est teardown ("+w.elapsedMillis()+" ms)"))){
 				p.tearDown();
 			}catch(Exception e) {
 				LOGGER.log(Level.SEVERE, "Une erreur est survenue lors du teardown de la phase "+p.getClass(), e);
