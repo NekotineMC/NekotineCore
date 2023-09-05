@@ -8,13 +8,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import fr.nekotine.core.NekotineCore;
+import fr.nekotine.core.logging.FormatingRemoteLogger;
+import fr.nekotine.core.text.Text;
+import fr.nekotine.core.util.Stopwatch;
 import fr.nekotine.core.util.TypeHashMap;
 import fr.nekotine.core.util.TypeMap;
 
 public class PhaseMachine implements IPhaseMachine{
 
+	private static Logger LOGGER = new FormatingRemoteLogger(NekotineCore.LOGGER,Text.namedLoggerFormat(PhaseMachine.class.getSimpleName()));
+	
 	private boolean running;
 	
 	private final Map<Object, Object> registeredPhases = new HashMap<>();
@@ -47,10 +53,10 @@ public class PhaseMachine implements IPhaseMachine{
 			currentPhaseIndex = phaseOrder.indexOf(phase);
 			var parents = getParents(currentPhase);
 			for (var p : parents) {
-				try {
+				try (var watch = new Stopwatch(w -> LOGGER.log(Level.INFO,"La phase "+p.getClass()+" est setup ("+w.elapsedMillis()+" ms)"))){
 					p.setup(inputData);
 				}catch(Exception e) {
-					NekotineCore.LOGGER.log(Level.SEVERE, "Une erreur est survenue lors du setup de la phase "+p.getClass(), e);
+					LOGGER.log(Level.SEVERE, "Une erreur est survenue lors du setup de la phase "+p.getClass(), e);
 				}
 			}
 			currentPhase.setup(inputData);
@@ -70,18 +76,18 @@ public class PhaseMachine implements IPhaseMachine{
 		}
 		Collections.reverse(curParents);
 		for (var p : curParents) {
-			try {
+			try (var watch = new Stopwatch(w -> LOGGER.log(Level.INFO,"La phase "+p.getClass()+" est teardown ("+w.elapsedMillis()+" ms)"))){
 				p.tearDown();
 			}catch(Exception e) {
-				NekotineCore.LOGGER.log(Level.SEVERE, "Une erreur est survenue lors du teardown de la phase "+p.getClass(), e);
+				LOGGER.log(Level.SEVERE, "Une erreur est survenue lors du teardown de la phase "+p.getClass(), e);
 			}
 			runningPhases.remove(p.getClass());
 		}
 		for (var p : nextParents) {
-			try {
+			try (var watch = new Stopwatch(w -> LOGGER.log(Level.INFO,"La phase "+p.getClass()+" est setup ("+w.elapsedMillis()+" ms)"))){
 				p.setup(inputData);
 			}catch(Exception e) {
-				NekotineCore.LOGGER.log(Level.SEVERE, "Une erreur est survenue lors du setup de la phase "+p.getClass(), e);
+				LOGGER.log(Level.SEVERE, "Une erreur est survenue lors du setup de la phase "+p.getClass(), e);
 			}
 		}
 		running = true;
@@ -96,10 +102,10 @@ public class PhaseMachine implements IPhaseMachine{
 		var all = getParents(currentPhase);
 		all.add(currentPhase);
 		for (var p : all) {
-			try {
+			try (var watch = new Stopwatch(w -> LOGGER.log(Level.INFO,"La phase "+p.getClass()+" est teardown ("+w.elapsedMillis()+" ms)"))){
 				p.tearDown();
 			}catch(Exception e) {
-				NekotineCore.LOGGER.log(Level.SEVERE, "Une erreur est survenue lors du teardown de la phase "+p.getClass(), e);
+				LOGGER.log(Level.SEVERE, "Une erreur est survenue lors du teardown de la phase "+p.getClass(), e);
 			}
 			runningPhases.remove(p.getClass());
 		}
