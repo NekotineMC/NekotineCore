@@ -14,12 +14,14 @@ import dev.jorel.commandapi.executors.ExecutorType;
 import fr.nekotine.core.NekotineCore;
 import fr.nekotine.core.map.MapHandle;
 import fr.nekotine.core.map.MapModule;
+import fr.nekotine.core.map.command.generator.BlockBoundingBoxCommandGenerator;
 import fr.nekotine.core.map.command.generator.BlockLocationCommandGenerator;
 import fr.nekotine.core.map.command.generator.BoundingBoxCommandGenerator;
 import fr.nekotine.core.map.command.generator.DefaultMapElementCommandGenerator;
 import fr.nekotine.core.map.command.generator.DictionaryCommandGenerator;
 import fr.nekotine.core.map.command.generator.LocationCommandGenerator;
 import fr.nekotine.core.map.command.generator.PositionCommandGenerator;
+import fr.nekotine.core.map.element.MapBlockBoundingBoxElement;
 import fr.nekotine.core.map.element.MapBlockLocationElement;
 import fr.nekotine.core.map.element.MapBoundingBoxElement;
 import fr.nekotine.core.map.element.MapDictionaryElement;
@@ -40,7 +42,8 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 				.registerGenerator(MapPositionElement.class, new PositionCommandGenerator())
 				.registerGenerator(MapLocationElement.class, new LocationCommandGenerator())
 				.registerGenerator(MapBlockLocationElement.class, new BlockLocationCommandGenerator())
-				.registerGenerator(MapBoundingBoxElement.class, new BoundingBoxCommandGenerator());
+				.registerGenerator(MapBoundingBoxElement.class, new BoundingBoxCommandGenerator())
+				.registerGenerator(MapBlockBoundingBoxElement.class, new BlockBoundingBoxCommandGenerator());
 	}
 
 	public IMapElementCommandGeneratorResolver getGeneratorResolver() {
