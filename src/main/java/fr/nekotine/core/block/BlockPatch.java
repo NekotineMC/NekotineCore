@@ -1,46 +1,44 @@
 package fr.nekotine.core.block;
 
-import java.util.LinkedList;
-import java.util.List;
 import java.util.function.Consumer;
 
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.entity.Player;
 
 import fr.nekotine.core.NekotineCore;
+import fr.nekotine.core.block.fakeblock.AppliedFakeBlockPatch;
+import fr.nekotine.core.block.fakeblock.FakeBlockModule;
+import fr.nekotine.core.block.tempblock.AppliedTempBlockPatch;
+import fr.nekotine.core.block.tempblock.TempBlockModule;
 
 public class BlockPatch {
 
 	private Consumer<BlockState> patch;
 	
-	private List<AppliedBlockPatch> appliedPatches = new LinkedList<>();
-	
 	public BlockPatch(Consumer<BlockState> patch) {
 		this.patch = patch;
 	}
 	
-	public AppliedBlockPatch patch(Block block, boolean applyPhysics) {
-		var existing = appliedPatches.stream().filter(a -> a.getTargetedBlock().equals(block)).findFirst();
-		if (existing.isPresent()) {
-			return existing.get();
-		}
-		var applied = new AppliedBlockPatch(block.getState());
-		var state = block.getState();
-		patch.accept(state);
-		state.update(true, applyPhysics);
-		appliedPatches.add(applied);
-		return applied;
+	public Consumer<BlockState> getPatchingFunction(){
+		return patch;
 	}
 	
-	public AppliedBlockPatch patch(Block block) {
+	public AppliedTempBlockPatch patch(Block block, boolean applyPhysics) {
+		return NekotineCore.MODULES.get(TempBlockModule.class).applyPatch(this, block, applyPhysics);
+	}
+	
+	public AppliedTempBlockPatch patch(Block block) {
 		return patch(block, false);
 	}
 	
+	public AppliedFakeBlockPatch patchPlayer(Player player, Block block) {
+		return NekotineCore.MODULES.get(FakeBlockModule.class).applyPatch(this, block, player);
+	}
+	
 	public void unpatchAll(boolean applyPhysics) {
-		var tempBlock = NekotineCore.MODULES.get(TempBlockModule.class);
-		for (var applied : appliedPatches) {
-			tempBlock.unpatch(applied, applyPhysics);
-		}
+		NekotineCore.MODULES.get(TempBlockModule.class).unpatchAll(this, applyPhysics);
+		NekotineCore.MODULES.get(FakeBlockModule.class).unpatchAll(this);
 	}
 	
 	public void unpatchAll() {
