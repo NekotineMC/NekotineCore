@@ -8,6 +8,8 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -41,6 +43,25 @@ public class ItemStackUtil {
 	 */
 	public static void hideAllFlags(ItemStack itemStack) {
 		itemStack.addItemFlags(ItemFlag.values());
+	}
+	
+	public static void setUnbreakable(ItemStack itemStack, boolean unbreakable) {
+		var meta = itemStack.getItemMeta();
+		meta.setUnbreakable(unbreakable);
+		itemStack.setItemMeta(meta);
+	}
+	
+	public static void setOldPvpAttackSpeed(ItemStack itemStack, boolean unbreakable) {
+		var meta = itemStack.getItemMeta();
+		meta.addAttributeModifier(Attribute.GENERIC_ATTACK_SPEED, new AttributeModifier("pvp_1.8", 1000.0D, AttributeModifier.Operation.ADD_NUMBER));
+		itemStack.setItemMeta(meta);
+	}
+	
+	public static void setFlags(ItemStack itemStack, ItemFlag... flags) {
+		var meta = itemStack.getItemMeta();
+		meta.removeItemFlags(meta.getItemFlags().toArray(ItemFlag[]::new));
+		meta.addItemFlags(flags);
+		itemStack.setItemMeta(meta);
 	}
 	
 	public static void setUnstackable(ItemStack itemStack) {

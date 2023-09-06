@@ -1,15 +1,21 @@
 package fr.nekotine.core.inventory;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.bukkit.Material;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
+import fr.nekotine.core.tuple.Pair;
 import net.kyori.adventure.text.Component;
 
 /**
@@ -29,10 +35,18 @@ public class ItemStackBuilder {
 	
 	private Map<Enchantment,Integer> enchantments;
 	
+	private List<Pair<Attribute, AttributeModifier>> attributeModifiers;
+	
+	private Set<ItemFlag> flags;
+	
+	private boolean unbreakable;
+	
 	public ItemStackBuilder(Material material) {
 		this.material = material;
 		lore = new LinkedList<>();
 		enchantments = new HashMap<>();
+		attributeModifiers = new LinkedList<>();
+		flags = Set.of();
 	}
 	
 	public ItemStackBuilder(ItemStackBuilder other) {
@@ -41,15 +55,13 @@ public class ItemStackBuilder {
 		amount = other.amount;
 		lore = new LinkedList<>(other.lore);
 		enchantments = new HashMap<>(other.enchantments);
+		attributeModifiers = new LinkedList<>(other.attributeModifiers);
+		flags = Set.copyOf(other.flags);
+		unbreakable = other.unbreakable;
 	}
 	
 	public ItemStackBuilder material(Material material) {
 		this.material = material;
-		return this;
-	}
-	
-	public ItemStackBuilder title(@Nullable Component title) {
-		this.name = title;
 		return this;
 	}
 	
@@ -78,6 +90,30 @@ public class ItemStackBuilder {
 		return this;
 	}
 	
+	public ItemStackBuilder attributeModifier(Attribute attribute, AttributeModifier modifier) {
+		attributeModifiers.add(new Pair<>(attribute, modifier));
+		return this;
+	}
+	
+	public ItemStackBuilder flags(ItemFlag... flags) {
+		this.flags.addAll(Arrays.asList(flags));
+		return this;
+	}
+	
+	public ItemStackBuilder unbreakable(boolean unbreakable) {
+		this.unbreakable = unbreakable;
+		return this;
+	}
+	
+	public ItemStackBuilder unbreakable() {
+		this.unbreakable = true;
+		return this;
+	}
+	
+	public ItemStackBuilder oldPvpAtkSpd() {
+		return attributeModifier(Attribute.GENERIC_ATTACK_SPEED, new AttributeModifier("pvp_1.8", 1000.0D, AttributeModifier.Operation.ADD_NUMBER));
+	}
+	
 	/**
 	 * Créée une nouvelle instance d'ItemStack
 	 * @return
@@ -91,8 +127,17 @@ public class ItemStackBuilder {
 		for (var ench : enchantments.entrySet()) {
 			meta.addEnchant(ench.getKey(), ench.getValue(), true);
 		}
+		for (var attr : attributeModifiers) {
+			meta.addAttributeModifier(attr.a(), attr.b());
+		}
+		meta.addItemFlags(flags.toArray(ItemFlag[]::new));
+		meta.setUnbreakable(unbreakable);
 		itemStack.setItemMeta(meta);
 		return itemStack;
+	}
+	
+	public ItemStack build() {
+		return make();
 	}
 	
 }
