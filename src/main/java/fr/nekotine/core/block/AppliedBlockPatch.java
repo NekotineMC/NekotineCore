@@ -1,4 +1,4 @@
-package fr.nekotine.core.tempblock;
+package fr.nekotine.core.block;
 
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;

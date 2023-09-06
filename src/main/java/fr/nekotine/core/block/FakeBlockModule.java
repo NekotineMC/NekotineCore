@@ -1,4 +1,4 @@
-package fr.nekotine.core.tempblock;
+package fr.nekotine.core.block;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -9,7 +9,7 @@ import org.bukkit.block.Block;
 
 import fr.nekotine.core.module.PluginModule;
 
-public class TempBlockModule extends PluginModule{
+public class FakeBlockModule extends PluginModule{
 
 	private Map<Block, LinkedList<AppliedBlockPatch>> map = new HashMap<>();
 	

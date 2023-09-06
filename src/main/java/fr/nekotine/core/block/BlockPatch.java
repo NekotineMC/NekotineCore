@@ -1,4 +1,4 @@
-package fr.nekotine.core.tempblock;
+package fr.nekotine.core.block;
 
 import java.util.LinkedList;
 import java.util.List;
