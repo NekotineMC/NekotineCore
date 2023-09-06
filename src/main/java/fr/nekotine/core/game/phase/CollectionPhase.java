@@ -2,6 +2,7 @@ package fr.nekotine.core.game.phase;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 
 import fr.nekotine.core.exception.ExceptionCollector;
 import fr.nekotine.core.state.ItemState;
@@ -12,6 +13,10 @@ public abstract class CollectionPhase<P, T> extends Phase<P>{
 	private final List<ItemState<T>> composingItemStates = makeAppliedItemStates();
 	
 	protected ObservableCollection<T> itemCollection = getItemCollection();
+	
+	private final Consumer<T> itemSetupCallback = this::globalItemSetup;
+	
+	private final Consumer<Object> objectTeardownCallback = this::globalObjectTearDown;
 	
 	public CollectionPhase(IPhaseMachine machine) {
 		super(machine);
@@ -32,16 +37,16 @@ public abstract class CollectionPhase<P, T> extends Phase<P>{
 				collector.collect(e);
 			}
 		}
-		itemCollection.addAdditionCallback(this::globalItemSetup);
-		itemCollection.addSuppressionCallback(this::globalObjectTearDown);
+		itemCollection.addAdditionCallback(itemSetupCallback);
+		itemCollection.addSuppressionCallback(objectTeardownCallback);
 		collector.throwAsRuntime("Une erreur est survenue lors du setup des etats composants "+getClass());
 	}
 
 	@Override
 	public final void handleTearDown() {
 		var collector = new ExceptionCollector();
-		itemCollection.removeAdditionCallback(this::globalItemSetup);
-		itemCollection.removeSuppressionCallback(this::globalObjectTearDown);
+		itemCollection.removeAdditionCallback(itemSetupCallback);
+		itemCollection.removeSuppressionCallback(objectTeardownCallback);
 		for (var item : itemCollection) {
 			try {
 				globalItemTearDown(item);
