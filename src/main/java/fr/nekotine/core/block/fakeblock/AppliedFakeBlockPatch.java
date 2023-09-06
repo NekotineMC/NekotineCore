@@ -5,7 +5,6 @@ import org.bukkit.entity.Player;
 
 import fr.nekotine.core.NekotineCore;
 import fr.nekotine.core.block.BlockPatch;
-import fr.nekotine.core.block.tempblock.TempBlockModule;
 
 public class AppliedFakeBlockPatch{
 	
@@ -33,12 +32,8 @@ public class AppliedFakeBlockPatch{
 		return patchSource;
 	}
 	
-	public void unpatch(boolean applyPhysics) {
-		NekotineCore.MODULES.get(TempBlockModule.class).unpatch(null, applyPhysics);
-	}
-	
 	public void unpatch() {
-		NekotineCore.MODULES.get(TempBlockModule.class).unpatch(null);
+		NekotineCore.MODULES.get(FakeBlockModule.class).unpatch(this);
 	}
 	
 }

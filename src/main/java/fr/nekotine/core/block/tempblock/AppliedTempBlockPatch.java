@@ -29,11 +29,11 @@ public class AppliedTempBlockPatch{
 		return patchSource;
 	}
 	public void unpatch(boolean applyPhysics) {
-		NekotineCore.MODULES.get(TempBlockModule.class).unpatch(null, applyPhysics);
+		NekotineCore.MODULES.get(TempBlockModule.class).unpatch(this, applyPhysics);
 	}
 	
 	public void unpatch() {
-		NekotineCore.MODULES.get(TempBlockModule.class).unpatch(null);
+		NekotineCore.MODULES.get(TempBlockModule.class).unpatch(this);
 	}
 	
 }
