@@ -44,6 +44,7 @@ public class ItemStackBuilder {
 	
 	public ItemStackBuilder(Material material) {
 		this.material = material;
+		amount = 1;
 		lore = new LinkedList<>();
 		enchantments = new HashMap<>();
 		attributeModifiers = new LinkedList<>();
