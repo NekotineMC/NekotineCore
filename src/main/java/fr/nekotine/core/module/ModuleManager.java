@@ -6,8 +6,8 @@ import java.util.logging.Logger;
 import fr.nekotine.core.logging.FormatingRemoteLogger;
 import fr.nekotine.core.text.Text;
 import fr.nekotine.core.util.Stopwatch;
-import fr.nekotine.core.util.TypeHashMap;
-import fr.nekotine.core.util.TypeMap;
+import fr.nekotine.core.util.map.TypeHashMap;
+import fr.nekotine.core.util.map.TypeMap;
 
 /**
  * Ioc pour les modules (des genres de service quoi).

@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import fr.nekotine.core.util.TypeHashMap;
-import fr.nekotine.core.util.TypeMap;
+import fr.nekotine.core.util.map.TypeHashMap;
+import fr.nekotine.core.util.map.TypeMap;
 
 public class IocProvider implements IIocProvider{
 

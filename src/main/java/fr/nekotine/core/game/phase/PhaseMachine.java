@@ -14,8 +14,8 @@ import fr.nekotine.core.NekotineCore;
 import fr.nekotine.core.logging.FormatingRemoteLogger;
 import fr.nekotine.core.text.Text;
 import fr.nekotine.core.util.Stopwatch;
-import fr.nekotine.core.util.TypeHashMap;
-import fr.nekotine.core.util.TypeMap;
+import fr.nekotine.core.util.map.TypeHashMap;
+import fr.nekotine.core.util.map.TypeMap;
 
 public class PhaseMachine implements IPhaseMachine{
 

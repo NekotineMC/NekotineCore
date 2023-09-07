@@ -1,4 +1,4 @@
-package fr.nekotine.core.util;
+package fr.nekotine.core.util.map;
 
 import java.util.Collection;
 import java.util.Set;
