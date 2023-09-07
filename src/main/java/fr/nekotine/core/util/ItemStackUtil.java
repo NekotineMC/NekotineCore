@@ -1,5 +1,6 @@
 package fr.nekotine.core.util;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
@@ -16,6 +18,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
+
+import com.destroystokyo.paper.profile.PlayerProfile;
 
 import fr.nekotine.core.NekotineCore;
 import net.kyori.adventure.text.Component;
@@ -71,21 +75,8 @@ public class ItemStackUtil {
 		itemStack.setItemMeta(meta);
 	}
 	
-	public static @NotNull ItemStack skull(String url) {
-		var itemStack = new ItemStack(Material.PLAYER_HEAD);
-		try {
-			var meta = itemStack.getItemMeta();
-			if (meta instanceof SkullMeta skullMeta) {
-				var profile = Bukkit.createProfile(UUID.randomUUID());
-				var texture = profile.getTextures();
-				texture.setSkin(new URL(url));
-				profile.setTextures(texture);
-				skullMeta.setPlayerProfile(profile);
-				itemStack.setItemMeta(skullMeta);
-			}
-		}catch(Exception e) {
-		}
-		return itemStack;
+	public static @NotNull ItemStack skull(String url) throws MalformedURLException {
+		return skull(new URL(url));
 	}
 	
 	public static @NotNull ItemStack skull(URL url) {
@@ -97,6 +88,24 @@ public class ItemStackUtil {
 			texture.setSkin(url);
 			profile.setTextures(texture);
 			skullMeta.setPlayerProfile(profile);
+			itemStack.setItemMeta(skullMeta);
+		}
+		return itemStack;
+	}
+	
+	public static @NotNull ItemStack skull(PlayerProfile profile) {
+		var itemStack = new ItemStack(Material.PLAYER_HEAD);
+		if (itemStack.getItemMeta() instanceof SkullMeta skullMeta) {
+			skullMeta.setPlayerProfile(profile);
+			itemStack.setItemMeta(skullMeta);
+		}
+		return itemStack;
+	}
+	
+	public static @NotNull ItemStack skull(OfflinePlayer player) {
+		var itemStack = new ItemStack(Material.PLAYER_HEAD);
+		if (itemStack.getItemMeta() instanceof SkullMeta skullMeta) {
+			skullMeta.setPlayerProfile(player.getPlayerProfile());
 			itemStack.setItemMeta(skullMeta);
 		}
 		return itemStack;
