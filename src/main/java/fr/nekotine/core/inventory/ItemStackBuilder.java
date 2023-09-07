@@ -2,6 +2,7 @@ package fr.nekotine.core.inventory;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +47,7 @@ public class ItemStackBuilder {
 		lore = new LinkedList<>();
 		enchantments = new HashMap<>();
 		attributeModifiers = new LinkedList<>();
-		flags = Set.of();
+		flags = new HashSet<>();
 	}
 	
 	public ItemStackBuilder(ItemStackBuilder other) {
@@ -56,7 +57,7 @@ public class ItemStackBuilder {
 		lore = new LinkedList<>(other.lore);
 		enchantments = new HashMap<>(other.enchantments);
 		attributeModifiers = new LinkedList<>(other.attributeModifiers);
-		flags = Set.copyOf(other.flags);
+		flags = new HashSet<>(other.flags);
 		unbreakable = other.unbreakable;
 	}
 	
