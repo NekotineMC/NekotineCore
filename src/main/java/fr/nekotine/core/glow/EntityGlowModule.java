@@ -92,12 +92,12 @@ public class EntityGlowModule extends PluginModule {
 		packet.getIntegers().write(0, glowed.getEntityId());
 		var dataValues = new ArrayList<WrappedDataValue>(2);
 		var serializer = WrappedDataWatcher.Registry.get(Byte.class);
-		dataValues.add(new WrappedDataValue(0, serializer, makeMaskFor(glowed, isGlowed))); // Invisible + Glowing effect
+		dataValues.add(new WrappedDataValue(0, serializer, makeMaskFor(glowed) | (isGlowed ? entityMetadataGlowMask : 0x0) )); // Invisible + Glowing effect
 		packet.getDataValueCollectionModifier().write(0, dataValues);
 		pmanager.sendServerPacket(viewer, packet);
 	}
 	
-	private byte makeMaskFor(Entity entity, boolean forceGlow) {
+	private byte makeMaskFor(Entity entity) {
 		var value = (byte)0x0;
 		// Values from https://wiki.vg/Entity_metadata#Entity
 		value |= entity.isVisualFire() ? 0x01 : 0x0; // is on fire
@@ -111,7 +111,7 @@ public class EntityGlowModule extends PluginModule {
 			value |= living.isInvisible() ? 0x20 : 0x0; // is invisible
 			value |= living.isGliding() ? 0x80 : 0x0; // is glowing
 		}
-		value |= entity.isGlowing() || forceGlow ? entityMetadataGlowMask : 0x0; // is glowing
+		value |= entity.isGlowing() ? entityMetadataGlowMask : 0x0; // is glowing
 		
 		return value;
 	}
