@@ -1,4 +1,4 @@
-package fr.nekotine.core.util;
+package fr.nekotine.core.util.lambda;
 
 import java.util.function.Consumer;
 
