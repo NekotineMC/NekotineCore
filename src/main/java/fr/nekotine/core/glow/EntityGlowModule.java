@@ -92,7 +92,7 @@ public class EntityGlowModule extends PluginModule {
 		packet.getIntegers().write(0, glowed.getEntityId());
 		var dataValues = new ArrayList<WrappedDataValue>(2);
 		var serializer = WrappedDataWatcher.Registry.get(Byte.class);
-		dataValues.add(new WrappedDataValue(0, serializer, makeMaskFor(glowed) | (isGlowed ? entityMetadataGlowMask : 0x0) )); // Invisible + Glowing effect
+		dataValues.add(new WrappedDataValue(0, serializer,(byte)(makeMaskFor(glowed) | (isGlowed ? entityMetadataGlowMask : 0x0)))); // Invisible + Glowing effect
 		packet.getDataValueCollectionModifier().write(0, dataValues);
 		pmanager.sendServerPacket(viewer, packet);
 	}
