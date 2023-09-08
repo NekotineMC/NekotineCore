@@ -25,7 +25,7 @@ import net.kyori.adventure.text.Component;
  *
  */
 public class ItemStackBuilder {
-
+	
 	private Material material;
 	
 	private @Nullable Component name;
@@ -41,6 +41,8 @@ public class ItemStackBuilder {
 	private Set<ItemFlag> flags;
 	
 	private boolean unbreakable;
+	
+	private boolean oldPvp;
 	
 	public ItemStackBuilder(Material material) {
 		this.material = material;
@@ -60,6 +62,7 @@ public class ItemStackBuilder {
 		attributeModifiers = new LinkedList<>(other.attributeModifiers);
 		flags = new HashSet<>(other.flags);
 		unbreakable = other.unbreakable;
+		oldPvp = other.oldPvp;
 	}
 	
 	public ItemStackBuilder material(Material material) {
@@ -112,8 +115,9 @@ public class ItemStackBuilder {
 		return this;
 	}
 	
-	public ItemStackBuilder oldPvpAtkSpd() {
-		return attributeModifier(Attribute.GENERIC_ATTACK_SPEED, new AttributeModifier("pvp_1.8", 1000.0D, AttributeModifier.Operation.ADD_NUMBER));
+	public ItemStackBuilder oldPvp() {
+		oldPvp = true;
+		return this;
 	}
 	
 	/**
@@ -129,6 +133,7 @@ public class ItemStackBuilder {
 		for (var ench : enchantments.entrySet()) {
 			meta.addEnchant(ench.getKey(), ench.getValue(), true);
 		}
+		applyOldPvp();
 		for (var attr : attributeModifiers) {
 			meta.addAttributeModifier(attr.a(), attr.b());
 		}
@@ -140,6 +145,38 @@ public class ItemStackBuilder {
 	
 	public ItemStack build() {
 		return make();
+	}
+	
+	private void applyOldPvp() {
+		switch(material) {
+		case WOODEN_SWORD:
+		case WOODEN_AXE:
+			attributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier("pvp_1.8", 4D, AttributeModifier.Operation.ADD_NUMBER));
+			break;
+		case STONE_SWORD:
+		case STONE_AXE:
+			attributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier("pvp_1.8", 5D, AttributeModifier.Operation.ADD_NUMBER));
+			break;
+		case IRON_SWORD:
+		case IRON_AXE:
+			attributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier("pvp_1.8", 6D, AttributeModifier.Operation.ADD_NUMBER));
+			break;
+		case GOLDEN_SWORD:
+		case GOLDEN_AXE:
+			attributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier("pvp_1.8", 4D, AttributeModifier.Operation.ADD_NUMBER));
+			break;
+		case DIAMOND_SWORD:
+		case DIAMOND_AXE:
+			attributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier("pvp_1.8", 7D, AttributeModifier.Operation.ADD_NUMBER));
+			break;
+		case NETHERITE_SWORD:
+		case NETHERITE_AXE:
+			attributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier("pvp_1.8", 8D, AttributeModifier.Operation.ADD_NUMBER));
+			break;
+		default:
+			break;
+		}
+		attributeModifier(Attribute.GENERIC_ATTACK_SPEED, new AttributeModifier("pvp_1.8", 100D, AttributeModifier.Operation.ADD_NUMBER));
 	}
 	
 }
