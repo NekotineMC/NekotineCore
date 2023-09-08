@@ -1,6 +1,6 @@
 package fr.nekotine.core.ticking.event;
 
-import java.util.Map;
+import java.util.Set;
 
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -11,9 +11,9 @@ public class TickElapsedEvent extends Event{
 
 	private static final HandlerList handlers = new HandlerList();
 	
-	Map<TickTimeStamp, Boolean> _timeStamps;
+	Set<TickTimeStamp> _timeStamps;
 	
-	public TickElapsedEvent(Map<TickTimeStamp, Boolean> timeStamps) {
+	public TickElapsedEvent(Set<TickTimeStamp> timeStamps) {
 		_timeStamps = timeStamps;
 	}
 	
@@ -27,8 +27,8 @@ public class TickElapsedEvent extends Event{
         return handlers;
     }
     
-    public boolean IsTimeStampReached(TickTimeStamp stamp) {
-    	return _timeStamps.get(stamp);
+    public boolean timeStampReached(TickTimeStamp stamp) {
+    	return _timeStamps.contains(stamp);
     }
 
 }

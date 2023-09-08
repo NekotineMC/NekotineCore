@@ -1,6 +1,7 @@
 package fr.nekotine.core.ticking;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -33,16 +34,14 @@ public class TickingModule extends PluginModule{
 	}
 	
 	private void Tick() {
-		Map<TickTimeStamp, Boolean> stampStatus = new HashMap<>();
+		var reachedStamps = new HashSet<TickTimeStamp>();
 		for (TickTimeStamp stamp : TickTimeStamp.values()) {
-			if (stamps.get(stamp)!=null && stamps.get(stamp) > stamp.getNumberOfTick()) {
+			if (stamps.compute(stamp, (s,v) -> v == null?0:++v) > stamp.getNumberOfTick()) {
 				stamps.put(stamp, 0);
-				stampStatus.put(stamp, true);
-			}else {
-				stampStatus.put(stamp, false);
+				reachedStamps.add(stamp);
 			}
 		}
-		Event tickEvent = new TickElapsedEvent(stampStatus);
+		Event tickEvent = new TickElapsedEvent(reachedStamps);
 		NekotineCore.getAttachedPlugin().getServer().getPluginManager().callEvent(tickEvent);
 	}
 	
