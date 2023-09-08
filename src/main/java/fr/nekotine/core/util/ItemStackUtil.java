@@ -165,4 +165,10 @@ public class ItemStackUtil {
 		return itemStack;
 	}
 	
+	public static void changeTo(ItemStack target, ItemStack source) {
+		target.setType(source.getType());
+		target.setAmount(source.getAmount());
+		target.setItemMeta(source.getItemMeta());
+	}
+	
 }
