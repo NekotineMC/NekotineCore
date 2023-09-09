@@ -1,4 +1,4 @@
-package fr.nekotine.core.effect;
+package fr.nekotine.core.status.effect;
 
 public class CustomEffect {
 

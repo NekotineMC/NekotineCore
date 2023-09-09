@@ -3,7 +3,7 @@ package fr.nekotine.core.visibility;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
-import fr.nekotine.core.effect.CustomEffectType;
+import fr.nekotine.core.status.effect.CustomEffectType;
 
 public class UnrenderedEffectType implements CustomEffectType{
 
