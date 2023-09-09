@@ -163,4 +163,8 @@ public class InventoryUtil {
 		return x + (y * 9);
 	}
 	
+	public static void replaceItem(Inventory inventory, ItemStack oldItem, ItemStack newItem) {
+		inventory.setItem(inventory.first(oldItem), newItem);
+	}
+	
 }
