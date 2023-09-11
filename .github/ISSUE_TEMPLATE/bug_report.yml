@@ -4,28 +4,28 @@ labels: [ "status: needs triage", "type: bug" ]
 body:
   - type: textarea
     attributes:
-      label: Comportement attendu:
+      label: Comportement attendu
       description: Ce que vous vous attendiez a voir.
     validations:
       required: true
 
   - type: textarea
     attributes:
-      label: Comportement observé:
+      label: Comportement observé
       description: Ce que vous avez constaté.
     validations:
       required: true
 
   - type: textarea
     attributes:
-      label: Étapes pour reproduire le bug:
+      label: Étapes pour reproduire le bug
       description: Cela peut inclure des instructions détaillées ou une vidéo, tout ce qui peut être utile pour reproduire le bug.
     validations:
       required: true
 
   - type: textarea
     attributes:
-      label: Liste des plugins et datapacks du serveur:
+      label: Liste des plugins et datapacks du serveur
       description: |
         Tous les plugins et datapacks présents sur le serveur lors de l'apparition du bug.
         Vous pouvez utilisez la commande /plugins pour avoir la liste des plugins installés.
@@ -58,7 +58,7 @@ body:
     description: Modules ou parties du NekotineCore concernées par ce bug
     multiple: true
     attributes:
-      label: Parties du NekotineCore concernés:
+      label: Parties du NekotineCore concernés
       options:
         - FakeBlock
         - TempBlock
