@@ -3,6 +3,7 @@ package fr.nekotine.core.util.collection;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
@@ -10,9 +11,9 @@ import fr.nekotine.core.NekotineCore;
 
 public class ObservableCollection<T> implements Collection<T>{
 
-	private final Collection<Consumer<T>> itemAddCallbacks = new LinkedList<>();
+	private final List<Consumer<T>> itemAddCallbacks = new LinkedList<>();
 	
-	private final Collection<Consumer<Object>> itemRemoveCallbacks = new LinkedList<>();
+	private final List<Consumer<Object>> itemRemoveCallbacks = new LinkedList<>();
 	
 	private Collection<T> inner;
 	
@@ -96,9 +97,10 @@ public class ObservableCollection<T> implements Collection<T>{
 	public boolean remove(Object o) {
 		var result = inner.remove(o);
 		if (result) {
-			for (var cb : itemRemoveCallbacks) {
+			var ite = itemRemoveCallbacks.listIterator();
+			while (ite.hasPrevious()) {
 				try {
-					cb.accept(o);
+					ite.previous().accept(o);
 				}catch(Exception ex) {
 					NekotineCore.LOGGER.log(Level.SEVERE, "Une erreur c'est produite dans une callback d'ObservableCollection.remove", ex);
 				}
