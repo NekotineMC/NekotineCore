@@ -1,6 +1,0 @@
-name: NekotineCore
-version: 1.0
-main: fr.nekotine.core.plugin.CorePlugin
-api-version: 1.18
-author: XxGoldenbluexX
-softdepend: [ProtocolLib,CommandAPI]
