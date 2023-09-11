@@ -1,0 +1,71 @@
+name: Rapport de bug
+description: Rapportez les problèmes liés au fonctionnement du NekotineCore.
+labels: [ "status: needs triage", "type: bug" ]
+body:
+  - type: textarea
+    attributes:
+      label: Comportement attendu.
+      description: Ce que vous vous attendiez a voir.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Comportement observé.
+      description: Ce que vous avez constaté.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Étapes pour reproduire le bug.
+      description: Cela peut inclure des instructions détaillées ou une vidéo, tout ce qui peut être utile pour reproduire le bug.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Liste des plugins et datapacks du serveur.
+      description: |
+        Tous les plugins et datapacks présents sur le serveur lors de l'apparition du bug.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Version de paper
+      description: |
+        Run `/version` on your server and **paste** the full, unmodified output here.
+        "latest" is *not* a version; we require the output of `/version` so we can adequately track down the issue.
+        Additionally, do NOT provide a screenshot, you MUST paste the entire output.
+        <details>
+        <summary>Example</summary>
+
+        ```
+        > version
+        [20:34:42 INFO]: This server is running Paper version git-Paper-540 (MC: 1.16.5) (Implementing API version 1.16.5-R0.1-SNAPSHOT)
+        [20:34:42 INFO]: Checking version, please wait...
+        [20:34:42 INFO]: Previous version: git-Paper-538 (MC: 1.16.5)
+        [20:34:42 INFO]: You are running the latest version
+        ```
+
+        </details>
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Autre
+      description: |
+        Ajoutez n'importe quelle autre information qui pourrait être utile ci-dessous.
+        Le plus d'informations vous donnerez, le plus efficace nous serons pour résoudre le problème.
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        Avant d'envoyer ce rapport, soyez certains des choses suivantes:
+        
+        1. Vous êtes sûr d'utiliser la dernière version du NekotineCore
+        2. Vous avez chercher s'il n'existait pas des rapports sur ce même bug existant.

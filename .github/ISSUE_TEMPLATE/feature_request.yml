@@ -1,0 +1,37 @@
+name: Demande de fonctionnalité
+description: Suggérer une idée pour NekotineCore
+labels: [ "status: needs triage", "type: feature" ]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci de remplire cette demande de fonctionnalité pour le NekotineCore. Soyez, s'il vous plais le plus détaillé possible dans votre demande pour faciliter sa revue.
+        Merci de bien vouloir rechercher votre fonctionnalité dans les demandes existants pour éviter les duplicatas. Si une demande existe, commentez-la si vous avez des choses à rajouter.
+        Avant de demander une nouvelle fonctionnalité, verifiez qu'elle n'existe pas déja dans la dernière version du NekotineCore.
+  - type: textarea
+    attributes:
+      label: Votre fonctionnalité est elle liée à un problème?
+      description: Donnez s'il vous plais un contexte pour cette demande. Pourquoi doit-elle être ajoutée?
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Décrivez la solution que vous aimeriez.
+      description: Une description claire est concise de ce que vous voulez.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Décrivez les alternatives que vous avez cherché.
+      description: Listez n'importe quelle alternative vous avez essayé pour avoir la fonctionnalité que vous voulez.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Autre
+      description: Ajoutez n'importe quel autre contexte ou capture d'écran à propos de la fonctionnalité ci-dessous.
+    validations:
+      required: false
