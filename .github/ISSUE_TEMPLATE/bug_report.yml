@@ -55,9 +55,9 @@ body:
       required: false
 
   - type: dropdown
-    description: Modules ou parties du NekotineCore concernées par ce bug
-    multiple: true
     attributes:
+      description: Modules ou parties du NekotineCore concernées par ce bug
+      multiple: true
       label: Parties du NekotineCore concernés
       options:
         - FakeBlock
