@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Merci de remplire cette demande de fonctionnalité pour le NekotineCore. Soyez, s'il vous plais le plus détaillé possible dans votre demande pour faciliter sa revue.
+        Merci de remplir cette demande de fonctionnalité pour le NekotineCore. Soyez, s'il vous plais le plus détaillé possible dans votre demande pour faciliter sa revue.
         Merci de bien vouloir rechercher votre fonctionnalité dans les demandes existants pour éviter les duplicatas. Si une demande existe, commentez-la si vous avez des choses à rajouter.
         Avant de demander une nouvelle fonctionnalité, verifiez qu'elle n'existe pas déja dans la dernière version du NekotineCore.
   - type: textarea
