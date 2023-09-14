@@ -24,6 +24,7 @@ public class BorderMenuLayout extends MenuLayout{
 	
 	public BorderMenuLayout(ItemStack borderBrush, MenuComponent child) {
 		brush = borderBrush;
+		this.child = child;
 		child.setParent(this);
 		if (child instanceof ClickableMenuComponent clickable) {
 			registerClicakble(clickable);
