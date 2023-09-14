@@ -27,6 +27,7 @@ public class MenuInventory extends MenuLayout{
 		this.layout = layout;
 		this.layout.setParent(this);
 		this.nbRow = nbRow;
+		registerClicakble(layout);
 		inventory = Bukkit.createInventory(null, nbRow * 9);
 		NekotineCore.MODULES.get(MenuModule.class).registerMenu(this);
 	}
@@ -35,6 +36,7 @@ public class MenuInventory extends MenuLayout{
 		this.layout = layout;
 		this.layout.setParent(this);
 		this.nbRow = nbRow;
+		registerClicakble(layout);
 		inventory = Bukkit.createInventory(null, nbRow * 9, title);
 		NekotineCore.MODULES.get(MenuModule.class).registerMenu(this);
 	}
