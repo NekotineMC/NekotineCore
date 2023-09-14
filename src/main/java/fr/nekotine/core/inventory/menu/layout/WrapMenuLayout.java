@@ -39,14 +39,14 @@ public class WrapMenuLayout extends MenuLayout{
 		var curX = x;
 		var curY = y;
 		for (var item : items) {
-			inventory.setItem(InventoryUtil.chestCoordinateToInventoryIndex(curX, curY), item.draw());
-			curX++;
-			if (++curX > width - x) {
+			if (curX > width - x) {
 				curX = x;
 				if (++curY > height - y) {
 					return;
 				}
 			}
+			inventory.setItem(InventoryUtil.chestCoordinateToInventoryIndex(curX, curY), item.draw());
+			curX++;
 		}
 	}
 
