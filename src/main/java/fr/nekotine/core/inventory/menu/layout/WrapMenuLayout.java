@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.bukkit.inventory.Inventory;
 
+import fr.nekotine.core.inventory.menu.ClickableMenuComponent;
 import fr.nekotine.core.inventory.menu.element.MenuElement;
 import fr.nekotine.core.util.InventoryUtil;
 
@@ -31,6 +32,9 @@ public class WrapMenuLayout extends MenuLayout{
 		element.setParent(this);
 		if (sorter != null) {
 			items.sort(sorter);
+		}
+		if (element instanceof ClickableMenuComponent clickable) {
+			registerClicakble(clickable);
 		}
 	}
 
