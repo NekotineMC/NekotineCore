@@ -6,7 +6,8 @@ import java.util.LinkedList;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import fr.nekotine.core.inventory.menu.element.ClickableMenuElement;
+import fr.nekotine.core.inventory.menu.ClickableMenuComponent;
+import fr.nekotine.core.inventory.menu.element.MenuElement;
 import fr.nekotine.core.util.InventoryUtil;
 
 /**
@@ -15,7 +16,7 @@ import fr.nekotine.core.util.InventoryUtil;
  */
 public class ToolbarMenuLayout extends MenuLayout{
 	
-	private Collection<ClickableMenuElement> tools = new LinkedList<>();
+	private Collection<MenuElement> tools = new LinkedList<>();
 	
 	private ItemStack brush;
 	
@@ -28,10 +29,12 @@ public class ToolbarMenuLayout extends MenuLayout{
 		registerClicakble(child);
 	}
 	
-	public void addTool(ClickableMenuElement element) {
+	public void addTool(MenuElement element) {
 		tools.add(element);
 		element.setParent(this);
-		registerClicakble(element);
+		if (element instanceof ClickableMenuComponent c) {
+			registerClicakble(c);
+		}
 	}
 
 	@Override
