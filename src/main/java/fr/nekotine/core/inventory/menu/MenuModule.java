@@ -41,7 +41,7 @@ public class MenuModule extends PluginModule implements Listener{
 				registeredMenus.remove(item);
 			}else {
 				if (menu.getInventory() == inv) {
-					menu.OnItemStackClicked(itemStack, player);
+					menu.onClick(itemStack, player);
 					shouldCancel = true;
 				}
 			}

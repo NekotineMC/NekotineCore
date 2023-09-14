@@ -1,17 +1,12 @@
-package fr.nekotine.core.inventory.menu.item;
+package fr.nekotine.core.inventory.menu.element;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
-
-import fr.nekotine.core.inventory.menu.ClickableMenuItem;
-import fr.nekotine.core.inventory.menu.MenuElement;
-import fr.nekotine.core.util.InventoryUtil;
 
 /**
  * MenuElement pour interragire avec une valeur boolean
@@ -19,7 +14,7 @@ import fr.nekotine.core.util.InventoryUtil;
  * @author XxGoldenbluexX
  *
  */
-public class BooleanInputMenuItem extends MenuElement implements ClickableMenuItem{
+public class BooleanInputMenuItem extends ClickableMenuElement{
 	
 	private final Supplier<Boolean> valueSupplier;
 	
@@ -85,16 +80,8 @@ public class BooleanInputMenuItem extends MenuElement implements ClickableMenuIt
 	}
 
 	@Override
-	public void draw(Inventory inventory, int x, int y, int width, int height) {
-		inventory.setItem(InventoryUtil.chestCoordinateToInventoryIndex(x,y), getValue() ? trueItem : falseItem);
-	}
-
-	@Override
-	public @Nullable ClickableMenuItem getClickedMenuItem(ItemStack item) {
-		if (item != null && (item.isSimilar(trueItem) || item.isSimilar(falseItem))) {
-			return this;
-		}
-		return null;
+	public ItemStack draw() {
+		return getValue() ? trueItem : falseItem;
 	}
 
 }

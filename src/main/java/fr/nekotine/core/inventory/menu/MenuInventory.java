@@ -3,10 +3,10 @@ package fr.nekotine.core.inventory.menu;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import fr.nekotine.core.NekotineCore;
+import fr.nekotine.core.inventory.menu.layout.MenuLayout;
 import net.kyori.adventure.text.Component;
 
 /**
@@ -63,13 +63,6 @@ public class MenuInventory extends MenuLayout{
 
 	public Inventory getInventory() {
 		return inventory;
-	}
-
-	public void OnItemStackClicked(@NotNull ItemStack itemStack, Player player) {
-		var item = layout.getClickedMenuItem(itemStack);
-		if (item != null) {
-			item.click(player);
-		}
 	}
 
 	@Override
