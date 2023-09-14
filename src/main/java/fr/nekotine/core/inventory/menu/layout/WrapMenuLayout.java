@@ -29,7 +29,9 @@ public class WrapMenuLayout extends MenuLayout{
 	public void addElement(MenuElement element) {
 		items.add(element);
 		element.setParent(this);
-		items.sort(sorter);
+		if (sorter != null) {
+			items.sort(sorter);
+		}
 	}
 
 	@Override
