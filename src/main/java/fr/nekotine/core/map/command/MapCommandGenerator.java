@@ -1,6 +1,7 @@
 package fr.nekotine.core.map.command;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.logging.Level;
 
 import dev.jorel.commandapi.CommandAPICommand;
@@ -9,6 +10,7 @@ import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.CustomArgument;
 import dev.jorel.commandapi.arguments.CustomArgument.CustomArgumentException;
 import dev.jorel.commandapi.arguments.StringArgument;
+import dev.jorel.commandapi.executors.CommandArguments;
 import dev.jorel.commandapi.executors.CommandExecutor;
 import dev.jorel.commandapi.executors.ExecutorType;
 import fr.nekotine.core.NekotineCore;
@@ -56,6 +58,7 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 	}
 
 	public void generateFor(Class<?>... mapTypes) {
+		var mapModule = NekotineCore.MODULES.get(MapModule.class);
 		try {
 			if (mapCommand == null) {
 				makeMapCommand();
@@ -78,7 +81,9 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 					var mapTypeName = mapType.getSimpleName();
 					var mapNameArgument = makeMapArgument(mapType);
 					var generator = generatorResolver.resolve(mapType);
-					for (var branch : generator.generateFor(mapType)) {
+					@SuppressWarnings("unchecked")
+					Function<CommandArguments, Object> pipeline = a -> ((MapHandle<Object>)a.get("mapName")).loadConfig();
+					for (var branch : generator.generateFor(pipeline, mapType)) {
 						var command = new CommandAPICommand(mapTypeName);
 						command.withArguments(mapNameArgument);
 						command.withArguments(branch.arguments());
@@ -86,9 +91,9 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 							@SuppressWarnings("unchecked")
 							var handle = (MapHandle<Object>) args.get(0);
 							var config = handle.loadConfig();
-							branch.consumer().accept(config/* map */, sender, args);
+							branch.consumer().accept(config, sender, args);
 							sender.sendMessage(Component.text("Sauvegarde de la carte...", NamedTextColor.BLUE));
-							NekotineCore.MODULES.get(MapModule.class).saveMapConfigAsync(handle, config,
+							mapModule.saveMapConfigAsync(handle, config,
 									() -> sender.sendMessage(Component.text("Sauvegarde effectuée.", NamedTextColor.GREEN)));
 						};
 						command.executes(executor, ExecutorType.ALL);

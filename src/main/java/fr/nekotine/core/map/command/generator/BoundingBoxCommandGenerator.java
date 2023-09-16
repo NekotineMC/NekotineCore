@@ -1,10 +1,13 @@
 package fr.nekotine.core.map.command.generator;
 
+import java.util.function.Function;
+
 import org.bukkit.Location;
 
 import dev.jorel.commandapi.arguments.Argument;
 import dev.jorel.commandapi.arguments.LocationArgument;
 import dev.jorel.commandapi.arguments.LocationType;
+import dev.jorel.commandapi.executors.CommandArguments;
 import fr.nekotine.core.NekotineCore;
 import fr.nekotine.core.map.command.MapCommandBranch;
 import fr.nekotine.core.map.command.MapCommandExecutor;
@@ -13,11 +16,12 @@ import fr.nekotine.core.map.element.MapBoundingBoxElement;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-public class BoundingBoxCommandGenerator extends MapElementCommandGenerator{
+public class BoundingBoxCommandGenerator implements MapElementCommandGenerator{
 
 	private static final String nodeName = "MapBoundingBoxElementNode";
 
-	protected MapCommandBranch[] generateFor(Class<?> elementType) {
+	@Override
+	public MapCommandBranch[] generateFor(Function<CommandArguments, Object> pipeline, Class<?> elementType) {
 		var arguments = new Argument<?>[] {
 			new LocationArgument(nodeName+"1", LocationType.PRECISE_POSITION),
 			new LocationArgument(nodeName+"2", LocationType.PRECISE_POSITION),

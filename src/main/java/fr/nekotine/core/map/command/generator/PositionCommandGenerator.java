@@ -1,11 +1,14 @@
 package fr.nekotine.core.map.command.generator;
 
+import java.util.function.Function;
+
 import org.bukkit.Location;
 
 import dev.jorel.commandapi.arguments.Argument;
 import dev.jorel.commandapi.arguments.LocationArgument;
 import dev.jorel.commandapi.arguments.LocationType;
 import dev.jorel.commandapi.arguments.RotationArgument;
+import dev.jorel.commandapi.executors.CommandArguments;
 import dev.jorel.commandapi.wrappers.Rotation;
 import fr.nekotine.core.NekotineCore;
 import fr.nekotine.core.map.command.MapCommandBranch;
@@ -15,12 +18,13 @@ import fr.nekotine.core.map.element.MapPositionElement;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-public class PositionCommandGenerator extends MapElementCommandGenerator{
+public class PositionCommandGenerator implements MapElementCommandGenerator{
 
 	private static final String nodeName = "MapPositionElementNode";
 	private static final String rotationNodeName = "MapPositionRotationNode";
 
-	protected MapCommandBranch[] generateFor(Class<?> elementType) {
+	@Override
+	public MapCommandBranch[] generateFor(Function<CommandArguments, Object> pipeline, Class<?> elementType) {
 		var arguments = new Argument<?>[] {new LocationArgument(nodeName, LocationType.PRECISE_POSITION),
 			new RotationArgument(rotationNodeName)};
 		MapCommandExecutor executor = (element, sender, args) ->{

@@ -1,9 +1,11 @@
 package fr.nekotine.core.map.command.generator;
 
 import java.util.LinkedList;
+import java.util.function.Function;
 
 import dev.jorel.commandapi.arguments.Argument;
 import dev.jorel.commandapi.arguments.LiteralArgument;
+import dev.jorel.commandapi.executors.CommandArguments;
 import fr.nekotine.core.NekotineCore;
 import fr.nekotine.core.map.annotation.ComposingMap;
 import fr.nekotine.core.map.annotation.MapElementTyped;
@@ -14,16 +16,16 @@ import fr.nekotine.core.map.command.MapElementCommandGenerator;
 import fr.nekotine.core.map.element.MapDictionaryElement;
 import fr.nekotine.core.util.CollectionUtil;
 
-public class DefaultMapElementCommandGenerator extends MapElementCommandGenerator{
+public class DefaultMapElementCommandGenerator implements MapElementCommandGenerator{
 
 	private final MapCommandGenerator globalGenerator;
 	
 	public DefaultMapElementCommandGenerator(MapCommandGenerator generator) {
-		super(false);
 		this.globalGenerator = generator;
 	}
 
-	protected MapCommandBranch[] generateFor(Class<?> elementType) {
+	@Override
+	public MapCommandBranch[] generateFor(Function<CommandArguments, Object> pipeline, Class<?> elementType) {
 		var list = new LinkedList<MapCommandBranch>();
 		for (var field : elementType.getDeclaredFields()) {
 			if (field.isAnnotationPresent(ComposingMap.class)) {
@@ -43,11 +45,18 @@ public class DefaultMapElementCommandGenerator extends MapElementCommandGenerato
 						dictGenerator.setNestedElementType(field.getAnnotation(MapElementTyped.class).value());
 					}else {
 						var msg = "[MapCommandGenerator]->Default Le champ %s dans %s est de type dictionnaire mais n'a"
-								+ " pas l'annotation MapDictionaryElementType nécessaire pour sa génération.";
+								+ " pas l'annotation MapElementTyped nécessaire pour sa génération.";
 						throw new IllegalArgumentException(String.format(msg,finalName,elementType.getName()));
 					}
 				}
-				for (var branch : generator.getGenerated(fieldType)) {
+				Function<CommandArguments, Object> pip = a -> {
+					try {
+						return field.get(pipeline.apply(a));
+					} catch (Exception e) {
+						throw new RuntimeException("Impossible d'acceder au champ "+field.getName()+" de la classe "+elementType.getName(),e);
+					}
+				};
+				for (var branch : generator.generateFor(pip, fieldType)) {
 					var arguments = CollectionUtil.linkedList(branch.arguments());
 					arguments.add(0, selfArgument);
 					MapCommandExecutor executor = (element, sender, args) ->{

@@ -2,11 +2,15 @@ package fr.nekotine.core.map.command.generator;
 
 import java.lang.reflect.Constructor;
 import java.util.LinkedList;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.logging.Level;
 
 import dev.jorel.commandapi.arguments.Argument;
+import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.LiteralArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
+import dev.jorel.commandapi.executors.CommandArguments;
 import fr.nekotine.core.NekotineCore;
 import fr.nekotine.core.map.command.MapCommandBranch;
 import fr.nekotine.core.map.command.MapCommandExecutor;
@@ -17,7 +21,7 @@ import fr.nekotine.core.util.CollectionUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-public class DictionaryCommandGenerator extends MapElementCommandGenerator{
+public class DictionaryCommandGenerator implements MapElementCommandGenerator{
 
 	private static final String nodeNameSuffix = "Name";
 	
@@ -28,27 +32,31 @@ public class DictionaryCommandGenerator extends MapElementCommandGenerator{
 	private MapCommandGenerator globalGenerator;
 	
 	public DictionaryCommandGenerator(MapCommandGenerator generator) {
-		super(false);
 		globalGenerator = generator;
 	}
 
-	protected MapCommandBranch[] generateFor(Class<?> elementType) {
+	@SuppressWarnings("unchecked")
+	@Override
+	public MapCommandBranch[] generateFor(Function<CommandArguments, Object> pipeline, Class<?> elementType) {
 		var constructionList = new LinkedList<MapCommandBranch>();
 		constructionList.add(makeAddCommand());
-		constructionList.add(makeRemoveCommand());
+		constructionList.add(makeRemoveCommand(pipeline));
 		// Commande Edit
 		final var finalNodeName = nodeName + nodeNameSuffix;
 		var nodeArg = new LiteralArgument("edit");
 		var nameArg = new StringArgument(finalNodeName);
+		nameArg.includeSuggestions(ArgumentSuggestions.stringCollectionAsync(i -> CompletableFuture.supplyAsync(() ->
+				((MapDictionaryElement<Object>)pipeline.apply(i.previousArgs())).backingMap().keySet()
+				)));
 		var generator = globalGenerator.getGeneratorResolver().resolve(nestedElementType);
-		for (var branch : generator.getGenerated(nestedElementType)) {
+		Function<CommandArguments, Object> pip = a -> ((MapDictionaryElement<Object>)pipeline.apply(a)).backingMap().get(finalNodeName);
+		for (var branch : generator.generateFor(pip, nestedElementType)) {
 			var branchArgs = CollectionUtil.linkedList(branch.arguments());
 			branchArgs.add(0, nameArg);
 			branchArgs.add(0, nodeArg);
 			MapCommandExecutor executor = (element, sender, args) ->{
 				var mapKey = (String)args.get(finalNodeName);
 				try {
-					@SuppressWarnings("unchecked")
 					var e = (MapDictionaryElement<Object>)element;
 					if (!e.backingMap().containsKey(mapKey)) {
 						sender.sendMessage(Component.text("Ce nom d'élément ("+mapKey+") n'existe pas"));
@@ -97,8 +105,13 @@ public class DictionaryCommandGenerator extends MapElementCommandGenerator{
 		return new MapCommandBranch(arguments, executor);
 	}
 	
-	private MapCommandBranch makeRemoveCommand() {
-		var arguments = new Argument<?>[] {new LiteralArgument("remove"),new StringArgument("itemName")};
+	@SuppressWarnings("unchecked")
+	private MapCommandBranch makeRemoveCommand(Function<CommandArguments, Object> pipeline) {
+		var nameArg = new StringArgument("itemName");
+		nameArg.includeSuggestions(ArgumentSuggestions.stringCollectionAsync(i -> CompletableFuture.supplyAsync(() ->
+		((MapDictionaryElement<Object>)pipeline.apply(i.previousArgs())).backingMap().keySet()
+		)));
+		var arguments = new Argument<?>[] {new LiteralArgument("remove"),nameArg};
 		MapCommandExecutor executor = (element, sender, args) ->{
 			var mapKey = (String)args.get("itemName");
 			var e = (MapDictionaryElement<?>)element;
