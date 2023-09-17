@@ -12,6 +12,7 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 
 import fr.nekotine.core.map.annotation.ComposingMap;
+import fr.nekotine.core.map.annotation.MapDictKey;
 import fr.nekotine.core.map.annotation.MapElementTyped;
 import fr.nekotine.core.map.element.MapDictionaryElement;
 import fr.nekotine.core.tuple.Pair;
@@ -150,7 +151,9 @@ public class ConfigurationSerializableAdapterSerializer {
 								var dict = (MapDictionaryElement<Object>)field.get(parent);
 								var backing = dict.backingMap();
 								for (var key : fieldMap.keySet()) {
-									backing.put(key, funcDict.apply((Map<String, Object>) fieldMap.get(key)));
+									var keyMap = (Map<String, Object>) fieldMap.get(key);
+									keyMap.put("MapDictKey", key);
+									backing.put(key, funcDict.apply(keyMap));
 								}
 							}catch(Exception e) {
 								throw new RuntimeException(e);
@@ -162,18 +165,32 @@ public class ConfigurationSerializableAdapterSerializer {
 						throw new IllegalArgumentException(String.format(msg,name,node.getName()));
 					}
 				}else {
-					var nodeDeserializer = getDeserializerFor(field.getType());
-					fieldsFunctions.add((parent,map) ->{
-						if (map == null) {
-							return;
-						}
-						try {
-							var obj = nodeDeserializer.apply((Map<String, Object>) map.get(finalName));
-							field.set(parent, obj);
-						}catch(Exception e) {
-							throw new RuntimeException(e);
-						}
-					});
+					if (field.isAnnotationPresent(MapDictKey.class)) {
+						fieldsFunctions.add((parent,map) ->{
+							if (map == null) {
+								return;
+							}
+							try {
+								var obj = map.get("MapDictKey");
+								field.set(parent, obj);
+							}catch(Exception e) {
+								throw new RuntimeException(e);
+							}
+						});
+					}else {
+						var nodeDeserializer = getDeserializerFor(field.getType());
+						fieldsFunctions.add((parent,map) ->{
+							if (map == null) {
+								return;
+							}
+							try {
+								var obj = nodeDeserializer.apply((Map<String, Object>) map.get(finalName));
+								field.set(parent, obj);
+							}catch(Exception e) {
+								throw new RuntimeException(e);
+							}
+						});
+					}
 				}
 			}
 		}
