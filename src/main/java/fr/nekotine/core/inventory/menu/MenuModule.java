@@ -55,7 +55,7 @@ public class MenuModule extends PluginModule implements Listener{
 	
 	@EventHandler
 	public void onInventoryClick(InventoryClickEvent event) {
-		if (event.getWhoClicked() instanceof Player player) {
+		if (event.getCurrentItem() != null && event.getWhoClicked() instanceof Player player) {
 			event.setCancelled(onMenuClicked(event.getInventory(), event.getCurrentItem(), player));
 		}
 	}
