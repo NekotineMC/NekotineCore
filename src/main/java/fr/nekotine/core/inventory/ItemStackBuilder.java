@@ -95,6 +95,25 @@ public class ItemStackBuilder {
 		return this;
 	}
 	
+	public ItemStackBuilder enchant(Enchantment enchant) {
+		enchantments.put(enchant, 1);
+		return this;
+	}
+	
+	/**
+	 * Donne un enchantement par défaut pour l'effet visuel.
+	 * Le flag pour cacher les enchantments est ajouté automatiquement
+	 * <p>
+	 * Note: L'enchantement utilisé est {@link org.bukkit.enchantments.Enchantment VANISHING_CURSE}
+	 * </p>
+	 * @return
+	 */
+	public ItemStackBuilder enchant() {
+		flags.add(ItemFlag.HIDE_ENCHANTS);
+		enchantments.put(Enchantment.VANISHING_CURSE, 1);
+		return this;
+	}
+	
 	public ItemStackBuilder attributeModifier(Attribute attribute, AttributeModifier modifier) {
 		attributeModifiers.add(new Pair<>(attribute, modifier));
 		return this;
