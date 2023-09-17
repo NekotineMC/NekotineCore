@@ -3,6 +3,7 @@ package fr.nekotine.core.map.command.generator;
 import java.util.function.Function;
 
 import org.bukkit.Location;
+import org.bukkit.util.Vector;
 
 import dev.jorel.commandapi.arguments.Argument;
 import dev.jorel.commandapi.arguments.LocationArgument;
@@ -27,10 +28,12 @@ public class BlockBoundingBoxCommandGenerator implements MapElementCommandGenera
 			new LocationArgument(nodeName+"2", LocationType.BLOCK_POSITION),
 			};
 		MapCommandExecutor executor = (element, sender, args) ->{
-			var pos1 = (Location)args.get(nodeName+1);
-			var pos2 = (Location)args.get(nodeName+2);
+			var pos1 = ((Location)args.get(nodeName+1)).toVector();
+			var pos2 = ((Location)args.get(nodeName+2)).toVector();
+			var min = Vector.getMinimum(pos1, pos2);
+			var max = Vector.getMaximum(pos1,  pos2);
 			var e = (MapBlockBoundingBoxElement)element;
-			e.get().resize(pos1.getBlockX(), pos1.getBlockY(), pos1.getBlockZ(), pos2.getBlockX(), pos2.getBlockY(), pos2.getBlockZ());
+			e.get().resize(min.getBlockX(), min.getBlockY(), min.getBlockZ(), max.getBlockX()+1, max.getBlockY()+1, max.getBlockZ()+1);
 			sender.sendMessage(Component.text("La location à bien été définie.", NamedTextColor.GREEN));
 		};
 		//TODO normaliser les messages de commande
