@@ -71,12 +71,23 @@ public class MapModule extends PluginModule{
 		AsyncUtil.runAsync(()->finder.add(mapConfigType, name));
 	}
 	
+	public <T> void addMapAsync(Class<T> mapConfigType, String name, Consumer<MapHandle<T>> thenSync, Consumer<Exception> exceptionCallback){
+		AsyncUtil.runAsync(AsyncUtil.thenSync(()->finder.add(mapConfigType, name), thenSync, exceptionCallback), exceptionCallback);
+	}
+	
 	public <T> void deleteMapAsync(Class<T> mapConfigType, String name, Runnable thenSync){
-		AsyncUtil.runAsync(
-				AsyncUtil.thenSync(AsyncUtil.then(() -> finder.findByName(mapConfigType, name), finder::delete), thenSync));
+		AsyncUtil.pipe().async(() -> finder.findByName(mapConfigType, name).delete()).sync(thenSync).run();
 	}
 	
 	public <T> void deleteMapAsync(Class<T> mapConfigType, String name){
-		AsyncUtil.runAsync(AsyncUtil.then(() -> finder.findByName(mapConfigType, name), finder::delete));
+		AsyncUtil.runAsync(() -> finder.findByName(mapConfigType, name).delete());
+	}
+	
+	public <T> void deleteMapAsync(Class<T> mapConfigType, String name, Runnable thenSync, Consumer<Exception> exceptionCallback){
+		AsyncUtil.pipe(exceptionCallback).async(() -> finder.findByName(mapConfigType, name).delete()).sync(thenSync).run();
+	}
+	
+	public <T> void deleteMapAsync(Class<T> mapConfigType, String name, Consumer<Exception> exceptionCallback){
+		AsyncUtil.runAsync(() -> finder.findByName(mapConfigType, name).delete(), exceptionCallback);
 	}
 }
