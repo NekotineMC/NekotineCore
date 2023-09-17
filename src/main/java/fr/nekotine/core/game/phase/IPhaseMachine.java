@@ -18,4 +18,8 @@ public interface IPhaseMachine {
 	
 	public <P> void onPhaseComplete(IPhase<P> phase, Object outData);
 	
+	public void setLooping(boolean looping);
+	
+	public boolean getLooping();
+	
 }

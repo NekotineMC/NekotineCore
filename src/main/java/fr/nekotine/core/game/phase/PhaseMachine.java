@@ -19,6 +19,8 @@ import fr.nekotine.core.util.map.TypeMap;
 
 public class PhaseMachine implements IPhaseMachine{
 
+	private boolean loop;
+	
 	private static Logger LOGGER = new FormatingRemoteLogger(NekotineCore.LOGGER,Text.namedLoggerFormat(PhaseMachine.class.getSimpleName()));
 	
 	private boolean running;
@@ -129,8 +131,11 @@ public class PhaseMachine implements IPhaseMachine{
 	@Override
 	public <P> void onPhaseComplete(IPhase<P> phase, Object outData) {
 		if (++currentPhaseIndex >= phaseOrder.size()) {
-			end();
-			return;
+			if (!loop) {
+				end();
+				return;
+			}
+			currentPhaseIndex = 0;
 		}
 		goTo(phaseOrder.get(currentPhaseIndex), outData);
 	}
@@ -182,6 +187,16 @@ public class PhaseMachine implements IPhaseMachine{
 			cur = p.getParent();
 		}
 		return list;
+	}
+	
+	@Override
+	public void setLooping(boolean looping) {
+		loop = looping;
+	}
+	
+	@Override
+	public boolean getLooping() {
+		return loop;
 	}
 
 }
