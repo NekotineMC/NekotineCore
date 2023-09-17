@@ -102,6 +102,7 @@ public class PhaseMachine implements IPhaseMachine{
 		}
 		var all = getParents(currentPhase);
 		all.add(currentPhase);
+		currentPhase = null;
 		Collections.reverse(all);
 		for (var p : all) {
 			try (var watch = new Stopwatch(w -> LOGGER.log(Level.INFO,"La phase "+p.getClass().getSimpleName()+" est teardown ("+w.elapsedMillis()+" ms)"))){
@@ -111,6 +112,7 @@ public class PhaseMachine implements IPhaseMachine{
 			}
 			runningPhases.remove(p.getClass());
 		}
+		running = false;
 	}
 
 	@Override
