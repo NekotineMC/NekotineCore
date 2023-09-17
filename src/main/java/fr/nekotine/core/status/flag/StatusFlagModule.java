@@ -72,4 +72,30 @@ public class StatusFlagModule extends PluginModule{
 		}
 	}
 	
+	public boolean hasAny(LivingEntity entity, StatusFlag...flags) {
+		var set = map.get(entity);
+		if (set  == null) {
+			return false;
+		}
+		for (var flag : flags) {
+			if (set.contains(flag)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean hasAny(LivingEntity entity, Set<StatusFlag> flags) {
+		var set = map.get(entity);
+		if (set  == null) {
+			return false;
+		}
+		for (var flag : flags) {
+			if (set.contains(flag)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 }
