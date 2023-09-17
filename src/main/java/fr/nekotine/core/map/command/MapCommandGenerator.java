@@ -104,7 +104,10 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 					typedAddCommand.withArguments(new StringArgument("mapName"));
 					typedAddCommand.executes((CommandExecutor) (sender, args) -> {
 						NekotineCore.MODULES.get(MapModule.class).addMapAsync(mapType, (String) args.get("mapName"),
-								handle -> sender.sendMessage(Component.text("La carte a bien été créé")));
+								handle -> sender.sendMessage(Component.text("La carte a bien été créé")),
+								e -> sender.sendMessage(Component.text("Une erreur est survenue lors de l'ajout:", NamedTextColor.DARK_RED)
+										.appendNewline()
+										.append(Component.text(e.getMessage(), NamedTextColor.RED))));
 						sender.sendMessage(Component.text("Ajout de la map en cours..."));
 					}, ExecutorType.ALL);// TODO standardiser command messages
 					addCommand.withSubcommand(typedAddCommand);
@@ -112,9 +115,16 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 					var typedRemoveCommand = new CommandAPICommand(mapTypeName);
 					typedRemoveCommand.withArguments(new StringArgument("mapName"));
 					typedRemoveCommand.executes((CommandExecutor) (sender, args) -> {
+						try {
 						NekotineCore.MODULES.get(MapModule.class).deleteMapAsync(mapType, (String) args.get("mapName"),
-								() -> sender.sendMessage(Component.text("La carte a bien été supprimée")));
+								() -> sender.sendMessage(Component.text("La carte a bien été supprimée")),
+								e -> sender.sendMessage(Component.text("Une erreur est survenue lors de la suppression:", NamedTextColor.DARK_RED)
+										.appendNewline()
+										.append(Component.text(e.getMessage(), NamedTextColor.RED))));
 						sender.sendMessage(Component.text("Suppression de la map en cours..."));
+						}catch(Exception e) {
+							throw new RuntimeException(e);
+						}
 					}, ExecutorType.ALL);// TODO standardiser command messages
 					removeCommand.withSubcommand(typedRemoveCommand);
 					NekotineCore.LOGGER
