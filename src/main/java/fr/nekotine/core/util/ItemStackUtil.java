@@ -15,6 +15,7 @@ import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
@@ -28,7 +29,7 @@ public class ItemStackUtil {
 
 	private static int unstackableCounter = Integer.MIN_VALUE;
 	
-	private static final NamespacedKey unstackableKey = new NamespacedKey(NekotineCore.getAttachedPlugin(), "Unstackable");
+	private static final NamespacedKey unstackableKey = new NamespacedKey(NekotineCore.getAttachedPlugin(), "UnstackableId");
 	
 	/**
 	 * Retire tous les enchantments de l'item.
@@ -68,11 +69,32 @@ public class ItemStackUtil {
 		itemStack.setItemMeta(meta);
 	}
 	
-	public static void setUnstackable(ItemStack itemStack) {
+	public static void setUnstackable(ItemStack itemStack, boolean unstackable) {
 		var meta = itemStack.getItemMeta();
 		var container = meta.getPersistentDataContainer();
-		container.set(unstackableKey, PersistentDataType.INTEGER, unstackableCounter++);
+		if (unstackable) {
+			container.set(unstackableKey, PersistentDataType.INTEGER, unstackableCounter++);
+		}else {
+			container.remove(unstackableKey);
+		}
 		itemStack.setItemMeta(meta);
+	}
+	
+	public static void setUnstackable(ItemMeta itemMeta, boolean unstackable) {
+		var container = itemMeta.getPersistentDataContainer();
+		if (unstackable) {
+			container.set(unstackableKey, PersistentDataType.INTEGER, unstackableCounter++);
+		}else {
+			container.remove(unstackableKey);
+		}
+	}
+	
+	public static void setUnstackable(ItemStack itemStack) {
+		setUnstackable(itemStack, true);
+	}
+	
+	public static void setUnstackable(ItemMeta itemMeta) {
+		setUnstackable(itemMeta, true);
 	}
 	
 	public static @NotNull ItemStack skull(String url) throws MalformedURLException {

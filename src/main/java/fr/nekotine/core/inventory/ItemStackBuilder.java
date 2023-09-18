@@ -17,6 +17,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import fr.nekotine.core.tuple.Pair;
+import fr.nekotine.core.util.ItemStackUtil;
 import net.kyori.adventure.text.Component;
 
 /**
@@ -42,6 +43,8 @@ public class ItemStackBuilder {
 	
 	private boolean unbreakable;
 	
+	private boolean unstackable;
+	
 	private boolean oldPvp;
 	
 	public ItemStackBuilder(Material material) {
@@ -62,6 +65,7 @@ public class ItemStackBuilder {
 		attributeModifiers = new LinkedList<>(other.attributeModifiers);
 		flags = new HashSet<>(other.flags);
 		unbreakable = other.unbreakable;
+		unstackable = other.unstackable;
 		oldPvp = other.oldPvp;
 	}
 	
@@ -134,6 +138,16 @@ public class ItemStackBuilder {
 		return this;
 	}
 	
+	public ItemStackBuilder unstackable(boolean unstackable) {
+		this.unstackable = unstackable;
+		return this;
+	}
+	
+	public ItemStackBuilder unstackable() {
+		this.unstackable = true;
+		return this;
+	}
+	
 	public ItemStackBuilder oldPvp() {
 		oldPvp = true;
 		return this;
@@ -158,6 +172,7 @@ public class ItemStackBuilder {
 		}
 		meta.addItemFlags(flags.toArray(ItemFlag[]::new));
 		meta.setUnbreakable(unbreakable);
+		ItemStackUtil.setUnstackable(meta, unstackable);
 		itemStack.setItemMeta(meta);
 		return itemStack;
 	}
