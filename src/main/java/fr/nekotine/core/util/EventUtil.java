@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.plugin.Plugin;
 
 import fr.nekotine.core.NekotineCore;
@@ -16,16 +17,19 @@ public class EventUtil {
 	 * @param customAction L'action customis�e
 	 * @return True si l'action fait partie de la customAction
 	 */
-	public static boolean isAction(Action action, CustomAction customAction) {
+	public static boolean isCustomAction(Action action, CustomAction customAction) {
 		switch(customAction) {
-		case RIGHT_CLICK:
-			if(action==Action.RIGHT_CLICK_AIR || action==Action.RIGHT_CLICK_BLOCK) {
-				return true;
-			}
-			return false;
+		case INTERACT_ANY:
+			return action==Action.RIGHT_CLICK_AIR || action==Action.RIGHT_CLICK_BLOCK;
+		case HIT_ANY:
+			return action==Action.LEFT_CLICK_AIR || action==Action.LEFT_CLICK_BLOCK;
 		default:
 			return false;
 		}
+	}
+	
+	public static boolean isCustomAction(PlayerInteractEvent evt, CustomAction customAction) {
+		return isCustomAction(evt.getAction(), customAction);
 	}
 	
 	/**
