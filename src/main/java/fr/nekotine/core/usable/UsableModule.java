@@ -26,6 +26,7 @@ public class UsableModule extends PluginModule implements Listener{
 	
 	@Override
 	protected void unload() {
+		EventUtil.unregister(this);
 		usables.clear();
 	}
 	
