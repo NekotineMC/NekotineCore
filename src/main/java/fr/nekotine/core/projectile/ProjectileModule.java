@@ -9,6 +9,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
@@ -18,10 +19,21 @@ import org.jetbrains.annotations.NotNull;
 
 import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.ticking.event.TickElapsedEvent;
+import fr.nekotine.core.util.EventUtil;
 
-public class ProjectileModule extends PluginModule{
+public class ProjectileModule extends PluginModule implements Listener{
 	private final HashMap<Entity, CustomProjectile> projectiles = new HashMap<Entity, CustomProjectile>();
 	private final HashMap<Entity, CustomProjectile> projectilesBuffer = new HashMap<Entity, CustomProjectile>();
+	
+	public ProjectileModule() {
+		EventUtil.register(this);
+	}
+	
+	@Override
+	protected void unload() {
+		EventUtil.unregister(this);
+		super.unload();
+	}
 	
 	//
 	

@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -17,11 +18,19 @@ import fr.nekotine.core.charge.ICharge;
 import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.ticking.event.TickElapsedEvent;
 import fr.nekotine.core.util.CustomAction;
+import fr.nekotine.core.util.EventUtil;
 
-public class ItemChargeModule extends PluginModule{
+public class ItemChargeModule extends PluginModule implements Listener{
 	
 	public ItemChargeModule() {
 		chargeManager = NekotineCore.MODULES.get(ChargeModule.class);
+		EventUtil.register(this);
+	}
+	
+	@Override
+	protected void unload() {
+		EventUtil.unregister(this);
+		super.unload();
 	}
 	
 	private ChargeModule chargeManager;

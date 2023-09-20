@@ -22,6 +22,12 @@ public class MenuModule extends PluginModule implements Listener{
 		EventUtil.register(this);
 	}
 	
+	@Override
+	protected void unload() {
+		EventUtil.unregister(this);
+		super.unload();
+	}
+	
 	public void registerMenu(MenuInventory menu) {
 		registeredMenus.add(new WeakReference<>(menu));
 	}

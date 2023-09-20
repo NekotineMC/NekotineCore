@@ -5,14 +5,26 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 
 import com.comphenix.protocol.wrappers.Pair;
 
 import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.ticking.event.TickElapsedEvent;
+import fr.nekotine.core.util.EventUtil;
 
-public class ChargeModule extends PluginModule{
+public class ChargeModule extends PluginModule implements Listener{
 	private static final String NAME = "ChargeModule";
+	
+	public ChargeModule() {
+		EventUtil.register(this);
+	}
+	
+	@Override
+	protected void unload() {
+		EventUtil.unregister(this);
+		super.unload();
+	}
 	
 	private final HashMap<Pair<String, String>, Charge> charges = new HashMap<Pair<String, String>, Charge>();
 	private final HashMap<Pair<String, String>, Charge> chargesBuffer = new HashMap<Pair<String, String>, Charge>();

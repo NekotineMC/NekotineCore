@@ -9,17 +9,26 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 
 import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.util.EntityUtil;
+import fr.nekotine.core.util.EventUtil;
 
-public class DamageModule extends PluginModule{
+public class DamageModule extends PluginModule implements Listener{
 	
 	public DamageModule() {
 		DamageFunction.SetDamageModule(this);
+		EventUtil.register(this);
+	}
+	
+	@Override
+	protected void unload() {
+		EventUtil.unregister(this);
+		super.unload();
 	}
 	
 	private boolean disabled = false;
