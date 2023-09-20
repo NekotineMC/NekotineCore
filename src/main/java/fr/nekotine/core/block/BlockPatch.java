@@ -18,8 +18,8 @@ public class BlockPatch {
 	
 	public BlockPatch(Consumer<BlockState> patch) {
 		this.patch = patch;
-		NekotineCore.MODULES.get(TempBlockModule.class); // Silently load module
-		NekotineCore.MODULES.get(FakeBlockModule.class); // Silently load module
+		NekotineCore.MODULES.tryLoad(TempBlockModule.class); // Silently load module
+		NekotineCore.MODULES.tryLoad(FakeBlockModule.class); // Silently load module
 	}
 	
 	public Consumer<BlockState> getPatchingFunction(){

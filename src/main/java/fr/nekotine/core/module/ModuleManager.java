@@ -27,6 +27,14 @@ public class ModuleManager {
 		}
 		return moduleMap.get(type);
 	}
+	
+	public  <M extends PluginModule> boolean tryLoad(Class<M> type) {
+		if (moduleMap.containsKey(type)) {
+			return false;
+		}
+		load(type);
+		return true;
+	}
 
 	public <M extends PluginModule> void load(Class<M> type) {
 		var name = type.getSimpleName();
