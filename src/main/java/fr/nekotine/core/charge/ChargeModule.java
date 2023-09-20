@@ -9,7 +9,9 @@ import org.bukkit.event.Listener;
 
 import com.comphenix.protocol.wrappers.Pair;
 
+import fr.nekotine.core.NekotineCore;
 import fr.nekotine.core.module.PluginModule;
+import fr.nekotine.core.ticking.TickingModule;
 import fr.nekotine.core.ticking.event.TickElapsedEvent;
 import fr.nekotine.core.util.EventUtil;
 
@@ -18,6 +20,7 @@ public class ChargeModule extends PluginModule implements Listener{
 	
 	public ChargeModule() {
 		EventUtil.register(this);
+		NekotineCore.MODULES.tryLoad(TickingModule.class);
 	}
 	
 	@Override
