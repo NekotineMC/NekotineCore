@@ -183,4 +183,11 @@ public class EntityUtil {
 			pmanager.sendServerPacket(player, packet);
 		}
 	}
+	
+	public static void fakeDamage(LivingEntity target) {
+		PacketContainer packet = new PacketContainer(PacketType.Play.Server.HURT_ANIMATION);
+		packet.getIntegers().write(0, target.getEntityId());
+		var pmanager = ProtocolLibrary.getProtocolManager();
+		pmanager.broadcastServerPacket(packet);
+	}
 }
