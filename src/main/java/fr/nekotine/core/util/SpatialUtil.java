@@ -52,7 +52,7 @@ public class SpatialUtil {
 			TriConsumer<Double, Double, Double> consumer) {
 		line3DFromDir(new Vector(startX, startY, startZ), new Vector(dirx, diry, dirz), distance, blockDensity, consumer);
 	}
-	
+	//test
 	public static final void line3DFromDir(Vector start,
 			Vector direction, double distance, double blockDensity,
 			Consumer<Vector> consumer) {
