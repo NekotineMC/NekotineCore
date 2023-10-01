@@ -34,8 +34,9 @@ public class SpatialUtil {
 		if (!direction.isNormalized()) {
 			direction.normalize();
 		}
-		direction.multiply(1/blockDensity);
-		for (double theta = 0; theta < distance; theta += blockDensity) {
+		var dist = 1/blockDensity;
+		direction.multiply(dist);
+		for (double theta = 0; theta < distance; theta += dist) {
 			consumer.accept(start.getX(), start.getY(), start.getZ());
 			start.add(direction);
 		}
@@ -59,8 +60,9 @@ public class SpatialUtil {
 		if (!direction.isNormalized()) {
 			direction.normalize();
 		}
-		direction.multiply(1/blockDensity);
-		for (double theta = 0; theta < distance; theta += blockDensity) {
+		var dist = 1/blockDensity;
+		direction.multiply(dist);
+		for (double theta = 0; theta < distance; theta += dist) {
 			consumer.accept(start);
 			start.add(direction);
 		}
