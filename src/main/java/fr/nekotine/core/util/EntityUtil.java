@@ -11,10 +11,15 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Llama;
+import org.bukkit.entity.Player;
 import org.bukkit.entity.Slime;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
+
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.events.PacketContainer;
 
 public class EntityUtil {
 	/**
@@ -158,6 +163,24 @@ public class EntityUtil {
 					attrInstance.removeModifier(modifier);
 				}
 			}
+		}
+	}
+	
+	public static void fakeDamage(LivingEntity target, Player ... observers) {
+		PacketContainer packet = new PacketContainer(PacketType.Play.Server.HURT_ANIMATION);
+		packet.getIntegers().write(0, target.getEntityId());
+		var pmanager = ProtocolLibrary.getProtocolManager();
+		for (var player : observers) {
+			pmanager.sendServerPacket(player, packet);
+		}
+	}
+	
+	public static void fakeDamage(LivingEntity target, Iterable<Player> observers) {
+		PacketContainer packet = new PacketContainer(PacketType.Play.Server.HURT_ANIMATION);
+		packet.getIntegers().write(0, target.getEntityId());
+		var pmanager = ProtocolLibrary.getProtocolManager();
+		for (var player : observers) {
+			pmanager.sendServerPacket(player, packet);
 		}
 	}
 }
