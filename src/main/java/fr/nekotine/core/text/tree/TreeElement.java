@@ -13,7 +13,7 @@ public abstract class TreeElement{
 	
 	public TreeElement addStyle(Enum<?>... styleNames) {
 		for(int i=0 ; i < styleNames.length ; i++) {
-			styles.add(styleNames[i]);
+			styles.addFirst(styleNames[i]);
 		}
 		return this;
 	}
