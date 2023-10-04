@@ -21,10 +21,6 @@ public class ActionMenuItem extends ClickableMenuElement{
 		this.itemStack = itemStack;
 		runnable = p -> action.run();
 	}
-	
-	public  @Nullable ClickableMenuElement getClickedMenuItem(ItemStack item) {
-		return item != null && item.isSimilar(itemStack) ? this : null;
-	}
 
 	@Override
 	public ItemStack draw() {
