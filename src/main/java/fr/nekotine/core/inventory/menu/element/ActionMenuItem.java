@@ -4,7 +4,6 @@ import java.util.function.Consumer;
 
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.Nullable;
 
 public class ActionMenuItem extends ClickableMenuElement{
 
