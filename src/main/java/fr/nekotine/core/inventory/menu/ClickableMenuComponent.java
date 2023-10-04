@@ -1,10 +1,9 @@
 package fr.nekotine.core.inventory.menu;
 
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.event.inventory.InventoryClickEvent;
 
 public interface ClickableMenuComponent {
 
-	public void onClick(ItemStack clicked, Player player);
+	public void onClick(InventoryClickEvent event);
 	
 }

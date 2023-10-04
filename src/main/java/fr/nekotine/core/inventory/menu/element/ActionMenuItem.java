@@ -2,7 +2,7 @@ package fr.nekotine.core.inventory.menu.element;
 
 import java.util.function.Consumer;
 
-import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -10,9 +10,9 @@ public class ActionMenuItem extends ClickableMenuElement{
 
 	ItemStack itemStack;
 	
-	Consumer<Player> runnable;
+	Consumer<InventoryClickEvent> runnable;
 	
-	public ActionMenuItem(ItemStack itemStack, Consumer<Player> action) {
+	public ActionMenuItem(ItemStack itemStack, Consumer<InventoryClickEvent> action) {
 		this.itemStack = itemStack;
 		runnable = action;
 	}
@@ -27,13 +27,13 @@ public class ActionMenuItem extends ClickableMenuElement{
 	}
 
 	@Override
-	public void click(Player player) {
-		runnable.accept(player);
-		askRedraw();
+	public ItemStack draw() {
+		return itemStack;
 	}
 
 	@Override
-	public ItemStack draw() {
-		return itemStack;
+	public void click(InventoryClickEvent event) {
+		runnable.accept(event);
+		askRedraw();
 	}
 }

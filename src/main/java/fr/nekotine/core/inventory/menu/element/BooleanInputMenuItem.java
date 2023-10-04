@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -75,8 +76,10 @@ public class BooleanInputMenuItem extends ClickableMenuElement{
 	}
 
 	@Override
-	public void click(Player player) {
-		toggleValue(player);
+	public void click(InventoryClickEvent event) {
+		if (event.getWhoClicked() instanceof Player p) {
+			toggleValue(p);
+		}
 	}
 
 	@Override

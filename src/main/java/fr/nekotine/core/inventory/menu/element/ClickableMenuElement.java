@@ -1,19 +1,23 @@
 package fr.nekotine.core.inventory.menu.element;
 
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.event.inventory.InventoryClickEvent;
 
 import fr.nekotine.core.inventory.menu.ClickableMenuComponent;
 
 public abstract class ClickableMenuElement extends MenuElement implements ClickableMenuComponent{
 
 	@Override
-	public void onClick(ItemStack clicked, Player player) {
-		if (clicked.isSimilar(draw())) {
-			click(player);
+	public void onClick(InventoryClickEvent event) {
+		var item = event.getCurrentItem();
+		if (item != null && item.isSimilar(draw())) {
+			click(event);
 		}
 	}
 	
-	public abstract void click(Player player);
+	/**
+	 * Actions when clicked ItemStack is matching
+	 * @param event
+	 */
+	public abstract void click(InventoryClickEvent event);
 	
 }

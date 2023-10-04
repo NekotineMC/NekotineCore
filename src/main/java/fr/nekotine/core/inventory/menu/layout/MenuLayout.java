@@ -3,9 +3,8 @@ package fr.nekotine.core.inventory.menu.layout;
 import java.util.Collection;
 import java.util.LinkedList;
 
-import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 
 import fr.nekotine.core.inventory.menu.ClickableMenuComponent;
 import fr.nekotine.core.inventory.menu.MenuComponent;
@@ -24,9 +23,9 @@ public abstract class MenuLayout extends MenuComponent implements ClickableMenuC
 		clickables.remove(element);
 	}
 	
-	public void onClick(ItemStack itemStack, Player player) {
+	public void onClick(InventoryClickEvent event) {
 		for (var clickable : clickables) {
-			clickable.onClick(itemStack, player);
+			clickable.onClick(event);
 		}
 	}
 	
