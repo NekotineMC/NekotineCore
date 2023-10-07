@@ -8,8 +8,8 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 
 import fr.nekotine.core.module.PluginModule;
+import fr.nekotine.core.text.style.NekotineStyles;
 import fr.nekotine.core.text.style.TextStyle;
-import fr.nekotine.core.text.style.Styles;
 import fr.nekotine.core.text.tree.Leaf;
 import fr.nekotine.core.text.tree.Node;
 import fr.nekotine.core.text.tree.TreeElement;
@@ -42,10 +42,9 @@ public class TextModule extends PluginModule{
 	
 	public TextModule() {
 		styles = new HashMap<Enum<?>, TextStyle>();
-		
-		registerStyle(Styles.EMPTY, TextStyle.build());
-		registerStyle(Styles.STANDART, TextStyle.build(TagResolver.standard()));
-		registerStyle(Styles.NEKOTINE, TextStyle.build(TagResolver.standard()));
+		registerStyle(NekotineStyles.EMPTY, TextStyle.build());
+		registerStyle(NekotineStyles.STANDART, TextStyle.build(TagResolver.standard()));
+		registerStyle(NekotineStyles.NEKOTINE, TextStyle.build(TagResolver.standard()));
 	}
 	
 	//

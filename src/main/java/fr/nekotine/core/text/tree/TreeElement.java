@@ -24,7 +24,7 @@ public abstract class TreeElement{
 		return styles;
 	}
 	public TreeElement addStyle(Enum<?>... styleNames) {
-		for(Enum<?> style : styles) 
+		for(Enum<?> style : styleNames) 
 			styles.addFirst(style);
 		return this;
 	}

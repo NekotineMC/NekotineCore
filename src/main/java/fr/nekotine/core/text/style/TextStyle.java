@@ -16,8 +16,13 @@ public class TextStyle {
 		return new TextStyle(resolvers);
 	}
 	public TextStyle(@Nullable TagResolver... resolvers) {
-		if(resolver == null) resolver = TagResolver.empty();
-		setResolver(resolver);
+		this.resolver = TagResolver.empty();
+		
+		if(resolvers == null) {
+			buildMM();
+		}else {
+			addTagResolver(resolvers);
+		}
 	}
 	
 	//
@@ -52,6 +57,6 @@ public class TextStyle {
 	//
 	
 	private void buildMM() {
-		mm = MiniMessage.builder().tags(resolver).build();
+		mm = MiniMessage.builder().tags(resolver).build();;
 	}
 }

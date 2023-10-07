@@ -9,6 +9,9 @@ public class TextUtil {
 		HashMap<String, List<Integer>> found = new HashMap<String, List<Integer>>();
 		HashMap<String, Integer> subHashValue = new HashMap<String, Integer>();
 		
+		if(patterns.length == 0)
+			return found;
+		
 		int n = text.length();
 		int minLength = -1;
 		
@@ -36,18 +39,19 @@ public class TextUtil {
 		}
 		
 		//Rabin Karp Algorithm
-		for(int i=0 ; i < n - minLength ; i++) {
+		for(int i=0 ; i < n - minLength + 1 ; i++) {
 			
 			for(String pattern : subHashValue.keySet()) {
 				
 				int patternLength = pattern.length();
-				if(i + patternLength - 1 >= n)
+				
+				if(i + patternLength - 1 >= n) {
 					continue;
+				}
 				
 				if(subHashValue.get(pattern) == hashValue) {
-					
 					boolean patternFound = true;
-					for(int j= minLength ; j < patternLength ; j++) {
+					for(int j= 0 ; j < patternLength ; j++) {
 						
 						if(pattern.charAt(j) != text.charAt(i + j)) {
 							patternFound = false;
@@ -64,7 +68,8 @@ public class TextUtil {
 				}
 			}
 			
-			hashValue += text.charAt(i + minLength) - text.charAt(i);
+			if(i < n - minLength)
+				hashValue += text.charAt(i + minLength) - text.charAt(i);
 		}
 		
 

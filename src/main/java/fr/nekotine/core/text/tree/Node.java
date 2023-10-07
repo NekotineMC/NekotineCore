@@ -78,7 +78,9 @@ public class Node extends TreeElement{
 				if(child_compon.isEmpty()) {
 					child_compon.add(child_builded.get(0));
 				}else {
-					child_builded.get(0).append(child_builded.get(0));
+					child_compon.set(0, 
+						child_compon.get(0).append(child_builded.get(0))
+					);
 				}
 				
 			}else {

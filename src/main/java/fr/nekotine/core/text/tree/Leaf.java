@@ -49,7 +49,7 @@ public class Leaf extends TreeElement{
 		HashMap<String, Pair<Integer,List<ComponentLike>>> map = new HashMap<String, Pair<Integer,List<ComponentLike>>>();
 		for(TextPlaceholder holder : getPlaceholders()) {
 			
-			Pair<String,ComponentLike>[] tags = holder.resolve();
+			ArrayList<Pair<String,ComponentLike>> tags = holder.resolve();
 			for(Pair<String,ComponentLike> tag : tags) {
 				
 				String asTag = "<".concat(tag.a()).concat(">");
@@ -84,13 +84,13 @@ public class Leaf extends TreeElement{
 			
 			for(Entry<String, List<Integer>> tagFound : tagsFound.entrySet()) {
 				String tag = tagFound.getKey();
+				Integer tagNumber = holdersMap.get(tag).a();
+				int offset = 0;
 				
 				for(Integer position : tagFound.getValue()) {
-					
-					Integer tagNumber = holdersMap.get(tag).a();
-					
+					System.out.println(tag);
 					//On ajoute un numéro à la fin du tag (<name> devient <name1>)
-					line = TextUtil.insertText(line, Integer.toString(tagNumber), position + tag.length() - 1);
+					line = TextUtil.insertText(line, Integer.toString(tagNumber), offset + position + tag.length() - 1);
 					
 					//On retire les "<" & ">" du tag
 					String cutTag = tag.subSequence(1, tag.length() - 1).toString();
@@ -104,8 +104,13 @@ public class Leaf extends TreeElement{
 						Placeholder.component(newTag, tagComponents.get(tagNumber % tagComponents.size()))
 					);
 					
+					//On décale l'offset
+					offset += Integer.toString(tagNumber).length();
+					
 					//On augmente le compteur
 					tagNumber += 1;
+					
+					
 				}
 			}
 			
