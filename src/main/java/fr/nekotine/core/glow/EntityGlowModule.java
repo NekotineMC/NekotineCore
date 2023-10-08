@@ -43,7 +43,8 @@ public class EntityGlowModule extends PluginModule {
 			if (!list.contains(eid)) {
 				return;
 			}
-			var values = packet.getDataValueCollectionModifier().read(0);
+			var newPacket = packet.deepClone();
+			var values = newPacket.getDataValueCollectionModifier().read(0);
 			var optionalValue =  values.stream().filter(v -> v.getIndex() == entityMetadataGlowIndex).findFirst();
 			if (optionalValue.isPresent()) {
 				var value = optionalValue.get();
@@ -52,6 +53,7 @@ public class EntityGlowModule extends PluginModule {
 				var serializer = WrappedDataWatcher.Registry.get(Byte.class);
 				values.add(new WrappedDataValue(0, serializer, entityMetadataGlowMask));
 			}
+			event.setPacket(newPacket);
 		}
 	};
 	
