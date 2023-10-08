@@ -35,11 +35,11 @@ public class MenuModule extends PluginModule implements Listener{
 	
 	@EventHandler
 	public void onInventoryClick(InventoryClickEvent event) {
-		var ite = registeredMenus.iterator();
-		while (ite.hasNext()) {
-			var menu = ite.next().get();
+		var tempList = new LinkedList<>(registeredMenus);
+		for (var weak : tempList) {
+			var menu = weak.get();
 			if (menu == null) {
-				ite.remove();
+				registeredMenus.remove(weak);
 			}else {
 				if (menu.getInventory() == event.getInventory()) {
 					menu.onClick(event);
