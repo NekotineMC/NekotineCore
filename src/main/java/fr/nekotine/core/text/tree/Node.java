@@ -1,11 +1,11 @@
 package fr.nekotine.core.text.tree;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import fr.nekotine.core.text.MessageModule;
+import fr.nekotine.core.text.TextModule;
+import fr.nekotine.core.text.placeholder.TextPlaceholder;
 import net.kyori.adventure.text.Component;
 
 public class Node extends TreeElement{
@@ -38,6 +38,10 @@ public class Node extends TreeElement{
 		super.addStyle(styleNames);
 		return this;
 	}
+	public Node addPlaceholder(TextPlaceholder... holders) {
+		super.addPlaceholder(holders);
+		return this;
+	}
 	public Node flatten() {
 		flatten = true;
 		return this;
@@ -46,24 +50,24 @@ public class Node extends TreeElement{
 	//
 	
 	private void addStylesToChildren() {
-		Iterator<TreeElement> childs_iter = childs.iterator();
-		while(childs_iter.hasNext()) {
-			TreeElement child = childs_iter.next();
-			Iterator<Enum<?>> styles_iter = super.styles.iterator();
-			while(styles_iter.hasNext()) {
-				child.addStyle(styles_iter.next());
-			}
-		}
+		for(TreeElement child : childs) 
+			for(Enum<?> style : getStyles()) 
+				child.addStyle(style);
+	}
+	private void addPlaceholdersToChildren() {
+		for(TreeElement child : childs) 
+			for(TextPlaceholder holder : getPlaceholders()) 
+			child.addPlaceholder(holder);
 	}
 	@Override
-	public List<Component> build(MessageModule module) {
+	public List<Component> build(TextModule module) {
+		//Passe ses styles/holders aux enfants
 		addStylesToChildren();
+		addPlaceholdersToChildren();
 		
 		//Recupère les textes des enfants déserialisés
 		List<Component> child_compon = new ArrayList<Component>();
-		Iterator<TreeElement> childs_iter = childs.iterator();
-		while(childs_iter.hasNext()) {
-			TreeElement child = childs_iter.next();
+		for(TreeElement child : childs) {
 			List<Component> child_builded = child.build(module);
 			if(child_builded.isEmpty())
 				continue;
@@ -74,7 +78,9 @@ public class Node extends TreeElement{
 				if(child_compon.isEmpty()) {
 					child_compon.add(child_builded.get(0));
 				}else {
-					child_builded.get(0).append(child_builded.get(0));
+					child_compon.set(0, 
+						child_compon.get(0).append(child_builded.get(0))
+					);
 				}
 				
 			}else {

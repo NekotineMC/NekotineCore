@@ -1,6 +1,6 @@
 package fr.nekotine.core.text.style;
 
-public enum Styles {
+public enum NekotineStyles {
 	EMPTY,
 	STANDART,
 	NEKOTINE

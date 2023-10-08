@@ -7,17 +7,22 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 
-public class MessageStyle {
+public class TextStyle {
 	private MiniMessage mm;
 	private TagResolver resolver;
 	
 	//
-	public static MessageStyle build(@Nullable TagResolver... resolvers) {
-		return new MessageStyle(resolvers);
+	public static TextStyle build(@Nullable TagResolver... resolvers) {
+		return new TextStyle(resolvers);
 	}
-	public MessageStyle(@Nullable TagResolver... resolvers) {
-		if(resolver == null) resolver = TagResolver.empty();
-		setResolver(resolver);
+	public TextStyle(@Nullable TagResolver... resolvers) {
+		this.resolver = TagResolver.empty();
+		
+		if(resolvers == null) {
+			buildMM();
+		}else {
+			addTagResolver(resolvers);
+		}
 	}
 	
 	//
@@ -52,6 +57,6 @@ public class MessageStyle {
 	//
 	
 	private void buildMM() {
-		mm = MiniMessage.builder().tags(resolver).build();
+		mm = MiniMessage.builder().tags(resolver).build();;
 	}
 }

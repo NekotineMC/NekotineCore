@@ -8,19 +8,19 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 
 import fr.nekotine.core.module.PluginModule;
-import fr.nekotine.core.text.style.MessageStyle;
-import fr.nekotine.core.text.style.Styles;
+import fr.nekotine.core.text.style.NekotineStyles;
+import fr.nekotine.core.text.style.TextStyle;
 import fr.nekotine.core.text.tree.Leaf;
 import fr.nekotine.core.text.tree.Node;
 import fr.nekotine.core.text.tree.TreeElement;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 
-public class MessageModule extends PluginModule{
+public class TextModule extends PluginModule{
 	public class Builder {
 		private TreeElement root;
-		private MessageModule module;
-		public Builder(TreeElement root, MessageModule module) {
+		private TextModule module;
+		public Builder(TreeElement root, TextModule module) {
 			this.root = root;
 			this.module = module;
 		}
@@ -36,29 +36,28 @@ public class MessageModule extends PluginModule{
 	
 	//
 	
-	private HashMap<Enum<?>, MessageStyle> styles;
+	private HashMap<Enum<?>, TextStyle> styles;
 	
 	//
 	
-	public MessageModule() {
-		styles = new HashMap<Enum<?>, MessageStyle>();
-		
-		registerStyle(Styles.EMPTY, MessageStyle.build());
-		registerStyle(Styles.STANDART, MessageStyle.build(TagResolver.standard()));
-		registerStyle(Styles.NEKOTINE, MessageStyle.build(TagResolver.standard()));
+	public TextModule() {
+		styles = new HashMap<Enum<?>, TextStyle>();
+		registerStyle(NekotineStyles.EMPTY, TextStyle.build());
+		registerStyle(NekotineStyles.STANDART, TextStyle.build(TagResolver.standard()));
+		registerStyle(NekotineStyles.NEKOTINE, TextStyle.build(TagResolver.standard()));
 	}
 	
 	//
 	
-	public boolean registerStyle(Enum<?> key, MessageStyle value) {
+	public boolean registerStyle(Enum<?> key, TextStyle value) {
 		if(styles.containsKey(key)) return false;
 		styles.put(key, value);
 		return true;
 	}
 	@Nullable
-	public MessageStyle getStyle(Enum<?> key) {
-		MessageStyle style = styles.get(key);
-		if(style==null) return MessageStyle.build();
+	public TextStyle getStyle(Enum<?> key) {
+		TextStyle style = styles.get(key);
+		if(style==null) return TextStyle.build();
 		return style;
 	}
 	public Builder message(Node node) {
@@ -70,8 +69,8 @@ public class MessageModule extends PluginModule{
 	
 	//
 	
-	public MessageStyle asMerged(LinkedList<Enum<?>> styles) {
-		MessageStyle merged = MessageStyle.build();
+	public TextStyle asMerged(LinkedList<Enum<?>> styles) {
+		TextStyle merged = TextStyle.build();
 		TagResolver[] resolvers = styles.stream().map(new Function<Enum<?>, TagResolver>() {
 			@Override
 			public TagResolver apply(Enum<?> style) {
