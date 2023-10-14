@@ -72,7 +72,6 @@ public class TextUtil {
 				hashValue += text.charAt(i + minLength) - text.charAt(i);
 		}
 		
-
 		return found;
 	}
 	

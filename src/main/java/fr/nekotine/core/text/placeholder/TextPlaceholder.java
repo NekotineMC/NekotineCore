@@ -1,10 +1,12 @@
-package fr.nekotine.core.text;
+package fr.nekotine.core.text.placeholder;
 
+import java.util.ArrayList;
+
+import fr.nekotine.core.tuple.Pair;
 import net.kyori.adventure.text.ComponentLike;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 
-public interface MessagePlaceholder {
+public interface TextPlaceholder {
 	
-	public ComponentLike resolve(String tag);
+	public ArrayList<Pair<String,ComponentLike>> resolve();
 	
 }
