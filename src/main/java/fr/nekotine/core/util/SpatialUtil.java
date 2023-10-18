@@ -11,7 +11,8 @@ public class SpatialUtil {
 
 	public static final void circle2DDensity(double radius, double blockDensity, double rotationOffset,BiConsumer<Double, Double> consumer) {
 		var perimeter = 2 * Math.PI * radius;
-		for(double theta = rotationOffset ; theta < perimeter + rotationOffset; theta+=blockDensity) {
+		var span = 1/blockDensity;
+		for(double theta = rotationOffset ; theta < perimeter + rotationOffset; theta+=span) {
 			double x = (Math.cos(theta) * radius);
 			double y = (Math.sin(theta) * radius);
 			consumer.accept(x, y);
