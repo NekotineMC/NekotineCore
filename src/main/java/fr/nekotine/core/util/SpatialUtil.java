@@ -9,21 +9,21 @@ import fr.nekotine.core.util.lambda.TriConsumer;
 
 public class SpatialUtil {
 
-	public static final void circle2DDensity(double centerX, double centerY, double radius, double blockDensity, double rotationOffset,BiConsumer<Double, Double> consumer) {
+	public static final void circle2DDensity(double radius, double blockDensity, double rotationOffset,BiConsumer<Double, Double> consumer) {
 		var perimeter = 2 * Math.PI * radius;
 		for(double theta = rotationOffset ; theta < perimeter + rotationOffset; theta+=blockDensity) {
-			double x = centerX + (Math.cos(theta) * radius);
-			double y = centerY + (Math.sin(theta) * radius);
+			double x = (Math.cos(theta) * radius);
+			double y = (Math.sin(theta) * radius);
 			consumer.accept(x, y);
 		}
 	}
 	
-	public static final void circle2DNumber(double centerX, double centerY, double radius, int nbPoints, double rotationOffset, BiConsumer<Double, Double> consumer) {
+	public static final void circle2DNumber(double radius, int nbPoints, double rotationOffset, BiConsumer<Double, Double> consumer) {
 		var fullCircle = 2 * Math.PI;
 		var span = fullCircle / nbPoints;
 		for(double theta = rotationOffset ; theta < fullCircle + rotationOffset ; theta+=span) {
-			double x = centerX + (Math.cos(theta) * radius);
-			double y = centerY + (Math.sin(theta) * radius);
+			double x = (Math.cos(theta) * radius);
+			double y = (Math.sin(theta) * radius);
 			consumer.accept(x, y);
 		}
 	}
