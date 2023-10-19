@@ -14,6 +14,7 @@ import fr.nekotine.core.util.TextUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 
 public class Leaf extends TreeElement{
 	private LinkedList<String> lines;
@@ -38,7 +39,7 @@ public class Leaf extends TreeElement{
 		super.addStyle(styleNames);
 		return this;
 	}
-	public Leaf addStyle(TextStyle... styles) {
+	public Leaf addStyle(TagResolver... styles) {
 		super.addStyle(styles);
 		return this;
 	}
@@ -79,9 +80,7 @@ public class Leaf extends TreeElement{
 		
 		//Récupère le style final
 		TextStyle style = module.asMerged(getStyles());
-		for(TextStyle additional : getAddtionalStyles()) {
-			style.addTagResolver(additional.getResolver());
-		}
+		style.addTagResolver(getAddtionalStyles().toArray(new TagResolver[0]));
 		
 		List<Component> components = new ArrayList<Component>();
 		for(String line : lines) {

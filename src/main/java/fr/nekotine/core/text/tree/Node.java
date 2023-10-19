@@ -6,8 +6,8 @@ import java.util.List;
 
 import fr.nekotine.core.text.TextModule;
 import fr.nekotine.core.text.placeholder.TextPlaceholder;
-import fr.nekotine.core.text.style.TextStyle;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 
 public class Node extends TreeElement{
 	private LinkedList<TreeElement> childs;
@@ -39,7 +39,7 @@ public class Node extends TreeElement{
 		super.addStyle(styleNames);
 		return this;
 	}
-	public Node addStyle(TextStyle... styles) {
+	public Node addStyle(TagResolver... styles) {
 		super.addStyle(styles);
 		return this;
 	}
@@ -59,7 +59,7 @@ public class Node extends TreeElement{
 			for(Enum<?> style : getStyles()) 
 				child.addStyle(style);
 			
-			for(TextStyle style : getAddtionalStyles())
+			for(TagResolver style : getAddtionalStyles())
 				child.addStyle(style);
 		}	
 	}

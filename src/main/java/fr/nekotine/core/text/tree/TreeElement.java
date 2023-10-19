@@ -5,19 +5,19 @@ import java.util.List;
 
 import fr.nekotine.core.text.TextModule;
 import fr.nekotine.core.text.placeholder.TextPlaceholder;
-import fr.nekotine.core.text.style.TextStyle;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 
 public abstract class TreeElement{
 	private LinkedList<Enum<?>> styles;
-	private LinkedList<TextStyle> additionalStyles;
+	private LinkedList<TagResolver> additionalStyles;
 	private LinkedList<TextPlaceholder> placeholders;
 	
 	//
 	
 	public TreeElement() {
 		styles = new LinkedList<Enum<?>>();
-		additionalStyles = new LinkedList<TextStyle>();
+		additionalStyles = new LinkedList<TagResolver>();
 		placeholders = new LinkedList<TextPlaceholder>();
 	}
 	
@@ -26,7 +26,7 @@ public abstract class TreeElement{
 	public LinkedList<Enum<?>> getStyles(){
 		return styles;
 	}
-	public LinkedList<TextStyle> getAddtionalStyles(){
+	public LinkedList<TagResolver> getAddtionalStyles(){
 		return additionalStyles;
 	}
 	public TreeElement addStyle(Enum<?>... styleNames) {
@@ -34,8 +34,8 @@ public abstract class TreeElement{
 			styles.addFirst(style);
 		return this;
 	}
-	public TreeElement addStyle(TextStyle... styles) {
-		for(TextStyle style : styles) 
+	public TreeElement addStyle(TagResolver... styles) {
+		for(TagResolver style : styles) 
 			additionalStyles.addFirst(style);
 		return this;
 	}
