@@ -47,6 +47,17 @@ public class ItemStackUtil {
 	}
 	
 	/**
+	 * Ajoute un enchantments à l'item.
+	 * @param itemStack
+	 * @param enchant
+	 * @param level
+	 */
+	public static ItemStack addEnchant(ItemStack itemStack, Enchantment enchant, int level) {
+		itemStack.addEnchantment(enchant, level);
+		return itemStack;
+	}
+	
+	/**
 	 * Applique tous les flags qui cache les propriétés de l'item.
 	 */
 	public static ItemStack hideAllFlags(ItemStack itemStack) {
