@@ -38,6 +38,10 @@ public class Leaf extends TreeElement{
 		super.addStyle(styleNames);
 		return this;
 	}
+	public Leaf addStyle(TextStyle... styles) {
+		super.addStyle(styles);
+		return this;
+	}
 	public Leaf addPlaceholder(TextPlaceholder... holders) {
 		super.addPlaceholder(holders);
 		return this;
@@ -75,6 +79,9 @@ public class Leaf extends TreeElement{
 		
 		//Récupère le style final
 		TextStyle style = module.asMerged(getStyles());
+		for(TextStyle additional : getAddtionalStyles()) {
+			style.addTagResolver(additional.getResolver());
+		}
 		
 		List<Component> components = new ArrayList<Component>();
 		for(String line : lines) {

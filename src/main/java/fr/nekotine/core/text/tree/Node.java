@@ -6,6 +6,7 @@ import java.util.List;
 
 import fr.nekotine.core.text.TextModule;
 import fr.nekotine.core.text.placeholder.TextPlaceholder;
+import fr.nekotine.core.text.style.TextStyle;
 import net.kyori.adventure.text.Component;
 
 public class Node extends TreeElement{
@@ -38,6 +39,10 @@ public class Node extends TreeElement{
 		super.addStyle(styleNames);
 		return this;
 	}
+	public Node addStyle(TextStyle... styles) {
+		super.addStyle(styles);
+		return this;
+	}
 	public Node addPlaceholder(TextPlaceholder... holders) {
 		super.addPlaceholder(holders);
 		return this;
@@ -50,9 +55,13 @@ public class Node extends TreeElement{
 	//
 	
 	private void addStylesToChildren() {
-		for(TreeElement child : childs) 
+		for(TreeElement child : childs) {
 			for(Enum<?> style : getStyles()) 
 				child.addStyle(style);
+			
+			for(TextStyle style : getAddtionalStyles())
+				child.addStyle(style);
+		}	
 	}
 	private void addPlaceholdersToChildren() {
 		for(TreeElement child : childs) 

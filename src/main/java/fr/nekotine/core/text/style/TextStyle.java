@@ -10,6 +10,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 public class TextStyle {
 	private MiniMessage mm;
 	private TagResolver resolver;
+	private boolean changed;
 	
 	//
 	public static TextStyle build(@Nullable TagResolver... resolvers) {
@@ -17,26 +18,24 @@ public class TextStyle {
 	}
 	public TextStyle(@Nullable TagResolver... resolvers) {
 		this.resolver = TagResolver.empty();
-		
-		if(resolvers == null) {
-			buildMM();
-		}else {
+		this.changed = true;
+		if(resolvers != null) 
 			addTagResolver(resolvers);
-		}
 	}
 	
 	//
 	
 	public void setResolver(TagResolver resolver) {
+		this.changed = true;
 		this.resolver = resolver;
-		buildMM();
 	}
 	public void addTagResolver(TagResolver... resolvers) {
+		this.changed = true;
 		this.resolver = TagResolver.builder()
 			.resolver(this.resolver)
 			.resolvers(resolvers)
 		.build();
-		buildMM();
+		
 	}
 	public void addTagResolver(String name, Tag tag) {
 		addTagResolver(TagResolver.resolver(name, tag));
@@ -45,6 +44,9 @@ public class TextStyle {
 	//
 	
 	public Component deserialize(String text) {
+		if(changed)
+			mm = MiniMessage.builder().tags(resolver).build();
+		changed = false;
 		return mm.deserialize(text);
 	}
 	
@@ -52,11 +54,5 @@ public class TextStyle {
 	
 	public TagResolver getResolver() {
 		return resolver;
-	}
-	
-	//
-	
-	private void buildMM() {
-		mm = MiniMessage.builder().tags(resolver).build();;
 	}
 }

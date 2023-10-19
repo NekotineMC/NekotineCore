@@ -5,16 +5,19 @@ import java.util.List;
 
 import fr.nekotine.core.text.TextModule;
 import fr.nekotine.core.text.placeholder.TextPlaceholder;
+import fr.nekotine.core.text.style.TextStyle;
 import net.kyori.adventure.text.Component;
 
 public abstract class TreeElement{
 	private LinkedList<Enum<?>> styles;
+	private LinkedList<TextStyle> additionalStyles;
 	private LinkedList<TextPlaceholder> placeholders;
 	
 	//
 	
 	public TreeElement() {
 		styles = new LinkedList<Enum<?>>();
+		additionalStyles = new LinkedList<TextStyle>();
 		placeholders = new LinkedList<TextPlaceholder>();
 	}
 	
@@ -23,9 +26,17 @@ public abstract class TreeElement{
 	public LinkedList<Enum<?>> getStyles(){
 		return styles;
 	}
+	public LinkedList<TextStyle> getAddtionalStyles(){
+		return additionalStyles;
+	}
 	public TreeElement addStyle(Enum<?>... styleNames) {
 		for(Enum<?> style : styleNames) 
 			styles.addFirst(style);
+		return this;
+	}
+	public TreeElement addStyle(TextStyle... styles) {
+		for(TextStyle style : styles) 
+			additionalStyles.addFirst(style);
 		return this;
 	}
 	public LinkedList<TextPlaceholder> getPlaceholders(){
