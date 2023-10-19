@@ -1,6 +1,8 @@
 package fr.nekotine.core.util;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
@@ -35,41 +37,46 @@ public class ItemStackUtil {
 	 * Retire tous les enchantments de l'item.
 	 * @param itemStack
 	 */
-	public static void clearEnchants(ItemStack itemStack) {
+	public static ItemStack clearEnchants(ItemStack itemStack) {
 		var meta = itemStack.getItemMeta();
 		for (var ench : Enchantment.values()) {
 			meta.removeEnchant(ench);
 		}
 		itemStack.setItemMeta(meta);
+		return itemStack;
 	}
 	
 	/**
 	 * Applique tous les flags qui cache les propriétés de l'item.
 	 */
-	public static void hideAllFlags(ItemStack itemStack) {
+	public static ItemStack hideAllFlags(ItemStack itemStack) {
 		itemStack.addItemFlags(ItemFlag.values());
+		return itemStack;
 	}
 	
-	public static void setUnbreakable(ItemStack itemStack, boolean unbreakable) {
+	public static ItemStack setUnbreakable(ItemStack itemStack, boolean unbreakable) {
 		var meta = itemStack.getItemMeta();
 		meta.setUnbreakable(unbreakable);
 		itemStack.setItemMeta(meta);
+		return itemStack;
 	}
 	
-	public static void setOldPvpAttackSpeed(ItemStack itemStack, boolean unbreakable) {
+	public static ItemStack setOldPvpAttackSpeed(ItemStack itemStack, boolean unbreakable) {
 		var meta = itemStack.getItemMeta();
 		meta.addAttributeModifier(Attribute.GENERIC_ATTACK_SPEED, new AttributeModifier("pvp_1.8", 1000.0D, AttributeModifier.Operation.ADD_NUMBER));
 		itemStack.setItemMeta(meta);
+		return itemStack;
 	}
 	
-	public static void setFlags(ItemStack itemStack, ItemFlag... flags) {
+	public static ItemStack setFlags(ItemStack itemStack, ItemFlag... flags) {
 		var meta = itemStack.getItemMeta();
 		meta.removeItemFlags(meta.getItemFlags().toArray(ItemFlag[]::new));
 		meta.addItemFlags(flags);
 		itemStack.setItemMeta(meta);
+		return itemStack;
 	}
 	
-	public static void setUnstackable(ItemStack itemStack, boolean unstackable) {
+	public static ItemStack setUnstackable(ItemStack itemStack, boolean unstackable) {
 		var meta = itemStack.getItemMeta();
 		var container = meta.getPersistentDataContainer();
 		if (unstackable) {
@@ -78,27 +85,30 @@ public class ItemStackUtil {
 			container.remove(unstackableKey);
 		}
 		itemStack.setItemMeta(meta);
+		return itemStack;
 	}
 	
-	public static void setUnstackable(ItemMeta itemMeta, boolean unstackable) {
+	public static ItemMeta setUnstackable(ItemMeta itemMeta, boolean unstackable) {
 		var container = itemMeta.getPersistentDataContainer();
 		if (unstackable) {
 			container.set(unstackableKey, PersistentDataType.INTEGER, unstackableCounter++);
 		}else {
 			container.remove(unstackableKey);
 		}
+		return itemMeta;
 	}
 	
-	public static void setUnstackable(ItemStack itemStack) {
+	public static ItemStack setUnstackable(ItemStack itemStack) {
 		setUnstackable(itemStack, true);
+		return itemStack;
 	}
 	
-	public static void setUnstackable(ItemMeta itemMeta) {
-		setUnstackable(itemMeta, true);
+	public static ItemMeta setUnstackable(ItemMeta itemMeta) {
+		return setUnstackable(itemMeta, true);
 	}
 	
-	public static @NotNull ItemStack skull(String url) throws MalformedURLException {
-		return skull(new URL(url));
+	public static @NotNull ItemStack skull(String url) throws MalformedURLException, URISyntaxException {
+		return skull(new URI(url).toURL());
 	}
 	
 	public static @NotNull ItemStack skull(URL url) {
