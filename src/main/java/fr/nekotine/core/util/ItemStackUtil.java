@@ -53,7 +53,7 @@ public class ItemStackUtil {
 	 * @param level
 	 */
 	public static ItemStack addEnchant(ItemStack itemStack, Enchantment enchant, int level) {
-		itemStack.addEnchantment(enchant, level);
+		itemStack.addUnsafeEnchantment(enchant, level);
 		return itemStack;
 	}
 	
