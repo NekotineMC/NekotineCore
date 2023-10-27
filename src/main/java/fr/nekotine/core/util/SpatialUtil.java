@@ -29,6 +29,48 @@ public class SpatialUtil {
 		}
 	}
 	
+	public static final void sphere3DDensity(double radius, double blockDensity, TriConsumer<Double, Double, Double> consumer) {
+		var nbPointsOuter = 2 * Math.PI * radius * blockDensity;
+		var deltaTheta = (2 * Math.PI) / nbPointsOuter;
+		for(double theta = 0 ; theta < Math.PI ; theta += deltaTheta) {
+			
+			double y = Math.cos(theta) * radius;
+			double outerRadius = Math.sin(theta);
+			var nbPointsInner = nbPointsOuter * outerRadius;
+			var deltaPhi = (2 * Math.PI) / nbPointsInner;
+			for(double phi = 0 ; phi < 2 * Math.PI ; phi += deltaPhi) {
+				double x = radius * Math.cos(phi) * outerRadius;
+				double z = radius * Math.sin(phi) * outerRadius;
+				consumer.accept(x, y, z);
+			}
+		}
+	}
+
+	public static final void sphere3DNumber(double radius, int nbCircles, int nbPoints, TriConsumer<Double, Double, Double> consumer) {
+		for(double theta = 0 ; theta < Math.PI ; theta += Math.PI / nbCircles) {
+			double y = Math.cos(theta) * radius;
+			for(double phi = 0 ; phi < 2 * Math.PI ; phi += (2 * Math.PI) / nbPoints) {
+				double x = radius * Math.cos(phi) * Math.sin(theta);
+				double z = radius * Math.sin(phi) * Math.sin(theta);
+				consumer.accept(x, y, z);
+			}
+		}
+	}
+	
+	public static final void ball3DDensity(double radius, double blockDensity, TriConsumer<Double, Double, Double> consumer) {
+		var span = 1 / blockDensity;
+		for(double r = 0 ; r <= radius ; r += span) {
+			sphere3DDensity(r, blockDensity, consumer);
+		}
+	}
+	
+	public static final void ball3DNumber(double radius, int nbRadius, int nbCircles, int nbPoints, TriConsumer<Double, Double, Double> consumer) {
+		var span = radius / nbRadius;
+		for(double r = 0 ; r <= radius ; r += span) {
+			sphere3DNumber(r, nbCircles, nbPoints, consumer);
+		}
+	}
+
 	public static final void line3DFromDir(Vector start,
 			Vector direction, double distance, double blockDensity,
 			TriConsumer<Double, Double, Double> consumer) {
