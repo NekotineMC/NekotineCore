@@ -8,6 +8,12 @@ import org.bukkit.util.Vector;
 import fr.nekotine.core.util.lambda.TriConsumer;
 
 public class SpatialUtil {
+	public enum SphereAlgorithm{
+		UNIFORM,
+		FIBONACCI
+	}
+	
+	//
 
 	public static final void circle2DDensity(double radius, double blockDensity, double rotationOffset,BiConsumer<Double, Double> consumer) {
 		var perimeter = 2 * Math.PI * radius;
@@ -29,7 +35,19 @@ public class SpatialUtil {
 		}
 	}
 	
-	public static final void sphere3DDensity(double radius, double blockDensity, TriConsumer<Double, Double, Double> consumer) {
+	//
+	
+	public static final void sphere3DDensity(double radius, double blockDensity, SphereAlgorithm algorithm, TriConsumer<Double, Double, Double> consumer) {
+		switch(algorithm) {
+		case UNIFORM:
+			sphere3DDensityUniform(radius,blockDensity,consumer);
+		case FIBONACCI:
+			sphere3DDensityFibonacci(radius,blockDensity,consumer);
+		default:
+			return;
+		}
+	}
+	private static final void sphere3DDensityUniform(double radius, double blockDensity, TriConsumer<Double, Double, Double> consumer) {
 		var nbPointsOuter = 2 * Math.PI * radius * blockDensity;
 		var deltaTheta = (2 * Math.PI) / nbPointsOuter;
 		for(double theta = 0 ; theta < Math.PI ; theta += deltaTheta) {
@@ -45,8 +63,45 @@ public class SpatialUtil {
 			}
 		}
 	}
+	private static final void sphere3DDensityFibonacci(double radius, double blockDensity, TriConsumer<Double, Double, Double> consumer) {
+		double surface = 4 * Math.PI * radius * radius;
+		int nbPoints = (int) (surface * blockDensity);
+		double phi = Math.PI * (Math.sqrt(5) - 1);
+		for(int i=0 ; i < nbPoints; i++) {
+			double y = 1 - (i / (float)(nbPoints - 1)) * 2;
+			double innerRadius = Math.sqrt(1 - y*y);
+			double theta = phi * i;
+			double x = Math.cos(theta) * innerRadius;
+			double z = Math.sin(theta) * innerRadius;
+			consumer.accept(x * radius, y * radius, z * radius);
+		}
+	}
+	public static final void ball3DDensity(double radius, double blockDensity, SphereAlgorithm algorithm, TriConsumer<Double, Double, Double> consumer) {
+		switch(algorithm) {
+		case UNIFORM:
+			ball3DDensityUniform(radius,blockDensity,consumer);
+		case FIBONACCI:
+			ball3DDensityFibonacci(radius,blockDensity,consumer);
+		default:
+			return;
+		}
+	}
+	private static final void ball3DDensityUniform(double radius, double blockDensity, TriConsumer<Double, Double, Double> consumer) {
+		var span = 1 / blockDensity;
+		for(double r = 0 ; r <= radius ; r += span) {
+			sphere3DDensity(r, blockDensity, SphereAlgorithm.UNIFORM, consumer);
+		}
+	}
+	private static final void ball3DDensityFibonacci(double radius, double blockDensity, TriConsumer<Double, Double, Double> consumer) {
+		var span = 1 / blockDensity;
+		for(double r = 0 ; r <= radius ; r += span) {
+			sphere3DDensity(r, blockDensity, SphereAlgorithm.FIBONACCI, consumer);
+		}
+	}
 
-	public static final void sphere3DNumber(double radius, int nbCircles, int nbPoints, TriConsumer<Double, Double, Double> consumer) {
+	//
+	
+	public static final void sphere3DCircle(double radius, int nbCircles, int nbPoints, TriConsumer<Double, Double, Double> consumer) {
 		for(double theta = 0 ; theta < Math.PI ; theta += Math.PI / nbCircles) {
 			double y = Math.cos(theta) * radius;
 			for(double phi = 0 ; phi < 2 * Math.PI ; phi += (2 * Math.PI) / nbPoints) {
@@ -56,20 +111,25 @@ public class SpatialUtil {
 			}
 		}
 	}
-	
-	public static final void ball3DDensity(double radius, double blockDensity, TriConsumer<Double, Double, Double> consumer) {
-		var span = 1 / blockDensity;
+	public static final void ball3DVolume(double radius, int nbSpheres, int nbCircles, int nbPoints, TriConsumer<Double, Double, Double> consumer) {
+		var span = radius / nbSpheres;
 		for(double r = 0 ; r <= radius ; r += span) {
-			sphere3DDensity(r, blockDensity, consumer);
+			sphere3DCircle(r, nbCircles, nbPoints, consumer);
+		}
+	}
+	public static final void sphere3DNumber(double radius, int nbPoints, TriConsumer<Double, Double, Double> consumer) {
+		double phi = Math.PI * (Math.sqrt(5) - 1);
+		for(int i=0 ; i < nbPoints; i++) {
+			double y = 1 - (i / (float)(nbPoints - 1)) * 2;
+			double innerRadius = Math.sqrt(1 - y*y);
+			double theta = phi * i;
+			double x = Math.cos(theta) * innerRadius;
+			double z = Math.sin(theta) * innerRadius;
+			consumer.accept(x * radius, y * radius, z * radius);
 		}
 	}
 	
-	public static final void ball3DNumber(double radius, int nbRadius, int nbCircles, int nbPoints, TriConsumer<Double, Double, Double> consumer) {
-		var span = radius / nbRadius;
-		for(double r = 0 ; r <= radius ; r += span) {
-			sphere3DNumber(r, nbCircles, nbPoints, consumer);
-		}
-	}
+	//
 
 	public static final void line3DFromDir(Vector start,
 			Vector direction, double distance, double blockDensity,
