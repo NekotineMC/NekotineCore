@@ -71,7 +71,7 @@ public class StatusEffectModule extends PluginModule implements Listener{
 				if (list == null) {
 					continue;
 				}
-				list.removeIf(a -> (--a.durationLeft) <= 0);
+				list.removeIf(a -> (--a.durationLeft) == 0);
 				if (list.isEmpty()) {
 					effect.removeEffect(entity);
 					entityMap.remove(effect);
