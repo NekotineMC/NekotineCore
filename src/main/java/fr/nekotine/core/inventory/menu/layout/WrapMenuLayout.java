@@ -43,9 +43,9 @@ public class WrapMenuLayout extends MenuLayout{
 		var curX = x;
 		var curY = y;
 		for (var item : items) {
-			if (curX > width - x) {
+			if (curX > width + x - 1) {
 				curX = x;
-				if (++curY > height - y) {
+				if (++curY > height + y - 1) {
 					return;
 				}
 			}
