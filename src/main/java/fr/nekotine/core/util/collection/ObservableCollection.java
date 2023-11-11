@@ -97,7 +97,7 @@ public class ObservableCollection<T> implements Collection<T>{
 	public boolean remove(Object o) {
 		var result = inner.remove(o);
 		if (result) {
-			var ite = itemRemoveCallbacks.listIterator();
+			var ite = itemRemoveCallbacks.listIterator(itemRemoveCallbacks.size());
 			while (ite.hasPrevious()) {
 				try {
 					ite.previous().accept(o);
@@ -138,9 +138,10 @@ public class ObservableCollection<T> implements Collection<T>{
 		for (var e : c) {
 			if (remove(e)) {
 				changed = true;
-				for (var cb : itemRemoveCallbacks) {
+				var ite = itemRemoveCallbacks.listIterator(itemRemoveCallbacks.size());
+				while (ite.hasPrevious()) {
 					try {
-						cb.accept(e);
+						ite.previous().accept(e);
 					}catch(Exception ex) {
 						NekotineCore.LOGGER.log(Level.SEVERE, "Une erreur c'est produite dans une callback d'ObservableCollection.removeAll", ex);
 					}
@@ -158,9 +159,10 @@ public class ObservableCollection<T> implements Collection<T>{
 	@Override
 	public void clear() {
 		for (var e : inner) {
-			for (var cb : itemRemoveCallbacks) {
+			var ite = itemRemoveCallbacks.listIterator(itemRemoveCallbacks.size());
+			while (ite.hasPrevious()) {
 				try {
-					cb.accept(e);
+					ite.previous().accept(e);
 				}catch(Exception ex) {
 					NekotineCore.LOGGER.log(Level.SEVERE, "Une erreur c'est produite dans une callback d'ObservableCollection.clear", ex);
 				}
