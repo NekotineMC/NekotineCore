@@ -94,7 +94,6 @@ public class Leaf extends TreeElement{
 				int offset = 0;
 				
 				for(Integer position : tagFound.getValue()) {
-					System.out.println(tag);
 					//On ajoute un numéro à la fin du tag (<name> devient <name1>)
 					line = TextUtil.insertText(line, Integer.toString(tagNumber), offset + position + tag.length() - 1);
 					

@@ -2,6 +2,7 @@ package fr.nekotine.core.util;
 
 import java.util.Collection;
 import java.util.function.Predicate;
+import java.util.logging.Level;
 
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -20,6 +21,8 @@ import org.bukkit.util.Vector;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.PacketContainer;
+
+import fr.nekotine.core.NekotineCore;
 
 public class EntityUtil {
 	/**
@@ -102,8 +105,8 @@ public class EntityUtil {
 		try {
 			sound = Sound.valueOf("ENTITY_"+type+"_HURT");
 		} catch (IllegalArgumentException  e) {
-			System.out.println("[NekotineCore][UtilEntity][PlayDamageSound] impossible d'obtenir le son pour "+entity.getType());
-			System.out.println(e.getStackTrace());
+			NekotineCore.getAttachedPlugin().getLogger()
+			.log(Level.SEVERE, "[NekotineCore] > [UtilEntity] > [PlayDamageSound] impossible d'obtenir le son pour "+entity.getType(), (Throwable)e);
 		}
 		
 		entity.getWorld().playSound(entity.getLocation(), sound, 1.5f + (float)(0.5f * Math.random()), 0.8f + (float)(0.4f * Math.random()));
