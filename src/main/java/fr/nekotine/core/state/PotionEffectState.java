@@ -3,7 +3,7 @@ package fr.nekotine.core.state;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.potion.PotionEffect;
 
-public class PotionEffectState implements ItemState<LivingEntity>{
+public class PotionEffectState<T extends LivingEntity> implements ItemState<T>{
 
 	private final PotionEffect effect;
 	
