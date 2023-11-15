@@ -185,27 +185,27 @@ public class ItemStackBuilder {
 		switch(material) {
 		case WOODEN_SWORD:
 		case WOODEN_AXE:
-			attributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier("pvp_1.8", 4D, AttributeModifier.Operation.ADD_NUMBER));
+			attributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier("pvp_1.8", 3.2D, AttributeModifier.Operation.ADD_NUMBER));
 			break;
 		case STONE_SWORD:
 		case STONE_AXE:
-			attributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier("pvp_1.8", 5D, AttributeModifier.Operation.ADD_NUMBER));
+			attributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier("pvp_1.8", 3.2D, AttributeModifier.Operation.ADD_NUMBER));
 			break;
 		case IRON_SWORD:
 		case IRON_AXE:
-			attributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier("pvp_1.8", 6D, AttributeModifier.Operation.ADD_NUMBER));
+			attributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier("pvp_1.8", 4D, AttributeModifier.Operation.ADD_NUMBER));
 			break;
 		case GOLDEN_SWORD:
 		case GOLDEN_AXE:
-			attributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier("pvp_1.8", 4D, AttributeModifier.Operation.ADD_NUMBER));
+			attributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier("pvp_1.8", 4.8D, AttributeModifier.Operation.ADD_NUMBER));
 			break;
 		case DIAMOND_SWORD:
 		case DIAMOND_AXE:
-			attributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier("pvp_1.8", 7D, AttributeModifier.Operation.ADD_NUMBER));
+			attributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier("pvp_1.8", 5.6D, AttributeModifier.Operation.ADD_NUMBER));
 			break;
 		case NETHERITE_SWORD:
 		case NETHERITE_AXE:
-			attributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier("pvp_1.8", 8D, AttributeModifier.Operation.ADD_NUMBER));
+			attributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier("pvp_1.8", 6.4D, AttributeModifier.Operation.ADD_NUMBER));
 			break;
 		default:
 			break;
