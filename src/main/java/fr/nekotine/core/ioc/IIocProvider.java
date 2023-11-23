@@ -10,6 +10,8 @@ public interface IIocProvider {
 	
 	public <T,D extends T> IIocProvider registerSingletonAs(D singleton, Class<T> asType);
 	
+	public <T,D extends T> IIocProvider registerSingletonAs(Supplier<D> factory, Class<T> asType);
+	
 	public <T,D extends T> IIocProvider registerTransientAs(Supplier<D> factory, Class<T> asType);
 	
 	public <T> T resolve(Class<T> type);

@@ -12,12 +12,13 @@ public class IocProvider implements IIocProvider{
 
 	private TypeMap singletonMap = new TypeHashMap();
 	
-	private Map<Object, Supplier<Object>> factoryMap = new HashMap<>();
+	private Map<Object, Supplier<Object>> supplierMap = new HashMap<>();
 	
 	@Override
 	public <T> IIocProvider registerSingleton(T singleton) {
-		singletonMap.put(singleton);
-		return this;
+		@SuppressWarnings("unchecked")
+		var type = (Class<T>)singleton.getClass();
+		return registerSingletonAs(singleton, type);
 	}
 
 	@Override
@@ -25,11 +26,21 @@ public class IocProvider implements IIocProvider{
 		singletonMap.put(asType, singleton);
 		return this;
 	}
+	
+	@Override
+	public <T, D extends T> IIocProvider registerSingletonAs(Supplier<D> factory, Class<T> asType) {
+		supplierMap.put(asType, () -> {
+			var singleton = factory.get();
+			singletonMap.put(asType, singleton);
+			return singleton;
+		});
+		return this;
+	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T, D extends T> IIocProvider registerTransientAs(Supplier<D> factory, Class<T> asType) {
-		factoryMap.put(asType, (Supplier<Object>) factory);
+		supplierMap.put(asType, (Supplier<Object>) factory);
 		return this;
 	}
 
@@ -38,8 +49,8 @@ public class IocProvider implements IIocProvider{
 		if (singletonMap.containsKey(type)) {
 			return singletonMap.get(type);
 		}
-		if (factoryMap.containsKey(type)) {
-			return type.cast(factoryMap.get(type).get());
+		if (supplierMap.containsKey(type)) {
+			return type.cast(supplierMap.get(type).get());
 		}
 		throw new IllegalArgumentException("Aucune resolution pour le type "+type.getName());
 	}
@@ -49,8 +60,8 @@ public class IocProvider implements IIocProvider{
 		if (singletonMap.containsKey(type)) {
 			return Optional.of(singletonMap.get(type));
 		}
-		if (factoryMap.containsKey(type)) {
-			return Optional.of(type.cast(factoryMap.get(type).get()));
+		if (supplierMap.containsKey(type)) {
+			return Optional.of(type.cast(supplierMap.get(type).get()));
 		}
 		return Optional.empty();
 	}
