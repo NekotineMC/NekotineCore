@@ -214,4 +214,7 @@ public class ItemStackUtil {
 		target.setItemMeta(source.getItemMeta());
 	}
 	
+	public static boolean isAirOrNull(ItemStack item){
+		return item == null || item.getType().equals(Material.AIR);
+	}
 }

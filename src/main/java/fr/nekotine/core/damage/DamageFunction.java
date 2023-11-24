@@ -156,6 +156,7 @@ public enum DamageFunction {
 			@Override
 			public void accept(LivingEntityDamageEvent e) {
 				if(e.GetDamage() >= 0) {
+					//Récupérer l'angle entre le joueur et le damager
 					e.GetDamaged().playEffect(EntityEffect.HURT);
 					return;
 				}

@@ -1,6 +1,7 @@
 package fr.nekotine.core.util;
 
 import org.bukkit.Bukkit;
+import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -55,5 +56,13 @@ public class EventUtil {
 	 */
 	public static void unregister(Listener listener) {
 		HandlerList.unregisterAll(listener);
+	}
+	
+	/**
+	 * Appele un event
+	 * @param evt
+	 */
+	public static void call(Event evt) {
+		Bukkit.getPluginManager().callEvent(evt);
 	}
 }
