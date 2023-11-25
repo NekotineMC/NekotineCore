@@ -6,9 +6,10 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import org.bukkit.event.Event;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import fr.nekotine.core.NekotineCore;
+import fr.nekotine.core.ioc.Ioc;
 import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.ticking.event.TickElapsedEvent;
 
@@ -20,7 +21,7 @@ public class TickingModule extends PluginModule{
 	
 	public TickingModule() {
 		runningTask = new TickEventRunnable(this);
-		runningTask.runTaskTimer(NekotineCore.getAttachedPlugin(), 0, 1);
+		runningTask.runTaskTimer(Ioc.resolve(JavaPlugin.class), 0, 1);
 	}
 
 	@Override
@@ -28,7 +29,7 @@ public class TickingModule extends PluginModule{
 		try {
 			runningTask.cancel();
 		}catch(Exception e) {
-			LOGGER.log(Level.WARNING, "Erreur lors de l'arret de l'horloge", e);
+			logger.log(Level.WARNING, "Erreur lors de l'arret de l'horloge", e);
 		}
 		super.unload();
 	}
@@ -42,7 +43,7 @@ public class TickingModule extends PluginModule{
 			}
 		}
 		Event tickEvent = new TickElapsedEvent(reachedStamps);
-		NekotineCore.getAttachedPlugin().getServer().getPluginManager().callEvent(tickEvent);
+		Ioc.resolve(JavaPlugin.class).getServer().getPluginManager().callEvent(tickEvent);
 	}
 	
 	private class TickEventRunnable extends BukkitRunnable{

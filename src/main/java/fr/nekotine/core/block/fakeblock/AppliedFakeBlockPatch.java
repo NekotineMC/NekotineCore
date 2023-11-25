@@ -3,8 +3,8 @@ package fr.nekotine.core.block.fakeblock;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-import fr.nekotine.core.NekotineCore;
 import fr.nekotine.core.block.BlockPatch;
+import fr.nekotine.core.ioc.Ioc;
 
 public class AppliedFakeBlockPatch{
 	
@@ -33,7 +33,7 @@ public class AppliedFakeBlockPatch{
 	}
 	
 	public void unpatch() {
-		NekotineCore.MODULES.get(FakeBlockModule.class).unpatch(this);
+		Ioc.resolve(FakeBlockModule.class).unpatch(this);
 	}
 	
 }

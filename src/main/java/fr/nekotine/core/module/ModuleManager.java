@@ -3,8 +3,7 @@ package fr.nekotine.core.module;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import fr.nekotine.core.logging.FormatingRemoteLogger;
-import fr.nekotine.core.text.Text;
+import fr.nekotine.core.logging.NekotineLogger;
 import fr.nekotine.core.util.Stopwatch;
 import fr.nekotine.core.util.map.TypeHashMap;
 import fr.nekotine.core.util.map.TypeMap;
@@ -17,10 +16,10 @@ import fr.nekotine.core.util.map.TypeMap;
  */
 public class ModuleManager {
 
-	public Logger LOGGER = new FormatingRemoteLogger(Text.namedLoggerFormat("ModuleManager"));
+	public Logger LOGGER = new NekotineLogger(ModuleManager.class);
 	
 	private TypeMap moduleMap = new TypeHashMap();
-
+	
 	public <M extends PluginModule> M get(Class<M> type) {
 		if (!moduleMap.containsKey(type)) {
 			load(type);
@@ -36,6 +35,7 @@ public class ModuleManager {
 		return true;
 	}
 
+	@SuppressWarnings("resource")
 	public <M extends PluginModule> void load(Class<M> type) {
 		var name = type.getSimpleName();
 		if (moduleMap.containsKey(type)) {
@@ -51,6 +51,7 @@ public class ModuleManager {
 		}
 	}
 
+	@SuppressWarnings("resource")
 	public <M extends PluginModule> void unload(Class<M> type) {
 		var name = type.getSimpleName();
 		if (!moduleMap.containsKey(type)) {
@@ -59,10 +60,10 @@ public class ModuleManager {
 		}
 		try (var watch = new Stopwatch(w -> LOGGER.log(Level.INFO, "Le module "+name+" est decharge ("+w.elapsedMillis()+"ms)"))){
 			moduleMap.get(type).unload();
+			moduleMap.remove(type);
 		}catch(Exception e) {
 			LOGGER.log(Level.SEVERE, "Impossible de decharger le module "+name, e);
 		}
-		moduleMap.remove(type);
 	}
 	
 	@SuppressWarnings("unchecked")

@@ -6,14 +6,17 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import fr.nekotine.core.NekotineCore;
+import fr.nekotine.core.logging.NekotineLogger;
 
 public class ObservableCollection<T> implements Collection<T>{
 
 	private final List<Consumer<T>> itemAddCallbacks = new LinkedList<>();
 	
 	private final List<Consumer<Object>> itemRemoveCallbacks = new LinkedList<>();
+	
+	private final Logger logger = new NekotineLogger(getClass());
 	
 	private Collection<T> inner;
 	
@@ -86,7 +89,7 @@ public class ObservableCollection<T> implements Collection<T>{
 				try {
 					cb.accept(e);
 				}catch(Exception ex) {
-					NekotineCore.LOGGER.log(Level.SEVERE, "Une erreur c'est produite dans une callback d'ObservableCollection.add", ex);
+					logger.log(Level.SEVERE, "Une erreur c'est produite dans une callback d'ObservableCollection.add", ex);
 				}
 			}
 		}
@@ -102,7 +105,7 @@ public class ObservableCollection<T> implements Collection<T>{
 				try {
 					ite.previous().accept(o);
 				}catch(Exception ex) {
-					NekotineCore.LOGGER.log(Level.SEVERE, "Une erreur c'est produite dans une callback d'ObservableCollection.remove", ex);
+					logger.log(Level.SEVERE, "Une erreur c'est produite dans une callback d'ObservableCollection.remove", ex);
 				}
 			}
 		}
@@ -124,7 +127,7 @@ public class ObservableCollection<T> implements Collection<T>{
 					try {
 						cb.accept(e);
 					}catch(Exception ex) {
-						NekotineCore.LOGGER.log(Level.SEVERE, "Une erreur c'est produite dans une callback d'ObservableCollection.addAll", ex);
+						logger.log(Level.SEVERE, "Une erreur c'est produite dans une callback d'ObservableCollection.addAll", ex);
 					}
 				}
 			}
@@ -143,7 +146,7 @@ public class ObservableCollection<T> implements Collection<T>{
 					try {
 						ite.previous().accept(e);
 					}catch(Exception ex) {
-						NekotineCore.LOGGER.log(Level.SEVERE, "Une erreur c'est produite dans une callback d'ObservableCollection.removeAll", ex);
+						logger.log(Level.SEVERE, "Une erreur c'est produite dans une callback d'ObservableCollection.removeAll", ex);
 					}
 				}
 			}
@@ -164,7 +167,7 @@ public class ObservableCollection<T> implements Collection<T>{
 				try {
 					ite.previous().accept(e);
 				}catch(Exception ex) {
-					NekotineCore.LOGGER.log(Level.SEVERE, "Une erreur c'est produite dans une callback d'ObservableCollection.clear", ex);
+					logger.log(Level.SEVERE, "Une erreur c'est produite dans une callback d'ObservableCollection.clear", ex);
 				}
 			}
 		}

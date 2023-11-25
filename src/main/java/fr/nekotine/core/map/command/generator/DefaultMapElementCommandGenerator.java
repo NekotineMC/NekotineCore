@@ -2,11 +2,12 @@ package fr.nekotine.core.map.command.generator;
 
 import java.util.LinkedList;
 import java.util.function.Function;
+import java.util.logging.Logger;
 
 import dev.jorel.commandapi.arguments.Argument;
 import dev.jorel.commandapi.arguments.LiteralArgument;
 import dev.jorel.commandapi.executors.CommandArguments;
-import fr.nekotine.core.NekotineCore;
+import fr.nekotine.core.logging.NekotineLogger;
 import fr.nekotine.core.map.annotation.ComposingMap;
 import fr.nekotine.core.map.annotation.MapElementTyped;
 import fr.nekotine.core.map.command.MapCommandBranch;
@@ -19,6 +20,8 @@ import fr.nekotine.core.util.CollectionUtil;
 public class DefaultMapElementCommandGenerator implements MapElementCommandGenerator{
 
 	private final MapCommandGenerator globalGenerator;
+	
+	private Logger logger = new NekotineLogger(getClass());
 	
 	public DefaultMapElementCommandGenerator(MapCommandGenerator generator) {
 		this.globalGenerator = generator;
@@ -64,7 +67,7 @@ public class DefaultMapElementCommandGenerator implements MapElementCommandGener
 							branch.consumer().accept(field.get(element), sender, args);
 						}catch(IllegalAccessException e) {
 							var ex = new RuntimeException("Impossible d'acceder au champ "+field.getName()+" de la classe "+elementType.getName(),e);
-							NekotineCore.LOGGER.throwing("DefaultMapElementCommandGenerator", "MapCommandBranch[] generateFor(Class<?> elementType)", ex);
+							logger.throwing("DefaultMapElementCommandGenerator", "MapCommandBranch[] generateFor(Class<?> elementType)", ex);
 							throw ex;
 						}
 					};

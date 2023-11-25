@@ -17,7 +17,8 @@ import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
-import fr.nekotine.core.NekotineCore;
+import fr.nekotine.core.ioc.Ioc;
+import fr.nekotine.core.module.ModuleManager;
 import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.ticking.TickingModule;
 import fr.nekotine.core.ticking.event.TickElapsedEvent;
@@ -29,7 +30,7 @@ public class ProjectileModule extends PluginModule implements Listener{
 	
 	public ProjectileModule() {
 		EventUtil.register(this);
-		NekotineCore.MODULES.tryLoad(TickingModule.class);
+		Ioc.resolve(ModuleManager.class).tryLoad(TickingModule.class);
 	}
 	
 	@Override

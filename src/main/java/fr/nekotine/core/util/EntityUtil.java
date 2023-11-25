@@ -15,6 +15,7 @@ import org.bukkit.entity.Llama;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Slime;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
@@ -22,7 +23,7 @@ import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.PacketContainer;
 
-import fr.nekotine.core.NekotineCore;
+import fr.nekotine.core.ioc.Ioc;
 
 public class EntityUtil {
 	/**
@@ -105,7 +106,7 @@ public class EntityUtil {
 		try {
 			sound = Sound.valueOf("ENTITY_"+type+"_HURT");
 		} catch (IllegalArgumentException  e) {
-			NekotineCore.getAttachedPlugin().getLogger()
+			Ioc.resolve(JavaPlugin.class).getLogger()
 			.log(Level.SEVERE, "[NekotineCore] > [UtilEntity] > [PlayDamageSound] impossible d'obtenir le son pour "+entity.getType(), (Throwable)e);
 		}
 		

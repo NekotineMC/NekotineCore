@@ -4,8 +4,9 @@ import java.io.File;
 import java.util.function.Consumer;
 
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
+import org.bukkit.plugin.java.JavaPlugin;
 
-import fr.nekotine.core.NekotineCore;
+import fr.nekotine.core.ioc.Ioc;
 import fr.nekotine.core.map.command.IMapCommandGenerator;
 import fr.nekotine.core.map.command.MapCommandGenerator;
 import fr.nekotine.core.map.finder.ConfigurationSerializableMapFolderFinder;
@@ -16,7 +17,7 @@ import fr.nekotine.core.util.AsyncUtil;
 
 public class MapModule extends PluginModule{
 	
-	private final File defaultMapFolder = new File(NekotineCore.getAttachedPlugin().getDataFolder(), "Maps");
+	private final File defaultMapFolder = new File(Ioc.resolve(JavaPlugin.class).getDataFolder(), "Maps");
 	
 	private IMapFinder finder = new ConfigurationSerializableMapFolderFinder(defaultMapFolder);
 	

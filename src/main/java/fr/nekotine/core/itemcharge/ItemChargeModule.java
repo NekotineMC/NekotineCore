@@ -12,9 +12,10 @@ import org.bukkit.inventory.ItemStack;
 
 import com.comphenix.protocol.wrappers.Pair;
 
-import fr.nekotine.core.NekotineCore;
 import fr.nekotine.core.charge.ChargeModule;
 import fr.nekotine.core.charge.ICharge;
+import fr.nekotine.core.ioc.Ioc;
+import fr.nekotine.core.module.ModuleManager;
 import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.ticking.TickingModule;
 import fr.nekotine.core.ticking.event.TickElapsedEvent;
@@ -24,9 +25,9 @@ import fr.nekotine.core.util.EventUtil;
 public class ItemChargeModule extends PluginModule implements Listener{
 	
 	public ItemChargeModule() {
-		chargeManager = NekotineCore.MODULES.get(ChargeModule.class);
+		chargeManager = Ioc.resolve(ChargeModule.class);
 		EventUtil.register(this);
-		NekotineCore.MODULES.tryLoad(TickingModule.class);
+		Ioc.resolve(ModuleManager.class).tryLoad(TickingModule.class);
 	}
 	
 	@Override

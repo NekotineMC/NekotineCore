@@ -13,9 +13,10 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import com.comphenix.protocol.wrappers.Pair;
 import com.destroystokyo.paper.event.player.PlayerReadyArrowEvent;
 
-import fr.nekotine.core.NekotineCore;
 import fr.nekotine.core.charge.ChargeModule;
 import fr.nekotine.core.charge.ICharge;
+import fr.nekotine.core.ioc.Ioc;
+import fr.nekotine.core.module.ModuleManager;
 import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.ticking.TickingModule;
 import fr.nekotine.core.ticking.event.TickElapsedEvent;
@@ -24,8 +25,8 @@ import fr.nekotine.core.util.EventUtil;
 public class BowChargeModule extends PluginModule implements Listener{
 	
 	public BowChargeModule() {
-		chargeManager = NekotineCore.MODULES.get(ChargeModule.class);
-		NekotineCore.MODULES.tryLoad(TickingModule.class);
+		chargeManager = Ioc.resolve(ChargeModule.class);
+		Ioc.resolve(ModuleManager.class).tryLoad(TickingModule.class);
 		EventUtil.register(this);
 	}
 	

@@ -20,18 +20,19 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 
-import fr.nekotine.core.NekotineCore;
+import fr.nekotine.core.ioc.Ioc;
 import net.kyori.adventure.text.Component;
 
 public class ItemStackUtil {
 
 	private static int unstackableCounter = Integer.MIN_VALUE;
 	
-	private static final NamespacedKey unstackableKey = new NamespacedKey(NekotineCore.getAttachedPlugin(), "UnstackableId");
+	private static final NamespacedKey unstackableKey = new NamespacedKey(Ioc.resolve(JavaPlugin.class), "UnstackableId");
 	
 	/**
 	 * Retire tous les enchantments de l'item.

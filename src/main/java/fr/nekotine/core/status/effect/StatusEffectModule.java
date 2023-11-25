@@ -10,7 +10,8 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
-import fr.nekotine.core.NekotineCore;
+import fr.nekotine.core.ioc.Ioc;
+import fr.nekotine.core.module.ModuleManager;
 import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.ticking.TickingModule;
 import fr.nekotine.core.ticking.event.TickElapsedEvent;
@@ -21,7 +22,7 @@ public class StatusEffectModule extends PluginModule implements Listener{
 	private final Map<LivingEntity,Map<StatusEffectType, List<AppliedStatusEffect>>> effectMap = new WeakHashMap<>();
 	
 	public StatusEffectModule() {
-		NekotineCore.MODULES.tryLoad(TickingModule.class);
+		Ioc.resolve(ModuleManager.class).tryLoad(TickingModule.class);
 		EventUtil.register(this);
 	}
 	
