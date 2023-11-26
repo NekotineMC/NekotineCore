@@ -7,8 +7,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 
-import fr.nekotine.core.NekotineCore;
+import fr.nekotine.core.ioc.Ioc;
 
 public class EventUtil {
 	
@@ -47,7 +48,7 @@ public class EventUtil {
 	 * @param listener
 	 */
 	public static void register(Listener listener) {
-		Bukkit.getPluginManager().registerEvents(listener, NekotineCore.getAttachedPlugin());
+		Bukkit.getPluginManager().registerEvents(listener, Ioc.resolve(JavaPlugin.class));
 	}
 	
 	/**

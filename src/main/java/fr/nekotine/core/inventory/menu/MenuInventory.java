@@ -5,8 +5,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
 
-import fr.nekotine.core.NekotineCore;
 import fr.nekotine.core.inventory.menu.layout.MenuLayout;
+import fr.nekotine.core.ioc.Ioc;
 import net.kyori.adventure.text.Component;
 
 /**
@@ -29,7 +29,7 @@ public class MenuInventory extends MenuLayout{
 		this.nbRow = nbRow;
 		registerClicakble(layout);
 		inventory = Bukkit.createInventory(null, nbRow * 9);
-		NekotineCore.MODULES.get(MenuModule.class).registerMenu(this);
+		Ioc.resolve(MenuModule.class).registerMenu(this);
 	}
 
 	public MenuInventory(@NotNull MenuLayout layout, int nbRow, @NotNull Component title) {
@@ -38,7 +38,7 @@ public class MenuInventory extends MenuLayout{
 		this.nbRow = nbRow;
 		registerClicakble(layout);
 		inventory = Bukkit.createInventory(null, nbRow * 9, title);
-		NekotineCore.MODULES.get(MenuModule.class).registerMenu(this);
+		Ioc.resolve(MenuModule.class).registerMenu(this);
 	}
 
 	/**

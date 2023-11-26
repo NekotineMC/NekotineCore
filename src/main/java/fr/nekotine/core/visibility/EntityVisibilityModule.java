@@ -7,6 +7,7 @@ import java.util.Set;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
@@ -19,7 +20,7 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.events.PacketListener;
 
-import fr.nekotine.core.NekotineCore;
+import fr.nekotine.core.ioc.Ioc;
 import fr.nekotine.core.module.PluginModule;
 
 public class EntityVisibilityModule extends PluginModule{
@@ -78,7 +79,7 @@ public class EntityVisibilityModule extends PluginModule{
 				}
 			}
 		};
-		metadataListener = new PacketAdapter(NekotineCore.getAttachedPlugin(), PacketType.Play.Server.SPAWN_ENTITY_LIVING) {
+		metadataListener = new PacketAdapter(Ioc.resolve(JavaPlugin.class), PacketType.Play.Server.SPAWN_ENTITY_LIVING) {
 			@Override
 			public void onPacketSending(PacketEvent event) {
 				PacketContainer packet = event.getPacket();
@@ -91,7 +92,7 @@ public class EntityVisibilityModule extends PluginModule{
 			}
 		};
 		ProtocolLibrary.getProtocolManager().addPacketListener(metadataListener);
-		updateTask = updateVisibilityStatus.runTaskTimer(NekotineCore.getAttachedPlugin(), 0, 1);
+		updateTask = updateVisibilityStatus.runTaskTimer(Ioc.resolve(JavaPlugin.class), 0, 1);
 	}
 	
 	public void hideFrom(Entity hidden, Player blind) {

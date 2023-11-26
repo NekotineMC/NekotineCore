@@ -3,8 +3,8 @@ package fr.nekotine.core.block.tempblock;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 
-import fr.nekotine.core.NekotineCore;
 import fr.nekotine.core.block.BlockPatch;
+import fr.nekotine.core.ioc.Ioc;
 
 public class AppliedTempBlockPatch{
 	
@@ -29,11 +29,11 @@ public class AppliedTempBlockPatch{
 		return patchSource;
 	}
 	public void unpatch(boolean applyPhysics) {
-		NekotineCore.MODULES.get(TempBlockModule.class).unpatch(this, applyPhysics);
+		Ioc.resolve(TempBlockModule.class).unpatch(this, applyPhysics);
 	}
 	
 	public void unpatch() {
-		NekotineCore.MODULES.get(TempBlockModule.class).unpatch(this);
+		Ioc.resolve(TempBlockModule.class).unpatch(this);
 	}
 	
 }

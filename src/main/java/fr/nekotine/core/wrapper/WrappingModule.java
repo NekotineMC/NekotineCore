@@ -23,7 +23,7 @@ public class WrappingModule extends PluginModule{
 			}
 			return srcMap.containsKey(wrapperType);
 		}catch(Exception e) {
-			LOGGER.log(Level.WARNING, "Une erreur est survenue lors de l'ajout d'un wrapper à l'entitée.", e);
+			logger.log(Level.WARNING, "Une erreur est survenue lors de l'ajout d'un wrapper à l'entitée.", e);
 			return false;
 		}
 	}
@@ -33,7 +33,7 @@ public class WrappingModule extends PluginModule{
 			var entityStore = store.get(source);
 			return wrapperType.cast(entityStore.get(wrapperType));
 		}catch(Exception e) {
-			LOGGER.log(Level.WARNING, "Une erreur est survenue lors de la récupération d'un wrapper de l'entitée.", e);
+			logger.log(Level.WARNING, "Une erreur est survenue lors de la récupération d'un wrapper de l'entitée.", e);
 			return null;
 		}
 	}
@@ -65,7 +65,7 @@ public class WrappingModule extends PluginModule{
 				store.put(source, entityStore);
 			}
 		}catch(Exception e) {
-			LOGGER.log(Level.WARNING, "Une erreur est survenue lors de l'ajout d'un wrapper à l'entitée.", e);
+			logger.log(Level.WARNING, "Une erreur est survenue lors de l'ajout d'un wrapper à l'entitée.", e);
 		}
 	}
 	

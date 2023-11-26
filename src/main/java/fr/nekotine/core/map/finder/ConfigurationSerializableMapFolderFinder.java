@@ -7,15 +7,15 @@ import java.nio.file.FileAlreadyExistsException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import fr.nekotine.core.NekotineCore;
+import fr.nekotine.core.logging.NekotineLogger;
 import fr.nekotine.core.map.MapHandle;
-import fr.nekotine.core.map.MapModule;
 import fr.nekotine.core.map.save.config.ConfigurationSerializableMapConfigSaver;
 import fr.nekotine.core.map.save.metadata.ConfigurationSerializableMapMetadataSaver;
 import fr.nekotine.core.util.AssertUtil;
@@ -37,6 +37,8 @@ public class ConfigurationSerializableMapFolderFinder implements IMapFinder {
 	private ConfigurationSerializableMapConfigSaver configSaver;
 	
 	private ConfigurationSerializableMapMetadataSaver metadataSaver;
+	
+	private Logger logger = new NekotineLogger(ConfigurationSerializableMapFolderFinder.class);
 	
 	/**
 	 * Constructeur
@@ -74,7 +76,7 @@ public class ConfigurationSerializableMapFolderFinder implements IMapFinder {
 						configSaver,
 						metadataSaver));
 			}catch(Exception e) {
-				NekotineCore.MODULES.get(MapModule.class).LOGGER.log(Level.WARNING,
+				logger.log(Level.WARNING,
 						"[ConfigurationSerializableMapFinder] > Erreur lors de la tentative de chargement de la map "+file.getName(), e);
 			}
 		}

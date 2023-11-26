@@ -1,6 +1,7 @@
 package fr.nekotine.core.map.command.generator;
 
 import java.util.function.Function;
+import java.util.logging.Logger;
 
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
@@ -9,7 +10,7 @@ import dev.jorel.commandapi.arguments.Argument;
 import dev.jorel.commandapi.arguments.LocationArgument;
 import dev.jorel.commandapi.arguments.LocationType;
 import dev.jorel.commandapi.executors.CommandArguments;
-import fr.nekotine.core.NekotineCore;
+import fr.nekotine.core.logging.NekotineLogger;
 import fr.nekotine.core.map.command.MapCommandBranch;
 import fr.nekotine.core.map.command.MapCommandExecutor;
 import fr.nekotine.core.map.command.MapElementCommandGenerator;
@@ -21,6 +22,8 @@ public class BlockBoundingBoxCommandGenerator implements MapElementCommandGenera
 
 	private static final String nodeName = "MapBlockBoundingBoxElementNode";
 
+	private Logger logger = new NekotineLogger(getClass());
+	
 	@Override
 	public MapCommandBranch[] generateFor(Function<CommandArguments, Object> pipeline, Class<?> elementType) {
 		var arguments = new Argument<?>[] {
@@ -37,7 +40,7 @@ public class BlockBoundingBoxCommandGenerator implements MapElementCommandGenera
 			sender.sendMessage(Component.text("La location à bien été définie.", NamedTextColor.GREEN));
 		};
 		//TODO normaliser les messages de commande
-		NekotineCore.LOGGER.info("BlockBoundingBoxCommandGenerator.generateFor utilise des messages de commande non-normalise");
+		logger.info("BlockBoundingBoxCommandGenerator.generateFor utilise des messages de commande non-normalise");
 		return new MapCommandBranch[] {new MapCommandBranch(arguments, executor)};
 	}
 

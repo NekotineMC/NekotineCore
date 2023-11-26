@@ -5,7 +5,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.apache.logging.log4j.util.TriConsumer;
-import org.bukkit.EntityEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -156,8 +155,7 @@ public enum DamageFunction {
 			@Override
 			public void accept(LivingEntityDamageEvent e) {
 				if(e.GetDamage() >= 0) {
-					//Récupérer l'angle entre le joueur et le damager
-					e.GetDamaged().playEffect(EntityEffect.HURT);
+					e.GetDamaged().playHurtAnimation(0); // TODO Properly set direction
 					return;
 				}
 				e.GetDamaged().getWorld().spawnParticle(Particle.HEART, e.GetDamaged().getLocation().add(0, 1, 0), 5, 0.5, 0, 0.5);

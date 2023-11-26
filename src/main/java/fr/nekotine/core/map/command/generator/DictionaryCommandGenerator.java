@@ -5,13 +5,14 @@ import java.util.LinkedList;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import dev.jorel.commandapi.arguments.Argument;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.LiteralArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
 import dev.jorel.commandapi.executors.CommandArguments;
-import fr.nekotine.core.NekotineCore;
+import fr.nekotine.core.logging.NekotineLogger;
 import fr.nekotine.core.map.command.MapCommandBranch;
 import fr.nekotine.core.map.command.MapCommandExecutor;
 import fr.nekotine.core.map.command.MapCommandGenerator;
@@ -24,6 +25,8 @@ import net.kyori.adventure.text.format.NamedTextColor;
 public class DictionaryCommandGenerator implements MapElementCommandGenerator{
 
 	private static final String nodeNameSuffix = "Name";
+	
+	private Logger logger = new NekotineLogger(getClass());
 	
 	private Class<?> nestedElementType;
 	
@@ -66,7 +69,7 @@ public class DictionaryCommandGenerator implements MapElementCommandGenerator{
 				}catch(Exception e) {
 					var ex = new RuntimeException("Impossible d'acceder a la valeur "+mapKey+" du dictionnaire "
 				+finalNodeName+" de la classe "+elementType.getName(),e);
-					NekotineCore.LOGGER.throwing("DictionaryCommandGenerator", "MapCommandBranch[] generateFor(Class<?> elementType)", ex);
+					logger.throwing("DictionaryCommandGenerator", "MapCommandBranch[] generateFor(Class<?> elementType)", ex);
 					throw ex;
 				}
 			};
@@ -94,14 +97,14 @@ public class DictionaryCommandGenerator implements MapElementCommandGenerator{
 				sender.sendMessage(Component.text("L'ajout à bien été fait.", NamedTextColor.GREEN));
 				
 			} catch (Exception ex) {
-				NekotineCore.LOGGER.logp(Level.SEVERE, "DictionaryCommandGenerator", "makeAddCommand",
+				logger.logp(Level.SEVERE, "DictionaryCommandGenerator", "makeAddCommand",
 						"Impossible d'instancier le nouvel element de carte a ajouter au dictionnaire "+nodeName + " du type "+element.getClass().getName(),
 						ex);
 			}
 			
 		};
 		//TODO normaliser les messages de commande
-		NekotineCore.LOGGER.info("DictionaryCommandGenerator.makeRemoveCommand utilise des messages de commande non-normalise");
+		logger.info("DictionaryCommandGenerator.makeRemoveCommand utilise des messages de commande non-normalise");
 		return new MapCommandBranch(arguments, executor);
 	}
 	
@@ -122,7 +125,7 @@ public class DictionaryCommandGenerator implements MapElementCommandGenerator{
 			sender.sendMessage(Component.text("La suppression à bien été faite.", NamedTextColor.GREEN));
 		};
 		//TODO normaliser les messages de commande
-		NekotineCore.LOGGER.info("DictionaryCommandGenerator.makeRemoveCommand utilise des messages de commande non-normalise");
+		logger.info("DictionaryCommandGenerator.makeRemoveCommand utilise des messages de commande non-normalise");
 		return new MapCommandBranch(arguments, executor);
 	}
 	
