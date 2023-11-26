@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import org.bukkit.configuration.Configuration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import fr.nekotine.core.NekotinePlugin;
@@ -58,6 +59,7 @@ public class PluginBuilder {
 	public final NekotinePlugin build() {
 		setupModules();
 		setupMapCommands();
+		setupConfiguration();
 		return new NekotinePlugin();
 	}
 	
@@ -87,6 +89,11 @@ public class PluginBuilder {
 		var gen = Ioc.resolve(MapModule.class).getGenerator();
 		gen.generateFor(mapTypesForCommand.toArray(Class<?>[]::new));
 		gen.register();
+	}
+	
+	private void setupConfiguration() {
+		plugin.saveDefaultConfig();
+		Ioc.getProvider().registerTransientAs(plugin::getConfig, Configuration.class);
 	}
 	
 }
