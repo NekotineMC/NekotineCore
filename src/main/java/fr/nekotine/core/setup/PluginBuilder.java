@@ -9,8 +9,10 @@ import java.util.stream.Collectors;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
+import fr.nekotine.core.NekotinePlugin;
 import fr.nekotine.core.ioc.Ioc;
 import fr.nekotine.core.logging.NekotineLogger;
+import fr.nekotine.core.map.MapModule;
 import fr.nekotine.core.module.ModuleManager;
 import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.reflexion.ReflexionUtil;
@@ -20,6 +22,8 @@ public class PluginBuilder {
 	private JavaPlugin plugin;
 	
 	private Set<Class<? extends PluginModule>> preloadModules = new HashSet<>();
+	
+	private Set<Class<?>> mapTypesForCommand = new HashSet<>();
 	
 	private final Logger logger;
 	
@@ -44,8 +48,17 @@ public class PluginBuilder {
 		}
 	}
 	
-	public final void build() {
+	@SafeVarargs
+	public final void mapCommandsFor(Class<?> ... mapTypes) {
+		for (var mapType : mapTypes) {
+			mapTypesForCommand.add(mapType);
+		}
+	}
+	
+	public final NekotinePlugin build() {
 		setupModules();
+		setupMapCommands();
+		return new NekotinePlugin();
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -65,6 +78,15 @@ public class PluginBuilder {
 		}catch(Exception e) {
 			logger.log(Level.SEVERE, "Errur lors de la mise en place des modules", e);
 		}
+	}
+	
+	private void setupMapCommands() {
+		if (mapTypesForCommand.isEmpty()) {
+			return;
+		}
+		var gen = Ioc.resolve(MapModule.class).getGenerator();
+		gen.generateFor(mapTypesForCommand.toArray(Class<?>[]::new));
+		gen.register();
 	}
 	
 }
