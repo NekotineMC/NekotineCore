@@ -1,6 +1,5 @@
 package fr.nekotine.core.reflexion;
 
-import java.io.IOException;
 import java.util.stream.Stream;
 
 import org.bukkit.plugin.java.JavaPlugin;
@@ -11,8 +10,10 @@ import fr.nekotine.core.ioc.Ioc;
 
 public class ReflexionUtil {
 	
-	public static Stream<Class<?>> streamJarClasses() throws IOException{
-		var plugin = Ioc.resolve(JavaPlugin.class);
-		return ClassPath.from(plugin.getClass().getClassLoader()).getAllClasses().stream().map(c -> c.load());
+	public static Stream<Class<?>> streamClassesFromPackage(String packageName) throws Exception{
+		var pluginClass = Ioc.resolve(JavaPlugin.class).getClass();
+		return ClassPath.from(pluginClass.getClassLoader()).getAllClasses().stream()
+				.filter(i -> i.getName().toLowerCase().startsWith(packageName))
+				.map(c -> c.load());
 	}
 }

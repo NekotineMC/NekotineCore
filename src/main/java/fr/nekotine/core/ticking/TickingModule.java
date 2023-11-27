@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import org.bukkit.event.Event;
+import org.bukkit.plugin.IllegalPluginAccessException;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -21,7 +22,11 @@ public class TickingModule extends PluginModule{
 	
 	public TickingModule() {
 		runningTask = new TickEventRunnable(this);
-		runningTask.runTaskTimer(Ioc.resolve(JavaPlugin.class), 0, 1);
+		try {
+			runningTask.runTaskTimer(Ioc.resolve(JavaPlugin.class), 0, 1);
+		}catch(IllegalPluginAccessException e) {
+			throw new IllegalStateException("Impossible de charger le TickingModule avant que le plugin soit activé (OnEnable)", e);
+		}
 	}
 
 	@Override

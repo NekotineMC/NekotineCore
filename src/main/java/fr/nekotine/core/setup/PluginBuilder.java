@@ -68,11 +68,13 @@ public class PluginBuilder {
 		try {
 			var moduleManager = new ModuleManager();
 			Ioc.getProvider().registerSingleton(moduleManager);
-			var allModuleClasses = ReflexionUtil.streamJarClasses()
+			// Nekotine Core Modules
+			var allCoreModuleClasses = ReflexionUtil.streamClassesFromPackage("fr.nekotine.core")
 					.filter(c -> PluginModule.class.isAssignableFrom(c))
 					.collect(Collectors.toSet());
-			for (var mc : allModuleClasses) {
+			for (var mc : allCoreModuleClasses) {
 				Ioc.getProvider().registerSingletonAs((Supplier)() -> moduleManager.get((Class<? extends PluginModule>) mc), mc);
+				logger.info(String.format("Module %s ajouté au registre", mc.getSimpleName()));
 			}
 			for (var module : preloadModules) {
 				moduleManager.tryLoad(module);
