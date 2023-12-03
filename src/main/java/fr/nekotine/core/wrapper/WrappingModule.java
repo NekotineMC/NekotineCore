@@ -51,7 +51,11 @@ public class WrappingModule extends PluginModule{
 		if (entityStore == null) {
 			return Optional.empty();
 		}
-		return Optional.of(wrapperType.cast(entityStore.get(wrapperType)));
+		var wrap = entityStore.get(wrapperType);
+		if (wrap == null) {
+			return Optional.empty();
+		}
+		return Optional.of(wrapperType.cast(wrap));
 	}
 	
 	public <U, T extends WrapperBase<U>> void putWrapper(U source, T wrapper) {
