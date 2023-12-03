@@ -164,7 +164,17 @@ public class InventoryUtil {
 	}
 	
 	public static void replaceItem(Inventory inventory, ItemStack oldItem, ItemStack newItem) {
-		inventory.setItem(inventory.first(oldItem), newItem);
+		var id = inventory.first(oldItem);
+		if (id >= 0) {
+			inventory.setItem(id, newItem);
+		}
+	}
+	
+	public static void replaceItem(PlayerInventory inventory, ItemStack oldItem, ItemStack newItem) {
+		var id = inventory.first(oldItem);
+		if (id >= 0) {
+			inventory.setItem(id, newItem);
+		}
 	}
 	
 }
