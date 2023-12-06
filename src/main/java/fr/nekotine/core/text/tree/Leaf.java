@@ -52,7 +52,7 @@ public class Leaf extends TreeElement{
 		HashMap<String, Pair<Integer,List<String>>> map = new HashMap<String, Pair<Integer,List<String>>>();
 		for(TextPlaceholder holder : getPlaceholders()) {
 			
-			ArrayList<Pair<String,String>> tags = holder.resolve();
+			List<Pair<String,String>> tags = holder.resolve();
 			for(Pair<String,String> tag : tags) {
 				
 				String asTag = "<".concat(tag.a()).concat(">");
