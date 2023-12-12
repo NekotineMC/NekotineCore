@@ -119,8 +119,13 @@ public class ItemStackUtil {
 		return setUnstackable(itemMeta, true);
 	}
 	
-	public static @NotNull ItemStack skull(String url) throws MalformedURLException, URISyntaxException {
-		return skull(new URI(url).toURL());
+	public static @NotNull ItemStack skull(String url) {
+		try {
+			return skull(new URI(url).toURL());
+		} catch (MalformedURLException | URISyntaxException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	public static @NotNull ItemStack skull(URL url) {
@@ -153,6 +158,22 @@ public class ItemStackUtil {
 			itemStack.setItemMeta(skullMeta);
 		}
 		return itemStack;
+	}
+	
+	public static void skull(ItemStack item, String url) {
+		try {
+			URL uri = new URI(url).toURL();
+			if (item.getItemMeta() instanceof SkullMeta skullMeta) {
+				var profile = Bukkit.createProfile(UUID.randomUUID());
+				var texture = profile.getTextures();
+				texture.setSkin(uri);
+				profile.setTextures(texture);
+				skullMeta.setPlayerProfile(profile);
+				item.setItemMeta(skullMeta);
+			}
+		} catch (MalformedURLException | URISyntaxException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/// MAKE SHORTCUTS
