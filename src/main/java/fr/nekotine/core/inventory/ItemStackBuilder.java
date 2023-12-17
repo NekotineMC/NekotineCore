@@ -47,6 +47,8 @@ public class ItemStackBuilder {
 	
 	private boolean oldPvp;
 	
+	private String skullUrl;
+	
 	public ItemStackBuilder(Material material) {
 		this.material = material;
 		amount = 1;
@@ -153,6 +155,11 @@ public class ItemStackBuilder {
 		return this;
 	}
 	
+	public ItemStackBuilder skull(String skullUrl) {
+		this.skullUrl = skullUrl;
+		return this;
+	}
+	
 	/**
 	 * Créée une nouvelle instance d'ItemStack
 	 * @return
@@ -174,6 +181,9 @@ public class ItemStackBuilder {
 		meta.setUnbreakable(unbreakable);
 		ItemStackUtil.setUnstackable(meta, unstackable);
 		itemStack.setItemMeta(meta);
+		if(skullUrl!=null) {
+			ItemStackUtil.skull(itemStack, skullUrl);
+		}
 		return itemStack;
 	}
 	
