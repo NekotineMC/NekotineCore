@@ -20,6 +20,8 @@ public class ConfigurationUtil {
 		}else {
 			conf = new YamlConfiguration();
 		}
+		var o = conf.options();
+		o.parseComments(true);
 		// load defaults
 		Configuration defaultConfig;
 		try (var defaultReader = new InputStreamReader(Ioc.resolve(JavaPlugin.class).getResource(pathInJar),"UTF-8")){
