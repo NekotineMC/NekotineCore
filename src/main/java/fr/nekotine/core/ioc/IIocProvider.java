@@ -14,6 +14,8 @@ public interface IIocProvider {
 	
 	public <T,D extends T> IIocProvider registerTransientAs(Supplier<D> factory, Class<T> asType);
 	
+	public <T> IIocProvider unregister(Class<T> type);
+	
 	public <T> T resolve(Class<T> type);
 	
 	public <T> Optional<T> tryResolve(Class<T> type);

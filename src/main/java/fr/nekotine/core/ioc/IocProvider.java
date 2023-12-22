@@ -66,4 +66,11 @@ public class IocProvider implements IIocProvider{
 		return Optional.empty();
 	}
 
+	@Override
+	public <T> IIocProvider unregister(Class<T> type) {
+		singletonMap.remove(type);
+		supplierMap.remove(type);
+		return this;
+	}
+
 }
