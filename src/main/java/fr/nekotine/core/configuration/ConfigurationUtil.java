@@ -22,9 +22,14 @@ public class ConfigurationUtil {
 		}
 		var o = conf.options();
 		o.parseComments(true);
+		o.copyDefaults(true);
 		// load defaults
 		Configuration defaultConfig;
-		try (var defaultReader = new InputStreamReader(Ioc.resolve(JavaPlugin.class).getResource(pathInJar),"UTF-8")){
+		var res = Ioc.resolve(JavaPlugin.class).getResource(pathInJar);
+		if (res == null) {
+			throw new RuntimeException("Aucun fichier de config n'est définit dans le jar pour "+pathInJar);
+		}
+		try (var defaultReader = new InputStreamReader(res ,"UTF-8")){
 			defaultConfig = YamlConfiguration.loadConfiguration(defaultReader);
 		}
 		conf.setDefaults(defaultConfig);
