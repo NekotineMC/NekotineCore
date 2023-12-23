@@ -31,7 +31,7 @@ public class ClientMovementTrackModule extends PluginModule{
 				event.setCancelled(true);
 			}
 		}
-	}
+	};
 	
 	public ClientMovementTrackModule() {
 		var pmanager = ProtocolLibrary.getProtocolManager();
