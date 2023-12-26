@@ -160,13 +160,14 @@ public class ItemStackUtil {
 		return itemStack;
 	}
 	
-	public static void skull(ItemStack item, String url) {
+	public static void skull(ItemStack item, String uri) {
+		uri = "http://textures.minecraft.net/texture/"+uri;
 		try {
-			URL uri = new URI(url).toURL();
+			URL url = new URI(uri).toURL();
 			if (item.getItemMeta() instanceof SkullMeta skullMeta) {
 				var profile = Bukkit.createProfile(UUID.randomUUID());
 				var texture = profile.getTextures();
-				texture.setSkin(uri);
+				texture.setSkin(url);
 				profile.setTextures(texture);
 				skullMeta.setPlayerProfile(profile);
 				item.setItemMeta(skullMeta);
