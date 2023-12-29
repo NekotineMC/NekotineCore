@@ -3,6 +3,7 @@ package fr.nekotine.core.util;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 
 import fr.nekotine.core.util.lambda.TriConsumer;
@@ -222,6 +223,10 @@ public class SpatialUtil {
 	public static final void rectangle3DFromPoints(double startX1, double startY1, double startZ1, 
 			double startX2, double startY2, double startZ2, double blockDensity, Consumer<Vector> consumer) {
 		rectangle3DFromPoints(new Vector(startX1,startY1,startZ1), new Vector(startX2,startY2,startZ2), blockDensity,consumer);
-
+	}
+	
+	public static final void rectangle3DFromPoints(BoundingBox box, double blockDensity, Consumer<Vector> consumer) {
+		rectangle3DFromPoints(box.getMinX(), box.getMinY(), box.getMinZ(),
+		box.getMaxX(), box.getMaxY(), box.getMaxZ(),blockDensity, consumer);
 	}
 }
