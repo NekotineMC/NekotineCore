@@ -165,7 +165,7 @@ public class SpatialUtil {
 		}
 		var dist = 1/blockDensity;
 		direction.multiply(dist);
-		for (double theta = 0; theta < distance; theta += dist) {
+		for (double theta = 0; theta <= distance; theta += dist) {
 			consumer.accept(start);
 			start.add(direction);
 		}
@@ -183,4 +183,45 @@ public class SpatialUtil {
 		line3DFromDir(new Vector(startX, startY, startZ), new Vector(dirx, diry, dirz), distance, blockDensity, consumer);
 	}
 	
+	public static final void line3DFromPoints(Vector start, Vector end, double blockDensity, Consumer<Vector> consumer) {
+		line3DFromDir(start, end.clone().subtract(start), start.distance(end), blockDensity, consumer);
+	}
+	
+	public static final void line3DFromPoints(double startX1, double startY1, double startZ1, 
+			double startX2, double startY2, double startZ2, 
+			double blockDensity, Consumer<Vector> consumer) {
+		line3DFromPoints(new Vector(startX1,startY1,startZ1), new Vector(startX2,startY2,startZ2), blockDensity,consumer);
+	}
+	
+	public static final void rectangle3DFromPoints(Vector corner1, Vector corner2, double blockDensity, Consumer<Vector> consumer) {
+		var minX = Math.min(corner1.getX(), corner2.getX());
+		var minY = Math.min(corner1.getY(), corner2.getY());
+		var minZ = Math.min(corner1.getZ(), corner2.getZ());
+		var maxX = Math.max(corner1.getX(), corner2.getX());
+		var maxY = Math.max(corner1.getY(), corner2.getY());
+		var maxZ = Math.max(corner1.getZ(), corner2.getZ());
+		
+		line3DFromPoints(minX,minY,minZ,maxX,minY,minZ,blockDensity,consumer);
+		line3DFromPoints(minX,minY,minZ,minX,maxY,minZ,blockDensity,consumer);
+		line3DFromPoints(minX,minY,minZ,minX,minY,maxZ,blockDensity,consumer);
+
+		line3DFromPoints(maxX,maxY,maxZ,minX,maxY,maxZ,blockDensity,consumer);
+		line3DFromPoints(maxX,maxY,maxZ,maxX,minY,maxZ,blockDensity,consumer);
+		line3DFromPoints(maxX,maxY,maxZ,maxX,maxY,minZ,blockDensity,consumer);
+
+		line3DFromPoints(maxX,minY,minZ,maxX,minY,maxZ,blockDensity,consumer);
+		line3DFromPoints(maxX,minY,minZ,maxX,maxY,minZ,blockDensity,consumer);
+		
+		line3DFromPoints(minX,maxY,minZ,maxX,maxY,minZ,blockDensity,consumer);
+		line3DFromPoints(minX,maxY,minZ,minX,maxY,maxZ,blockDensity,consumer);
+		
+		line3DFromPoints(minX,minY,maxZ,maxX,minY,maxZ,blockDensity,consumer);
+		line3DFromPoints(minX,minY,maxZ,minX,maxY,maxZ,blockDensity,consumer);
+	}
+	
+	public static final void rectangle3DFromPoints(double startX1, double startY1, double startZ1, 
+			double startX2, double startY2, double startZ2, double blockDensity, Consumer<Vector> consumer) {
+		rectangle3DFromPoints(new Vector(startX1,startY1,startZ1), new Vector(startX2,startY2,startZ2), blockDensity,consumer);
+
+	}
 }
