@@ -5,6 +5,7 @@ import java.util.function.Predicate;
 import java.util.logging.Level;
 
 import org.bukkit.Location;
+import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.attribute.Attributable;
 import org.bukkit.attribute.Attribute;
@@ -16,7 +17,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Slime;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 import com.comphenix.protocol.PacketType;
@@ -144,9 +144,7 @@ public class EntityUtil {
 	 * @param target l'entitée vidée de ses effets.
 	 */
 	public static void clearPotionEffects(LivingEntity target) {
-		for (var effectType : PotionEffectType.values()) {
-			target.removePotionEffect(effectType);
-		}
+		Registry.POTION_EFFECT_TYPE.forEach(e -> target.removePotionEffect(e));
 	}
 	
 	/**
