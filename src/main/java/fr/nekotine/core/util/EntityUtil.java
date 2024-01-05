@@ -30,15 +30,16 @@ public class EntityUtil {
 	 * Crée un slime de la taille donnée.
 	 * 
 	 * @param location La location du slime
-	 * @param reason La raison de l'apparition
-	 * @param size La taille du slime
+	 * @param reason   La raison de l'apparition
+	 * @param size     La taille du slime
 	 * @return Le slime crée
 	 */
 	public static Slime SpawnSlime(Location location, SpawnReason reason, int size) {
-		Slime slime = (Slime)location.getWorld().spawnEntity(location, EntityType.SLIME, reason);
+		Slime slime = (Slime) location.getWorld().spawnEntity(location, EntityType.SLIME, reason);
 		slime.setSize(size);
 		return slime;
 	}
+
 	/**
 	 * 
 	 * @param entity L'entité à regarder
@@ -47,6 +48,7 @@ public class EntityUtil {
 	public static boolean IsOnGround(Entity entity) {
 		return entity.isOnGround();
 	}
+
 	/**
 	 * 
 	 * @param ent
@@ -55,9 +57,10 @@ public class EntityUtil {
 	 * @param yMax
 	 * @param groundBoost
 	 */
-	public static void ApplyVelocity(Entity ent, double str, double yAdd, double yMax, boolean groundBoost){
+	public static void ApplyVelocity(Entity ent, double str, double yAdd, double yMax, boolean groundBoost) {
 		ApplyVelocity(ent, ent.getLocation().getDirection(), str, false, 0, yAdd, yMax, groundBoost);
 	}
+
 	/**
 	 * 
 	 * @param ent
@@ -69,49 +72,56 @@ public class EntityUtil {
 	 * @param yMax
 	 * @param groundBoost
 	 */
-	public static void ApplyVelocity(Entity ent, Vector vec, double str, boolean ySet, double yBase, double yAdd, double yMax, boolean groundBoost) {
+	public static void ApplyVelocity(Entity ent, Vector vec, double str, boolean ySet, double yBase, double yAdd,
+			double yMax, boolean groundBoost) {
 		if (Double.isNaN(vec.getX()) || Double.isNaN(vec.getY()) || Double.isNaN(vec.getZ()) || vec.length() == 0)
 			return;
-		
-		//YSet
+
+		// YSet
 		if (ySet)
 			vec.setY(yBase);
 
-		//Modify
+		// Modify
 		vec.normalize();
 		vec.multiply(str);
-		
-		//YAdd
+
+		// YAdd
 		vec.setY(vec.getY() + yAdd);
-		
-		//Limit
+
+		// Limit
 		if (vec.getY() > yMax)
 			vec.setY(yMax);
-		
+
 		if (groundBoost)
 			if (IsOnGround(ent))
-				vec.setY(vec.getY() + 0.2); 
-		
-		//Velocity
+				vec.setY(vec.getY() + 0.2);
+
+		// Velocity
 		ent.setFallDistance(0);
-		
-		ent.setVelocity(vec);	
+
+		ent.setVelocity(vec);
 	}
+
 	public static void PlayDamageSound(LivingEntity entity) {
 		Sound sound = Sound.ENTITY_PLAYER_HURT;
-		
+
 		EntityType type = entity.getType();
-		if(entity instanceof Llama) type = EntityType.LLAMA;
-		
+		if (entity instanceof Llama)
+			type = EntityType.LLAMA;
+
 		try {
-			sound = Sound.valueOf("ENTITY_"+type+"_HURT");
-		} catch (IllegalArgumentException  e) {
-			Ioc.resolve(JavaPlugin.class).getLogger()
-			.log(Level.SEVERE, "[NekotineCore] > [UtilEntity] > [PlayDamageSound] impossible d'obtenir le son pour "+entity.getType(), (Throwable)e);
+			sound = Sound.valueOf("ENTITY_" + type + "_HURT");
+		} catch (IllegalArgumentException e) {
+			Ioc.resolve(JavaPlugin.class).getLogger().log(Level.SEVERE,
+					"[NekotineCore] > [UtilEntity] > [PlayDamageSound] impossible d'obtenir le son pour "
+							+ entity.getType(),
+					(Throwable) e);
 		}
-		
-		entity.getWorld().playSound(entity.getLocation(), sound, 1.5f + (float)(0.5f * Math.random()), 0.8f + (float)(0.4f * Math.random()));
+
+		entity.getWorld().playSound(entity.getLocation(), sound, 1.5f + (float) (0.5f * Math.random()),
+				0.8f + (float) (0.4f * Math.random()));
 	}
+
 	/**
 	 * 
 	 * @param entity
@@ -120,14 +130,16 @@ public class EntityUtil {
 	public static double GetMaxHealth(LivingEntity entity) {
 		return entity.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
 	}
+
 	/**
 	 * 
 	 * @param entity
-	 * @param value (0.5 si <= 0)
+	 * @param value  (0.5 si <= 0)
 	 */
 	public static void SetMaxHealth(LivingEntity entity, double value) {
 		entity.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(value);
 	}
+
 	public static Collection<LivingEntity> GetNearbyLivingEntities(Location center, double radius) {
 		Collection<LivingEntity> nearby = center.getWorld().getNearbyLivingEntities(center, radius);
 		nearby.removeIf(new Predicate<LivingEntity>() {
@@ -138,18 +150,23 @@ public class EntityUtil {
 		});
 		return nearby;
 	}
-	
+
 	/**
-	 * Retire tous les effets de potion minecraft à cette {@link org.bukkit.entity.LivingEntity LicingEntity}.
+	 * Retire tous les effets de potion minecraft à cette
+	 * {@link org.bukkit.entity.LivingEntity LicingEntity}.
+	 * 
 	 * @param target l'entitée vidée de ses effets.
 	 */
 	public static void clearPotionEffects(LivingEntity target) {
 		Registry.POTION_EFFECT_TYPE.forEach(e -> target.removePotionEffect(e));
 	}
-	
+
 	/**
-	 * Change la valeur de tous les attributs listés dans {@link org.bukkit.attribute.Attribute Attribute} pour leurs valeur de base.
-	 * Supprime également tous les {@link org.bukkit.attribute.AttributeModifier AttributeModifier}.
+	 * Change la valeur de tous les attributs listés dans
+	 * {@link org.bukkit.attribute.Attribute Attribute} pour leurs valeur de base.
+	 * Supprime également tous les {@link org.bukkit.attribute.AttributeModifier
+	 * AttributeModifier}.
+	 * 
 	 * @param target
 	 */
 	public static void defaultAllAttributes(Attributable target) {
@@ -158,7 +175,7 @@ public class EntityUtil {
 			if (attrInstance != null) { // Toutes les entitées n'ont pas tous les attributs
 				if (attrType == Attribute.GENERIC_MOVEMENT_SPEED) {
 					attrInstance.setBaseValue(0.1);
-				}else {
+				} else {
 					attrInstance.setBaseValue(attrInstance.getDefaultValue());
 				}
 				for (var modifier : attrInstance.getModifiers()) {
@@ -167,8 +184,8 @@ public class EntityUtil {
 			}
 		}
 	}
-	
-	public static void fakeDamage(LivingEntity target, Player ... observers) {
+
+	public static void fakeDamage(LivingEntity target, Player... observers) {
 		PacketContainer packet = new PacketContainer(PacketType.Play.Server.HURT_ANIMATION);
 		packet.getIntegers().write(0, target.getEntityId());
 		var pmanager = ProtocolLibrary.getProtocolManager();
@@ -176,7 +193,7 @@ public class EntityUtil {
 			pmanager.sendServerPacket(player, packet);
 		}
 	}
-	
+
 	public static void fakeDamage(LivingEntity target, Iterable<Player> observers) {
 		PacketContainer packet = new PacketContainer(PacketType.Play.Server.HURT_ANIMATION);
 		packet.getIntegers().write(0, target.getEntityId());
@@ -185,7 +202,7 @@ public class EntityUtil {
 			pmanager.sendServerPacket(player, packet);
 		}
 	}
-	
+
 	public static void fakeDamage(LivingEntity target) {
 		PacketContainer packet = new PacketContainer(PacketType.Play.Server.HURT_ANIMATION);
 		packet.getIntegers().write(0, target.getEntityId());

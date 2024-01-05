@@ -22,11 +22,18 @@ public class ToolbarMenuLayout extends MenuLayout{
 	
 	private MenuLayout child;
 	
-	public ToolbarMenuLayout(ItemStack borderBrush, MenuLayout child) {
+	private Direction direction;
+	
+	public ToolbarMenuLayout(ItemStack borderBrush, MenuLayout child, Direction direction) {
 		this.brush = borderBrush;
 		this.child = child;
+		this.direction = direction;
 		child.setParent(this);
 		registerClicakble(child);
+	}
+	
+	public ToolbarMenuLayout(ItemStack borderBrush, MenuLayout child) {
+		this(borderBrush, child, Direction.UP);
 	}
 	
 	public void addTool(MenuElement element) {
@@ -49,16 +56,47 @@ public class ToolbarMenuLayout extends MenuLayout{
 					return;
 				}
 			}
-			inventory.setItem(InventoryUtil.chestCoordinateToInventoryIndex(curX, curY), item.draw());
+			inventory.setItem(InventoryUtil.chestCoordinateToInventoryIndex(curX, directionalY(curY,y,height)), item.draw());
 			curX++;
 		}
 		
 		curX = x;
-		if (++curY > height - y) {
+		if (++curY - y > height) {
 			return;
 		}
-		InventoryUtil.paintRectangle(inventory, brush, curX, curY, curX + width, curY);
-		child.draw(inventory, curX, ++curY, width, height - (curY - y));
+		InventoryUtil.paintRectangle(inventory, brush, curX, directionalY(curY,y,height), curX + width, directionalY(curY,y,height));
+		child.draw(inventory, curX, directionalY(++curY,y,height), width, height - (curY - y));
+	}
+	
+	/**
+	 * Retourne la valeur de Y selon le haut ou le bas du composant, selon la direction selectionnée
+	 * @param y
+	 * @param baseY
+	 * @param height
+	 * @return
+	 */
+	private int directionalY(int y, int baseY, int height) {
+		switch(direction) {
+		case UP:
+			return y;
+		case DOWN:
+			var locY = y - baseY;
+			return baseY + height - locY -1;
+		}
+		return y;
+	}
+	
+	public Direction getDirection() {
+		return direction;
+	}
+
+	public void setDirection(Direction direction) {
+		this.direction = direction;
+	}
+
+	public enum Direction{
+		UP,
+		DOWN;
 	}
 
 }
