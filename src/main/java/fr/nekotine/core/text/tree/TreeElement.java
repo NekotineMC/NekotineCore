@@ -3,6 +3,8 @@ package fr.nekotine.core.text.tree;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import fr.nekotine.core.text.TextModule;
 import fr.nekotine.core.text.placeholder.TextPlaceholder;
 import net.kyori.adventure.text.Component;
@@ -50,5 +52,5 @@ public abstract class TreeElement{
 	
 	//
 	
-	public abstract List<Component> build(TextModule module);
+	public abstract <T> List<Component> build(TextModule module, @Nullable T resolveData);
 }

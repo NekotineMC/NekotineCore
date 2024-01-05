@@ -48,11 +48,11 @@ public class Leaf extends TreeElement{
 	
 	//
 	
-	private HashMap<String, Pair<Integer,List<String>>> getHoldersMap(){
+	private <T> HashMap<String, Pair<Integer,List<String>>> getHoldersMap(T test){
 		HashMap<String, Pair<Integer,List<String>>> map = new HashMap<String, Pair<Integer,List<String>>>();
 		for(TextPlaceholder holder : getPlaceholders()) {
 			
-			List<Pair<String,String>> tags = holder.resolve();
+			List<Pair<String,String>> tags = holder.resolve(test);
 			for(Pair<String,String> tag : tags) {
 				
 				String asTag = "<".concat(tag.a()).concat(">");
@@ -71,10 +71,10 @@ public class Leaf extends TreeElement{
 	//
 	
 	@Override
-	public List<Component> build(TextModule module){
+	public <T> List<Component> build(TextModule module, T resolveData){
 		
 		//Hashmap contenant les placeholders et leur nombre dans la feuille
-		HashMap<String, Pair<Integer,List<String>>> holdersMap = getHoldersMap();
+		HashMap<String, Pair<Integer,List<String>>> holdersMap = getHoldersMap(resolveData);
 		
 		//Récupère le style final
 		TextStyle style = module.asMerged(getStyles());

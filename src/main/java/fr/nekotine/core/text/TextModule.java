@@ -24,11 +24,19 @@ public class TextModule extends PluginModule{
 			this.root = root;
 			this.module = module;
 		}
-		public List<Component> build() {
-			return root.build(module);
+		public <T> List<Component> build() {
+			return root.build(module, null);
 		}
-		public Component buildFirst() {
-			List<Component> built = build();
+		public <T> List<Component> build(@Nullable T resolveData) {
+			return root.build(module, resolveData);
+		}
+		public <T> Component buildFirst() {
+			List<Component> built = build(null);
+			if(built.isEmpty()) return Component.empty();
+			return built.get(0);
+		}
+		public <T> Component buildFirst(@Nullable T resolveData) {
+			List<Component> built = build(resolveData);
 			if(built.isEmpty()) return Component.empty();
 			return built.get(0);
 		}

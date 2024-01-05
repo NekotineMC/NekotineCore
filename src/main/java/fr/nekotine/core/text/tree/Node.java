@@ -69,7 +69,7 @@ public class Node extends TreeElement{
 			child.addPlaceholder(holder);
 	}
 	@Override
-	public List<Component> build(TextModule module) {
+	public <T> List<Component> build(TextModule module, T resolveData) {
 		//Passe ses styles/holders aux enfants
 		addStylesToChildren();
 		addPlaceholdersToChildren();
@@ -77,7 +77,7 @@ public class Node extends TreeElement{
 		//Recupère les textes des enfants déserialisés
 		List<Component> child_compon = new ArrayList<Component>();
 		for(TreeElement child : childs) {
-			List<Component> child_builded = child.build(module);
+			List<Component> child_builded = child.build(module, resolveData);
 			if(child_builded.isEmpty())
 				continue;
 			
