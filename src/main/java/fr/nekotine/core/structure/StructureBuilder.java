@@ -85,6 +85,7 @@ public class StructureBuilder {
 		            .ignoreAirBlocks(ignoreAirBlocks)
 		            .build();
 		    Operations.complete(operation);
+		    editSession.close();
 		    return new Structure(editSession);
 		}
 	}

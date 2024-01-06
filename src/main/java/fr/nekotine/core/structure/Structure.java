@@ -12,6 +12,7 @@ public class Structure {
 		try(var newSession = WorldEdit.getInstance().newEditSession(session.getWorld())){
 			session.undo(newSession);
 			session = newSession;
+			session.close();
 		}
 	}
 }
