@@ -17,12 +17,19 @@ repositories {
     maven {
     	url = "https://repo.codemc.org/repository/maven-public/"
     }
+    // FAWE
+    maven { 
+    	url = uri("https://repo.papermc.io/repository/maven-public/") 
+    }
 }
 
 dependencies {
 	compileOnly group: "io.papermc.paper", name: "paper-api", version: "1.+"
 	compileOnly group: "com.comphenix.protocol", name: "ProtocolLib", version: "+"
 	compileOnly group: "dev.jorel", name: "commandapi-bukkit-core", version: "+"
+	implementation(platform("com.intellectualsites.bom:bom-newest:1.40"))
+	compileOnly("com.fastasyncworldedit:FastAsyncWorldEdit-Core")
+	compileOnly("com.fastasyncworldedit:FastAsyncWorldEdit-Bukkit")
 	testImplementation group: "org.junit.jupiter", name:"junit-jupiter-engine", version:"5.+"
 	testImplementation group: "io.papermc.paper", name: "paper-api", version: "1.+"
 }
