@@ -58,9 +58,16 @@ public class StatusEffectModule extends PluginModule implements Listener{
 		}
 		list.removeIf(a -> a.source==effect);
 		if (list.isEmpty()) {
-			effect.type().removeEffect(entity);
 			entityMap.remove(effect.type());
+			effect.type().removeEffect(entity);
 		}
+	}
+	
+	public <T> boolean hasEffect(LivingEntity entity, StatusEffectType type) {
+		if(!effectMap.containsKey(entity)) {
+			return false;
+		}
+		return effectMap.get(entity).keySet().stream().anyMatch(ef -> ef.equals(type));
 	}
 	
 	@EventHandler
@@ -74,8 +81,8 @@ public class StatusEffectModule extends PluginModule implements Listener{
 				}
 				list.removeIf(a -> (--a.durationLeft) == 0);
 				if (list.isEmpty()) {
-					effect.removeEffect(entity);
 					entityMap.remove(effect);
+					effect.removeEffect(entity);
 				}
 			}
 		}
