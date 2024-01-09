@@ -9,6 +9,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import fr.nekotine.core.eventguard.PlayerDoubleEventGuard;
 import fr.nekotine.core.ioc.Ioc;
 
 public class EventUtil {
@@ -30,10 +31,19 @@ public class EventUtil {
 		}
 	}
 	
+	/**
+	 * Appeler cette fonction si on vérifie HIT_ANY
+	 * @param evt L'évent d'interaction
+	 * @param customAction L'action customisée
+	 * @return True si l'action fait partie de la customAction
+	 */
 	public static boolean isCustomAction(PlayerInteractEvent evt, CustomAction customAction) {
+		if(Ioc.resolve(PlayerDoubleEventGuard.class).alreadyCalled(evt.getPlayer(), evt)) {
+			return false;
+		}
 		return isCustomAction(evt.getAction(), customAction);
 	}
-	
+
 	/**
 	 * Enregistre les Events pour le Listener
 	 * @param plugin
