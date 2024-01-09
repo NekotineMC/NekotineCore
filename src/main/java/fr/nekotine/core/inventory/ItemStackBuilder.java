@@ -11,6 +11,7 @@ import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.attribute.AttributeModifier.Operation;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -48,6 +49,8 @@ public class ItemStackBuilder {
 	private boolean oldPvp;
 	
 	private String skullUrl;
+	
+	private double attack_damage = 0;
 	
 	public ItemStackBuilder(Material material) {
 		this.material = material;
@@ -160,6 +163,11 @@ public class ItemStackBuilder {
 		return this;
 	}
 	
+	public ItemStackBuilder attackDamage(double damage) {
+		attack_damage = damage;
+		return this;
+	}
+	
 	/**
 	 * Créée une nouvelle instance d'ItemStack
 	 * @return
@@ -180,6 +188,12 @@ public class ItemStackBuilder {
 		meta.addItemFlags(flags.toArray(ItemFlag[]::new));
 		meta.setUnbreakable(unbreakable);
 		ItemStackUtil.setUnstackable(meta, unstackable);
+		if(attack_damage>0) {
+			meta.removeAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE);
+			meta.addAttributeModifier(
+			Attribute.GENERIC_ATTACK_DAMAGE, 
+			new AttributeModifier("generic.attackDamage", attack_damage, Operation.ADD_NUMBER));
+		}
 		itemStack.setItemMeta(meta);
 		if(skullUrl!=null) {
 			ItemStackUtil.skull(itemStack, skullUrl);
