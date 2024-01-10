@@ -14,15 +14,17 @@ public class ConfigurationUtil {
 
 	public static Configuration updateAndLoadYaml(String pathInJar, String pathInPluginFolder) throws IOException {
 		YamlConfiguration conf;
+		boolean confPresent = false;
 		var confFile = new File(Ioc.resolve(JavaPlugin.class).getDataFolder(), pathInPluginFolder);
 		if (confFile.exists()) {
 			conf = YamlConfiguration.loadConfiguration(confFile);
+			confPresent = true;
 		}else {
 			conf = new YamlConfiguration();
 		}
 		var o = conf.options();
-		o.parseComments(true);
 		o.copyDefaults(true);
+		o.parseComments(true);
 		// load defaults
 		Configuration defaultConfig;
 		var res = Ioc.resolve(JavaPlugin.class).getResource(pathInJar);
@@ -35,7 +37,7 @@ public class ConfigurationUtil {
 		conf.setDefaults(defaultConfig);
 		// save
 		conf.save(confFile);
-		return conf;
+		return confPresent?conf:defaultConfig;
 	}
 	
 }
