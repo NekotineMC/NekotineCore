@@ -74,7 +74,9 @@ public class StatusEffectModule extends PluginModule implements Listener{
 	public void onTick(TickElapsedEvent event) {
 		for (var entity : effectMap.keySet()) {
 			var entityMap = effectMap.get(entity);
-			for (var effect : entityMap.keySet()) {
+			var iterator = entityMap.keySet().iterator();
+			while(iterator.hasNext()) {
+				var effect = iterator.next();
 				var list = entityMap.get(effect);
 				if (list == null) {
 					continue;
