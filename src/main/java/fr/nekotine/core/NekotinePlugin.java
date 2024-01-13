@@ -7,7 +7,7 @@ import fr.nekotine.core.util.DebugUtil;
 public class NekotinePlugin {
 
 	public void disable() {
-		DebugUtil.clearDebugInstances();
+		DebugUtil.clearDebugEntities();
 		Ioc.resolve(ModuleManager.class).unloadAll();
 	}
 	
