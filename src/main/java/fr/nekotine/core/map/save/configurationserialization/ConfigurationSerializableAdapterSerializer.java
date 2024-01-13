@@ -54,6 +54,9 @@ public class ConfigurationSerializableAdapterSerializer {
 		var fieldsFunctions = new LinkedList<Pair<String,Function<Object, Map<String, Object>>>>();
 		for (var field : node.getDeclaredFields()) {
 			if (field.isAnnotationPresent(ComposingMap.class)) {
+				if (field.isAnnotationPresent(MapDictKey.class)) {
+					continue; // Pas besoin de stocker le champ si c'est déja la clef d'un dictionnaire
+				}
 				var fieldType = field.getType();
 				field.trySetAccessible();
 				var name = field.getAnnotation(ComposingMap.class).value();
