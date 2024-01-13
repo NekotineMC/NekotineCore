@@ -74,16 +74,17 @@ public class StatusEffectModule extends PluginModule implements Listener{
 	public void onTick(TickElapsedEvent event) {
 		for (var entity : effectMap.keySet()) {
 			var entityMap = effectMap.get(entity);
-			var iterator = entityMap.keySet().iterator();
+			var iterator = entityMap.entrySet().iterator();
 			while(iterator.hasNext()) {
-				var effect = iterator.next();
-				var list = entityMap.get(effect);
+				var entry = iterator.next();
+				var effect = entry.getKey();
+				var list = entry.getValue();
 				if (list == null) {
 					continue;
 				}
 				list.removeIf(a -> (--a.durationLeft) == 0);
 				if (list.isEmpty()) {
-					entityMap.remove(effect);
+					iterator.remove();
 					effect.removeEffect(entity);
 				}
 			}
