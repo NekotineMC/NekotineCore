@@ -2,9 +2,9 @@ package fr.nekotine.core.glow;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
+
+import javax.annotation.Nullable;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -29,7 +29,7 @@ public class EntityGlowModule extends PluginModule {
 	
 	private static final byte entityMetadataGlowMask = 0x40; // https://wiki.vg/Entity_metadata#Entity
 	
-	private Map<Player, Set<Integer>> map = new HashMap<>();
+	private Map<Player, Map<Integer,TeamColor>> map = new HashMap<>();
 	
 	private PacketListener packetAdapter = new PacketAdapter(Ioc.resolve(JavaPlugin.class),PacketType.Play.Server.ENTITY_METADATA) {
 		@Override
@@ -41,7 +41,7 @@ public class EntityGlowModule extends PluginModule {
 				return;
 			}
 			var eid = packet.getIntegers().read(0);
-			if (!list.contains(eid)) {
+			if (!list.containsKey(eid)) {
 				return;
 			}
 			var newPacket = packet.deepClone();
@@ -71,8 +71,16 @@ public class EntityGlowModule extends PluginModule {
 	}
 	
 	public void glowEntityFor(Entity glowed, Player viewer) {
-		if (map.computeIfAbsent(viewer, p -> new HashSet<>()).add(glowed.getEntityId())) {
-			triggerUpdate(glowed, viewer, true);
+		glowEntityFor(glowed, viewer, null);
+	}
+	
+	public void glowEntityFor(Entity glowed, Player viewer, @Nullable TeamColor color) {
+
+		var eid = glowed.getEntityId();
+		var set = map.computeIfAbsent(viewer, p -> new HashMap<>());
+		if (!set.containsKey(eid) || set.get(eid) == color) {
+			set.put(eid, color);
+			triggerUpdate(glowed, viewer, true, color);
 		}
 	}
 	
@@ -81,23 +89,32 @@ public class EntityGlowModule extends PluginModule {
 		if (set == null) {
 			return;
 		}
-		if (set.remove(glowed.getEntityId())) {
-			triggerUpdate(glowed, viewer, false);
+		if (set.remove(glowed.getEntityId()) != null) {
+			triggerUpdate(glowed, viewer, false, null);
 		}
 		if (set.isEmpty()) {
 			map.remove(viewer);
 		}
 	}
 	
-	private void triggerUpdate(Entity glowed, Player viewer, boolean isGlowed) {
+	private void triggerUpdate(Entity glowed, Player viewer, boolean isGlowed, @Nullable TeamColor color) {
 		var pmanager = ProtocolLibrary.getProtocolManager();
-		var packet = pmanager.createPacket(PacketType.Play.Server.ENTITY_METADATA);
-		packet.getIntegers().write(0, glowed.getEntityId());
+		var metadataPacket = pmanager.createPacket(PacketType.Play.Server.ENTITY_METADATA);
+		metadataPacket.getIntegers().write(0, glowed.getEntityId());
 		var dataValues = new ArrayList<WrappedDataValue>(2);
 		var serializer = WrappedDataWatcher.Registry.get(Byte.class);
 		dataValues.add(new WrappedDataValue(0, serializer,(byte)(makeMaskFor(glowed) | (isGlowed ? entityMetadataGlowMask : 0x0)))); // Invisible + Glowing effect
-		packet.getDataValueCollectionModifier().write(0, dataValues);
-		pmanager.sendServerPacket(viewer, packet);
+		metadataPacket.getDataValueCollectionModifier().write(0, dataValues);
+		pmanager.sendServerPacket(viewer, metadataPacket);
+		if (color != null) {
+			var teamName = "EntityGlowModule"+color+"Team";
+			var tp = new ScoreboardTeamCreatePacketWrapper();
+			tp.setTeamName(teamName);
+			tp.setColor(color);
+			tp.getEntities().add(glowed);
+			var p = tp.buildPacket();
+			pmanager.sendServerPacket(viewer, p);
+		}
 	}
 	
 	private byte makeMaskFor(Entity entity) {
@@ -118,5 +135,4 @@ public class EntityGlowModule extends PluginModule {
 		
 		return value;
 	}
-	
 }
