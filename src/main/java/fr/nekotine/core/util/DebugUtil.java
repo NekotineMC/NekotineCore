@@ -37,7 +37,7 @@ public class DebugUtil {
 		return display;
 	}
 	
-	public static void clearDebugInstances() {
+	public static void clearDebugEntities() {
 		instance.clear();
 	}
 	
