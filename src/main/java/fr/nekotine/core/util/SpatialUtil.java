@@ -3,8 +3,15 @@ package fr.nekotine.core.util;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+import org.bukkit.World;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.entity.BlockDisplay;
+import org.bukkit.entity.EntityType;
 import org.bukkit.util.BoundingBox;
+import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
+import org.joml.AxisAngle4f;
+import org.joml.Vector3f;
 
 import fr.nekotine.core.util.lambda.TriConsumer;
 
@@ -228,5 +235,16 @@ public class SpatialUtil {
 	public static final void rectangle3DFromPoints(BoundingBox box, double blockDensity, Consumer<Vector> consumer) {
 		rectangle3DFromPoints(box.getMinX(), box.getMinY(), box.getMinZ(),
 		box.getMaxX(), box.getMaxY(), box.getMaxZ(),blockDensity, consumer);
+	}
+	
+	public static final BlockDisplay fillBoundingBox(World world, BoundingBox box, BlockData data) {
+		var min = box.getMin();
+		var max = box.getMax();
+		var scale = new Vector3f((float)(max.getX()-min.getX()), (float)(max.getY()-min.getY()), (float)(max.getZ()-min.getZ()));
+		var transform = new Transformation(new Vector3f(), new AxisAngle4f(), scale, new AxisAngle4f());
+		var display = (BlockDisplay)world.spawnEntity(min.toLocation(world), EntityType.BLOCK_DISPLAY);
+		display.setBlock(data);
+		display.setTransformation(transform);
+		return display;
 	}
 }
