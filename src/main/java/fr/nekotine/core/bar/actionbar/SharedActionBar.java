@@ -1,11 +1,11 @@
 package fr.nekotine.core.bar.actionbar;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -17,7 +17,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 
 public class SharedActionBar implements Listener{
-	private Collection<Player> viewers = new ArrayList<Player>();
+	private Set<Player> viewers = new HashSet<Player>();
 	private List<ActionBarComponent> components = new LinkedList<ActionBarComponent>();
 	private boolean rebuild = false;
 	private boolean resort = false;
@@ -34,16 +34,25 @@ public class SharedActionBar implements Listener{
 			this.viewers.add(viewer);
 		}
 	}
+	public void removeViewers(Player... viewers) {
+		for(Player viewer : viewers) {
+			this.viewers.remove(viewer);
+		}
+	}
 	public void addComponent(ActionBarComponent component) {
 		if(!components.add(component)) return;
 		component.addActionBar(this);
 		scheduleSort();
 		scheduleBuild();
 	}
+	public void addComponents(ActionBarComponent... components) {
+		for(ActionBarComponent component : components) {
+			addComponent(component);
+		}
+	}
 	public void removeComponent(ActionBarComponent component) {
 		if(!components.remove(component)) return;
 		component.removeActionBar(this);
-		scheduleSort();
 		scheduleBuild();
 	}
 	public Optional<ActionBarComponent> getComponent(int priority) {
