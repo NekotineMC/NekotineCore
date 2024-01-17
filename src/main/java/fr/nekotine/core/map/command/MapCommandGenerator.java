@@ -5,6 +5,8 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.bukkit.Location;
+
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.Argument;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
@@ -27,11 +29,8 @@ import fr.nekotine.core.map.command.generator.LocationCommandGenerator;
 import fr.nekotine.core.map.command.generator.PositionCommandGenerator;
 import fr.nekotine.core.map.command.generator.StringCommandGenerator;
 import fr.nekotine.core.map.element.MapBlockBoundingBoxElement;
-import fr.nekotine.core.map.element.MapBlockLocationElement;
 import fr.nekotine.core.map.element.MapBoundingBoxElement;
 import fr.nekotine.core.map.element.MapDictionaryElement;
-import fr.nekotine.core.map.element.MapLocationElement;
-import fr.nekotine.core.map.element.MapPositionElement;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -46,9 +45,9 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 	public MapCommandGenerator() {
 		generatorResolver = new MapElementCommandGeneratorResolver(new DefaultMapElementCommandGenerator(this))
 				.registerGenerator(MapDictionaryElement.class, new DictionaryCommandGenerator(this))
-				.registerGenerator(MapPositionElement.class, new PositionCommandGenerator())
-				.registerGenerator(MapLocationElement.class, new LocationCommandGenerator())
-				.registerGenerator(MapBlockLocationElement.class, new BlockLocationCommandGenerator())
+				.registerGenerator(Location.class, new PositionCommandGenerator())
+				.registerGenerator(Location.class, new LocationCommandGenerator())
+				.registerGenerator(Location.class, new BlockLocationCommandGenerator())
 				.registerGenerator(MapBoundingBoxElement.class, new BoundingBoxCommandGenerator())
 				.registerGenerator(MapBlockBoundingBoxElement.class, new BlockBoundingBoxCommandGenerator())
 				.registerGenerator(String.class, new StringCommandGenerator());
@@ -86,7 +85,7 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 					// EDIT
 					var mapTypeName = mapType.getSimpleName();
 					var mapNameArgument = makeMapArgument(mapType);
-					var generator = generatorResolver.resolve(mapType);
+					var generator = generatorResolver.resolveFor(mapType);
 					@SuppressWarnings("unchecked")
 					Function<CommandArguments, Object> pipeline = a -> ((MapHandle<Object>)a.get("mapName")).loadConfig();
 					for (var branch : generator.generateFor(pipeline, mapType)) {

@@ -8,6 +8,7 @@ import dev.jorel.commandapi.arguments.Argument;
 import dev.jorel.commandapi.arguments.LiteralArgument;
 import dev.jorel.commandapi.executors.CommandArguments;
 import fr.nekotine.core.logging.NekotineLogger;
+import fr.nekotine.core.map.annotation.CommandGeneratorOverride;
 import fr.nekotine.core.map.annotation.ComposingMap;
 import fr.nekotine.core.map.annotation.MapElementTyped;
 import fr.nekotine.core.map.command.MapCommandBranch;
@@ -40,7 +41,13 @@ public class DefaultMapElementCommandGenerator implements MapElementCommandGener
 				}
 				final var finalName = name;
 				var selfArgument = new LiteralArgument(finalName);
-				var generator = globalGenerator.getGeneratorResolver().resolve(fieldType);
+				MapElementCommandGenerator generator;
+				if (field.isAnnotationPresent(CommandGeneratorOverride.class)) {
+					var generatorType = field.getAnnotation(CommandGeneratorOverride.class).value();
+					generator = globalGenerator.getGeneratorResolver().resolveSpecific(generatorType);
+				}else {
+					generator = globalGenerator.getGeneratorResolver().resolveFor(fieldType);
+				}
 				// special Dictionary case
 				if (MapDictionaryElement.class == fieldType && generator instanceof DictionaryCommandGenerator dictGenerator) { // Type précis pour permettre l'héritage par l'utilisateur
 					if (field.isAnnotationPresent(MapElementTyped.class)) {

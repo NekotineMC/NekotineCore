@@ -51,7 +51,7 @@ public class DictionaryCommandGenerator implements MapElementCommandGenerator{
 		nameArg.includeSuggestions(ArgumentSuggestions.stringCollectionAsync(i -> CompletableFuture.supplyAsync(() ->
 				((MapDictionaryElement<Object>)pipeline.apply(i.previousArgs())).backingMap().keySet()
 				)));
-		var generator = globalGenerator.getGeneratorResolver().resolve(nestedElementType);
+		var generator = globalGenerator.getGeneratorResolver().resolveFor(nestedElementType);
 		Function<CommandArguments, Object> pip = a -> ((MapDictionaryElement<Object>)pipeline.apply(a)).backingMap().get(finalNodeName);
 		for (var branch : generator.generateFor(pip, nestedElementType)) {
 			var branchArgs = CollectionUtil.linkedList(branch.arguments());
