@@ -43,18 +43,15 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 	private final IMapElementCommandGeneratorResolver generatorResolver;
 
 	public MapCommandGenerator() {
-		generatorResolver = new MapElementCommandGeneratorResolver(new DefaultMapElementCommandGenerator(this))
-				.registerGenerator(MapDictionaryElement.class, new DictionaryCommandGenerator(this))
+		generatorResolver = new MapElementCommandGeneratorResolver(new DefaultMapElementCommandGenerator())
+				.registerGenerator(MapDictionaryElement.class, new DictionaryCommandGenerator())
 				.registerGenerator(Location.class, new PositionCommandGenerator())
 				.registerGenerator(Location.class, new LocationCommandGenerator())
 				.registerGenerator(Location.class, new BlockLocationCommandGenerator())
 				.registerGenerator(MapBoundingBoxElement.class, new BoundingBoxCommandGenerator())
 				.registerGenerator(MapBlockBoundingBoxElement.class, new BlockBoundingBoxCommandGenerator())
 				.registerGenerator(String.class, new StringCommandGenerator());
-	}
-
-	public IMapElementCommandGeneratorResolver getGeneratorResolver() {
-		return generatorResolver;
+		Ioc.getProvider().registerSingletonAs(generatorResolver,IMapElementCommandGeneratorResolver.class);
 	}
 
 	@Override

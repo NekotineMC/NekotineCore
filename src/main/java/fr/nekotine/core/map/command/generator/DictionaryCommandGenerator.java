@@ -12,10 +12,11 @@ import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.LiteralArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
 import dev.jorel.commandapi.executors.CommandArguments;
+import fr.nekotine.core.ioc.Ioc;
 import fr.nekotine.core.logging.NekotineLogger;
+import fr.nekotine.core.map.command.IMapElementCommandGeneratorResolver;
 import fr.nekotine.core.map.command.MapCommandBranch;
 import fr.nekotine.core.map.command.MapCommandExecutor;
-import fr.nekotine.core.map.command.MapCommandGenerator;
 import fr.nekotine.core.map.command.MapElementCommandGenerator;
 import fr.nekotine.core.map.element.MapDictionaryElement;
 import fr.nekotine.core.util.CollectionUtil;
@@ -32,11 +33,7 @@ public class DictionaryCommandGenerator implements MapElementCommandGenerator{
 	
 	private String nodeName;
 	
-	private MapCommandGenerator globalGenerator;
-	
-	public DictionaryCommandGenerator(MapCommandGenerator generator) {
-		globalGenerator = generator;
-	}
+	private Class<? extends MapElementCommandGenerator> elementGeneratorOverride;
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -51,7 +48,13 @@ public class DictionaryCommandGenerator implements MapElementCommandGenerator{
 		nameArg.includeSuggestions(ArgumentSuggestions.stringCollectionAsync(i -> CompletableFuture.supplyAsync(() ->
 				((MapDictionaryElement<Object>)pipeline.apply(i.previousArgs())).backingMap().keySet()
 				)));
-		var generator = globalGenerator.getGeneratorResolver().resolveFor(nestedElementType);
+		MapElementCommandGenerator generator;
+		var resolver = Ioc.resolve(IMapElementCommandGeneratorResolver.class);
+		if (elementGeneratorOverride != null) {
+			generator =  resolver.resolveSpecific(elementGeneratorOverride);
+		}else {
+			generator = resolver.resolveFor(nestedElementType);
+		}
 		Function<CommandArguments, Object> pip = a -> ((MapDictionaryElement<Object>)pipeline.apply(a)).backingMap().get(finalNodeName);
 		for (var branch : generator.generateFor(pip, nestedElementType)) {
 			var branchArgs = CollectionUtil.linkedList(branch.arguments());
@@ -138,6 +141,10 @@ public class DictionaryCommandGenerator implements MapElementCommandGenerator{
 	
 	public void setNodeName(String name) {
 		this.nodeName = name;
+	}
+	
+	public void setElementGeneratorTypeOverride(Class<? extends MapElementCommandGenerator> generatorType) {
+		elementGeneratorOverride = generatorType;
 	}
 
 }
