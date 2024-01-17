@@ -64,7 +64,8 @@ public class DefaultMapElementCommandGenerator implements MapElementCommandGener
 					arguments.add(0, selfArgument);
 					MapCommandExecutor executor = (element, sender, args) ->{
 						try {
-							branch.consumer().accept(field.get(element), sender, args);
+							field.set(element, branch.consumer().accept(field.get(element), sender, args));
+							return element;
 						}catch(IllegalAccessException e) {
 							var ex = new RuntimeException("Impossible d'acceder au champ "+field.getName()+" de la classe "+elementType.getName(),e);
 							logger.throwing("DefaultMapElementCommandGenerator", "MapCommandBranch[] generateFor(Class<?> elementType)", ex);

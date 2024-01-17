@@ -25,6 +25,7 @@ import fr.nekotine.core.map.command.generator.DefaultMapElementCommandGenerator;
 import fr.nekotine.core.map.command.generator.DictionaryCommandGenerator;
 import fr.nekotine.core.map.command.generator.LocationCommandGenerator;
 import fr.nekotine.core.map.command.generator.PositionCommandGenerator;
+import fr.nekotine.core.map.command.generator.StringCommandGenerator;
 import fr.nekotine.core.map.element.MapBlockBoundingBoxElement;
 import fr.nekotine.core.map.element.MapBlockLocationElement;
 import fr.nekotine.core.map.element.MapBoundingBoxElement;
@@ -49,7 +50,8 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 				.registerGenerator(MapLocationElement.class, new LocationCommandGenerator())
 				.registerGenerator(MapBlockLocationElement.class, new BlockLocationCommandGenerator())
 				.registerGenerator(MapBoundingBoxElement.class, new BoundingBoxCommandGenerator())
-				.registerGenerator(MapBlockBoundingBoxElement.class, new BlockBoundingBoxCommandGenerator());
+				.registerGenerator(MapBlockBoundingBoxElement.class, new BlockBoundingBoxCommandGenerator())
+				.registerGenerator(String.class, new StringCommandGenerator());
 	}
 
 	public IMapElementCommandGeneratorResolver getGeneratorResolver() {
@@ -95,9 +97,9 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 							@SuppressWarnings("unchecked")
 							var handle = (MapHandle<Object>) args.get(0);
 							var config = handle.loadConfig();
-							branch.consumer().accept(config, sender, args);
+							var newConf = branch.consumer().accept(config, sender, args);
 							sender.sendMessage(Component.text("Sauvegarde de la carte...", NamedTextColor.BLUE));
-							mapModule.saveMapConfigAsync(handle, config,
+							mapModule.saveMapConfigAsync(handle, newConf,
 									() -> sender.sendMessage(Component.text("Sauvegarde effectuée.", NamedTextColor.GREEN)));
 						};
 						command.executes(executor, ExecutorType.ALL);

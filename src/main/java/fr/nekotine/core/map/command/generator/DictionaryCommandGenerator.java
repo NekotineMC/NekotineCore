@@ -63,9 +63,11 @@ public class DictionaryCommandGenerator implements MapElementCommandGenerator{
 					var e = (MapDictionaryElement<Object>)element;
 					if (!e.backingMap().containsKey(mapKey)) {
 						sender.sendMessage(Component.text("Ce nom d'élément ("+mapKey+") n'existe pas"));
-						return;
+						return element;
 					}
-					branch.consumer().accept(e.backingMap().get(mapKey), sender, args);
+					
+					e.backingMap().put(mapKey, branch.consumer().accept(e.backingMap().get(mapKey), sender, args));
+					return element;
 				}catch(Exception e) {
 					var ex = new RuntimeException("Impossible d'acceder a la valeur "+mapKey+" du dictionnaire "
 				+finalNodeName+" de la classe "+elementType.getName(),e);
@@ -88,7 +90,7 @@ public class DictionaryCommandGenerator implements MapElementCommandGenerator{
 		}
 		final var constructor = tempConstructor;
 		var arguments = new Argument<?>[] {new LiteralArgument("add"),new StringArgument("itemName")};
-		MapCommandExecutor executor = (element, sender, args) ->{
+		MapCommandExecutor executor = (element, sender, args) -> {
 			var mapKey = (String)args.get("itemName");
 			@SuppressWarnings("unchecked")
 			var e = (MapDictionaryElement<Object>)element;
@@ -101,7 +103,7 @@ public class DictionaryCommandGenerator implements MapElementCommandGenerator{
 						"Impossible d'instancier le nouvel element de carte a ajouter au dictionnaire "+nodeName + " du type "+element.getClass().getName(),
 						ex);
 			}
-			
+			return element;
 		};
 		//TODO normaliser les messages de commande
 		logger.info("DictionaryCommandGenerator.makeRemoveCommand utilise des messages de commande non-normalise");
@@ -123,6 +125,7 @@ public class DictionaryCommandGenerator implements MapElementCommandGenerator{
 			}
 			e.backingMap().remove(mapKey);
 			sender.sendMessage(Component.text("La suppression à bien été faite.", NamedTextColor.GREEN));
+			return element;
 		};
 		//TODO normaliser les messages de commande
 		logger.info("DictionaryCommandGenerator.makeRemoveCommand utilise des messages de commande non-normalise");

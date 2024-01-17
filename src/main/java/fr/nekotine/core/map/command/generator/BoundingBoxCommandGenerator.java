@@ -35,6 +35,7 @@ public class BoundingBoxCommandGenerator implements MapElementCommandGenerator{
 			var e = (MapBoundingBoxElement)element;
 			e.get().resize(pos1.getX(), pos1.getY(), pos1.getZ(), pos2.getX(), pos2.getY(), pos2.getZ());
 			sender.sendMessage(Component.text("La location à bien été définie.", NamedTextColor.GREEN));
+			return element;
 		};
 		//TODO normaliser les messages de commande
 		logger.info("BoundingBoxCommandGenerator.generateFor utilise des messages de commande non-normalise");

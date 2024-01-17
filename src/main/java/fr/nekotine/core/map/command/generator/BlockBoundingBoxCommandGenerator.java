@@ -38,6 +38,7 @@ public class BlockBoundingBoxCommandGenerator implements MapElementCommandGenera
 			var e = (MapBlockBoundingBoxElement)element;
 			e.get().resize(min.getBlockX(), min.getBlockY(), min.getBlockZ(), max.getBlockX()+1, max.getBlockY()+1, max.getBlockZ()+1);
 			sender.sendMessage(Component.text("La location à bien été définie.", NamedTextColor.GREEN));
+			return element;
 		};
 		//TODO normaliser les messages de commande
 		logger.info("BlockBoundingBoxCommandGenerator.generateFor utilise des messages de commande non-normalise");

@@ -13,7 +13,6 @@ import fr.nekotine.core.logging.NekotineLogger;
 import fr.nekotine.core.map.command.MapCommandBranch;
 import fr.nekotine.core.map.command.MapCommandExecutor;
 import fr.nekotine.core.map.command.MapElementCommandGenerator;
-import fr.nekotine.core.map.element.MapLocationElement;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -28,9 +27,10 @@ public class LocationCommandGenerator implements MapElementCommandGenerator{
 		var arguments = new Argument<?>[] {new LocationArgument(nodeName, LocationType.PRECISE_POSITION)};
 		MapCommandExecutor executor = (element, sender, args) ->{
 			var pos = (Location)args.get(nodeName);
-			var e = (MapLocationElement)element;
-			e.fromLocation(pos);
+			var e = (Location)element;
+			e.set(pos.getX(), pos.getY(), pos.getZ());
 			sender.sendMessage(Component.text("La position à bien été définie.", NamedTextColor.GREEN));
+			return element;
 		};
 		//TODO normaliser les messages de commande
 		logger.info("LocationCommandGenerator.generateFor utilise des messages de commande non-normalise");

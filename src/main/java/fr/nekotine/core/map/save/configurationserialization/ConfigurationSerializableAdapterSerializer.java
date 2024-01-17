@@ -28,18 +28,31 @@ public class ConfigurationSerializableAdapterSerializer {
 		return instance;
 	}
 	
-	private Map<Class<?>, Function<Object, Map<String, Object>>> serializers = new HashMap<>();
+	// Types qui n'ont pas besoin d'être transformé pour être serializé (un peut comme ConfigurationSerializable)
+	private static final Class<?>[] primitiveTypes = new Class<?>[]{
+		byte.class,
+		short.class,
+		int.class,
+		long.class,
+		float.class,
+		double.class,
+		boolean.class,
+		char.class,
+		String.class
+	};
 	
-	private Map<Class<?>, Function<Map<String, Object>, Object>> deserializers = new HashMap<>();
+	private Map<Class<?>, Function<Object, Object>> serializers = new HashMap<>();
 	
-	public Function<Object, Map<String, Object>> getSerializerFor(Class<?> clazz) {
+	private Map<Class<?>, Function<Object, Object>> deserializers = new HashMap<>();
+	
+	public Function<Object, Object> getSerializerFor(Class<?> clazz) {
 		if (!serializers.containsKey(clazz)) {
 			serializers.put(clazz, makeSerializerForNode(clazz));
 		}
 		return serializers.get(clazz);
 	}
 	
-	public Function<Map<String, Object>, Object> getDeserializerFor(Class<?> clazz) {
+	public Function<Object, Object> getDeserializerFor(Class<?> clazz) {
 		if (!deserializers.containsKey(clazz)) {
 			deserializers.put(clazz, makeDeserializerForNode(clazz));
 		}
@@ -47,10 +60,18 @@ public class ConfigurationSerializableAdapterSerializer {
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private Function<Object, Map<String, Object>> makeSerializerForNode(Class<?> node){
+	private Function<Object, Object> makeSerializerForNode(Class<?> node){
+		// ConfigurationSerializable
 		if (ConfigurationSerializable.class.isAssignableFrom(node)) {
 			return obj -> obj != null ? ((ConfigurationSerializable)obj).serialize() : null;
 		}
+		// primitive types
+		for (var t : primitiveTypes) {
+			if (t.isAssignableFrom(node)) {
+				return Function.identity();
+			}
+		}
+		// Composed type (dict or Component)
 		var fieldsFunctions = new LinkedList<Pair<String,Function<Object, Map<String, Object>>>>();
 		for (var field : node.getDeclaredFields()) {
 			if (field.isAnnotationPresent(ComposingMap.class)) {
@@ -68,8 +89,8 @@ public class ConfigurationSerializableAdapterSerializer {
 					if (field.isAnnotationPresent(MapElementTyped.class)) {
 						var annotation = field.getAnnotation(MapElementTyped.class);
 						var typeDict = annotation.value();
-						var funcDict = makeSerializerForNode(typeDict);
-						fieldsFunctions.add(new Pair(name,(Function<Object, Map<String, Object>>)obj -> {
+						var funcDict = makeSerializerForNode(typeDict); // TODO Pk pas getSerializerForNode?
+						fieldsFunctions.add(new Pair(name,(Function<Object, Object>)obj -> {
 							try {
 								if (obj == null) {
 									return null;
@@ -92,7 +113,7 @@ public class ConfigurationSerializableAdapterSerializer {
 					}
 				}else {
 					var nodeSerializer = getSerializerFor(field.getType());
-					fieldsFunctions.add(new Pair(name,(Function<Object, Map<String, Object>>)obj ->{
+					fieldsFunctions.add(new Pair(name,(Function<Object, Object>)obj ->{
 						if (obj == null) {
 							return null;
 						}
@@ -122,11 +143,19 @@ public class ConfigurationSerializableAdapterSerializer {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private Function<Map<String, Object>, Object> makeDeserializerForNode(Class<?> node){
+	private Function<Object, Object> makeDeserializerForNode(Class<?> node){
+		// ConfigurationSerializable
 		if (ConfigurationSerializable.class.isAssignableFrom(node)) {
-			return map -> map != null ? ConfigurationSerialization.deserializeObject(map, (Class<? extends ConfigurationSerializable>)node) : null;
+			return map -> map != null && map instanceof Map<?,?> ? ConfigurationSerialization.deserializeObject((Map<String,Object>)map, (Class<? extends ConfigurationSerializable>)node) : null;
 		}
-		var fieldsFunctions = new LinkedList<BiConsumer<Object,Map<String, Object>>>();
+		// Primitive type
+		for (var t : primitiveTypes) {
+			if (t.isAssignableFrom(node)) {
+				return Function.identity();
+			}
+		}
+		// Composed type (dict or Component)
+		var fieldsFunctions = new LinkedList<BiConsumer<Object,Object>>();
 		for (var field : node.getDeclaredFields()) {
 			if (field.isAnnotationPresent(ComposingMap.class)) {
 				var fieldType = field.getType();
@@ -144,10 +173,10 @@ public class ConfigurationSerializableAdapterSerializer {
 						var funcDict = makeDeserializerForNode(typeDict);
 						fieldsFunctions.add((parent,map) -> {
 							try {
-								if (map == null) {
+								if (map == null || !(map instanceof Map<?,?> realMap)) {
 									return;
 								}
-								var fieldMap = (Map<String, Object>) map.get(finalName);
+								var fieldMap = (Map<String, Object>) realMap.get(finalName);
 								if (fieldMap == null) {
 									return;
 								}
@@ -170,11 +199,11 @@ public class ConfigurationSerializableAdapterSerializer {
 				}else {
 					if (field.isAnnotationPresent(MapDictKey.class)) {
 						fieldsFunctions.add((parent,map) ->{
-							if (map == null) {
+							if (map == null || !(map instanceof Map<?,?> realMap)) {
 								return;
 							}
 							try {
-								var obj = map.get("MapDictKey");
+								var obj = realMap.get("MapDictKey");
 								field.set(parent, obj);
 							}catch(Exception e) {
 								throw new RuntimeException(e);
@@ -183,11 +212,11 @@ public class ConfigurationSerializableAdapterSerializer {
 					}else {
 						var nodeDeserializer = getDeserializerFor(field.getType());
 						fieldsFunctions.add((parent,map) ->{
-							if (map == null) {
+							if (map == null || !(map instanceof Map<?,?> realMap)) {
 								return;
 							}
 							try {
-								var obj = nodeDeserializer.apply((Map<String, Object>) map.get(finalName));
+								var obj = nodeDeserializer.apply(realMap.get(finalName));
 								field.set(parent, obj);
 							}catch(Exception e) {
 								throw new RuntimeException(e);
