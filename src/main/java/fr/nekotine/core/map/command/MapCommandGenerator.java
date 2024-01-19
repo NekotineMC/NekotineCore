@@ -1,11 +1,13 @@
 package fr.nekotine.core.map.command;
 
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bukkit.Location;
+import org.bukkit.util.BoundingBox;
 
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.Argument;
@@ -28,9 +30,6 @@ import fr.nekotine.core.map.command.generator.DictionaryCommandGenerator;
 import fr.nekotine.core.map.command.generator.LocationCommandGenerator;
 import fr.nekotine.core.map.command.generator.PositionCommandGenerator;
 import fr.nekotine.core.map.command.generator.StringCommandGenerator;
-import fr.nekotine.core.map.element.MapBlockBoundingBoxElement;
-import fr.nekotine.core.map.element.MapBoundingBoxElement;
-import fr.nekotine.core.map.element.MapDictionaryElement;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -44,12 +43,12 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 
 	public MapCommandGenerator() {
 		generatorResolver = new MapElementCommandGeneratorResolver(new DefaultMapElementCommandGenerator())
-				.registerGenerator(MapDictionaryElement.class, new DictionaryCommandGenerator())
+				.registerGenerator(Map.class, new DictionaryCommandGenerator())
 				.registerGenerator(Location.class, new PositionCommandGenerator())
 				.registerGenerator(Location.class, new LocationCommandGenerator())
 				.registerGenerator(Location.class, new BlockLocationCommandGenerator())
-				.registerGenerator(MapBoundingBoxElement.class, new BoundingBoxCommandGenerator())
-				.registerGenerator(MapBlockBoundingBoxElement.class, new BlockBoundingBoxCommandGenerator())
+				.registerGenerator(BoundingBox.class, new BoundingBoxCommandGenerator())
+				.registerGenerator(BoundingBox.class, new BlockBoundingBoxCommandGenerator())
 				.registerGenerator(String.class, new StringCommandGenerator());
 		Ioc.getProvider().registerSingletonAs(generatorResolver,IMapElementCommandGeneratorResolver.class);
 	}
