@@ -2,6 +2,7 @@ package fr.nekotine.core.map.command.generator;
 
 import java.lang.reflect.Constructor;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -18,7 +19,6 @@ import fr.nekotine.core.map.command.IMapElementCommandGeneratorResolver;
 import fr.nekotine.core.map.command.MapCommandBranch;
 import fr.nekotine.core.map.command.MapCommandExecutor;
 import fr.nekotine.core.map.command.MapElementCommandGenerator;
-import fr.nekotine.core.map.element.MapDictionaryElement;
 import fr.nekotine.core.util.CollectionUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -46,7 +46,7 @@ public class DictionaryCommandGenerator implements MapElementCommandGenerator{
 		var nodeArg = new LiteralArgument("edit");
 		var nameArg = new StringArgument(finalNodeName);
 		nameArg.includeSuggestions(ArgumentSuggestions.stringCollectionAsync(i -> CompletableFuture.supplyAsync(() ->
-				((MapDictionaryElement<Object>)pipeline.apply(i.previousArgs())).backingMap().keySet()
+				((Map<String,Object>)pipeline.apply(i.previousArgs())).keySet()
 				)));
 		MapElementCommandGenerator generator;
 		var resolver = Ioc.resolve(IMapElementCommandGeneratorResolver.class);
@@ -55,7 +55,7 @@ public class DictionaryCommandGenerator implements MapElementCommandGenerator{
 		}else {
 			generator = resolver.resolveFor(nestedElementType);
 		}
-		Function<CommandArguments, Object> pip = a -> ((MapDictionaryElement<Object>)pipeline.apply(a)).backingMap().get(finalNodeName);
+		Function<CommandArguments, Object> pip = a -> ((Map<String,Object>)pipeline.apply(a)).get(finalNodeName);
 		for (var branch : generator.generateFor(pip, nestedElementType)) {
 			var branchArgs = CollectionUtil.linkedList(branch.arguments());
 			branchArgs.add(0, nameArg);
@@ -63,13 +63,13 @@ public class DictionaryCommandGenerator implements MapElementCommandGenerator{
 			MapCommandExecutor executor = (element, sender, args) ->{
 				var mapKey = (String)args.get(finalNodeName);
 				try {
-					var e = (MapDictionaryElement<Object>)element;
-					if (!e.backingMap().containsKey(mapKey)) {
+					var e = (Map<String,Object>)element;
+					if (!e.containsKey(mapKey)) {
 						sender.sendMessage(Component.text("Ce nom d'élément ("+mapKey+") n'existe pas"));
 						return element;
 					}
 					
-					e.backingMap().put(mapKey, branch.consumer().accept(e.backingMap().get(mapKey), sender, args));
+					e.put(mapKey, branch.consumer().accept(e.get(mapKey), sender, args));
 					return element;
 				}catch(Exception e) {
 					var ex = new RuntimeException("Impossible d'acceder a la valeur "+mapKey+" du dictionnaire "
@@ -96,9 +96,9 @@ public class DictionaryCommandGenerator implements MapElementCommandGenerator{
 		MapCommandExecutor executor = (element, sender, args) -> {
 			var mapKey = (String)args.get("itemName");
 			@SuppressWarnings("unchecked")
-			var e = (MapDictionaryElement<Object>)element;
+			var e = (Map<String,Object>)element;
 			try {
-				e.backingMap().put(mapKey, constructor.newInstance());
+				e.put(mapKey, constructor.newInstance());
 				sender.sendMessage(Component.text("L'ajout à bien été fait.", NamedTextColor.GREEN));
 				
 			} catch (Exception ex) {
@@ -117,16 +117,16 @@ public class DictionaryCommandGenerator implements MapElementCommandGenerator{
 	private MapCommandBranch makeRemoveCommand(Function<CommandArguments, Object> pipeline) {
 		var nameArg = new StringArgument("itemName");
 		nameArg.includeSuggestions(ArgumentSuggestions.stringCollectionAsync(i -> CompletableFuture.supplyAsync(() ->
-		((MapDictionaryElement<Object>)pipeline.apply(i.previousArgs())).backingMap().keySet()
+		((Map<String,Object>)pipeline.apply(i.previousArgs())).keySet()
 		)));
 		var arguments = new Argument<?>[] {new LiteralArgument("remove"),nameArg};
 		MapCommandExecutor executor = (element, sender, args) ->{
 			var mapKey = (String)args.get("itemName");
-			var e = (MapDictionaryElement<?>)element;
-			if (!e.backingMap().containsKey(mapKey)) {
+			var e = (Map<String,?>)element;
+			if (!e.containsKey(mapKey)) {
 				sender.sendMessage(Component.text("Ce nom d'élément ("+mapKey+") n'est pas présent.", NamedTextColor.GREEN));
 			}
-			e.backingMap().remove(mapKey);
+			e.remove(mapKey);
 			sender.sendMessage(Component.text("La suppression à bien été faite.", NamedTextColor.GREEN));
 			return element;
 		};

@@ -13,10 +13,16 @@ import fr.nekotine.core.logging.NekotineLogger;
 import fr.nekotine.core.map.command.MapCommandBranch;
 import fr.nekotine.core.map.command.MapCommandExecutor;
 import fr.nekotine.core.map.command.MapElementCommandGenerator;
-import fr.nekotine.core.map.element.MapBlockLocationElement;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
+/**
+ * Générateur de commande pour un champ de type {@link org.bukkit.Location Location}
+ * Il permet de définir les coordonées en arrondissant au block
+ * 
+ * @author XxGoldenbluexX
+ *
+ */
 public class BlockLocationCommandGenerator implements MapElementCommandGenerator{
 
 	private static final String nodeName = "MapBlockLocationElementNode";

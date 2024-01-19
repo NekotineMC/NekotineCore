@@ -1,6 +1,7 @@
 package fr.nekotine.core.map.command.generator;
 
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
@@ -16,7 +17,6 @@ import fr.nekotine.core.map.command.IMapElementCommandGeneratorResolver;
 import fr.nekotine.core.map.command.MapCommandBranch;
 import fr.nekotine.core.map.command.MapCommandExecutor;
 import fr.nekotine.core.map.command.MapElementCommandGenerator;
-import fr.nekotine.core.map.element.MapDictionaryElement;
 import fr.nekotine.core.util.CollectionUtil;
 
 public class DefaultMapElementCommandGenerator implements MapElementCommandGenerator{
@@ -45,7 +45,7 @@ public class DefaultMapElementCommandGenerator implements MapElementCommandGener
 					generator = resolver.resolveFor(fieldType);
 				}
 				// special Dictionary case
-				if (MapDictionaryElement.class == fieldType && generator instanceof DictionaryCommandGenerator dictGenerator) { // Type précis pour permettre l'héritage par l'utilisateur
+				if (Map.class.isAssignableFrom(fieldType) && generator instanceof DictionaryCommandGenerator dictGenerator) { // Type précis pour permettre l'héritage par l'utilisateur
 					if (field.isAnnotationPresent(MapElementTyped.class)) {
 						if (field.isAnnotationPresent(CommandGeneratorOverride.class)) {
 							dictGenerator.setElementGeneratorTypeOverride(field.getAnnotation(CommandGeneratorOverride.class).value());

@@ -4,6 +4,7 @@ import java.util.function.Function;
 import java.util.logging.Logger;
 
 import org.bukkit.Location;
+import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 
 import dev.jorel.commandapi.arguments.Argument;
@@ -14,7 +15,6 @@ import fr.nekotine.core.logging.NekotineLogger;
 import fr.nekotine.core.map.command.MapCommandBranch;
 import fr.nekotine.core.map.command.MapCommandExecutor;
 import fr.nekotine.core.map.command.MapElementCommandGenerator;
-import fr.nekotine.core.map.element.MapBlockBoundingBoxElement;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -35,8 +35,8 @@ public class BlockBoundingBoxCommandGenerator implements MapElementCommandGenera
 			var pos2 = ((Location)args.get(nodeName+2)).toVector();
 			var min = Vector.getMinimum(pos1, pos2);
 			var max = Vector.getMaximum(pos1,  pos2);
-			var e = (MapBlockBoundingBoxElement)element;
-			e.get().resize(min.getBlockX(), min.getBlockY(), min.getBlockZ(), max.getBlockX()+1, max.getBlockY()+1, max.getBlockZ()+1);
+			var e = (BoundingBox)element;
+			e.resize(min.getBlockX(), min.getBlockY(), min.getBlockZ(), max.getBlockX()+1, max.getBlockY()+1, max.getBlockZ()+1);
 			sender.sendMessage(Component.text("La location à bien été définie.", NamedTextColor.GREEN));
 			return element;
 		};
