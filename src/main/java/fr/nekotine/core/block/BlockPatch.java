@@ -1,10 +1,14 @@
 package fr.nekotine.core.block;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Consumer;
 
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
+import org.bukkit.util.BlockVector;
+import org.bukkit.util.BoundingBox;
 
 import fr.nekotine.core.block.fakeblock.AppliedFakeBlockPatch;
 import fr.nekotine.core.block.fakeblock.FakeBlockModule;
@@ -37,6 +41,22 @@ public class BlockPatch {
 	
 	public AppliedFakeBlockPatch patchPlayer(Player player, Block block) {
 		return Ioc.resolve(FakeBlockModule.class).applyPatch(this, block, player);
+	}
+	
+	public List<AppliedFakeBlockPatch> patchPlayer(Player player, BoundingBox boundingbox) {
+		var fakeModule = Ioc.resolve(FakeBlockModule.class);
+		var world = player.getWorld();
+		var col = new LinkedList<AppliedFakeBlockPatch>();
+		var min = new BlockVector(boundingbox.getMin());
+		var max = new BlockVector(boundingbox.getMax());
+		for (var x = min.getBlockX(); x < max.getBlockX(); x++) {
+			for (var y = min.getBlockY(); y < max.getBlockY(); y++) {
+				for (var z = min.getBlockZ(); z < max.getBlockZ(); z++) {
+					col.add(fakeModule.applyPatch(this, world.getBlockAt(x, y, z), player));
+				}
+			}
+		}
+		return col;
 	}
 	
 	public void unpatchAll(boolean applyPhysics) {
