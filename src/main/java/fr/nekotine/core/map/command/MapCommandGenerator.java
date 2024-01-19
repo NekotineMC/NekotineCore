@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bukkit.Location;
+import org.bukkit.util.BlockVector;
 import org.bukkit.util.BoundingBox;
 
 import dev.jorel.commandapi.CommandAPICommand;
@@ -45,8 +46,8 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 		generatorResolver = new MapElementCommandGeneratorResolver(new DefaultMapElementCommandGenerator())
 				.registerGenerator(Map.class, new DictionaryCommandGenerator())
 				.registerGenerator(Location.class, new PositionCommandGenerator())
-				.registerGenerator(Location.class, new LocationCommandGenerator())
-				.registerGenerator(Location.class, new BlockLocationCommandGenerator())
+				.registerGenerator(BlockVector.class, new LocationCommandGenerator())
+				.registerGenerator(BlockVector.class, new BlockLocationCommandGenerator())
 				.registerGenerator(BoundingBox.class, new BoundingBoxCommandGenerator())
 				.registerGenerator(BoundingBox.class, new BlockBoundingBoxCommandGenerator())
 				.registerGenerator(String.class, new StringCommandGenerator());

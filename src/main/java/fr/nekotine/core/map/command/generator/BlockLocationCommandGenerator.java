@@ -35,7 +35,9 @@ public class BlockLocationCommandGenerator implements MapElementCommandGenerator
 		MapCommandExecutor executor = (element, sender, args) ->{
 			var pos = (Location)args.get(nodeName);
 			var e = (Location)element;
-			e.set(pos.getX(), pos.getY(), pos.getZ());
+			e.setX(pos.getBlockX());
+			e.setY(pos.getBlockY());
+			e.setZ(pos.getBlockZ());
 			sender.sendMessage(Component.text("La position du block à bien été définie.", NamedTextColor.GREEN));
 			return e;
 		};

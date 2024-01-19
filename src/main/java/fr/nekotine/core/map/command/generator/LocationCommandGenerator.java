@@ -4,6 +4,7 @@ import java.util.function.Function;
 import java.util.logging.Logger;
 
 import org.bukkit.Location;
+import org.bukkit.util.BlockVector;
 
 import dev.jorel.commandapi.arguments.Argument;
 import dev.jorel.commandapi.arguments.LocationArgument;
@@ -27,8 +28,10 @@ public class LocationCommandGenerator implements MapElementCommandGenerator{
 		var arguments = new Argument<?>[] {new LocationArgument(nodeName, LocationType.PRECISE_POSITION)};
 		MapCommandExecutor executor = (element, sender, args) ->{
 			var pos = (Location)args.get(nodeName);
-			var e = (Location)element;
-			e.set(pos.getX(), pos.getY(), pos.getZ());
+			var e = (BlockVector)element;
+			e.setX(pos.getX());
+			e.setY(pos.getY());
+			e.setZ(pos.getZ());
 			sender.sendMessage(Component.text("La position à bien été définie.", NamedTextColor.GREEN));
 			return element;
 		};
