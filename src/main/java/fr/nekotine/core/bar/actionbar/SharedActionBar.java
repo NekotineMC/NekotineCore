@@ -29,6 +29,11 @@ public class SharedActionBar implements Listener{
 		EventUtil.register(this);
 		addViewers(viewers);
 	}
+	public void tearDown() {
+		EventUtil.unregister(this);
+		viewers.clear();
+		components.forEach(c -> removeComponent(c));
+	}
 	public void addViewers(Player... viewers) {
 		for(Player viewer : viewers) {
 			this.viewers.add(viewer);
