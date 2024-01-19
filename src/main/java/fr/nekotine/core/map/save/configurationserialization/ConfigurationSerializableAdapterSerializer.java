@@ -14,7 +14,6 @@ import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import fr.nekotine.core.map.annotation.ComposingMap;
 import fr.nekotine.core.map.annotation.MapDictKey;
 import fr.nekotine.core.map.annotation.MapElementTyped;
-import fr.nekotine.core.map.element.MapDictionaryElement;
 import fr.nekotine.core.tuple.Pair;
 
 public class ConfigurationSerializableAdapterSerializer {
@@ -85,7 +84,7 @@ public class ConfigurationSerializableAdapterSerializer {
 					name = field.getName();
 				}
 				// special Dictionary case
-				if (MapDictionaryElement.class == fieldType) { // Type précis pour permettre l'héritage par l'utilisateur
+				if (Map.class.isAssignableFrom(fieldType)) { // Type précis pour permettre l'héritage par l'utilisateur
 					if (field.isAnnotationPresent(MapElementTyped.class)) {
 						var annotation = field.getAnnotation(MapElementTyped.class);
 						var typeDict = annotation.value();
@@ -96,7 +95,7 @@ public class ConfigurationSerializableAdapterSerializer {
 									return null;
 								}
 								var map = new HashMap<String, Object>();
-								var backingMap = ((MapDictionaryElement)(field.get(obj))).backingMap();
+								var backingMap = ((Map)(field.get(obj)));
 								for (Entry entry : (Set<Entry>)backingMap.entrySet()) {
 									entry.getKey();
 									map.put((String)entry.getKey(), funcDict.apply(entry.getValue()));
@@ -166,7 +165,7 @@ public class ConfigurationSerializableAdapterSerializer {
 				}
 				final var finalName = name;
 				// special Dictionary case
-				if (MapDictionaryElement.class == fieldType) { // Type précis pour permettre l'héritage par l'utilisateur
+				if (Map.class.isAssignableFrom(fieldType)) { // Type précis pour permettre l'héritage par l'utilisateur
 					if (field.isAnnotationPresent(MapElementTyped.class)) {
 						var annotation = field.getAnnotation(MapElementTyped.class);
 						var typeDict = annotation.value();
@@ -180,8 +179,7 @@ public class ConfigurationSerializableAdapterSerializer {
 								if (fieldMap == null) {
 									return;
 								}
-								var dict = (MapDictionaryElement<Object>)field.get(parent);
-								var backing = dict.backingMap();
+								var backing = (Map<String,Object>)field.get(parent);
 								for (var key : fieldMap.keySet()) {
 									var keyMap = (Map<String, Object>) fieldMap.get(key);
 									keyMap.put("MapDictKey", key);

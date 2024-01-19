@@ -1,5 +1,6 @@
 package fr.nekotine.core.util;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
 public class BukkitUtil {
@@ -14,6 +15,10 @@ public class BukkitUtil {
 		toOverride.setPitch(with.getPitch());
 		toOverride.setYaw(with.getYaw());
 		toOverride.setWorld(with.getWorld());
+	}
+	
+	public static Location defaultLocation() {
+		return new Location(Bukkit.getWorlds().get(0),0,0,0);
 	}
 	
 }
