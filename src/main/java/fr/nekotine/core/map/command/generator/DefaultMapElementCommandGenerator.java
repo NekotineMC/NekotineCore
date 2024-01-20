@@ -12,6 +12,7 @@ import fr.nekotine.core.ioc.Ioc;
 import fr.nekotine.core.logging.NekotineLogger;
 import fr.nekotine.core.map.annotation.CommandGeneratorOverride;
 import fr.nekotine.core.map.annotation.ComposingMap;
+import fr.nekotine.core.map.annotation.MapDictKey;
 import fr.nekotine.core.map.annotation.MapElementTyped;
 import fr.nekotine.core.map.command.IMapElementCommandGeneratorResolver;
 import fr.nekotine.core.map.command.MapCommandBranch;
@@ -28,6 +29,9 @@ public class DefaultMapElementCommandGenerator implements MapElementCommandGener
 		var list = new LinkedList<MapCommandBranch>();
 		for (var field : elementType.getDeclaredFields()) {
 			if (field.isAnnotationPresent(ComposingMap.class)) {
+				if (field.isAnnotationPresent(MapDictKey.class)) {
+					continue; // On skip les champs qui servent de clef, car la commande ne sert a rien
+				}
 				var fieldType = field.getType();
 				field.trySetAccessible();
 				var name = field.getAnnotation(ComposingMap.class).value();
