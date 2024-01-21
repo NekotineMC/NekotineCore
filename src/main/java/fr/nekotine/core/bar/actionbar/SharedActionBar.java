@@ -34,7 +34,10 @@ public class SharedActionBar implements Listener{
 		viewers.clear();
 		var iterator = components.iterator();
 		while(iterator.hasNext()) {
-			removeComponent(iterator.next());
+			var component = iterator.next();
+			component.removeActionBar(this);
+			scheduleBuild();
+			iterator.remove();
 		}
 	}
 	public void addViewers(Player... viewers) {
