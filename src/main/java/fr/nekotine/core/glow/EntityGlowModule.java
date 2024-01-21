@@ -78,7 +78,7 @@ public class EntityGlowModule extends PluginModule {
 
 		var eid = glowed.getEntityId();
 		var set = map.computeIfAbsent(viewer, p -> new HashMap<>());
-		if (!set.containsKey(eid) || set.get(eid) == color) {
+		if (!set.containsKey(eid) || set.get(eid) != color) {
 			set.put(eid, color);
 			triggerUpdate(glowed, viewer, true, color);
 		}
@@ -89,7 +89,8 @@ public class EntityGlowModule extends PluginModule {
 		if (set == null) {
 			return;
 		}
-		if (set.remove(glowed.getEntityId()) != null) {
+		if (set.containsKey(glowed.getEntityId())) {
+			set.remove(glowed.getEntityId());
 			triggerUpdate(glowed, viewer, false, null);
 		}
 		if (set.isEmpty()) {
