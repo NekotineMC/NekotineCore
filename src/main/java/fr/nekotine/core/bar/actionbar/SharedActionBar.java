@@ -32,7 +32,10 @@ public class SharedActionBar implements Listener{
 	public void tearDown() {
 		EventUtil.unregister(this);
 		viewers.clear();
-		components.forEach(c -> removeComponent(c));
+		var iterator = components.iterator();
+		while(iterator.hasNext()) {
+			removeComponent(iterator.next());
+		}
 	}
 	public void addViewers(Player... viewers) {
 		for(Player viewer : viewers) {
