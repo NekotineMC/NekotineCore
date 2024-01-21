@@ -4,6 +4,7 @@ import java.util.function.Function;
 import java.util.logging.Logger;
 
 import org.bukkit.Location;
+import org.bukkit.util.BlockVector;
 
 import dev.jorel.commandapi.arguments.Argument;
 import dev.jorel.commandapi.arguments.LocationArgument;
@@ -34,10 +35,10 @@ public class BlockLocationCommandGenerator implements MapElementCommandGenerator
 		var arguments = new Argument<?>[] {new LocationArgument(nodeName, LocationType.BLOCK_POSITION)};
 		MapCommandExecutor executor = (element, sender, args) ->{
 			var pos = (Location)args.get(nodeName);
-			var e = (Location)element;
-			e.setX(pos.getBlockX());
-			e.setY(pos.getBlockY());
-			e.setZ(pos.getBlockZ());
+			var e = (BlockVector)element;
+			e.setX((double)pos.getBlockX());
+			e.setY((double)pos.getBlockY());
+			e.setZ((double)pos.getBlockZ());
 			sender.sendMessage(Component.text("La position du block à bien été définie.", NamedTextColor.GREEN));
 			return e;
 		};
