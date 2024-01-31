@@ -42,24 +42,28 @@ public class DefaultMapElementCommandGenerator implements MapElementCommandGener
 				var selfArgument = new LiteralArgument(finalName);
 				MapElementCommandGenerator generator;
 				var resolver = Ioc.resolve(IMapElementCommandGeneratorResolver.class);
-				if (field.isAnnotationPresent(CommandGeneratorOverride.class)) {
-					var generatorType = field.getAnnotation(CommandGeneratorOverride.class).value();
-					generator = resolver.resolveSpecific(generatorType);
-				}else {
-					generator = resolver.resolveFor(fieldType);
-				}
+				
 				// special Dictionary case
-				if (Map.class.isAssignableFrom(fieldType) && generator instanceof DictionaryCommandGenerator dictGenerator) { // Type précis pour permettre l'héritage par l'utilisateur
+				if (Map.class.isAssignableFrom(fieldType)) { // Type précis pour permettre l'héritage par l'utilisateur
 					if (field.isAnnotationPresent(MapElementTyped.class)) {
+						var dictGenerator = resolver.resolveSpecific(DictionaryCommandGenerator.class);
 						if (field.isAnnotationPresent(CommandGeneratorOverride.class)) {
 							dictGenerator.setElementGeneratorTypeOverride(field.getAnnotation(CommandGeneratorOverride.class).value());
 						}
 						dictGenerator.setNodeName(finalName);
 						dictGenerator.setNestedElementType(field.getAnnotation(MapElementTyped.class).value());
+						generator = dictGenerator;
 					}else {
 						var msg = "[MapCommandGenerator]->Default Le champ %s dans %s est de type dictionnaire mais n'a"
 								+ " pas l'annotation MapElementTyped nécessaire pour sa génération.";
 						throw new IllegalArgumentException(String.format(msg,finalName,elementType.getName()));
+					}
+				}else {
+					if (field.isAnnotationPresent(CommandGeneratorOverride.class)) {
+						var generatorType = field.getAnnotation(CommandGeneratorOverride.class).value();
+						generator = resolver.resolveSpecific(generatorType);
+					}else {
+						generator = resolver.resolveFor(fieldType);
 					}
 				}
 				Function<CommandArguments, Object> pip = a -> {
