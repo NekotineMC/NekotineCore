@@ -134,7 +134,7 @@ public class ConfigurationSerializableAdapterSerializer {
 				try {
 				map.put(pair.a(), pair.b().apply(obj));
 				}catch(Exception e) {
-					throw new RuntimeException(e);
+					throw new RuntimeException("Serialization issue for node "+node.getTypeName(), e);
 				}
 			}
 			return map;
