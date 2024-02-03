@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bukkit.Location;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.BoundingBox;
 
@@ -59,6 +60,7 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 		mapCommand.register();
 	}
 
+	@SuppressWarnings("unchecked")
 	public void generateFor(Class<?>... mapTypes) {
 		var mapModule = Ioc.resolve(MapModule.class);
 		try {
@@ -81,19 +83,19 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 				try {
 					// EDIT
 					var mapTypeName = mapType.getSimpleName();
-					var mapNameArgument = makeMapArgument(mapType);
+					var mapNameArgument = makeMapArgument((Class<? extends ConfigurationSerializable>)mapType);
 					var generator = generatorResolver.resolveFor(mapType);
 					@SuppressWarnings("unchecked")
-					Function<CommandArguments, Object> pipeline = a -> ((MapHandle<Object>)a.get("mapName")).loadConfig();
+					Function<CommandArguments, Object> pipeline = a -> ((MapHandle<ConfigurationSerializable>)a.get("mapName")).loadConfig();
 					for (var branch : generator.generateFor(pipeline, mapType)) {
 						var command = new CommandAPICommand(mapTypeName);
 						command.withArguments(mapNameArgument);
 						command.withArguments(branch.arguments());
 						CommandExecutor executor = (sender, args) -> {
 							@SuppressWarnings("unchecked")
-							var handle = (MapHandle<Object>) args.get(0);
+							var handle = (MapHandle<ConfigurationSerializable>) args.get(0);
 							var config = handle.loadConfig();
-							var newConf = branch.consumer().accept(config, sender, args);
+							var newConf = (ConfigurationSerializable)branch.consumer().accept(config, sender, args);
 							sender.sendMessage(Component.text("Sauvegarde de la carte...", NamedTextColor.BLUE));
 							mapModule.saveMapConfigAsync(handle, newConf,
 									() -> sender.sendMessage(Component.text("Sauvegarde effectuée.", NamedTextColor.GREEN)));
@@ -105,7 +107,7 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 					var typedAddCommand = new CommandAPICommand(mapTypeName);
 					typedAddCommand.withArguments(new StringArgument("mapName"));
 					typedAddCommand.executes((CommandExecutor) (sender, args) -> {
-						Ioc.resolve(MapModule.class).addMapAsync(mapType, (String) args.get("mapName"),
+						Ioc.resolve(MapModule.class).addMapAsync((Class<? extends ConfigurationSerializable>)mapType, (String) args.get("mapName"),
 								handle -> sender.sendMessage(Component.text("La carte a bien été créé")),
 								e -> sender.sendMessage(Component.text("Une erreur est survenue lors de l'ajout:", NamedTextColor.DARK_RED)
 										.appendNewline()
@@ -118,7 +120,7 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 					typedRemoveCommand.withArguments(new StringArgument("mapName"));
 					typedRemoveCommand.executes((CommandExecutor) (sender, args) -> {
 						try {
-							Ioc.resolve(MapModule.class).deleteMapAsync(mapType, (String) args.get("mapName"),
+							Ioc.resolve(MapModule.class).deleteMapAsync((Class<? extends ConfigurationSerializable>)mapType, (String) args.get("mapName"),
 								() -> sender.sendMessage(Component.text("La carte a bien été supprimée")),
 								e -> sender.sendMessage(Component.text("Une erreur est survenue lors de la suppression:", NamedTextColor.DARK_RED)
 										.appendNewline()
@@ -149,7 +151,7 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 		}
 	}
 
-	private <T> Argument<MapHandle<T>> makeMapArgument(Class<T> mapType) {
+	private <T extends ConfigurationSerializable> Argument<MapHandle<T>> makeMapArgument(Class<T> mapType) {
 		return new CustomArgument<MapHandle<T>, String>(new StringArgument("mapName"), info -> {
 			try {
 				return Ioc.resolve(MapModule.class).getMapFinder().findByName(mapType,

@@ -43,7 +43,7 @@ public class PluginBuilder {
 		ioc.registerSingletonAs(plugin, JavaPlugin.class);
 		ioc.registerSingletonAs(plugin.getLogger(), Logger.class);
 		// Serialization
-		ioc.registerSingletonAs(ConfigurationSerializableAdapterSerializer::new, IConfigurationSerializableAdapterContainer.class);
+		ioc.registerSingletonAs((Supplier<ConfigurationSerializableAdapterSerializer>)ConfigurationSerializableAdapterSerializer::new, IConfigurationSerializableAdapterContainer.class);
 	}
 	
 	@SafeVarargs

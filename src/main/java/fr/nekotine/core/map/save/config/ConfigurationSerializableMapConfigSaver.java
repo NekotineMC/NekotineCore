@@ -5,9 +5,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
 import fr.nekotine.core.map.MapHandle;
-import fr.nekotine.core.map.save.configurationserialization.ConfigurationSerializableAdapter;
 
 public class ConfigurationSerializableMapConfigSaver implements IMapConfigSaver {
 	
@@ -25,13 +25,13 @@ public class ConfigurationSerializableMapConfigSaver implements IMapConfigSaver 
 	}
 	
 	@Override
-	public <T> boolean delete(MapHandle<T> handle) {
+	public <T extends ConfigurationSerializable> boolean delete(MapHandle<T> handle) {
 		var file = new File(folder, handle.getName() + fileExtention);
 		return file.delete();
 	}
 	
 	@Override
-	public <T> void save(MapHandle<T> handle, Object map) {
+	public <T extends ConfigurationSerializable> void save(MapHandle<T> handle, ConfigurationSerializable map) {
 		var mapFile = new File(folder, handle.getName() + fileExtention);
 		if (!mapFile.exists()) {
 			try {
@@ -41,7 +41,7 @@ public class ConfigurationSerializableMapConfigSaver implements IMapConfigSaver 
 			}
 		}
 		var config = YamlConfiguration.loadConfiguration(mapFile);
-		config.set(contentKey, new ConfigurationSerializableAdapter(map));
+		config.set("", map);
 		try {
 			config.save(mapFile);
 		} catch (IOException e) {
@@ -50,7 +50,7 @@ public class ConfigurationSerializableMapConfigSaver implements IMapConfigSaver 
 	}
 
 	@Override
-	public <T> T load(MapHandle<T> handle) {
+	public <T extends ConfigurationSerializable> T load(MapHandle<T> handle) {
 		var mapFile = new File(folder, handle.getName() + fileExtention);
 		if (!mapFile.exists()) {
 			throw new RuntimeException(new FileNotFoundException(
@@ -58,10 +58,7 @@ public class ConfigurationSerializableMapConfigSaver implements IMapConfigSaver 
 					));
 		}
 		var config = YamlConfiguration.loadConfiguration(mapFile);
-		var map = config.get(contentKey);
-		if (map instanceof ConfigurationSerializableAdapter adapter) {
-			map = adapter.getContent();
-		}
+		var map = config.get("");
 		if (map == null) {
 			try {
 				map = handle.getConfigType().getConstructor().newInstance();

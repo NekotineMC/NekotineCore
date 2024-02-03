@@ -1,12 +1,13 @@
 package fr.nekotine.core.map;
 
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.jetbrains.annotations.NotNull;
 
 import fr.nekotine.core.map.finder.IMapFinder;
 import fr.nekotine.core.map.save.config.IMapConfigSaver;
 import fr.nekotine.core.map.save.metadata.IMapMetadataSaver;
 
-public class MapHandle<MapConfigType>{
+public class MapHandle<MapConfigType extends ConfigurationSerializable>{
 	
 	private @NotNull Class<MapConfigType> configType;
 	private @NotNull String name;

@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -55,7 +56,7 @@ public class ConfigurationSerializableMapFolderFinder implements IMapFinder {
 	}
 	
 	@Override
-	public <T> boolean delete(MapHandle<T> handle) {
+	public <T extends ConfigurationSerializable> boolean delete(MapHandle<T> handle) {
 		var mapFile = new File(mapFolder, handle.getName() + fileExtension);
 		return mapFile.delete();
 	}
@@ -84,7 +85,7 @@ public class ConfigurationSerializableMapFolderFinder implements IMapFinder {
 	}
 
 	@Override
-	public <T> MapHandle<T> add(Class<T> mapConfigType, String name) {
+	public <T extends ConfigurationSerializable> MapHandle<T> add(Class<T> mapConfigType, String name) {
 		var mapFile = new File(mapFolder, name + fileExtension);
 		if (mapFile.exists()) {
 			throw new RuntimeException(new FileAlreadyExistsException("Une carte de ce nom existe deja"));
@@ -100,7 +101,7 @@ public class ConfigurationSerializableMapFolderFinder implements IMapFinder {
 	}
 
 	@Override
-	public <T> @Nullable MapHandle<T> findByName(@NotNull Class<T> type, @NotNull String name) {
+	public <T extends ConfigurationSerializable> @Nullable MapHandle<T> findByName(@NotNull Class<T> type, @NotNull String name) {
 		AssertUtil.nonNull(name, "Le nom de ne peut être null");
 		var fileName = name + fileExtension;
 		if (mapFolder.listFiles((dir, n) -> n.equals(fileName)).length > 0) {

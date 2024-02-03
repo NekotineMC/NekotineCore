@@ -5,10 +5,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
 import fr.nekotine.core.map.MapHandle;
 import fr.nekotine.core.map.MapMetadata;
-import fr.nekotine.core.map.save.configurationserialization.ConfigurationSerializableAdapter;
 
 public class ConfigurationSerializableMapMetadataSaver implements IMapMetadataSaver {
 	
@@ -26,13 +26,13 @@ public class ConfigurationSerializableMapMetadataSaver implements IMapMetadataSa
 	}
 	
 	@Override
-	public <T> boolean delete(MapHandle<T> handle) {
+	public <T extends ConfigurationSerializable> boolean delete(MapHandle<T> handle) {
 		var file = new File(folder, handle.getName() + fileExtension);
 		return file.delete();
 	}
 	
 	@Override
-	public <T> void saveMetadata(MapHandle<T> handle, MapMetadata map) {
+	public <T extends ConfigurationSerializable> void saveMetadata(MapHandle<T> handle, MapMetadata map) {
 		var mapFile = new File(folder, handle.getName() + fileExtension);
 		if (!mapFile.exists()) {
 			try {
@@ -42,7 +42,7 @@ public class ConfigurationSerializableMapMetadataSaver implements IMapMetadataSa
 			}
 		}
 		var config = YamlConfiguration.loadConfiguration(mapFile);
-		config.set(mapMetadataKey, new ConfigurationSerializableAdapter(map));
+		config.set(mapMetadataKey, map);
 		try {
 			config.save(mapFile);
 		} catch (IOException e) {
@@ -51,7 +51,7 @@ public class ConfigurationSerializableMapMetadataSaver implements IMapMetadataSa
 	}
 
 	@Override
-	public <T> MapMetadata loadMetadata(MapHandle<T> handle) {
+	public <T extends ConfigurationSerializable> MapMetadata loadMetadata(MapHandle<T> handle) {
 		var mapFile = new File(folder, handle.getName() + fileExtension);
 		if (!mapFile.exists()) {
 			throw new RuntimeException(new FileNotFoundException(
