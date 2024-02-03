@@ -1,14 +1,21 @@
-package fr.nekotine.core.map.annotation;
+package fr.nekotine.core.reflexion.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import fr.nekotine.core.map.command.MapElementCommandGenerator;
-
+/**
+ * 
+ * Permet de savoir les types génériques en runtime
+ * 
+ * @author XxGoldenbluexX
+ *
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface CommandGeneratorOverride {
-	Class<? extends MapElementCommandGenerator> value();
+public @interface GenericBiTyped {
+	Class<?> a();
+	Class<?> b();
+	
 }

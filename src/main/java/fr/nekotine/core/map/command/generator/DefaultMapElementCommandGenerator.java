@@ -10,14 +10,13 @@ import dev.jorel.commandapi.arguments.LiteralArgument;
 import dev.jorel.commandapi.executors.CommandArguments;
 import fr.nekotine.core.ioc.Ioc;
 import fr.nekotine.core.logging.NekotineLogger;
-import fr.nekotine.core.map.annotation.CommandGeneratorOverride;
-import fr.nekotine.core.map.annotation.ComposingMap;
-import fr.nekotine.core.map.annotation.MapDictKey;
-import fr.nekotine.core.map.annotation.MapElementTyped;
+import fr.nekotine.core.map.annotation.GenerateCommandFor;
+import fr.nekotine.core.map.annotation.GenerateSpecificCommandFor;
 import fr.nekotine.core.map.command.IMapElementCommandGeneratorResolver;
 import fr.nekotine.core.map.command.MapCommandBranch;
 import fr.nekotine.core.map.command.MapCommandExecutor;
 import fr.nekotine.core.map.command.MapElementCommandGenerator;
+import fr.nekotine.core.reflexion.annotation.GenericBiTyped;
 import fr.nekotine.core.util.CollectionUtil;
 
 public class DefaultMapElementCommandGenerator implements MapElementCommandGenerator{
@@ -28,13 +27,11 @@ public class DefaultMapElementCommandGenerator implements MapElementCommandGener
 	public MapCommandBranch[] generateFor(Function<CommandArguments, Object> pipeline, Class<?> elementType) {
 		var list = new LinkedList<MapCommandBranch>();
 		for (var field : elementType.getDeclaredFields()) {
-			if (field.isAnnotationPresent(ComposingMap.class)) {
-				if (field.isAnnotationPresent(MapDictKey.class)) {
-					continue; // On skip les champs qui servent de clef, car la commande ne sert a rien
-				}
+			var genFor = field.getAnnotation(GenerateCommandFor.class);
+			var genForSpecific = field.getAnnotation(GenerateSpecificCommandFor.class);
+			if (genFor != null || genForSpecific != null) {
 				var fieldType = field.getType();
-				field.trySetAccessible();
-				var name = field.getAnnotation(ComposingMap.class).value();
+				var name = genFor == null ? genForSpecific.name() : genFor.value();
 				if (name.isBlank()) {
 					name = field.getName();
 				}
@@ -45,13 +42,13 @@ public class DefaultMapElementCommandGenerator implements MapElementCommandGener
 				
 				// special Dictionary case
 				if (Map.class.isAssignableFrom(fieldType)) { // Type précis pour permettre l'héritage par l'utilisateur
-					if (field.isAnnotationPresent(MapElementTyped.class)) {
+					if (field.isAnnotationPresent(GenericBiTyped.class)) {
 						var dictGenerator = resolver.resolveSpecific(DictionaryCommandGenerator.class);
-						if (field.isAnnotationPresent(CommandGeneratorOverride.class)) {
-							dictGenerator.setElementGeneratorTypeOverride(field.getAnnotation(CommandGeneratorOverride.class).value());
+						if (genForSpecific != null) {
+							dictGenerator.setElementGeneratorTypeOverride(genForSpecific.value());
 						}
 						dictGenerator.setNodeName(finalName);
-						dictGenerator.setNestedElementType(field.getAnnotation(MapElementTyped.class).value());
+						dictGenerator.setNestedElementType(field.getAnnotation(GenericBiTyped.class).b());
 						generator = dictGenerator;
 					}else {
 						var msg = "[MapCommandGenerator]->Default Le champ %s dans %s est de type dictionnaire mais n'a"
@@ -59,8 +56,8 @@ public class DefaultMapElementCommandGenerator implements MapElementCommandGener
 						throw new IllegalArgumentException(String.format(msg,finalName,elementType.getName()));
 					}
 				}else {
-					if (field.isAnnotationPresent(CommandGeneratorOverride.class)) {
-						var generatorType = field.getAnnotation(CommandGeneratorOverride.class).value();
+					if (genForSpecific != null) {
+						var generatorType = genForSpecific.value();
 						generator = resolver.resolveSpecific(generatorType);
 					}else {
 						generator = resolver.resolveFor(fieldType);

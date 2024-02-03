@@ -1,30 +1,30 @@
 package fr.nekotine.core.map;
 
-import fr.nekotine.core.map.annotation.ComposingMap;
-import fr.nekotine.core.map.annotation.MapElementTyped;
+import fr.nekotine.core.map.annotation.GenerateCommandFor;
 import fr.nekotine.core.map.element.MapBlockLocationElement;
 import fr.nekotine.core.map.element.MapDictionaryElement;
 import fr.nekotine.core.map.element.MapPositionElement;
+import fr.nekotine.core.reflexion.annotation.GenericBiTyped;
 
 public class MapTest {
 
 	private MapPositionElement notComposing = new MapPositionElement();
 	
-	@ComposingMap
+	@GenerateCommandFor
 	private MapTestComposite composite = new MapTestComposite();
 	
-	@ComposingMap()
+	@GenerateCommandFor()
 	private MapPositionElement poseUnnamed = new MapPositionElement();
 	
-	@ComposingMap("blockPoseRenamed")
+	@GenerateCommandFor("blockPoseRenamed")
 	private MapBlockLocationElement blockPoseToRename = new MapBlockLocationElement();
 	
-	@MapElementTyped(MapBlockLocationElement.class)
-	@ComposingMap()
+	@GenericBiTyped(MapBlockLocationElement.class)
+	@GenerateCommandFor()
 	private MapDictionaryElement<MapBlockLocationElement> poseList = new MapDictionaryElement<>();
 	
-	@MapElementTyped(MapTestComposite.class)
-	@ComposingMap()
+	@GenericBiTyped(MapTestComposite.class)
+	@GenerateCommandFor()
 	private MapDictionaryElement<MapTestComposite> compositeList = new MapDictionaryElement<>();
 
 	public MapPositionElement getNotComposing() {

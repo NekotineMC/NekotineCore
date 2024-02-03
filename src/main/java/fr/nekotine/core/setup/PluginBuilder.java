@@ -17,6 +17,8 @@ import fr.nekotine.core.map.MapModule;
 import fr.nekotine.core.module.ModuleManager;
 import fr.nekotine.core.module.PluginModule;
 import fr.nekotine.core.reflexion.ReflexionUtil;
+import fr.nekotine.core.serialization.configurationserializable.ConfigurationSerializableAdapterSerializer;
+import fr.nekotine.core.serialization.configurationserializable.IConfigurationSerializableAdapterContainer;
 
 public class PluginBuilder {
 
@@ -40,6 +42,8 @@ public class PluginBuilder {
 		ioc.registerSingleton(plugin);
 		ioc.registerSingletonAs(plugin, JavaPlugin.class);
 		ioc.registerSingletonAs(plugin.getLogger(), Logger.class);
+		// Serialization
+		ioc.registerSingletonAs(ConfigurationSerializableAdapterSerializer::new, IConfigurationSerializableAdapterContainer.class);
 	}
 	
 	@SafeVarargs

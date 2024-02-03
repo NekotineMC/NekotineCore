@@ -1,4 +1,4 @@
-package fr.nekotine.core.map.save.configurationserialization;
+package fr.nekotine.core.serialization.configurationserializable;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -11,21 +11,12 @@ import java.util.function.Function;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 
-import fr.nekotine.core.map.annotation.ComposingMap;
-import fr.nekotine.core.map.annotation.MapDictKey;
-import fr.nekotine.core.map.annotation.MapElementTyped;
+import fr.nekotine.core.reflexion.annotation.GenericBiTyped;
+import fr.nekotine.core.serialization.configurationserializable.annotation.ComposingConfiguration;
+import fr.nekotine.core.serialization.configurationserializable.annotation.MapDictKey;
 import fr.nekotine.core.tuple.Pair;
 
-public class ConfigurationSerializableAdapterSerializer {
-
-	private static ConfigurationSerializableAdapterSerializer instance;
-	
-	public static ConfigurationSerializableAdapterSerializer getInstance() {
-		if (instance == null) {
-			instance = new ConfigurationSerializableAdapterSerializer();
-		}
-		return instance;
-	}
+public class ConfigurationSerializableAdapterSerializer implements IConfigurationSerializableAdapterContainer{
 	
 	// Types qui n'ont pas besoin d'être transformé pour être serializé (un peut comme ConfigurationSerializable)
 	private static final Class<?>[] primitiveTypes = new Class<?>[]{
@@ -44,14 +35,33 @@ public class ConfigurationSerializableAdapterSerializer {
 	
 	private Map<Class<?>, Function<Object, Object>> deserializers = new HashMap<>();
 	
-	public Function<Object, Object> getSerializerFor(Class<?> clazz) {
+	@SuppressWarnings("unchecked")
+	@Override
+	public Function<Object, Map<String,Object>> getSerializerFor(Class<?> clazz) {
+		// On peut pas cast, obligé de wrap, fait chier java
+		var uncastableSerializer = getSerializerForInternal(clazz);
+		return (Object o) -> {
+			return (Map<String, Object>) uncastableSerializer.apply(o);
+		};
+	}
+	
+	@Override
+	public Function<Map<String,Object>, Object> getDeserializerFor(Class<?> clazz) {
+		// On peut pas cast, obligé de wrap, fait chier java
+		var uncastableDeserializer = getDeserializerForInternal(clazz);
+		return (Map<String,Object> o) -> {
+			return uncastableDeserializer.apply(o);
+		};
+	}
+	
+	private Function<Object, Object> getSerializerForInternal(Class<?> clazz) {
 		if (!serializers.containsKey(clazz)) {
 			serializers.put(clazz, makeSerializerForNode(clazz));
 		}
 		return serializers.get(clazz);
 	}
 	
-	public Function<Object, Object> getDeserializerFor(Class<?> clazz) {
+	private Function<Object, Object> getDeserializerForInternal(Class<?> clazz) {
 		if (!deserializers.containsKey(clazz)) {
 			deserializers.put(clazz, makeDeserializerForNode(clazz));
 		}
@@ -73,21 +83,21 @@ public class ConfigurationSerializableAdapterSerializer {
 		// Composed type (dict or Component)
 		var fieldsFunctions = new LinkedList<Pair<String,Function<Object, Map<String, Object>>>>();
 		for (var field : node.getDeclaredFields()) {
-			if (field.isAnnotationPresent(ComposingMap.class)) {
+			if (field.isAnnotationPresent(ComposingConfiguration.class)) {
 				if (field.isAnnotationPresent(MapDictKey.class)) {
 					continue; // Pas besoin de stocker le champ si c'est déja la clef d'un dictionnaire
 				}
 				var fieldType = field.getType();
 				field.trySetAccessible();
-				var name = field.getAnnotation(ComposingMap.class).value();
+				var name = field.getAnnotation(ComposingConfiguration.class).value();
 				if (name.isBlank()) {
 					name = field.getName();
 				}
 				// special Dictionary case
-				if (Map.class.isAssignableFrom(fieldType)) { // Type précis pour permettre l'héritage par l'utilisateur
-					if (field.isAnnotationPresent(MapElementTyped.class)) {
-						var annotation = field.getAnnotation(MapElementTyped.class);
-						var typeDict = annotation.value();
+				if (Map.class.isAssignableFrom(fieldType)) {
+					if (field.isAnnotationPresent(GenericBiTyped.class)) {
+						var annotation = field.getAnnotation(GenericBiTyped.class);
+						var typeDict = annotation.b();
 						var funcDict = makeSerializerForNode(typeDict); // TODO Pk pas getSerializerForNode?
 						fieldsFunctions.add(new Pair(name,(Function<Object, Object>)obj -> {
 							try {
@@ -111,7 +121,7 @@ public class ConfigurationSerializableAdapterSerializer {
 						throw new IllegalArgumentException(String.format(msg,name,node.getName()));
 					}
 				}else {
-					var nodeSerializer = getSerializerFor(field.getType());
+					var nodeSerializer = getSerializerForInternal(field.getType());
 					fieldsFunctions.add(new Pair(name,(Function<Object, Object>)obj ->{
 						if (obj == null) {
 							return null;
@@ -156,19 +166,32 @@ public class ConfigurationSerializableAdapterSerializer {
 		// Composed type (dict or Component)
 		var fieldsFunctions = new LinkedList<BiConsumer<Object,Object>>();
 		for (var field : node.getDeclaredFields()) {
-			if (field.isAnnotationPresent(ComposingMap.class)) {
+			if (field.isAnnotationPresent(MapDictKey.class)) {
+				fieldsFunctions.add((parent,map) ->{
+					if (map == null || !(map instanceof Map<?,?> realMap)) {
+						return;
+					}
+					try {
+						var obj = realMap.get("MapDictKey");
+						field.set(parent, obj);
+					}catch(Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
+			}
+			else if (field.isAnnotationPresent(ComposingConfiguration.class)) {
 				var fieldType = field.getType();
 				field.trySetAccessible();
-				var name = field.getAnnotation(ComposingMap.class).value();
+				var name = field.getAnnotation(ComposingConfiguration.class).value();
 				if (name.isBlank()) {
 					name = field.getName();
 				}
 				final var finalName = name;
 				// special Dictionary case
 				if (Map.class.isAssignableFrom(fieldType)) { // Type précis pour permettre l'héritage par l'utilisateur
-					if (field.isAnnotationPresent(MapElementTyped.class)) {
-						var annotation = field.getAnnotation(MapElementTyped.class);
-						var typeDict = annotation.value();
+					if (field.isAnnotationPresent(GenericBiTyped.class)) {
+						var annotation = field.getAnnotation(GenericBiTyped.class);
+						var typeDict = annotation.b();
 						var funcDict = makeDeserializerForNode(typeDict);
 						fieldsFunctions.add((parent,map) -> {
 							try {
@@ -195,32 +218,18 @@ public class ConfigurationSerializableAdapterSerializer {
 						throw new IllegalArgumentException(String.format(msg,name,node.getName()));
 					}
 				}else {
-					if (field.isAnnotationPresent(MapDictKey.class)) {
-						fieldsFunctions.add((parent,map) ->{
-							if (map == null || !(map instanceof Map<?,?> realMap)) {
-								return;
-							}
-							try {
-								var obj = realMap.get("MapDictKey");
-								field.set(parent, obj);
-							}catch(Exception e) {
-								throw new RuntimeException(e);
-							}
-						});
-					}else {
-						var nodeDeserializer = getDeserializerFor(field.getType());
-						fieldsFunctions.add((parent,map) ->{
-							if (map == null || !(map instanceof Map<?,?> realMap)) {
-								return;
-							}
-							try {
-								var obj = nodeDeserializer.apply(realMap.get(finalName));
-								field.set(parent, obj);
-							}catch(Exception e) {
-								throw new RuntimeException(e);
-							}
-						});
-					}
+					var nodeDeserializer = getDeserializerForInternal(field.getType());
+					fieldsFunctions.add((parent,map) ->{
+						if (map == null || !(map instanceof Map<?,?> realMap)) {
+							return;
+						}
+						try {
+							var obj = nodeDeserializer.apply(realMap.get(finalName));
+							field.set(parent, obj);
+						}catch(Exception e) {
+							throw new RuntimeException(e);
+						}
+					});
 				}
 			}
 		}
