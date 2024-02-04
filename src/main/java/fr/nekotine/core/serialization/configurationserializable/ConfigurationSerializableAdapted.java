@@ -7,15 +7,15 @@ import org.jetbrains.annotations.NotNull;
 
 import fr.nekotine.core.ioc.Ioc;
 
-public interface ConfigurationSerializableAdapted extends ConfigurationSerializable{
-
-	public static ConfigurationSerializableAdapted deserialize(Map<String,Object> map) {
+public abstract class ConfigurationSerializableAdapted implements ConfigurationSerializable{
+	
+	public ConfigurationSerializableAdapted(Map<String,Object> map) {
 		var deserializerSource = Ioc.resolve(IConfigurationSerializableAdapterContainer.class);
-		return (ConfigurationSerializableAdapted)deserializerSource.getDeserializerFor(ConfigurationSerializableAdapted.class).apply(map);
+		deserializerSource.getDeserializerApplierFor(getClass()).apply(this, map);
 	}
 	
 	@Override
-	default @NotNull Map<String, Object> serialize() {
+	public @NotNull Map<String, Object> serialize() {
 		var serializerSource = Ioc.resolve(IConfigurationSerializableAdapterContainer.class);
 		return serializerSource.getSerializerFor(getClass()).apply(this);
 	}

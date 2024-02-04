@@ -1,6 +1,5 @@
 package fr.nekotine.core.map.command.generator;
 
-import java.lang.reflect.Constructor;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -13,6 +12,7 @@ import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.LiteralArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
 import dev.jorel.commandapi.executors.CommandArguments;
+import fr.nekotine.core.defaut.IDefaultProvider;
 import fr.nekotine.core.ioc.Ioc;
 import fr.nekotine.core.logging.NekotineLogger;
 import fr.nekotine.core.map.command.IMapElementCommandGeneratorResolver;
@@ -84,21 +84,14 @@ public class DictionaryCommandGenerator implements MapElementCommandGenerator{
 	}
 	
 	private MapCommandBranch makeAddCommand() {
-		Constructor<?> tempConstructor = null;
-		try {
-			tempConstructor = nestedElementType.getConstructor();
-		}catch(Exception e) {
-			throw new IllegalArgumentException("Aucun constructeur par defaut pour le type "+nestedElementType.getName()+
-					". La generation de la commande \"add\" du dictionnaire a echouee.");
-		}
-		final var constructor = tempConstructor;
+		var provider = Ioc.resolve(IDefaultProvider.class).getSupplier(nestedElementType);
 		var arguments = new Argument<?>[] {new LiteralArgument("add"),new StringArgument("itemName")};
 		MapCommandExecutor executor = (element, sender, args) -> {
 			var mapKey = (String)args.get("itemName");
 			@SuppressWarnings("unchecked")
 			var e = (Map<String,Object>)element;
 			try {
-				e.put(mapKey, constructor.newInstance());
+				e.put(mapKey, provider.get());
 				sender.sendMessage(Component.text("L'ajout à bien été fait.", NamedTextColor.GREEN));
 				
 			} catch (Exception ex) {

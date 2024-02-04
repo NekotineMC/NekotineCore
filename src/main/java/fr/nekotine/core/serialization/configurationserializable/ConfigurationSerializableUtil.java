@@ -1,6 +1,6 @@
 package fr.nekotine.core.serialization.configurationserializable;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -17,11 +17,17 @@ public class ConfigurationSerializableUtil {
 	}
 	
 	public static <T extends ConfigurationSerializable> T getObjectFrom(ConfigurationSection section, Class<T> clazz) {
-		var map = new HashMap<String,Object>();
-		for (var key : section.getKeys(false)) {
-			map.put(key, section.get(key));
+		return clazz.cast(ConfigurationSerialization.deserializeObject(sectionAsMap(section), clazz));
+	}
+	
+	public static Map<String,Object> sectionAsMap(ConfigurationSection section){
+		var map = section.getValues(false);
+		for (var entry : map.entrySet()) {
+			if (ConfigurationSection.class.isAssignableFrom(entry.getValue().getClass())) {
+				entry.setValue(sectionAsMap((ConfigurationSection)entry.getValue()));
+			}
 		}
-		return clazz.cast(ConfigurationSerialization.deserializeObject(map, clazz));
+		return map;
 	}
 	
 }

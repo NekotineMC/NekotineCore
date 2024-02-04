@@ -1,16 +1,21 @@
 package fr.nekotine.core.serialization.configurationserializable;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 
+import fr.nekotine.core.defaut.IDefaultProvider;
+import fr.nekotine.core.ioc.Ioc;
 import fr.nekotine.core.reflexion.annotation.GenericBiTyped;
 import fr.nekotine.core.serialization.configurationserializable.annotation.ComposingConfiguration;
 import fr.nekotine.core.serialization.configurationserializable.annotation.MapDictKey;
@@ -31,27 +36,63 @@ public class ConfigurationSerializableAdapterSerializer implements IConfiguratio
 		String.class
 	};
 	
+	private static final BiFunction<Object,Object,Object> biIdentity = (instance,map) -> instance;
+	
 	private Map<Class<?>, Function<Object, Object>> serializers = new HashMap<>();
 	
-	private Map<Class<?>, Function<Object, Object>> deserializers = new HashMap<>();
+	private Map<Class<?>, BiFunction<Object, Object, Object>> deserializers = new HashMap<>();
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	public Function<Object, Map<String,Object>> getSerializerFor(Class<?> clazz) {
 		// On peut pas cast, obligé de wrap, fait chier java
 		var uncastableSerializer = getSerializerForInternal(clazz);
-		return (Object o) -> {
+		return (o) -> {
 			return (Map<String, Object>) uncastableSerializer.apply(o);
 		};
 	}
 	
 	@Override
 	public Function<Map<String,Object>, Object> getDeserializerFor(Class<?> clazz) {
+		final var defaulterFinal = providerFor(clazz);
+		var uncastableDeserializer = getDeserializerForInternal(clazz);
+		// On peut pas cast, obligé de wrap, fait chier java
+		return (map) -> {
+			return uncastableDeserializer.apply(defaulterFinal.apply(map),map);
+		};
+	}
+	
+	@Override
+	public BiFunction<Object,Map<String,Object>, Object> getDeserializerApplierFor(Class<?> clazz) {
 		// On peut pas cast, obligé de wrap, fait chier java
 		var uncastableDeserializer = getDeserializerForInternal(clazz);
-		return (Map<String,Object> o) -> {
-			return uncastableDeserializer.apply(o);
+		return (instance, o) -> {
+			return uncastableDeserializer.apply(instance,o);
 		};
+	}
+	
+	private Function<Object, Object> providerFor(Class<?> clazz){
+		var defaultProvider = Ioc.resolve(IDefaultProvider.class).getSupplier(clazz);
+		Function<Object,Object> defaulter = null;
+		if (defaultProvider != null) {
+			defaulter = (map) -> defaultProvider.get();
+		}
+		if (defaulter == null && !Modifier.isAbstract(clazz.getModifiers()) && ConfigurationSerializable.class.isAssignableFrom(clazz)) {
+			Constructor<?> ctor;
+			try {
+				ctor = clazz.getConstructor(Map.class);
+			} catch (NoSuchMethodException e) {
+				throw new IllegalArgumentException("Impossible de construire une instance de "+clazz.getTypeName(),e);
+			}
+			defaulter = (map) -> {
+				try {
+					return ctor.newInstance(map);
+				} catch (Exception e) {
+					return null;
+				}
+			};
+		}
+		return defaulter;
 	}
 	
 	private Function<Object, Object> getSerializerForInternal(Class<?> clazz) {
@@ -61,7 +102,7 @@ public class ConfigurationSerializableAdapterSerializer implements IConfiguratio
 		return serializers.get(clazz);
 	}
 	
-	private Function<Object, Object> getDeserializerForInternal(Class<?> clazz) {
+	private BiFunction<Object,Object, Object> getDeserializerForInternal(Class<?> clazz) {
 		if (!deserializers.containsKey(clazz)) {
 			deserializers.put(clazz, makeDeserializerForNode(clazz));
 		}
@@ -98,7 +139,7 @@ public class ConfigurationSerializableAdapterSerializer implements IConfiguratio
 					if (field.isAnnotationPresent(GenericBiTyped.class)) {
 						var annotation = field.getAnnotation(GenericBiTyped.class);
 						var typeDict = annotation.b();
-						var funcDict = makeSerializerForNode(typeDict); // TODO Pk pas getSerializerForNode?
+						var funcDict = getSerializerForInternal(typeDict);
 						fieldsFunctions.add(new Pair(name,(Function<Object, Object>)obj -> {
 							try {
 								if (obj == null) {
@@ -152,20 +193,21 @@ public class ConfigurationSerializableAdapterSerializer implements IConfiguratio
 	}
 	
 	@SuppressWarnings("unchecked")
-	private Function<Object, Object> makeDeserializerForNode(Class<?> node){
+	private BiFunction<Object,Object, Object> makeDeserializerForNode(Class<?> node){
 		// ConfigurationSerializable
-		if (ConfigurationSerializable.class.isAssignableFrom(node)) {
-			return map -> map != null && map instanceof Map<?,?> ? ConfigurationSerialization.deserializeObject((Map<String,Object>)map, (Class<? extends ConfigurationSerializable>)node) : null;
+		if (ConfigurationSerializable.class.isAssignableFrom(node) && !ConfigurationSerializableAdapted.class.isAssignableFrom(node)) {
+			return (instnace,map) -> map != null && map instanceof Map<?,?> ? ConfigurationSerialization.deserializeObject((Map<String,Object>)map, (Class<? extends ConfigurationSerializable>)node) : null;
 		}
 		// Primitive type
 		for (var t : primitiveTypes) {
 			if (t.isAssignableFrom(node)) {
-				return Function.identity();
+				return biIdentity;
 			}
 		}
 		// Composed type (dict or Component)
 		var fieldsFunctions = new LinkedList<BiConsumer<Object,Object>>();
 		for (var field : node.getDeclaredFields()) {
+			field.trySetAccessible();
 			if (field.isAnnotationPresent(MapDictKey.class)) {
 				fieldsFunctions.add((parent,map) ->{
 					if (map == null || !(map instanceof Map<?,?> realMap)) {
@@ -192,7 +234,8 @@ public class ConfigurationSerializableAdapterSerializer implements IConfiguratio
 					if (field.isAnnotationPresent(GenericBiTyped.class)) {
 						var annotation = field.getAnnotation(GenericBiTyped.class);
 						var typeDict = annotation.b();
-						var funcDict = makeDeserializerForNode(typeDict);
+						var funcDict = getDeserializerForInternal(typeDict);
+						var provider = providerFor(typeDict);
 						fieldsFunctions.add((parent,map) -> {
 							try {
 								if (map == null || !(map instanceof Map<?,?> realMap)) {
@@ -203,10 +246,15 @@ public class ConfigurationSerializableAdapterSerializer implements IConfiguratio
 									return;
 								}
 								var backing = (Map<String,Object>)field.get(parent);
+								if (backing == null) {
+									backing = new HashMap<>();
+									field.set(parent, backing);
+								}
 								for (var key : fieldMap.keySet()) {
 									var keyMap = (Map<String, Object>) fieldMap.get(key);
 									keyMap.put("MapDictKey", key);
-									backing.put(key, funcDict.apply(keyMap));
+									var res = funcDict.apply(provider.apply(keyMap),keyMap);
+									backing.put(key, res);
 								}
 							}catch(Exception e) {
 								throw new RuntimeException(e);
@@ -218,13 +266,15 @@ public class ConfigurationSerializableAdapterSerializer implements IConfiguratio
 						throw new IllegalArgumentException(String.format(msg,name,node.getName()));
 					}
 				}else {
-					var nodeDeserializer = getDeserializerForInternal(field.getType());
+					var nodeDeserializer = getDeserializerForInternal(fieldType);
+					var provider = providerFor(fieldType);
 					fieldsFunctions.add((parent,map) ->{
 						if (map == null || !(map instanceof Map<?,?> realMap)) {
 							return;
 						}
 						try {
-							var obj = nodeDeserializer.apply(realMap.get(finalName));
+							var innerMap = realMap.get(finalName);
+							var obj = nodeDeserializer.apply(provider.apply(innerMap),innerMap);
 							field.set(parent, obj);
 						}catch(Exception e) {
 							throw new RuntimeException(e);
@@ -234,13 +284,11 @@ public class ConfigurationSerializableAdapterSerializer implements IConfiguratio
 			}
 		}
 		try {
-			var ctor = node.getConstructor();
-			return map -> {
+			return (instance,map) -> {
 				if (map == null) {
 					return null;
 				}
 				try {
-					var instance = ctor.newInstance();
 					for (var func : fieldsFunctions) {
 						func.accept(instance, map);
 					}

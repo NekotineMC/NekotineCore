@@ -11,6 +11,8 @@ import org.bukkit.configuration.Configuration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import fr.nekotine.core.NekotinePlugin;
+import fr.nekotine.core.defaut.DefaultProvider;
+import fr.nekotine.core.defaut.IDefaultProvider;
 import fr.nekotine.core.ioc.Ioc;
 import fr.nekotine.core.logging.NekotineLogger;
 import fr.nekotine.core.map.MapModule;
@@ -42,8 +44,11 @@ public class PluginBuilder {
 		ioc.registerSingleton(plugin);
 		ioc.registerSingletonAs(plugin, JavaPlugin.class);
 		ioc.registerSingletonAs(plugin.getLogger(), Logger.class);
+		ioc.registerSingletonAs(new DefaultProvider(), IDefaultProvider.class);
 		// Serialization
-		ioc.registerSingletonAs((Supplier<ConfigurationSerializableAdapterSerializer>)ConfigurationSerializableAdapterSerializer::new, IConfigurationSerializableAdapterContainer.class);
+		ioc.registerSingletonAs((Supplier<ConfigurationSerializableAdapterSerializer>)ConfigurationSerializableAdapterSerializer::new,
+				IConfigurationSerializableAdapterContainer.class);
+		
 	}
 	
 	@SafeVarargs
