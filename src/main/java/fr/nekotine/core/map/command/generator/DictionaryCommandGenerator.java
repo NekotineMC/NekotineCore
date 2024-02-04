@@ -51,7 +51,7 @@ public class DictionaryCommandGenerator implements MapElementCommandGenerator{
 		MapElementCommandGenerator generator;
 		var resolver = Ioc.resolve(IMapElementCommandGeneratorResolver.class);
 		if (elementGeneratorOverride != null) {
-			generator =  resolver.resolveSpecific(elementGeneratorOverride);
+			generator = resolver.resolveSpecific(elementGeneratorOverride);
 		}else {
 			generator = resolver.resolveFor(nestedElementType);
 		}
