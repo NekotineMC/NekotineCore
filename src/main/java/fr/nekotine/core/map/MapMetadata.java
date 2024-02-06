@@ -3,37 +3,45 @@ package fr.nekotine.core.map;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 
-@SerializableAs("MapIdentifier")
+@SerializableAs("MapMetadata")
 public class MapMetadata implements ConfigurationSerializable{
 	
-	private Component displayName;
+	private @Nonnull String name;
 	
-	private Component description;
+	private @Nullable Component displayName;
 	
-	private Material icon;
+	private @Nullable Component description;
+	
+	private @Nullable Material icon;
 	
 	public MapMetadata() {}
 	
-	public MapMetadata(Component displayName, Component description, Material icon) {
+	public MapMetadata(@Nonnull String name, @Nullable Component displayName, @Nullable Component description, @Nullable Material icon) {
 		this.displayName = displayName;
 		this.description = description;
 		this.icon = icon;
 	}
 	
 	@Override
-	public @NotNull Map<String, Object> serialize() {
+	public @Nonnull Map<String, Object> serialize() {
 		Map<String, Object> map = new HashMap<>();
-		map.put("displayName", JSONComponentSerializer.json().serialize(displayName));
-		map.put("description", JSONComponentSerializer.json().serialize(description));
+		map.put("name", name);
+		if (displayName != null) {
+			map.put("displayName", JSONComponentSerializer.json().serialize(displayName));
+		}
+		if (description != null) {
+			map.put("description", JSONComponentSerializer.json().serialize(description));
+		}
 		if (icon != null) {
 			map.put("icon", icon.toString());
 		}
@@ -41,25 +49,25 @@ public class MapMetadata implements ConfigurationSerializable{
 	}
 
 	public static MapMetadata deserialize(Map<String, Object> map) throws ClassNotFoundException {
-		return new MapMetadata(
-				JSONComponentSerializer.json().deserialize((String)map.get("displayName")),
-				JSONComponentSerializer.json().deserialize((String)map.get("description")),
+		return new MapMetadata((String)map.get("name"),
+				map.containsKey("displayName")?JSONComponentSerializer.json().deserialize((String)map.get("displayName")):Component.text(""),
+				map.containsKey("description")?JSONComponentSerializer.json().deserialize((String)map.get("description")):Component.text(""),
 				map.containsKey("icon")?Material.valueOf((String) map.get("icon")):null);
 	}
 
-	public Component getDisplayName() {
+	public @Nullable Component getDisplayName() {
 		return displayName;
 	}
 
-	public void setDisplayName(Component displayName) {
+	public void setDisplayName(@Nullable Component displayName) {
 		this.displayName = displayName;
 	}
 
-	public Component getDescription() {
+	public @Nullable Component getDescription() {
 		return description;
 	}
 
-	public void setDescription(Component description) {
+	public void setDescription(@Nullable Component description) {
 		this.description = description;
 	}
 
