@@ -6,14 +6,22 @@ import java.util.Optional;
 import java.util.WeakHashMap;
 import java.util.function.Function;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jetbrains.annotations.Nullable;
 
-import fr.nekotine.core.module.PluginModule;
+import fr.nekotine.core.logging.NekotineLogger;
+import fr.nekotine.core.module.IPluginModule;
 
-public class WrappingModule extends PluginModule{
+public class WrappingModule implements IPluginModule{
 
+	private Logger logger = new NekotineLogger(getClass());
+	
 	private Map<Object, Map<Class<? extends Object>, WrapperBase<? extends Object>>> store = new WeakHashMap<>();
+	
+	@Override
+	public void unload() {
+	}
 	
 	public <U, T extends WrapperBase<U>> boolean hasWrapper(U source, Class<T> wrapperType) {
 		try {

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.bukkit.event.Event;
 import org.bukkit.plugin.IllegalPluginAccessException;
@@ -11,10 +12,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import fr.nekotine.core.ioc.Ioc;
-import fr.nekotine.core.module.PluginModule;
+import fr.nekotine.core.logging.NekotineLogger;
+import fr.nekotine.core.module.IPluginModule;
 import fr.nekotine.core.ticking.event.TickElapsedEvent;
 
-public class TickingModule extends PluginModule{
+public class TickingModule implements IPluginModule{
+	
+	private Logger logger = new NekotineLogger(getClass());
 	
 	TickEventRunnable runningTask;
 	
@@ -30,13 +34,12 @@ public class TickingModule extends PluginModule{
 	}
 
 	@Override
-	protected void unload() {
+	public void unload() {
 		try {
 			runningTask.cancel();
 		}catch(Exception e) {
 			logger.log(Level.WARNING, "Erreur lors de l'arret de l'horloge", e);
 		}
-		super.unload();
 	}
 	
 	private void Tick() {

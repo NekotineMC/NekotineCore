@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import fr.nekotine.core.ioc.Ioc;
-import fr.nekotine.core.module.PluginModule;
+import fr.nekotine.core.module.IPluginModule;
 
 public class NekotineLogger extends Logger{
 
@@ -15,7 +15,7 @@ public class NekotineLogger extends Logger{
 	public NekotineLogger(Class<?> clazz) {
 		super(loggerName(clazz), null);
 		var pre = clazz.getTypeName();
-		if (!PluginModule.class.isAssignableFrom(clazz)) {
+		if (!IPluginModule.class.isAssignableFrom(clazz)) {
 			pre = clazz.getSimpleName();
 		}
 		prefix = '[' + pre + "] > ";

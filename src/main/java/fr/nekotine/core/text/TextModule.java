@@ -7,7 +7,7 @@ import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
-import fr.nekotine.core.module.PluginModule;
+import fr.nekotine.core.module.IPluginModule;
 import fr.nekotine.core.text.style.NekotineStyles;
 import fr.nekotine.core.text.style.TextStyle;
 import fr.nekotine.core.text.tree.Leaf;
@@ -16,7 +16,7 @@ import fr.nekotine.core.text.tree.TreeElement;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 
-public class TextModule extends PluginModule{
+public class TextModule implements IPluginModule{
 	public class Builder {
 		private TreeElement root;
 		private TextModule module;
@@ -56,6 +56,10 @@ public class TextModule extends PluginModule{
 	}
 	
 	//
+	
+	@Override
+	public void unload() {
+	}
 	
 	public boolean registerStyle(Enum<?> key, TextStyle value) {
 		if(styles.containsKey(key)) return false;

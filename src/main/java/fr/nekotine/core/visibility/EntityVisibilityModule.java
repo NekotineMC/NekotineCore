@@ -21,9 +21,9 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.events.PacketListener;
 
 import fr.nekotine.core.ioc.Ioc;
-import fr.nekotine.core.module.PluginModule;
+import fr.nekotine.core.module.IPluginModule;
 
-public class EntityVisibilityModule extends PluginModule{
+public class EntityVisibilityModule implements IPluginModule{
 	
 	private PacketListener metadataListener;
 	
@@ -108,12 +108,11 @@ public class EntityVisibilityModule extends PluginModule{
 	}
 	
 	@Override
-	protected void unload() {
+	public void unload() {
 		if (updateTask != null && !updateTask.isCancelled()) {
 			updateTask.cancel();
 		}
 		ProtocolLibrary.getProtocolManager().removePacketListener(metadataListener);
-		super.unload();
 	}
 	
 	private class VisibilityData{

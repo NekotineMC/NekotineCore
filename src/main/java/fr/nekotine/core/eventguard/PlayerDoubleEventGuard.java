@@ -13,12 +13,12 @@ import org.bukkit.event.player.PlayerInteractEvent;
 
 import fr.nekotine.core.ioc.Ioc;
 import fr.nekotine.core.module.ModuleManager;
-import fr.nekotine.core.module.PluginModule;
+import fr.nekotine.core.module.IPluginModule;
 import fr.nekotine.core.ticking.TickingModule;
 import fr.nekotine.core.ticking.event.TickElapsedEvent;
 import fr.nekotine.core.util.EventUtil;
 
-public class PlayerDoubleEventGuard extends PluginModule implements Listener{
+public class PlayerDoubleEventGuard implements IPluginModule, Listener{
 	private HashMap<Player, Set<String>> calledEvent = new HashMap<Player, Set<String>>();
 	public PlayerDoubleEventGuard() {
 		Ioc.resolve(ModuleManager.class).tryLoad(TickingModule.class);
@@ -36,6 +36,10 @@ public class PlayerDoubleEventGuard extends PluginModule implements Listener{
 	}
 	public boolean alreadyCalled(Player player, Event evt) {
 		return calledEvent.containsKey(player) && calledEvent.get(player).contains(evt.getEventName());
+	}
+	
+	@Override
+	public void unload() {
 	}
 	
 	//

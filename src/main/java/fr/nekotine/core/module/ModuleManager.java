@@ -20,14 +20,14 @@ public class ModuleManager {
 	
 	private TypeMap moduleMap = new TypeHashMap();
 	
-	public <M extends PluginModule> M get(Class<M> type) {
+	public <M extends IPluginModule> M get(Class<M> type) {
 		if (!moduleMap.containsKey(type)) {
 			load(type);
 		}
 		return moduleMap.get(type);
 	}
 	
-	public  <M extends PluginModule> boolean tryLoad(Class<M> type) {
+	public  <M extends IPluginModule> boolean tryLoad(Class<M> type) {
 		if (moduleMap.containsKey(type)) {
 			return false;
 		}
@@ -36,7 +36,7 @@ public class ModuleManager {
 	}
 
 	@SuppressWarnings("resource")
-	public <M extends PluginModule> void load(Class<M> type) {
+	public <M extends IPluginModule> void load(Class<M> type) {
 		var name = type.getSimpleName();
 		if (moduleMap.containsKey(type)) {
 			LOGGER.log(Level.WARNING, "Le module " + name + " est deja charge");
@@ -52,7 +52,7 @@ public class ModuleManager {
 	}
 
 	@SuppressWarnings("resource")
-	public <M extends PluginModule> void unload(Class<M> type) {
+	public <M extends IPluginModule> void unload(Class<M> type) {
 		var name = type.getSimpleName();
 		if (!moduleMap.containsKey(type)) {
 			LOGGER.log(Level.WARNING, "Le module " + name + " n'est pas charge");
@@ -70,7 +70,7 @@ public class ModuleManager {
 	public void unloadAll() {
 		var ite = moduleMap.keySet().iterator();
 		while(ite.hasNext()) {
-			var item = (Class<? extends PluginModule>)ite.next();
+			var item = (Class<? extends IPluginModule>)ite.next();
 			var name = item.getSimpleName();
 			try (var watch = new Stopwatch(w -> LOGGER.log(Level.INFO, "Le module "+name+" est decharge ("+w.elapsedMillis()+"ms)"))){
 				moduleMap.get(item).unload();

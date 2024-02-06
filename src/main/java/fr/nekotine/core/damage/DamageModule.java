@@ -14,11 +14,11 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 
-import fr.nekotine.core.module.PluginModule;
+import fr.nekotine.core.module.IPluginModule;
 import fr.nekotine.core.util.EntityUtil;
 import fr.nekotine.core.util.EventUtil;
 
-public class DamageModule extends PluginModule implements Listener{
+public class DamageModule implements IPluginModule, Listener{
 	
 	public DamageModule() {
 		DamageFunction.SetDamageModule(this);
@@ -26,9 +26,8 @@ public class DamageModule extends PluginModule implements Listener{
 	}
 	
 	@Override
-	protected void unload() {
+	public void unload() {
 		EventUtil.unregister(this);
-		super.unload();
 	}
 	
 	private boolean disabled = false;

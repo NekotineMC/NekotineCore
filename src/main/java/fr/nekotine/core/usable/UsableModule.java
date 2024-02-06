@@ -13,10 +13,10 @@ import org.bukkit.event.player.PlayerItemConsumeEvent;
 
 import com.destroystokyo.paper.event.player.PlayerReadyArrowEvent;
 
-import fr.nekotine.core.module.PluginModule;
+import fr.nekotine.core.module.IPluginModule;
 import fr.nekotine.core.util.EventUtil;
 
-public class UsableModule extends PluginModule implements Listener{
+public class UsableModule implements IPluginModule, Listener{
 	
 	private final Set<Usable> usables = new LinkedHashSet<>();
 
@@ -25,7 +25,7 @@ public class UsableModule extends PluginModule implements Listener{
 	}
 	
 	@Override
-	protected void unload() {
+	public void unload() {
 		EventUtil.unregister(this);
 		usables.clear();
 	}

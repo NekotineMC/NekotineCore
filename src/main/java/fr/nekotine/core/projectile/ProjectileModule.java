@@ -19,12 +19,12 @@ import org.jetbrains.annotations.NotNull;
 
 import fr.nekotine.core.ioc.Ioc;
 import fr.nekotine.core.module.ModuleManager;
-import fr.nekotine.core.module.PluginModule;
+import fr.nekotine.core.module.IPluginModule;
 import fr.nekotine.core.ticking.TickingModule;
 import fr.nekotine.core.ticking.event.TickElapsedEvent;
 import fr.nekotine.core.util.EventUtil;
 
-public class ProjectileModule extends PluginModule implements Listener{
+public class ProjectileModule implements IPluginModule, Listener{
 	private final HashMap<Entity, CustomProjectile> projectiles = new HashMap<Entity, CustomProjectile>();
 	private final HashMap<Entity, CustomProjectile> projectilesBuffer = new HashMap<Entity, CustomProjectile>();
 	
@@ -34,9 +34,8 @@ public class ProjectileModule extends PluginModule implements Listener{
 	}
 	
 	@Override
-	protected void unload() {
+	public void unload() {
 		EventUtil.unregister(this);
-		super.unload();
 	}
 	
 	//

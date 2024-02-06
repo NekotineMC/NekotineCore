@@ -21,9 +21,9 @@ import com.comphenix.protocol.wrappers.WrappedDataValue;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 
 import fr.nekotine.core.ioc.Ioc;
-import fr.nekotine.core.module.PluginModule;
+import fr.nekotine.core.module.IPluginModule;
 
-public class EntityGlowModule extends PluginModule {
+public class EntityGlowModule implements IPluginModule {
 
 	private static final int entityMetadataGlowIndex = 0; // https://wiki.vg/Entity_metadata#Entity
 	
@@ -64,7 +64,7 @@ public class EntityGlowModule extends PluginModule {
 	}
 	
 	@Override
-	protected void unload() {
+	public void unload() {
 		var pmanager = ProtocolLibrary.getProtocolManager();
 		pmanager.removePacketListener(packetAdapter);
 		map.clear();

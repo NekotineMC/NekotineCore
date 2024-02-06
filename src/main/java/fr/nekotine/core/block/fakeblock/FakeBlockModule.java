@@ -13,11 +13,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import fr.nekotine.core.block.BlockPatch;
-import fr.nekotine.core.module.PluginModule;
+import fr.nekotine.core.module.IPluginModule;
 import fr.nekotine.core.util.EventUtil;
 import io.papermc.paper.event.packet.PlayerChunkLoadEvent;
 
-public class FakeBlockModule extends PluginModule implements Listener{
+public class FakeBlockModule implements IPluginModule, Listener{
 
 	private Map<Player, Map<Block, LinkedList<AppliedFakeBlockPatch>>> map = new HashMap<>();
 	
@@ -71,7 +71,7 @@ public class FakeBlockModule extends PluginModule implements Listener{
 	}
 	
 	@Override
-	protected void unload() {
+	public void unload() {
 		EventUtil.unregister(this);
 		for (var applied : map.values().stream()
 				.flatMap(m -> m.values().stream())
@@ -79,7 +79,6 @@ public class FakeBlockModule extends PluginModule implements Listener{
 				.collect(Collectors.toUnmodifiableSet())) {
 			unpatch(applied);
 		}
-		super.unload();
 	}
 	
 	private BlockData appliedBlockData(AppliedFakeBlockPatch patch) {

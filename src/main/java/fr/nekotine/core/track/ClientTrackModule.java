@@ -13,9 +13,9 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.events.PacketListener;
 
 import fr.nekotine.core.ioc.Ioc;
-import fr.nekotine.core.module.PluginModule;
+import fr.nekotine.core.module.IPluginModule;
 
-public class ClientTrackModule extends PluginModule{
+public class ClientTrackModule implements IPluginModule{
 	private Collection<Player> map = new LinkedList<>();
 	private PacketListener packetAdapter = new PacketAdapter(Ioc.resolve(JavaPlugin.class),
 			PacketType.Play.Client.POSITION,
@@ -37,7 +37,7 @@ public class ClientTrackModule extends PluginModule{
 		pmanager.addPacketListener(packetAdapter);
 	}
 	@Override
-	protected void unload() {
+	public void unload() {
 		var pmanager = ProtocolLibrary.getProtocolManager();
 		pmanager.removePacketListener(packetAdapter);
 		map.clear();

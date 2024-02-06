@@ -11,12 +11,12 @@ import com.comphenix.protocol.wrappers.Pair;
 
 import fr.nekotine.core.ioc.Ioc;
 import fr.nekotine.core.module.ModuleManager;
-import fr.nekotine.core.module.PluginModule;
+import fr.nekotine.core.module.IPluginModule;
 import fr.nekotine.core.ticking.TickingModule;
 import fr.nekotine.core.ticking.event.TickElapsedEvent;
 import fr.nekotine.core.util.EventUtil;
 
-public class ChargeModule extends PluginModule implements Listener{
+public class ChargeModule implements IPluginModule,Listener{
 	private static final String NAME = "ChargeModule";
 	
 	public ChargeModule() {
@@ -25,9 +25,8 @@ public class ChargeModule extends PluginModule implements Listener{
 	}
 	
 	@Override
-	protected void unload() {
+	public void unload() {
 		EventUtil.unregister(this);
-		super.unload();
 	}
 	
 	private final HashMap<Pair<String, String>, Charge> charges = new HashMap<Pair<String, String>, Charge>();

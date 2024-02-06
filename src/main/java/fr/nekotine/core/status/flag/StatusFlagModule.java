@@ -7,11 +7,15 @@ import java.util.WeakHashMap;
 
 import org.bukkit.entity.LivingEntity;
 
-import fr.nekotine.core.module.PluginModule;
+import fr.nekotine.core.module.IPluginModule;
 
-public class StatusFlagModule extends PluginModule{
+public class StatusFlagModule implements IPluginModule{
 
 	private final Map<LivingEntity, Set<StatusFlag>> map = new WeakHashMap<>();
+	
+	@Override
+	public void unload() {
+	}
 	
 	/**
 	 * Ajoute un flag

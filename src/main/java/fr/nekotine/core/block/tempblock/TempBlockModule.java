@@ -10,9 +10,9 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 
 import fr.nekotine.core.block.BlockPatch;
-import fr.nekotine.core.module.PluginModule;
+import fr.nekotine.core.module.IPluginModule;
 
-public class TempBlockModule extends PluginModule{
+public class TempBlockModule implements IPluginModule{
 
 	private Map<Block, LinkedList<AppliedTempBlockPatch>> map = new HashMap<>();
 	
@@ -91,11 +91,10 @@ public class TempBlockModule extends PluginModule{
 	}
 	
 	@Override
-	protected void unload() {
+	public void unload() {
 		for (var patch : map.values().stream().flatMap(LinkedList::stream).collect(Collectors.toUnmodifiableSet())) {
 			unpatch(patch);
 		}
-		super.unload();
 	}
 	
 }

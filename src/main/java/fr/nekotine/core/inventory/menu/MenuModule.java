@@ -8,10 +8,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
-import fr.nekotine.core.module.PluginModule;
+import fr.nekotine.core.module.IPluginModule;
 import fr.nekotine.core.util.EventUtil;
 
-public class MenuModule extends PluginModule implements Listener{
+public class MenuModule implements IPluginModule, Listener{
 	
 	private List<WeakReference<MenuInventory>> registeredMenus = new LinkedList<>();
 	
@@ -20,9 +20,8 @@ public class MenuModule extends PluginModule implements Listener{
 	}
 	
 	@Override
-	protected void unload() {
+	public void unload() {
 		EventUtil.unregister(this);
-		super.unload();
 	}
 	
 	public void registerMenu(MenuInventory menu) {

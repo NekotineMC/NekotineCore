@@ -16,13 +16,13 @@ import fr.nekotine.core.charge.ChargeModule;
 import fr.nekotine.core.charge.ICharge;
 import fr.nekotine.core.ioc.Ioc;
 import fr.nekotine.core.module.ModuleManager;
-import fr.nekotine.core.module.PluginModule;
+import fr.nekotine.core.module.IPluginModule;
 import fr.nekotine.core.ticking.TickingModule;
 import fr.nekotine.core.ticking.event.TickElapsedEvent;
 import fr.nekotine.core.util.CustomAction;
 import fr.nekotine.core.util.EventUtil;
 
-public class ItemChargeModule extends PluginModule implements Listener{
+public class ItemChargeModule implements IPluginModule, Listener{
 	
 	public ItemChargeModule() {
 		chargeManager = Ioc.resolve(ChargeModule.class);
@@ -31,9 +31,8 @@ public class ItemChargeModule extends PluginModule implements Listener{
 	}
 	
 	@Override
-	protected void unload() {
+	public void unload() {
 		EventUtil.unregister(this);
-		super.unload();
 	}
 	
 	private ChargeModule chargeManager;

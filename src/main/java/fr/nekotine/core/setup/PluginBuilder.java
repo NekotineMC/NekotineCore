@@ -15,9 +15,9 @@ import fr.nekotine.core.defaut.DefaultProvider;
 import fr.nekotine.core.defaut.IDefaultProvider;
 import fr.nekotine.core.ioc.Ioc;
 import fr.nekotine.core.logging.NekotineLogger;
-import fr.nekotine.core.map.MapModule;
+import fr.nekotine.core.map.OldMapModule;
 import fr.nekotine.core.module.ModuleManager;
-import fr.nekotine.core.module.PluginModule;
+import fr.nekotine.core.module.IPluginModule;
 import fr.nekotine.core.reflexion.ReflexionUtil;
 import fr.nekotine.core.serialization.configurationserializable.ConfigurationSerializableAdapterSerializer;
 import fr.nekotine.core.serialization.configurationserializable.IConfigurationSerializableAdapterContainer;
@@ -26,7 +26,7 @@ public class PluginBuilder {
 
 	private JavaPlugin plugin;
 	
-	private Set<Class<? extends PluginModule>> preloadModules = new HashSet<>();
+	private Set<Class<? extends IPluginModule>> preloadModules = new HashSet<>();
 	
 	private Set<Class<?>> mapTypesForCommand = new HashSet<>();
 	
@@ -52,7 +52,7 @@ public class PluginBuilder {
 	}
 	
 	@SafeVarargs
-	public final void preloadModules(Class<? extends PluginModule> ... modules) {
+	public final void preloadModules(Class<? extends IPluginModule> ... modules) {
 		for (var module : modules) {
 			preloadModules.add(module);
 		}
@@ -79,10 +79,10 @@ public class PluginBuilder {
 			Ioc.getProvider().registerSingleton(moduleManager);
 			// Nekotine Core Modules
 			var allCoreModuleClasses = ReflexionUtil.streamClassesFromPackage("fr.nekotine.core")
-					.filter(c -> PluginModule.class.isAssignableFrom(c))
+					.filter(c -> IPluginModule.class.isAssignableFrom(c))
 					.collect(Collectors.toSet());
 			for (var mc : allCoreModuleClasses) {
-				Ioc.getProvider().registerSingletonAs((Supplier)() -> moduleManager.get((Class<? extends PluginModule>) mc), mc);
+				Ioc.getProvider().registerSingletonAs((Supplier)() -> moduleManager.get((Class<? extends IPluginModule>) mc), mc);
 				logger.info(String.format("Module %s ajouté au registre", mc.getSimpleName()));
 			}
 			for (var module : preloadModules) {
@@ -97,7 +97,7 @@ public class PluginBuilder {
 		if (mapTypesForCommand.isEmpty()) {
 			return;
 		}
-		var gen = Ioc.resolve(MapModule.class).getGenerator();
+		var gen = Ioc.resolve(OldMapModule.class).getGenerator();
 		gen.generateFor(mapTypesForCommand.toArray(Class<?>[]::new));
 		gen.register();
 	}
