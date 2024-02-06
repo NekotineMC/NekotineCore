@@ -16,7 +16,7 @@ import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 @SerializableAs("MapMetadata")
 public class MapMetadata implements ConfigurationSerializable{
 	
-	private @Nonnull String name;
+	private @Nonnull String name = "unnamed";
 	
 	private @Nullable Component displayName;
 	
@@ -26,7 +26,12 @@ public class MapMetadata implements ConfigurationSerializable{
 	
 	public MapMetadata() {}
 	
+	public MapMetadata(@Nonnull String name) {
+		this.name = name;
+	}
+	
 	public MapMetadata(@Nonnull String name, @Nullable Component displayName, @Nullable Component description, @Nullable Material icon) {
+		this.name = name;
 		this.displayName = displayName;
 		this.description = description;
 		this.icon = icon;
