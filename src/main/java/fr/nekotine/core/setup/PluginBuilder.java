@@ -82,14 +82,23 @@ public class PluginBuilder {
 					.filter(c -> IPluginModule.class.isAssignableFrom(c))
 					.collect(Collectors.toSet());
 			for (var mc : allCoreModuleClasses) {
-				Ioc.getProvider().registerSingletonAs((Supplier)() -> moduleManager.get((Class<? extends IPluginModule>) mc), mc);
-				logger.info(String.format("Module %s ajouté au registre", mc.getSimpleName()));
+				if (mc.isInterface()) {
+					var impl = allCoreModuleClasses.stream().filter(c -> mc.isAssignableFrom(c)).findAny();
+					if (impl.isPresent()) {
+						var implType = impl.get();
+						Ioc.getProvider().registerSingletonAs((Supplier)() -> moduleManager.get((Class<? extends IPluginModule>) implType), mc);
+						logger.info(String.format("Module %s ajouté dans l'IOC en tant que %s", implType.getSimpleName(),mc.getSimpleName()));
+					}
+				}else {
+					Ioc.getProvider().registerSingletonAs((Supplier)() -> moduleManager.get((Class<? extends IPluginModule>) mc), mc);
+					logger.info(String.format("Module %s ajouté dans l'IOC", mc.getSimpleName()));
+				}
 			}
 			for (var module : preloadModules) {
 				moduleManager.tryLoad(module);
 			}
 		}catch(Exception e) {
-			logger.log(Level.SEVERE, "Errur lors de la mise en place des modules", e);
+			logger.log(Level.SEVERE, "Erreur lors de la mise en place des modules", e);
 		}
 	}
 	
