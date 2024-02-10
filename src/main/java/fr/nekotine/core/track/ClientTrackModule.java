@@ -41,8 +41,11 @@ public class ClientTrackModule extends PluginModule{
 	}
 	private static final int STOP_SNEAKING = 1;
 	private static final int STOP_SPRINTING = 4;
+	/*private static final byte ENTITY_ACTION_INDEX = 0;	
+	private static final byte SNEAKING_MASK = 0x02;
+	private static final byte SPRINTING_MASK = 0x08;*/
 	private HashMap<Player,ActionState> map = new HashMap<>();
-	private PacketListener packetAdapter = new PacketAdapter(Ioc.resolve(JavaPlugin.class),
+	private PacketListener receiverAdapter = new PacketAdapter(Ioc.resolve(JavaPlugin.class),
 			PacketType.Play.Client.POSITION,
 			PacketType.Play.Client.POSITION_LOOK,
 			PacketType.Play.Client.ENTITY_ACTION,
@@ -77,15 +80,44 @@ public class ClientTrackModule extends PluginModule{
 			}
 		}
 	};
+	/*
+	private PacketListener sendingAdapter = new PacketAdapter(Ioc.resolve(JavaPlugin.class),
+			PacketType.Play.Server.ENTITY_METADATA) {
+		public void onPacketSending(PacketEvent event) {
+			Player player = event.getPlayer();
+			if (map.containsKey(player)) {
+				
+				var newPacket = event.getPacket();
+				var metadatas = newPacket.getDataValueCollectionModifier().read(0);
+				var filteredMetadatas = metadatas.stream().filter(v -> v.getIndex() == ENTITY_ACTION_INDEX).toList();
+				if(filteredMetadatas.size() > 0) {
+					var metadata = filteredMetadatas.get(0);
+					var infos = map.get(player);
+					//for(var metadata : filteredMetadatas) {
+
+						var value = (byte)metadata.getRawValue();
+						value = (byte) (infos.isSneaking ? (value | SNEAKING_MASK) : (value & ~SNEAKING_MASK));
+						value = (byte) (infos.isSprinting ? (value | SPRINTING_MASK) : (value & ~SPRINTING_MASK));
+						metadata.setValue(value);
+					
+	
+					//modifier.write(0,metadatas);
+					event.setPacket(newPacket);
+				}
+			}
+		}
+	};*/
 	
 	public ClientTrackModule() {
 		var pmanager = ProtocolLibrary.getProtocolManager();
-		pmanager.addPacketListener(packetAdapter);
+		pmanager.addPacketListener(receiverAdapter);
+		//pmanager.addPacketListener(sendingAdapter);
 	}
 	@Override
 	protected void unload() {
 		var pmanager = ProtocolLibrary.getProtocolManager();
-		pmanager.removePacketListener(packetAdapter);
+		pmanager.removePacketListener(receiverAdapter);
+		//pmanager.removePacketListener(sendingAdapter);
 		map.clear();
 	}
 	public void untrack(Player player) {
