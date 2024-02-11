@@ -36,7 +36,7 @@ public class ConfigurationSerializableAdapterSerializer implements IConfiguratio
 		String.class
 	};
 	
-	private static final BiFunction<Object,Object,Object> biIdentity = (instance,map) -> instance;
+	private static final BiFunction<Object,Object,Object> biIdentity = (instance,map) -> map;
 	
 	private Map<Class<?>, Function<Object, Object>> serializers = new HashMap<>();
 	
@@ -112,7 +112,7 @@ public class ConfigurationSerializableAdapterSerializer implements IConfiguratio
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private Function<Object, Object> makeSerializerForNode(Class<?> node){
 		// ConfigurationSerializable
-		if (ConfigurationSerializable.class.isAssignableFrom(node)) {
+		if (ConfigurationSerializable.class.isAssignableFrom(node) && !ConfigurationSerializableAdapted.class.isAssignableFrom(node)) {
 			return obj -> obj != null ? ((ConfigurationSerializable)obj).serialize() : null;
 		}
 		// primitive types

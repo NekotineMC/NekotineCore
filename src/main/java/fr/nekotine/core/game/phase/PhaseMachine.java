@@ -88,6 +88,8 @@ public class PhaseMachine implements IPhaseMachine{
 				p.setup(inputData);
 			}catch(Exception e) {
 				logger.log(Level.SEVERE, "Une erreur est survenue lors du setup de la phase "+p.getClass(), e);
+				running = false;
+				return;
 			}
 		}
 		currentPhase = nextPhase;

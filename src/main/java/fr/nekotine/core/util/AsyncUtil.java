@@ -57,7 +57,7 @@ public class AsyncUtil {
 		};
 	}
 	
-	public static <T> @NotNull Runnable thenAsync(@NotNull Runnable first, Runnable then) {
+	public static @NotNull Runnable thenAsync(@NotNull Runnable first, Runnable then) {
 		return () -> {
 			first.run();
 			runAsync(then);
@@ -73,7 +73,7 @@ public class AsyncUtil {
 		};
 	}
 	
-	public static <T> @NotNull Runnable thenAsync(@NotNull Runnable first, Runnable then, Consumer<Exception> onException) {
+	public static @NotNull Runnable thenAsync(@NotNull Runnable first, Runnable then, Consumer<Exception> onException) {
 		return () -> {
 			first.run();
 			runAsync(then, onException);
@@ -89,7 +89,7 @@ public class AsyncUtil {
 		};
 	}
 	
-	public static <T> @NotNull Runnable thenSync(@NotNull Runnable first, Runnable then) {
+	public static @NotNull Runnable thenSync(@NotNull Runnable first, Runnable then) {
 		return () -> {
 			first.run();
 			runSync(then);

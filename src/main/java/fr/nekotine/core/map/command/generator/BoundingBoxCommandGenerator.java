@@ -53,7 +53,7 @@ public class BoundingBoxCommandGenerator implements MapElementCommandGenerator{
 				var bb = sel.getBoundingBox();
 				var e = (BoundingBox)element;
 				e.resize(bb.getMinimumX(), bb.getMinimumY(), bb.getMinimumZ(),
-						bb.getMaximumX(), bb.getMaximumY(), bb.getMaximumZ());
+						bb.getMaximumX()+1, bb.getMaximumY()+1, bb.getMaximumZ()+1);
 				sender.sendMessage(Component.text("La location à bien été définie.", NamedTextColor.GREEN));
 			}catch(IncompleteRegionException ex) {
 				sender.sendMessage(Component.text("Vous devez sélectionner une zone avec world edit"));

@@ -30,6 +30,7 @@ public class DefaultMapElementCommandGenerator implements MapElementCommandGener
 			var genFor = field.getAnnotation(GenerateCommandFor.class);
 			var genForSpecific = field.getAnnotation(GenerateSpecificCommandFor.class);
 			if (genFor != null || genForSpecific != null) {
+				field.trySetAccessible();
 				var fieldType = field.getType();
 				var name = genFor == null ? genForSpecific.name() : genFor.value();
 				if (name.isBlank()) {
@@ -44,9 +45,7 @@ public class DefaultMapElementCommandGenerator implements MapElementCommandGener
 				if (Map.class.isAssignableFrom(fieldType)) { // Type précis pour permettre l'héritage par l'utilisateur
 					if (field.isAnnotationPresent(GenericBiTyped.class)) {
 						var dictGenerator = resolver.resolveSpecific(DictionaryCommandGenerator.class);
-						if (genForSpecific != null) {
-							dictGenerator.setElementGeneratorTypeOverride(genForSpecific.value());
-						}
+						dictGenerator.setElementGeneratorTypeOverride(genForSpecific != null?genForSpecific.value():null);
 						dictGenerator.setNodeName(finalName);
 						dictGenerator.setNestedElementType(field.getAnnotation(GenericBiTyped.class).b());
 						generator = dictGenerator;

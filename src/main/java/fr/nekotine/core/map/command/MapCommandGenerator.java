@@ -112,13 +112,13 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 							var config = mapModule.getContent(metadata, mapType);
 							var newConf = (ConfigurationSerializable)branch.consumer().accept(config, sender, args);
 							sender.sendMessage(Component.text("Sauvegarde de la carte...", NamedTextColor.BLUE));
-							AsyncUtil.runAsync(() ->{
+							AsyncUtil.runAsync(
 								AsyncUtil.thenSync(() -> {
 									mapModule.saveContent(metadata, newConf);
 								}, () -> {
 									sender.sendMessage(Component.text("Sauvegarde effectuée.", NamedTextColor.GREEN));
-								});
-							}, (e) -> {sender.sendMessage(Component.text("Une erreur est survenue lors de l'édition:", NamedTextColor.DARK_RED)
+								})
+							, (e) -> {sender.sendMessage(Component.text("Une erreur est survenue lors de l'édition:", NamedTextColor.DARK_RED)
 									.append(Component.text(e.getMessage())));
 							logger.log(Level.WARNING, "Une erreur est survenue lors de la sauvegarde de la carte.", e);}
 							);

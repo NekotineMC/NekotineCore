@@ -4,8 +4,13 @@ import java.util.function.Function;
 import java.util.logging.Logger;
 
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
+
+import com.sk89q.worldedit.IncompleteRegionException;
+import com.sk89q.worldedit.WorldEdit;
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
 
 import dev.jorel.commandapi.arguments.Argument;
 import dev.jorel.commandapi.arguments.LocationArgument;
@@ -40,9 +45,30 @@ public class BlockBoundingBoxCommandGenerator implements MapElementCommandGenera
 			sender.sendMessage(Component.text("La location à bien été définie.", NamedTextColor.GREEN));
 			return element;
 		};
+		MapCommandExecutor worldEditExecutor = (element, sender, args) ->{
+			if (!(sender instanceof Player player)) {
+				sender.sendMessage(Component.text("Vous devez être un joueur pour executer cette commande"));
+				return element;
+			}
+			var session = WorldEdit.getInstance().getSessionManager().get(BukkitAdapter.adapt(player));
+			try {
+				var sel = session.getSelection();
+				var bb = sel.getBoundingBox();
+				var e = (BoundingBox)element;
+				e.resize(bb.getMinimumX(), bb.getMinimumY(), bb.getMinimumZ(),
+						bb.getMaximumX()+1, bb.getMaximumY()+1, bb.getMaximumZ()+1);
+				sender.sendMessage(Component.text("La location à bien été définie.", NamedTextColor.GREEN));
+			}catch(IncompleteRegionException ex) {
+				sender.sendMessage(Component.text("Vous devez sélectionner une zone avec world edit"));
+			}
+			return element;
+		};
 		//TODO normaliser les messages de commande
 		logger.info("BlockBoundingBoxCommandGenerator.generateFor utilise des messages de commande non-normalise");
-		return new MapCommandBranch[] {new MapCommandBranch(arguments, executor)};
+		return new MapCommandBranch[] {
+				new MapCommandBranch(arguments, executor),
+				new MapCommandBranch(new Argument<?>[]{},worldEditExecutor)
+				};
 	}
 
 }
