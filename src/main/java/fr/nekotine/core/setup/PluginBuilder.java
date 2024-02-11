@@ -15,7 +15,8 @@ import fr.nekotine.core.defaut.DefaultProvider;
 import fr.nekotine.core.defaut.IDefaultProvider;
 import fr.nekotine.core.ioc.Ioc;
 import fr.nekotine.core.logging.NekotineLogger;
-import fr.nekotine.core.map.OldMapModule;
+import fr.nekotine.core.map.command.IMapCommandGenerator;
+import fr.nekotine.core.map.command.MapCommandGenerator;
 import fr.nekotine.core.module.ModuleManager;
 import fr.nekotine.core.module.IPluginModule;
 import fr.nekotine.core.reflexion.ReflexionUtil;
@@ -42,13 +43,14 @@ public class PluginBuilder {
 		var ioc = Ioc.getProvider(); // Use default IIocProvider
 		// Register some defaults
 		ioc.registerSingleton(plugin);
-		ioc.registerSingletonAs(plugin, JavaPlugin.class);
-		ioc.registerSingletonAs(plugin.getLogger(), Logger.class);
-		ioc.registerSingletonAs(new DefaultProvider(), IDefaultProvider.class);
+		ioc.registerSingletonInstanceAs(plugin, JavaPlugin.class);
+		ioc.registerSingletonInstanceAs(plugin.getLogger(), Logger.class);
+		ioc.registerSingletonInstanceAs(new DefaultProvider(), IDefaultProvider.class);
 		// Serialization
-		ioc.registerSingletonAs((Supplier<ConfigurationSerializableAdapterSerializer>)ConfigurationSerializableAdapterSerializer::new,
+		ioc.registerSingletonAs(ConfigurationSerializableAdapterSerializer::new,
 				IConfigurationSerializableAdapterContainer.class);
-		
+		// Some services
+		ioc.registerSingletonAs(MapCommandGenerator::new, IMapCommandGenerator.class);
 	}
 	
 	@SafeVarargs
@@ -79,11 +81,11 @@ public class PluginBuilder {
 			Ioc.getProvider().registerSingleton(moduleManager);
 			// Nekotine Core Modules
 			var allCoreModuleClasses = ReflexionUtil.streamClassesFromPackage("fr.nekotine.core")
-					.filter(c -> IPluginModule.class.isAssignableFrom(c))
+					.filter(c -> IPluginModule.class.isAssignableFrom(c) && !c.equals(IPluginModule.class))
 					.collect(Collectors.toSet());
 			for (var mc : allCoreModuleClasses) {
 				if (mc.isInterface()) {
-					var impl = allCoreModuleClasses.stream().filter(c -> mc.isAssignableFrom(c)).findAny();
+					var impl = allCoreModuleClasses.stream().filter(c -> mc.isAssignableFrom(c) && !c.isInterface()).findAny();
 					if (impl.isPresent()) {
 						var implType = impl.get();
 						Ioc.getProvider().registerSingletonAs((Supplier)() -> moduleManager.get((Class<? extends IPluginModule>) implType), mc);
@@ -106,7 +108,7 @@ public class PluginBuilder {
 		if (mapTypesForCommand.isEmpty()) {
 			return;
 		}
-		var gen = Ioc.resolve(OldMapModule.class).getGenerator();
+		var gen = Ioc.resolve(IMapCommandGenerator.class);
 		gen.generateFor(mapTypesForCommand.toArray(Class<?>[]::new));
 		gen.register();
 	}

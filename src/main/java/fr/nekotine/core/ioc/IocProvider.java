@@ -18,11 +18,11 @@ public class IocProvider implements IIocProvider{
 	public <T> IIocProvider registerSingleton(T singleton) {
 		@SuppressWarnings("unchecked")
 		var type = (Class<T>)singleton.getClass();
-		return registerSingletonAs(singleton, type);
+		return registerSingletonInstanceAs(singleton, type);
 	}
 
 	@Override
-	public <T, D extends T> IIocProvider registerSingletonAs(D singleton, Class<T> asType) {
+	public <T, D extends T> IIocProvider registerSingletonInstanceAs(D singleton, Class<T> asType) {
 		singletonMap.put(asType, singleton);
 		return this;
 	}

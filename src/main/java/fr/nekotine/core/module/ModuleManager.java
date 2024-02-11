@@ -35,7 +35,6 @@ public class ModuleManager {
 		return true;
 	}
 
-	@SuppressWarnings("resource")
 	public <M extends IPluginModule> void load(Class<M> type) {
 		var name = type.getSimpleName();
 		if (moduleMap.containsKey(type)) {
@@ -51,7 +50,6 @@ public class ModuleManager {
 		}
 	}
 
-	@SuppressWarnings("resource")
 	public <M extends IPluginModule> void unload(Class<M> type) {
 		var name = type.getSimpleName();
 		if (!moduleMap.containsKey(type)) {

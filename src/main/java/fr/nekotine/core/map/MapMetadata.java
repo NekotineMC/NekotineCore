@@ -84,4 +84,12 @@ public class MapMetadata implements ConfigurationSerializable{
 		this.icon = icon;
 	}
 	
+	public @Nonnull String getName() {
+		return name;
+	}
+	
+	public void setName(@Nonnull String name) {
+		this.name = name;
+	}
+	
 }

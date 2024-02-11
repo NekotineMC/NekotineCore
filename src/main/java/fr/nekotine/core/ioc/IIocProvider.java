@@ -8,7 +8,7 @@ public interface IIocProvider {
 
 	public <T> IIocProvider registerSingleton(T singleton);
 	
-	public <T,D extends T> IIocProvider registerSingletonAs(D singleton, Class<T> asType);
+	public <T,D extends T> IIocProvider registerSingletonInstanceAs(D singleton, Class<T> asType);
 	
 	public <T,D extends T> IIocProvider registerSingletonAs(Supplier<D> factory, Class<T> asType);
 	

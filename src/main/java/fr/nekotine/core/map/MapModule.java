@@ -1,95 +1,142 @@
 package fr.nekotine.core.map;
 
 import java.io.File;
-import java.util.function.Consumer;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.LinkedList;
 
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.NotImplementedException;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import fr.nekotine.core.ioc.Ioc;
-import fr.nekotine.core.map.command.IMapCommandGenerator;
-import fr.nekotine.core.map.command.MapCommandGenerator;
-import fr.nekotine.core.map.finder.ConfigurationSerializableMapFolderFinder;
-import fr.nekotine.core.map.finder.IMapFinder;
-import fr.nekotine.core.module.PluginModule;
-import fr.nekotine.core.serialization.configurationserializable.ConfigurationSerializableAdapted;
-import fr.nekotine.core.util.AsyncUtil;
+import com.sk89q.worldedit.extent.clipboard.Clipboard;
 
-public class MapModule extends PluginModule{
-	
-	private final File defaultMapFolder = new File(Ioc.resolve(JavaPlugin.class).getDataFolder(), "Maps");
-	
-	private IMapFinder finder = new ConfigurationSerializableMapFolderFinder(defaultMapFolder);
-	
-	private IMapCommandGenerator generator = new MapCommandGenerator();
+import fr.nekotine.core.ioc.Ioc;
+import fr.nekotine.core.serialization.configurationserializable.ConfigurationSerializableUtil;
+
+public class MapModule implements IMapModule {
+
+	private final File mapFolder = new File(Ioc.resolve(JavaPlugin.class).getDataFolder(), "Maps");
 	
 	public MapModule() {
-		ConfigurationSerialization.registerClass(ConfigurationSerializableAdapted.class);
-		ConfigurationSerialization.registerClass(MapMetadata.class);
+		if (!mapFolder.exists()) {
+			mapFolder.mkdir();
+		}
 	}
 	
-	public IMapFinder getMapFinder() {
-		return finder;
+	@Override
+	public Collection<MapMetadata> listMaps() {
+		var list = new LinkedList<MapMetadata>();
+		var mapDirs = mapFolder.listFiles(f -> f.isDirectory());
+		for (var dir : mapDirs) {
+			var metadata = getMapMetadata(dir.getName());
+			if (metadata != null) {
+				list.add(metadata);
+			}
+		}
+		return list;
 	}
 
-	public void setMapFinder(IMapFinder finder) {
-		this.finder = finder;
+	@Override
+	public MapMetadata getMapMetadata(String name) {
+		return getContent(name, MapMetadata.class);
 	}
 
-	public IMapCommandGenerator getGenerator() {
-		return generator;
+	@Override
+	public void saveMapMetadata(MapMetadata metadata) {
+		saveContent(metadata.getName(), metadata);
 	}
 
-	public void setGenerator(IMapCommandGenerator generator) {
-		this.generator = generator;
+	@Override
+	public Clipboard getStructure(MapMetadata metadata) {
+		return null;
+	}
+
+	@Override
+	public void saveStructure(MapMetadata metadata, Clipboard structure) {
+	}
+
+	@Override
+	public <T> @Nullable T getContent(MapMetadata metadata, Class<T> contentType) {
+		return getContent(metadata.getName(), contentType);
+	}
+
+	@Override
+	public <T> void saveContent(MapMetadata metadata, T content) {
+		saveContent(metadata.getName(), content);
 	}
 	
-	public <T  extends ConfigurationSerializable> void getMapConfigAsync(MapHandle<T> handle, Consumer<T> thenSync) {
-		AsyncUtil.runAsync(AsyncUtil.thenSync(handle::loadConfig, thenSync));
+	@SuppressWarnings("unchecked")
+	private <T> @Nullable T getContent(String mapName, Class<T> contentType) {
+		if (!ConfigurationSerializable.class.isAssignableFrom(contentType)) {
+			throw new NotImplementedException(
+					String.format("Cette implémentation du MapModule (%s) ne peut deserializer que des ConfigrationSerializable",
+					contentType.getTypeName()));
+		}
+		var mapNameFolder = new File(mapFolder, mapName);
+		if (mapNameFolder.exists() && mapNameFolder.isDirectory()) {
+			var nameStart = contentType.getSimpleName() + '.';
+			var matchingFiles = mapNameFolder.listFiles(f -> f.getName().startsWith(nameStart));
+			if (matchingFiles.length > 0) {
+				var file = matchingFiles[0];
+				var config = YamlConfiguration.loadConfiguration(file);
+				return contentType.cast(ConfigurationSerializableUtil.getObjectFrom(config, (Class<? extends ConfigurationSerializable>)contentType));
+			}
+		}
+		return null;
 	}
 	
-	public <T  extends ConfigurationSerializable> void saveMapConfigAsync(MapHandle<T> handle, T config) {
-		AsyncUtil.runAsync(()->handle.saveConfig(config));
+	private <T> void saveContent(String mapName, T content) {
+		var contentType = content.getClass();
+		if (!ConfigurationSerializable.class.isAssignableFrom(contentType)) {
+			throw new NotImplementedException(
+					String.format("Cette implémentation du MapModule (%s) ne peut deserializer que des ConfigrationSerializable",
+					contentType.getTypeName()));
+		}
+		var mapNameFolder = new File(mapFolder, mapName);
+		if (!mapNameFolder.exists()) {
+			mapNameFolder.mkdir();
+		}
+		if (mapNameFolder.isDirectory()) {
+			var nameStart = contentType.getSimpleName() + '.';
+			var matchingFiles = mapNameFolder.listFiles(f -> f.getName().startsWith(nameStart));
+			File file;
+			if (matchingFiles.length > 0) {
+				file = matchingFiles[0];
+			}else {
+				file = new File(mapNameFolder,nameStart+"yml");
+				try {
+					file.createNewFile();
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			var config = YamlConfiguration.loadConfiguration(file);
+			ConfigurationSerializableUtil.setFromObject(config, (ConfigurationSerializable)content);
+			try {
+				config.save(file);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
 	}
-	
-	public <T  extends ConfigurationSerializable> void saveMapConfigAsync(MapHandle<T> handle, T config, Runnable thenSync) {
-		AsyncUtil.runAsync(AsyncUtil.thenSync(()->handle.saveConfig(config), thenSync));
+
+	@Override
+	public void deleteMap(MapMetadata metadata) {
+		var mapNameFolder = new File(mapFolder, metadata.getName());
+		if (mapNameFolder.exists() && mapNameFolder.isDirectory()) {
+			for (var file : mapNameFolder.listFiles()) {
+				file.delete();
+			}
+			mapNameFolder.delete();
+		}
 	}
-	
-	public <T  extends ConfigurationSerializable> void getMapMetadataAsync(MapHandle<T> handle, Consumer<MapMetadata> thenSync) {
-		AsyncUtil.runAsync(AsyncUtil.thenSync(handle::loadMetadata, thenSync));
+
+	@Override
+	public void unload() {
 	}
-	
-	public <T  extends ConfigurationSerializable> void saveMapMetadataAsync(MapHandle<T> handle, T config) {
-		AsyncUtil.runAsync(()->handle.saveConfig(config));
-	}
-	
-	public <T  extends ConfigurationSerializable> void addMapAsync(Class<T> mapConfigType, String name, Consumer<MapHandle<T>> thenSync){
-		AsyncUtil.runAsync(AsyncUtil.thenSync(()->finder.add(mapConfigType, name), thenSync));
-	}
-	
-	public <T  extends ConfigurationSerializable> void addMapAsync(Class<T> mapConfigType, String name){
-		AsyncUtil.runAsync(()->finder.add(mapConfigType, name));
-	}
-	
-	public <T  extends ConfigurationSerializable> void addMapAsync(Class<T> mapConfigType, String name, Consumer<MapHandle<T>> thenSync, Consumer<Exception> exceptionCallback){
-		AsyncUtil.runAsync(AsyncUtil.thenSync(()->finder.add(mapConfigType, name), thenSync, exceptionCallback), exceptionCallback);
-	}
-	
-	public <T  extends ConfigurationSerializable> void deleteMapAsync(Class<T> mapConfigType, String name, Runnable thenSync){
-		AsyncUtil.pipe().async(() -> finder.findByName(mapConfigType, name).delete()).sync(thenSync).run();
-	}
-	
-	public <T  extends ConfigurationSerializable> void deleteMapAsync(Class<T> mapConfigType, String name){
-		AsyncUtil.runAsync(() -> finder.findByName(mapConfigType, name).delete());
-	}
-	
-	public <T  extends ConfigurationSerializable> void deleteMapAsync(Class<T> mapConfigType, String name, Runnable thenSync, Consumer<Exception> exceptionCallback){
-		AsyncUtil.pipe(exceptionCallback).async(() -> finder.findByName(mapConfigType, name).delete()).sync(thenSync).run();
-	}
-	
-	public <T  extends ConfigurationSerializable> void deleteMapAsync(Class<T> mapConfigType, String name, Consumer<Exception> exceptionCallback){
-		AsyncUtil.runAsync(() -> finder.findByName(mapConfigType, name).delete(), exceptionCallback);
-	}
+
 }
