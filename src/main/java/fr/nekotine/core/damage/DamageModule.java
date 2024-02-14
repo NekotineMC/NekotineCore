@@ -187,7 +187,7 @@ public class DamageModule implements IPluginModule, Listener{
 		health = Math.min(health, EntityUtil.GetMaxHealth(event.GetDamaged()));
 		
 		event.GetDamaged().setLastDamage(event.GetDamage());
-		event.GetDamaged().setLastDamageCause(new EntityDamageEvent(event.GetDamaged(), event.GetCause(), event.GetDamage()));
+		//event.GetDamaged().setLastDamageCause(new EntityDamageEvent(event.GetDamaged(), event.GetCause(), event.GetDamage()));
 		if(event.GetDamager() instanceof Player && !event.GetDamaged().equals(event.GetDamager())) event.GetDamaged().setKiller((Player)event.GetDamager());
 		
 		event.GetDamaged().setHealth(health);

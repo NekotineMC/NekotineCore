@@ -24,11 +24,11 @@ public class SpatialUtil {
 	//
 
 	public static final void circle2DDensity(double radius, double blockDensity, double rotationOffset,BiConsumer<Double, Double> consumer) {
-		var perimeter = 2 * Math.PI * radius;
-		var span = 1/blockDensity;
-		for(double theta = rotationOffset ; theta < perimeter + rotationOffset; theta+=span) {
-			double x = (Math.cos(theta) * radius);
-			double y = (Math.sin(theta) * radius);
+		var nbPoints = Math.round(2 * Math.PI * radius * blockDensity);
+		var deltaTheta = (2 * Math.PI) / nbPoints;
+		for(double theta = rotationOffset ; theta < rotationOffset + 2 * Math.PI ; theta += deltaTheta) {
+			double x = Math.cos(theta) * radius;
+			double y = Math.sin(theta) * radius;
 			consumer.accept(x, y);
 		}
 	}
@@ -56,13 +56,13 @@ public class SpatialUtil {
 		}
 	}
 	private static final void sphere3DDensityUniform(double radius, double blockDensity, TriConsumer<Double, Double, Double> consumer) {
-		var nbPointsOuter = 2 * Math.PI * radius * blockDensity;
+		var nbPointsOuter = Math.round(2 * Math.PI * radius * blockDensity);
 		var deltaTheta = (2 * Math.PI) / nbPointsOuter;
 		for(double theta = 0 ; theta < Math.PI ; theta += deltaTheta) {
 			
 			double y = Math.cos(theta) * radius;
 			double outerRadius = Math.sin(theta);
-			var nbPointsInner = nbPointsOuter * outerRadius;
+			var nbPointsInner = Math.round(nbPointsOuter * outerRadius);
 			var deltaPhi = (2 * Math.PI) / nbPointsInner;
 			for(double phi = 0 ; phi < 2 * Math.PI ; phi += deltaPhi) {
 				double x = radius * Math.cos(phi) * outerRadius;
@@ -73,7 +73,7 @@ public class SpatialUtil {
 	}
 	private static final void sphere3DDensityFibonacci(double radius, double blockDensity, TriConsumer<Double, Double, Double> consumer) {
 		double surface = 4 * Math.PI * radius * radius;
-		int nbPoints = (int) (surface * blockDensity);
+		long nbPoints = Math.round(surface * blockDensity);
 		double phi = Math.PI * (Math.sqrt(5) - 1);
 		for(int i=0 ; i < nbPoints; i++) {
 			double y = 1 - (i / (float)(nbPoints - 1)) * 2;
@@ -246,5 +246,16 @@ public class SpatialUtil {
 		display.setBlock(data);
 		display.setTransformation(transform);
 		return display;
+	}
+	
+	public static final void helix(double height, double radius, double espacement, double theta0, double density, Consumer<Vector> consumer) {
+		var theta = theta0;
+		var deltaTheta = radius / (2*Math.PI*density);
+		for(double y = 0 ; y <= height; y = y + deltaTheta * (espacement/ (2*Math.PI))) {
+			var x = radius * Math.cos(theta);
+			var z = radius * Math.sin(theta);
+			consumer.accept(new Vector(x, y, z));
+			theta += deltaTheta;
+		}
 	}
 }
