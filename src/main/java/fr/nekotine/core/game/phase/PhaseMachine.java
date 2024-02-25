@@ -50,7 +50,6 @@ public class PhaseMachine implements IPhaseMachine{
 		}
 		if (currentPhase == null) {
 			currentPhase = makePhase(phase);
-			currentPhaseIndex = phaseOrder.indexOf(phase);
 			var parents = getParents(currentPhase);
 			parents.add(currentPhase);
 			for (var p : parents) {
@@ -92,6 +91,7 @@ public class PhaseMachine implements IPhaseMachine{
 				return;
 			}
 		}
+		currentPhaseIndex = phaseOrder.indexOf(phase);
 		currentPhase = nextPhase;
 		running = true;
 	}
