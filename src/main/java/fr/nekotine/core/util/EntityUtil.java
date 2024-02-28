@@ -5,10 +5,12 @@ import java.util.function.Predicate;
 import java.util.logging.Level;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.attribute.Attributable;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -208,5 +210,24 @@ public class EntityUtil {
 		packet.getIntegers().write(0, target.getEntityId());
 		var pmanager = ProtocolLibrary.getProtocolManager();
 		pmanager.broadcastServerPacket(packet);
+	}
+	
+	public static void freeze(Player player) {
+		player.setAllowFlight(true);
+		player.teleport(player.getLocation().add(0,0.1,0));
+		player.setFlying(true);
+		player.setFlySpeed(0);
+	}
+	
+	public static void unfreeze(Player player) {
+		player.setAllowFlight(false);
+		player.setFlying(false);
+		player.setFlySpeed(0.1F);
+	}
+	
+	public static void fixLighting(BlockDisplay blockDisplay) {
+		var copy = blockDisplay.copy(blockDisplay.getLocation());
+		blockDisplay.setBlock(Material.AIR.createBlockData());
+		blockDisplay.addPassenger(copy);
 	}
 }
