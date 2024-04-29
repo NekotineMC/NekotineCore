@@ -1,5 +1,6 @@
 package fr.nekotine.core.map.command.generator;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -88,6 +89,9 @@ public class DictionaryCommandGenerator implements MapElementCommandGenerator{
 		var arguments = new Argument<?>[] {new LiteralArgument("add"),new StringArgument("itemName")};
 		MapCommandExecutor executor = (element, sender, args) -> {
 			var mapKey = (String)args.get("itemName");
+			if (element == null) {
+				element = new HashMap<>();
+			}
 			@SuppressWarnings("unchecked")
 			var e = (Map<String,Object>)element;
 			try {
