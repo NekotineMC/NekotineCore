@@ -75,7 +75,8 @@ public class ItemStackUtil {
 	
 	public static ItemStack setOldPvpAttackSpeed(ItemStack itemStack, boolean unbreakable) {
 		var meta = itemStack.getItemMeta();
-		meta.addAttributeModifier(Attribute.GENERIC_ATTACK_SPEED, new AttributeModifier("pvp_1.8", 1000.0D, AttributeModifier.Operation.ADD_NUMBER));
+		var key = new NamespacedKey(Ioc.resolve(JavaPlugin.class), "pvp_1.8");
+		meta.addAttributeModifier(Attribute.ATTACK_SPEED, new AttributeModifier(key, 1000.0D, AttributeModifier.Operation.ADD_NUMBER));
 		itemStack.setItemMeta(meta);
 		return itemStack;
 	}

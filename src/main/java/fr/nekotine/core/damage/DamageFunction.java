@@ -225,24 +225,24 @@ public enum DamageFunction {
 						Map<Enchantment, Integer> enchants = armor.getEnchantments();
 						for (Enchantment enchant : enchants.keySet()) {
 							
-							if (enchant.equals(Enchantment.PROTECTION_ENVIRONMENTAL))
+							if (enchant.equals(Enchantment.PROTECTION))
 								e.AddFinalMult( 1 - (PROTECTION_ENCHANT_REDUCTION * enchants.get(enchant)));
 							
-							else if (enchant.equals(Enchantment.PROTECTION_FIRE) && 
+							else if (enchant.equals(Enchantment.FIRE_PROTECTION) &&
 								(e.GetCause() == DamageCause.FIRE ||
 								e.GetCause() == DamageCause.FIRE_TICK ||
 								e.GetCause() == DamageCause.LAVA))
 								e.AddFinalMult(1 - (FIRE_PROTECTION_ENCHANT_REDUCTION * enchants.get(enchant)));
 			
-							else if (enchant.equals(Enchantment.PROTECTION_FALL) && 
+							else if (enchant.equals(Enchantment.FEATHER_FALLING) &&
 									e.GetCause() == DamageCause.FALL)
 								e.AddFinalMult(1 - (FALL_PROTECTION_ENCHANT_REDUCTION * enchants.get(enchant)));
 			
-							else if (enchant.equals(Enchantment.PROTECTION_EXPLOSIONS) && 
+							else if (enchant.equals(Enchantment.BLAST_PROTECTION) &&
 									e.GetCause() == DamageCause.ENTITY_EXPLOSION)
 								e.AddFinalMult(1 - (BLAST_PROTECTION_ENCHANT_REDUCTION * enchants.get(enchant)));
 			
-							else if (enchant.equals(Enchantment.PROTECTION_PROJECTILE) && 
+							else if (enchant.equals(Enchantment.PROJECTILE_PROTECTION) &&
 									e.GetCause() == DamageCause.PROJECTILE)
 								e.AddFinalMult(1 - (PROJECTILE_PROTECTION_ENCHANT_REDUCTION * enchants.get(enchant)));
 							
@@ -262,16 +262,16 @@ public enum DamageFunction {
 						Map<Enchantment, Integer> enchants = weapon.getEnchantments();
 						for (Enchantment enchant : enchants.keySet()) {
 							
-							if (enchant.equals(Enchantment.ARROW_KNOCKBACK) || enchant.equals(Enchantment.KNOCKBACK)) 
+							if (enchant.equals(Enchantment.PUNCH) || enchant.equals(Enchantment.KNOCKBACK))
 								e.AddKnockbackMult(1 + (0.5 * enchants.get(enchant)));
 							
 							else if (enchant.equals(Enchantment.FIRE_ASPECT)) 
 								e.GetDamaged().setFireTicks(Math.max(e.GetDamaged().getFireTicks(), 20 * ((enchants.get(enchant) * 4) - 1) ));
 							
-							else if (enchant.equals(Enchantment.ARROW_FIRE))
+							else if (enchant.equals(Enchantment.FLAME))
 								e.GetDamaged().setFireTicks(Math.max(e.GetDamaged().getFireTicks(), 20 * ((enchants.get(enchant) * 5)) ));
 							
-							else if (enchant.equals(Enchantment.ARROW_DAMAGE))
+							else if (enchant.equals(Enchantment.POWER))
 								e.AddFinalMult(1 + (0.25 * (enchants.get(enchant) + 1)));
 						}
 					}
@@ -282,9 +282,9 @@ public enum DamageFunction {
 			@Override
 			public void accept(LivingEntityDamageEvent e) {
 				//Base resistance & armor protection
-				double defense = e.GetDamaged().getAttribute(Attribute.GENERIC_ARMOR).getValue();
-				double toughness = e.GetDamaged().getAttribute(Attribute.GENERIC_ARMOR_TOUGHNESS).getValue();
-				PotionEffect effect = e.GetDamaged().getPotionEffect(PotionEffectType.DAMAGE_RESISTANCE);
+				double defense = e.GetDamaged().getAttribute(Attribute.ARMOR).getValue();
+				double toughness = e.GetDamaged().getAttribute(Attribute.ARMOR_TOUGHNESS).getValue();
+				PotionEffect effect = e.GetDamaged().getPotionEffect(PotionEffectType.RESISTANCE);
 				int resistance = effect == null ? 0 : effect.getAmplifier();
 				
 				double withArmorAndToughness = e.GetDamage() * (1 - Math.min(20, Math.max(defense / 5, defense - e.GetDamage() / (2 + toughness / 4))) / 25);

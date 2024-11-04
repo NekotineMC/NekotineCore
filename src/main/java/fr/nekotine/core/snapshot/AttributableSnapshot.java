@@ -3,6 +3,8 @@ package fr.nekotine.core.snapshot;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.papermc.paper.registry.RegistryAccess;
+import io.papermc.paper.registry.RegistryKey;
 import org.bukkit.attribute.Attributable;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -14,7 +16,7 @@ public class AttributableSnapshot implements Snapshot<Attributable> {
 	@Override
 	public Snapshot<Attributable> snapshot(Attributable item) {
 		attributes = new HashMap<>();
-		for (var attr : Attribute.values()) {
+		for (var attr : RegistryAccess.registryAccess().getRegistry(RegistryKey.ATTRIBUTE)) {
 			var inst = item.getAttribute(attr);
 			if (inst != null) {
 				var snap = new AttributeInstanceSnapshot().snapshot(inst);
@@ -28,7 +30,7 @@ public class AttributableSnapshot implements Snapshot<Attributable> {
 	@Override
 	public Snapshot<Attributable> deepSnapshot(Attributable item) {
 		attributes = new HashMap<>();
-		for (var attr : Attribute.values()) {
+		for (var attr : RegistryAccess.registryAccess().getRegistry(RegistryKey.ATTRIBUTE)) {
 			var inst = item.getAttribute(attr);
 			if (inst != null) {
 				var snap = new AttributeInstanceSnapshot();

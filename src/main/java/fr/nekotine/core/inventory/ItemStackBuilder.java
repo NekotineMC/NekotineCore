@@ -8,13 +8,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import fr.nekotine.core.ioc.Ioc;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.attribute.AttributeModifier.Operation;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 
 import fr.nekotine.core.tuple.Pair;
@@ -189,10 +192,10 @@ public class ItemStackBuilder {
 		meta.setUnbreakable(unbreakable);
 		ItemStackUtil.setUnstackable(meta, unstackable);
 		if(attack_damage>0) {
-			meta.removeAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE);
+			meta.removeAttributeModifier(Attribute.ATTACK_DAMAGE);
 			meta.addAttributeModifier(
-			Attribute.GENERIC_ATTACK_DAMAGE, 
-			new AttributeModifier("generic.attackDamage", attack_damage, Operation.ADD_NUMBER));
+			Attribute.ATTACK_DAMAGE,
+			new AttributeModifier(new NamespacedKey(Ioc.resolve(JavaPlugin.class), "generic.attackDamage"), attack_damage, Operation.ADD_NUMBER));
 		}
 		itemStack.setItemMeta(meta);
 		if(skullUrl!=null) {
@@ -206,35 +209,36 @@ public class ItemStackBuilder {
 	}
 	
 	private void applyOldPvp() {
+		var key = new NamespacedKey(Ioc.resolve(JavaPlugin.class), "pvp_1.8");
 		switch(material) {
 		case WOODEN_SWORD:
 		case WOODEN_AXE:
-			attributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier("pvp_1.8", 3.2D, AttributeModifier.Operation.ADD_NUMBER));
+			attributeModifier(Attribute.ATTACK_DAMAGE, new AttributeModifier(key, 3.2D, AttributeModifier.Operation.ADD_NUMBER));
 			break;
 		case STONE_SWORD:
 		case STONE_AXE:
-			attributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier("pvp_1.8", 3.2D, AttributeModifier.Operation.ADD_NUMBER));
+			attributeModifier(Attribute.ATTACK_DAMAGE, new AttributeModifier(key, 3.2D, AttributeModifier.Operation.ADD_NUMBER));
 			break;
 		case IRON_SWORD:
 		case IRON_AXE:
-			attributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier("pvp_1.8", 4D, AttributeModifier.Operation.ADD_NUMBER));
+			attributeModifier(Attribute.ATTACK_DAMAGE, new AttributeModifier(key, 4D, AttributeModifier.Operation.ADD_NUMBER));
 			break;
 		case GOLDEN_SWORD:
 		case GOLDEN_AXE:
-			attributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier("pvp_1.8", 4.8D, AttributeModifier.Operation.ADD_NUMBER));
+			attributeModifier(Attribute.ATTACK_DAMAGE, new AttributeModifier(key, 4.8D, AttributeModifier.Operation.ADD_NUMBER));
 			break;
 		case DIAMOND_SWORD:
 		case DIAMOND_AXE:
-			attributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier("pvp_1.8", 5.6D, AttributeModifier.Operation.ADD_NUMBER));
+			attributeModifier(Attribute.ATTACK_DAMAGE, new AttributeModifier(key, 5.6D, AttributeModifier.Operation.ADD_NUMBER));
 			break;
 		case NETHERITE_SWORD:
 		case NETHERITE_AXE:
-			attributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier("pvp_1.8", 6.4D, AttributeModifier.Operation.ADD_NUMBER));
+			attributeModifier(Attribute.ATTACK_DAMAGE, new AttributeModifier(key, 6.4D, AttributeModifier.Operation.ADD_NUMBER));
 			break;
 		default:
 			break;
 		}
-		attributeModifier(Attribute.GENERIC_ATTACK_SPEED, new AttributeModifier("pvp_1.8", 100D, AttributeModifier.Operation.ADD_NUMBER));
+		attributeModifier(Attribute.ATTACK_SPEED, new AttributeModifier(key, 100D, AttributeModifier.Operation.ADD_NUMBER));
 	}
 	
 }

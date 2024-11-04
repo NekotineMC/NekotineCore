@@ -24,7 +24,7 @@ import net.kyori.adventure.text.Component;
 
 public class Usable {
 	
-	private static final Enchantment GLOW_ENCHANT = Enchantment.DURABILITY;
+	private static final Enchantment GLOW_ENCHANT = Enchantment.UNBREAKING;
 	
 	@NotNull
 	private ItemStack item;
@@ -69,7 +69,7 @@ public class Usable {
 	}
 	/**
 	 * Si l'objet doit afficher le texte de ses enchantements
-	 * @param text
+	 * @param hide oui ou non
 	 */
 	public @NotNull Usable hideEnchants(boolean hide) {
 		if(hide) {
@@ -197,7 +197,7 @@ public class Usable {
 	
 	/**
 	 * Ne fonctionne qu'avec les objets ayant une durabilité
-	 * @param durability Le pourcentage de durabilité de l'objet
+	 * @param percentage Le pourcentage de durabilité de l'objet
 	 */
 	public @NotNull Usable setDurabilityPercentage(float percentage) {
 		if (percentage < 0 || percentage > 1) {

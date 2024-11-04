@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 
+import io.papermc.paper.registry.RegistryAccess;
+import io.papermc.paper.registry.RegistryKey;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Registry;
@@ -130,7 +132,7 @@ public class EntityUtil {
 	 * @return La vie maximale de l'entité
 	 */
 	public static double GetMaxHealth(LivingEntity entity) {
-		return entity.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
+		return entity.getAttribute(Attribute.MAX_HEALTH).getValue();
 	}
 
 	/**
@@ -139,7 +141,7 @@ public class EntityUtil {
 	 * @param value  (0.5 si <= 0)
 	 */
 	public static void SetMaxHealth(LivingEntity entity, double value) {
-		entity.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(value);
+		entity.getAttribute(Attribute.MAX_HEALTH).setBaseValue(value);
 	}
 
 	public static Collection<LivingEntity> GetNearbyLivingEntities(Location center, double radius) {
@@ -172,10 +174,10 @@ public class EntityUtil {
 	 * @param target
 	 */
 	public static void defaultAllAttributes(Attributable target) {
-		for (var attrType : Attribute.values()) {
+		for (var attrType : RegistryAccess.registryAccess().getRegistry(RegistryKey.ATTRIBUTE)) {
 			var attrInstance = target.getAttribute(attrType);
 			if (attrInstance != null) { // Toutes les entitées n'ont pas tous les attributs
-				if (attrType == Attribute.GENERIC_MOVEMENT_SPEED) {
+				if (attrType == Attribute.MOVEMENT_SPEED) {
 					attrInstance.setBaseValue(0.1);
 				} else {
 					attrInstance.setBaseValue(attrInstance.getDefaultValue());
