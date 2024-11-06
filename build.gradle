@@ -38,6 +38,12 @@ test {
     useJUnitPlatform()
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
+
 // CONFIGURATION
 
 group = 'fr.nekotine'
