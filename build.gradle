@@ -24,14 +24,14 @@ repositories {
 }
 
 dependencies {
-	compileOnly group: "io.papermc.paper", name: "paper-api", version: "1.21.1-R0.1-SNAPSHOT"
+	compileOnly group: "io.papermc.paper", name: "paper-api", version: "1.21.3-R0.1-SNAPSHOT"
 	compileOnly group: "com.comphenix.protocol", name: "ProtocolLib", version: "+"
 	compileOnly group: "dev.jorel", name: "commandapi-bukkit-core", version: "+"
 	implementation(platform("com.intellectualsites.bom:bom-newest:1.40"))
 	compileOnly("com.fastasyncworldedit:FastAsyncWorldEdit-Core")
 	compileOnly("com.fastasyncworldedit:FastAsyncWorldEdit-Bukkit")
 	testImplementation group: "org.junit.jupiter", name:"junit-jupiter-engine", version:"5.+"
-	testImplementation group: "io.papermc.paper", name: "paper-api", version: "1.21.1-R0.1-SNAPSHOT"
+	testImplementation group: "io.papermc.paper", name: "paper-api", version: "1.21.3-R0.1-SNAPSHOT"
 }
 
 test {
