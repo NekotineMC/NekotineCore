@@ -24,7 +24,7 @@ repositories {
 }
 
 dependencies {
-	compileOnly group: "io.papermc.paper", name: "paper-api", version: "1.21.3-R0.1-SNAPSHOT"
+	compileOnly group: "io.papermc.paper", name: "paper-api", version: "1.21.4-R0.1-SNAPSHOT"
 	compileOnly group: "com.comphenix.protocol", name: "ProtocolLib", version: "+"
 	compileOnly group: "dev.jorel", name: "commandapi-bukkit-core", version: "+"
 	implementation(platform("com.intellectualsites.bom:bom-newest:1.40"))

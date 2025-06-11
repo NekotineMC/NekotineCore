@@ -162,11 +162,11 @@ public class ClientTrackModule implements IPluginModule{
 	
 	private void unsprint(Player player) {
 		EventUtil.call(new PlayerToggleSprintEvent(player, false));
-		sendActionPacket(player, STOP_SPRINTING);
+		//sendActionPacket(player, STOP_SPRINTING);
 	}
 	private void unsneak(Player player) {
 		EventUtil.call(new PlayerToggleSneakEvent(player, false));
-		sendActionPacket(player, STOP_SNEAKING);
+		//sendActionPacket(player, STOP_SNEAKING);
 	}
 	private void sendActionPacket(Player player, int actionId) {
 		var pmanager = ProtocolLibrary.getProtocolManager();
