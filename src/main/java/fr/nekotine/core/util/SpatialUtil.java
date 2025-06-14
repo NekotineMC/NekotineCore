@@ -7,6 +7,7 @@ import org.bukkit.World;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.EntityType;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
@@ -242,7 +243,9 @@ public class SpatialUtil {
 		var max = box.getMax();
 		var scale = new Vector3f((float)(max.getX()-min.getX()), (float)(max.getY()-min.getY()), (float)(max.getZ()-min.getZ()));
 		var transform = new Transformation(new Vector3f(), new AxisAngle4f(), scale, new AxisAngle4f());
-		var display = (BlockDisplay)world.spawnEntity(min.toLocation(world), EntityType.BLOCK_DISPLAY);
+		var display = (BlockDisplay)world.spawnEntity(min.toLocation(world), EntityType.BLOCK_DISPLAY, CreatureSpawnEvent.SpawnReason.CUSTOM, b -> {
+			b.setPersistent(false);
+		});
 		display.setBlock(data);
 		display.setTransformation(transform);
 		return display;
