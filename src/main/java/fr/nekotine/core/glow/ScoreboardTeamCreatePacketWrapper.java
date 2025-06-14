@@ -2,8 +2,12 @@ package fr.nekotine.core.glow;
 
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.comphenix.protocol.wrappers.EnumWrappers;
+import com.comphenix.protocol.wrappers.WrappedChatComponent;
+import com.comphenix.protocol.wrappers.WrappedTeamParameters;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
@@ -35,11 +39,16 @@ public class ScoreboardTeamCreatePacketWrapper {
 		packet.getStrings().write(0, teamName);
 	}
 	
-	public void setColor(TeamColor color) {
-		packet.getOptionalStructures().read(0).map((structure) ->
-        structure.getEnumModifier(TeamColor.class,
-                MinecraftReflection.getMinecraftClass("EnumChatFormat"))
-                .write(0, color));
+	public void setColor(EnumWrappers.ChatFormatting color) {
+		var param = WrappedTeamParameters.newBuilder()
+				.displayName(WrappedChatComponent.fromText(color.name()))
+				.prefix(WrappedChatComponent.fromText(""))
+				.suffix(WrappedChatComponent.fromText(""))
+				.nametagVisibility("never")
+				.collisionRule("never")
+				.color(color)
+				.build();
+		packet.getOptionalTeamParameters().write(0, Optional.of(param));
 	}
 	
 	public Collection<Entity> getEntities() {

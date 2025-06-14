@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import com.comphenix.protocol.wrappers.EnumWrappers;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -29,7 +30,7 @@ public class EntityGlowModule implements IPluginModule {
 	
 	private static final byte entityMetadataGlowMask = 0x40; // https://wiki.vg/Entity_metadata#Entity
 	
-	private Map<Player, Map<Integer,TeamColor>> map = new HashMap<>();
+	private Map<Player, Map<Integer, EnumWrappers.ChatFormatting>> map = new HashMap<>();
 	
 	private PacketListener packetAdapter = new PacketAdapter(Ioc.resolve(JavaPlugin.class),PacketType.Play.Server.ENTITY_METADATA) {
 		@Override
@@ -74,7 +75,7 @@ public class EntityGlowModule implements IPluginModule {
 		glowEntityFor(glowed, viewer, null);
 	}
 	
-	public void glowEntityFor(Entity glowed, Player viewer, @Nullable TeamColor color) {
+	public void glowEntityFor(Entity glowed, Player viewer, @Nullable EnumWrappers.ChatFormatting color) {
 
 		var eid = glowed.getEntityId();
 		var set = map.computeIfAbsent(viewer, p -> new HashMap<>());
@@ -98,7 +99,7 @@ public class EntityGlowModule implements IPluginModule {
 		}
 	}
 	
-	private void triggerUpdate(Entity glowed, Player viewer, boolean isGlowed, @Nullable TeamColor color) {
+	private void triggerUpdate(Entity glowed, Player viewer, boolean isGlowed, @Nullable EnumWrappers.ChatFormatting color) {
 		var pmanager = ProtocolLibrary.getProtocolManager();
 		var metadataPacket = pmanager.createPacket(PacketType.Play.Server.ENTITY_METADATA);
 		metadataPacket.getIntegers().write(0, glowed.getEntityId());
@@ -108,7 +109,7 @@ public class EntityGlowModule implements IPluginModule {
 		metadataPacket.getDataValueCollectionModifier().write(0, dataValues);
 		pmanager.sendServerPacket(viewer, metadataPacket);
 		if (color != null) {
-			var teamName = "EntityGlowModule"+color+"Team";
+			var teamName = "EntityGlowModule"+color.name()+"Team";
 			var tp = new ScoreboardTeamCreatePacketWrapper();
 			tp.setTeamName(teamName);
 			tp.setColor(color);
