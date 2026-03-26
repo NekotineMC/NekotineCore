@@ -1,53 +1,28 @@
 package fr.nekotine.core.logging;
 
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
-
 import org.bukkit.plugin.java.JavaPlugin;
 
 import fr.nekotine.core.ioc.Ioc;
-import fr.nekotine.core.module.IPluginModule;
 import fr.nekotine.core.util.ReflexionUtil;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 
-public class NekotineLogger extends Logger{
+public class NekotineLogger{
 
-	private final String prefix;
-
-	private NekotineLogger() {
-		this(ReflexionUtil.getCallingClass(),ReflexionUtil.getCallingClassName());
-	}
-	
-	private NekotineLogger(Class<?> clazz) {
-		this(clazz,nameFromClass(clazz));
-	}
-	
-	private NekotineLogger(Class<?> clazz, String name) {
-		super(loggerName(clazz), null);
-		prefix = '('+ name + ") > ";
-		setParent(Ioc.resolve(Logger.class));
-	}
-	
-	@Override
-	public void log(LogRecord record) {
-		record.setMessage(prefix + record.getMessage());
-		super.log(record);
-	}
-	
 	private static final String loggerName(Class<?> clazz) {
 		if (clazz.getPackageName().startsWith("fr.nekotine.core")) {
 			return "NekotineCore";
 		}
-		return Ioc.resolve(JavaPlugin.class).getName();
-	}
-	
-	private static String nameFromClass(Class<?> clazz) {
-		
-		if (IPluginModule.class.isAssignableFrom(clazz)) {
-			return clazz.getTypeName();
-		}else {
-			return clazz.getSimpleName();
+		// Le plugin n'est pas accessible lors de la création
+		if (JavaPlugin.class.isAssignableFrom(clazz)) {
+			var plugin = Ioc.getProvider().tryResolve(JavaPlugin.class);
+			if (plugin.isPresent()) {
+				return plugin.get().getName();
+			}else {
+				make().warn("Le NekotineLogger est créé avant que l'Ioc ai une référence au Plugin. Le nom du plugin sera donc incorrect. Si ce logger est créé pour un JavaPlugin, vous pouvez utiliser make(JavaPlugin) pour contourner le problème.");
+				return clazz.getSimpleName();
+			}
 		}
+		return Ioc.resolve(JavaPlugin.class).getName();
 	}
 
 	public static ComponentLogger make() {
@@ -66,6 +41,14 @@ public class NekotineLogger extends Logger{
 	
 	public static ComponentLogger make(Class<?> clazz, String name) {
 		return ComponentLogger.logger(loggerName(clazz) + " > (" + name +')');
+	}
+	
+	public static ComponentLogger make(JavaPlugin plugin) {
+		return ComponentLogger.logger(plugin.getName() + " > (" + plugin.getClass().getSimpleName() +')');
+	}
+	
+	public static ComponentLogger make(JavaPlugin plugin, String name) {
+		return ComponentLogger.logger(plugin.getName() + " > (" + name +')');
 	}
 	
 }

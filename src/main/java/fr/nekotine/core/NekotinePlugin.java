@@ -1,7 +1,6 @@
 package fr.nekotine.core;
 
 import java.util.function.Supplier;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -26,7 +25,7 @@ import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 
 public class NekotinePlugin extends JavaPlugin{
 	
-	private ComponentLogger nekotinePluginLogger = NekotineLogger.make(NekotinePlugin.class);
+	private final ComponentLogger nekotinePluginLogger = NekotineLogger.make(NekotinePlugin.class);
 	
 	@Override
 	public void onLoad() {
