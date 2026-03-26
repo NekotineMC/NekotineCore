@@ -1,7 +1,6 @@
 package fr.nekotine.core.map.command.generator;
 
 import java.util.function.Function;
-import java.util.logging.Logger;
 
 import org.bukkit.Location;
 import org.bukkit.util.BlockVector;
@@ -10,18 +9,15 @@ import dev.jorel.commandapi.arguments.Argument;
 import dev.jorel.commandapi.arguments.LocationArgument;
 import dev.jorel.commandapi.arguments.LocationType;
 import dev.jorel.commandapi.executors.CommandArguments;
-import fr.nekotine.core.logging.NekotineLogger;
 import fr.nekotine.core.map.command.MapCommandBranch;
 import fr.nekotine.core.map.command.MapCommandExecutor;
 import fr.nekotine.core.map.command.MapElementCommandGenerator;
+import fr.nekotine.core.text.Colors;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 
 public class LocationCommandGenerator implements MapElementCommandGenerator{
 
 	private static final String nodeName = "MapLocationElementNode";
-
-	private Logger logger = new NekotineLogger(getClass());
 	
 	@Override
 	public MapCommandBranch[] generateFor(Function<CommandArguments, Object> pipeline, Class<?> elementType) {
@@ -32,11 +28,9 @@ public class LocationCommandGenerator implements MapElementCommandGenerator{
 			e.setX(pos.getX());
 			e.setY(pos.getY());
 			e.setZ(pos.getZ());
-			sender.sendMessage(Component.text("La position à bien été définie.", NamedTextColor.GREEN));
+			sender.sendMessage(Component.text("La position à bien été définie.", Colors.Command.SUCCESS));
 			return element;
 		};
-		//TODO normaliser les messages de commande
-		logger.info("LocationCommandGenerator.generateFor utilise des messages de commande non-normalise");
 		return new MapCommandBranch[] {new MapCommandBranch(arguments, executor)};
 	}
 

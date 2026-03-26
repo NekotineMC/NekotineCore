@@ -3,7 +3,6 @@ package fr.nekotine.core.map.command.generator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.logging.Logger;
 
 import dev.jorel.commandapi.arguments.Argument;
 import dev.jorel.commandapi.arguments.LiteralArgument;
@@ -18,10 +17,11 @@ import fr.nekotine.core.map.command.MapCommandExecutor;
 import fr.nekotine.core.map.command.MapElementCommandGenerator;
 import fr.nekotine.core.reflexion.annotation.GenericBiTyped;
 import fr.nekotine.core.util.CollectionUtil;
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 
 public class DefaultMapElementCommandGenerator implements MapElementCommandGenerator{
 	
-	private Logger logger = new NekotineLogger(getClass());
+	private final ComponentLogger logger = NekotineLogger.make();
 
 	@Override
 	public MapCommandBranch[] generateFor(Function<CommandArguments, Object> pipeline, Class<?> elementType) {
@@ -78,7 +78,7 @@ public class DefaultMapElementCommandGenerator implements MapElementCommandGener
 							return element;
 						}catch(IllegalAccessException e) {
 							var ex = new RuntimeException("Impossible d'acceder au champ "+field.getName()+" de la classe "+elementType.getName(),e);
-							logger.throwing("DefaultMapElementCommandGenerator", "MapCommandBranch[] generateFor(Class<?> elementType)", ex);
+							logger.error("DefaultMapElementCommandGenerator.generateFor(Class<?> elementType)", ex);
 							throw ex;
 						}
 					};

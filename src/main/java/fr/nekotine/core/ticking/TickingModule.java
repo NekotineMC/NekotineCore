@@ -3,8 +3,6 @@ package fr.nekotine.core.ticking;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.bukkit.event.Event;
 import org.bukkit.plugin.IllegalPluginAccessException;
@@ -15,10 +13,11 @@ import fr.nekotine.core.ioc.Ioc;
 import fr.nekotine.core.logging.NekotineLogger;
 import fr.nekotine.core.module.IPluginModule;
 import fr.nekotine.core.ticking.event.TickElapsedEvent;
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 
 public class TickingModule implements IPluginModule{
 	
-	private Logger logger = new NekotineLogger(getClass());
+	private final ComponentLogger logger = NekotineLogger.make();
 	
 	TickEventRunnable runningTask;
 	
@@ -38,7 +37,7 @@ public class TickingModule implements IPluginModule{
 		try {
 			runningTask.cancel();
 		}catch(Exception e) {
-			logger.log(Level.WARNING, "Erreur lors de l'arret de l'horloge", e);
+			logger.warn("Erreur lors de l'arret de l'horloge", e);
 		}
 	}
 	

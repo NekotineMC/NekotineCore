@@ -22,17 +22,17 @@ import fr.nekotine.core.reflexion.ReflexionUtil;
 import fr.nekotine.core.serialization.configurationserializable.ConfigurationSerializableAdapterSerializer;
 import fr.nekotine.core.serialization.configurationserializable.IConfigurationSerializableAdapterContainer;
 import fr.nekotine.core.util.DebugUtil;
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 
 public class NekotinePlugin extends JavaPlugin{
 	
-	private Logger nekotinePluginLogger;
+	private ComponentLogger nekotinePluginLogger = NekotineLogger.make(NekotinePlugin.class);
 	
 	@Override
 	public void onLoad() {
 		super.onLoad();
 		CommandAPI.onLoad(new CommandAPIPaperConfig(this).setNamespace("vi6"));
 		setupIoc();
-		nekotinePluginLogger = new NekotineLogger(NekotinePlugin.class);
 		setupConfiguration();
 		setupModules();
 	}
@@ -57,6 +57,7 @@ public class NekotinePlugin extends JavaPlugin{
 		ioc.registerSingleton(this);
 		ioc.registerSingletonInstanceAs(this, JavaPlugin.class);
 		ioc.registerSingletonInstanceAs(this.getLogger(), Logger.class);
+		ioc.registerSingletonInstanceAs(this.getComponentLogger(), ComponentLogger.class);
 		ioc.registerSingletonInstanceAs(new DefaultProvider(), IDefaultProvider.class);
 		// Serialization
 		ioc.registerSingletonAs(ConfigurationSerializableAdapterSerializer::new,
@@ -88,7 +89,7 @@ public class NekotinePlugin extends JavaPlugin{
 				}
 			}
 		}catch(Exception e) {
-			nekotinePluginLogger.log(Level.SEVERE, "Erreur lors de la mise en place des modules", e);
+			nekotinePluginLogger.error("Erreur lors de la mise en place des modules", e);
 		}
     }
     

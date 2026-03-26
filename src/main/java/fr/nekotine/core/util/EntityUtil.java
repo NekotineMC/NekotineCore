@@ -2,7 +2,6 @@ package fr.nekotine.core.util;
 
 import java.util.Collection;
 import java.util.function.Predicate;
-import java.util.logging.Level;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -115,7 +114,7 @@ public class EntityUtil {
 		try {
 			sound = RegistryAccess.registryAccess().getRegistry(RegistryKey.SOUND_EVENT).get(NamespacedKey.minecraft("entity."+type+".hurt"));
 		} catch (IllegalArgumentException e) {
-			new NekotineLogger(EntityUtil.class).log(Level.SEVERE, "[PlayDamageSound] impossible d'obtenir le son pour "+ type, e);
+			NekotineLogger.make().error("[PlayDamageSound] impossible d'obtenir le son pour "+ type, e);
 		}
 
 		entity.getWorld().playSound(entity.getLocation(), sound, 1.5f + (float) (0.5f * Math.random()),

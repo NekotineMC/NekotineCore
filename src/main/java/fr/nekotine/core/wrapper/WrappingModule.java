@@ -5,17 +5,16 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.WeakHashMap;
 import java.util.function.Function;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.jetbrains.annotations.Nullable;
 
 import fr.nekotine.core.logging.NekotineLogger;
 import fr.nekotine.core.module.IPluginModule;
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 
 public class WrappingModule implements IPluginModule{
 
-	private Logger logger = new NekotineLogger(getClass());
+	private final ComponentLogger logger = NekotineLogger.make();
 	
 	private Map<Object, Map<Class<? extends Object>, WrapperBase<? extends Object>>> store = new WeakHashMap<>();
 	
@@ -31,7 +30,7 @@ public class WrappingModule implements IPluginModule{
 			}
 			return srcMap.containsKey(wrapperType);
 		}catch(Exception e) {
-			logger.log(Level.WARNING, "Une erreur est survenue lors de l'ajout d'un wrapper à l'entitée.", e);
+			logger.warn("Une erreur est survenue lors de l'ajout d'un wrapper à l'entitée.", e);
 			return false;
 		}
 	}
@@ -41,7 +40,7 @@ public class WrappingModule implements IPluginModule{
 			var entityStore = store.get(source);
 			return wrapperType.cast(entityStore.get(wrapperType));
 		}catch(Exception e) {
-			logger.log(Level.WARNING, "Une erreur est survenue lors de la récupération d'un wrapper de l'entitée.", e);
+			logger.warn("Une erreur est survenue lors de la récupération d'un wrapper de l'entitée.", e);
 			return null;
 		}
 	}
@@ -77,7 +76,7 @@ public class WrappingModule implements IPluginModule{
 				store.put(source, entityStore);
 			}
 		}catch(Exception e) {
-			logger.log(Level.WARNING, "Une erreur est survenue lors de l'ajout d'un wrapper à l'entitée.", e);
+			logger.warn("Une erreur est survenue lors de l'ajout d'un wrapper à l'entitée.", e);
 		}
 	}
 	

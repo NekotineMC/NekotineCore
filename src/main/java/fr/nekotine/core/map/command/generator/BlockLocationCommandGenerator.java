@@ -1,7 +1,6 @@
 package fr.nekotine.core.map.command.generator;
 
 import java.util.function.Function;
-import java.util.logging.Logger;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -15,12 +14,11 @@ import dev.jorel.commandapi.arguments.Argument;
 import dev.jorel.commandapi.arguments.LocationArgument;
 import dev.jorel.commandapi.arguments.LocationType;
 import dev.jorel.commandapi.executors.CommandArguments;
-import fr.nekotine.core.logging.NekotineLogger;
 import fr.nekotine.core.map.command.MapCommandBranch;
 import fr.nekotine.core.map.command.MapCommandExecutor;
 import fr.nekotine.core.map.command.MapElementCommandGenerator;
+import fr.nekotine.core.text.Colors;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 
 /**
  * Générateur de commande pour un champ de type {@link org.bukkit.Location Location}
@@ -32,8 +30,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 public class BlockLocationCommandGenerator implements MapElementCommandGenerator{
 
 	private static final String nodeName = "MapBlockLocationElementNode";
-
-	private Logger logger = new NekotineLogger(getClass());
 	
 	@Override
 	public MapCommandBranch[] generateFor(Function<CommandArguments, Object> pipeline, Class<?> elementType) {
@@ -44,12 +40,12 @@ public class BlockLocationCommandGenerator implements MapElementCommandGenerator
 			e.setX((double)pos.getBlockX());
 			e.setY((double)pos.getBlockY());
 			e.setZ((double)pos.getBlockZ());
-			sender.sendMessage(Component.text("La position du block à bien été définie.", NamedTextColor.GREEN));
+			sender.sendMessage(Component.text("La position du block à bien été définie.", Colors.Command.SUCCESS));
 			return e;
 		};
 		MapCommandExecutor worldEditExecutor = (element, sender, args) ->{
 			if (!(sender instanceof Player player)) {
-				sender.sendMessage(Component.text("Vous devez être un joueur pour executer cette commande"));
+				sender.sendMessage(Component.text("Vous devez être un joueur pour executer cette commande.", Colors.Command.WARNING));
 				return element;
 			}
 			var session = WorldEdit.getInstance().getSessionManager().get(BukkitAdapter.adapt(player));
@@ -60,20 +56,18 @@ public class BlockLocationCommandGenerator implements MapElementCommandGenerator
 				if (bb.getMinimumX() != bb.getMaximumX() ||
 						bb.getMinimumY() != bb.getMaximumY() ||
 						bb.getMinimumZ() != bb.getMaximumZ()) {
-					sender.sendMessage(Component.text("Vous devez sélectionner seulement UN block avec world edit"));
+					sender.sendMessage(Component.text("Vous devez sélectionner seulement UN block avec world edit.", Colors.Command.WARNING));
 					return element;
 				}
 				e.setX((double)bb.getMinimumX());
 				e.setY((double)bb.getMinimumY());
 				e.setZ((double)bb.getMinimumZ());
-				sender.sendMessage(Component.text("La location à bien été définie.", NamedTextColor.GREEN));
+				sender.sendMessage(Component.text("La location à bien été définie.", Colors.Command.SUCCESS));
 			}catch(IncompleteRegionException ex) {
-				sender.sendMessage(Component.text("Vous devez sélectionner un block avec world edit"));
+				sender.sendMessage(Component.text("Vous devez sélectionner un block avec world edit.", Colors.Command.WARNING));
 			}
 			return element;
 		};
-		//TODO normaliser les messages de commande
-		logger.info("BlockLocationCommandGenerator.generateFor utilise des messages de commande non-normalise");
 		return new MapCommandBranch[] {
 				new MapCommandBranch(arguments, executor),
 				new MapCommandBranch(new Argument<?>[]{},worldEditExecutor)

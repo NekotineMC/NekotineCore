@@ -5,8 +5,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import dev.jorel.commandapi.arguments.Argument;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
@@ -20,15 +18,16 @@ import fr.nekotine.core.map.command.IMapElementCommandGeneratorResolver;
 import fr.nekotine.core.map.command.MapCommandBranch;
 import fr.nekotine.core.map.command.MapCommandExecutor;
 import fr.nekotine.core.map.command.MapElementCommandGenerator;
+import fr.nekotine.core.text.Colors;
 import fr.nekotine.core.util.CollectionUtil;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 
 public class DictionaryCommandGenerator implements MapElementCommandGenerator{
 
 	private static final String nodeNameSuffix = "Name";
 	
-	private Logger logger = new NekotineLogger(getClass());
+	private final ComponentLogger logger = NekotineLogger.make();
 	
 	private Class<?> nestedElementType;
 	
@@ -66,7 +65,7 @@ public class DictionaryCommandGenerator implements MapElementCommandGenerator{
 				try {
 					var e = (Map<String,Object>)element;
 					if (!e.containsKey(mapKey)) {
-						sender.sendMessage(Component.text("Ce nom d'élément ("+mapKey+") n'existe pas"));
+						sender.sendMessage(Component.text("Ce nom d'élément ("+mapKey+") n'existe pas.", Colors.Command.WARNING));
 						return element;
 					}
 					
@@ -75,7 +74,7 @@ public class DictionaryCommandGenerator implements MapElementCommandGenerator{
 				}catch(Exception e) {
 					var ex = new RuntimeException("Impossible d'acceder a la valeur "+mapKey+" du dictionnaire "
 				+finalNodeName+" de la classe "+elementType.getName(),e);
-					logger.throwing("DictionaryCommandGenerator", "MapCommandBranch[] generateFor(Class<?> elementType)", ex);
+					logger.error("DictionaryCommandGenerator.generateFor(Class<?> elementType)", ex);
 					throw ex;
 				}
 			};
@@ -96,17 +95,15 @@ public class DictionaryCommandGenerator implements MapElementCommandGenerator{
 			var e = (Map<String,Object>)element;
 			try {
 				e.put(mapKey, provider.get());
-				sender.sendMessage(Component.text("L'ajout à bien été fait.", NamedTextColor.GREEN));
+				sender.sendMessage(Component.text("L'ajout à bien été fait.", Colors.Command.SUCCESS));
 				
 			} catch (Exception ex) {
-				logger.logp(Level.SEVERE, "DictionaryCommandGenerator", "makeAddCommand",
+				logger.error("DictionaryCommandGenerator.makeAddCommand() > "+
 						"Impossible d'instancier le nouvel element de carte a ajouter au dictionnaire "+nodeName + " du type "+element.getClass().getName(),
 						ex);
 			}
 			return element;
 		};
-		//TODO normaliser les messages de commande
-		logger.info("DictionaryCommandGenerator.makeRemoveCommand utilise des messages de commande non-normalise");
 		return new MapCommandBranch(arguments, executor);
 	}
 	
@@ -121,14 +118,12 @@ public class DictionaryCommandGenerator implements MapElementCommandGenerator{
 			var mapKey = (String)args.get("itemName");
 			var e = (Map<String,?>)element;
 			if (!e.containsKey(mapKey)) {
-				sender.sendMessage(Component.text("Ce nom d'élément ("+mapKey+") n'est pas présent.", NamedTextColor.GREEN));
+				sender.sendMessage(Component.text("L'élément avec ce nom ("+mapKey+") est déjà absent.", Colors.Command.SUCCESS));
 			}
 			e.remove(mapKey);
-			sender.sendMessage(Component.text("La suppression à bien été faite.", NamedTextColor.GREEN));
+			sender.sendMessage(Component.text("La suppression à bien été faite.", Colors.Command.SUCCESS));
 			return element;
 		};
-		//TODO normaliser les messages de commande
-		logger.info("DictionaryCommandGenerator.makeRemoveCommand utilise des messages de commande non-normalise");
 		return new MapCommandBranch(arguments, executor);
 	}
 	
