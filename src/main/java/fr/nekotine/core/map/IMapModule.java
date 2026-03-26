@@ -58,7 +58,7 @@ public interface IMapModule extends IPluginModule {
 	 * @param mapType Le type du contenu de la carte.
 	 * @return Le contenu de la carte si elle existe.
 	 */
-	public <T> @Nullable T getContent(@Nonnull MapMetadata metadata, @Nonnull Class<T> contentType);
+	public <T> T getContent(@Nonnull MapMetadata metadata, @Nonnull Class<T> contentType);
 	
 	/**
 	 * Sauvegarde le contenu de la carte, la créée si elle n'existe pas.

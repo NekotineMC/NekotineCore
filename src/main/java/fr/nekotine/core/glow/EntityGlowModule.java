@@ -1,12 +1,12 @@
 package fr.nekotine.core.glow;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import com.comphenix.protocol.wrappers.EnumWrappers;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -18,11 +18,13 @@ import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.events.PacketListener;
+import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.comphenix.protocol.wrappers.WrappedDataValue;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 
 import fr.nekotine.core.ioc.Ioc;
 import fr.nekotine.core.module.IPluginModule;
+import net.kyori.adventure.util.TriState;
 
 public class EntityGlowModule implements IPluginModule {
 
@@ -33,6 +35,7 @@ public class EntityGlowModule implements IPluginModule {
 	private Map<Player, Map<Integer, EnumWrappers.ChatFormatting>> map = new HashMap<>();
 	
 	private PacketListener packetAdapter = new PacketAdapter(Ioc.resolve(JavaPlugin.class),PacketType.Play.Server.ENTITY_METADATA) {
+		
 		@Override
 		public void onPacketSending(PacketEvent event) {
 			PacketContainer packet = event.getPacket();
@@ -52,7 +55,7 @@ public class EntityGlowModule implements IPluginModule {
 				var value = optionalValue.get();
 				value.setRawValue((byte)((byte)value.getRawValue() | entityMetadataGlowMask)); // Add glow to bitmask
 			}else {
-				var serializer = WrappedDataWatcher.Registry.get(Byte.class);
+				var serializer = WrappedDataWatcher.Registry.get(((Type)Byte.class));
 				values.add(new WrappedDataValue(0, serializer, entityMetadataGlowMask));
 			}
 			event.setPacket(newPacket);
@@ -104,7 +107,7 @@ public class EntityGlowModule implements IPluginModule {
 		var metadataPacket = pmanager.createPacket(PacketType.Play.Server.ENTITY_METADATA);
 		metadataPacket.getIntegers().write(0, glowed.getEntityId());
 		var dataValues = new ArrayList<WrappedDataValue>(2);
-		var serializer = WrappedDataWatcher.Registry.get(Byte.class);
+		var serializer = WrappedDataWatcher.Registry.get((Type)Byte.class);
 		dataValues.add(new WrappedDataValue(0, serializer,(byte)(makeMaskFor(glowed) | (isGlowed ? entityMetadataGlowMask : 0x0)))); // Invisible + Glowing effect
 		metadataPacket.getDataValueCollectionModifier().write(0, dataValues);
 		pmanager.sendServerPacket(viewer, metadataPacket);
@@ -122,7 +125,7 @@ public class EntityGlowModule implements IPluginModule {
 	private byte makeMaskFor(Entity entity) {
 		var value = (byte)0x0;
 		// Values from https://wiki.vg/Entity_metadata#Entity
-		value |= entity.isVisualFire() ? 0x01 : 0x0; // is on fire
+		value |= entity.getVisualFire() == TriState.TRUE ? 0x01 : 0x0; // is on fire
 		value |= entity.isSneaking() ? 0x02 : 0x0; // is crouching
 		// 0x04 is unused (previously riding)
 		if (entity instanceof Player player) {

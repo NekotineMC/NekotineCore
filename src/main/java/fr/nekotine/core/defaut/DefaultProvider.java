@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import javax.annotation.Nullable;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -16,14 +14,14 @@ public class DefaultProvider implements IDefaultProvider {
 	private Map<Class<?>,Supplier<?>> suppliers = new HashMap<>();
 	
 	@Override
-	public <T> @Nullable T get(Class<T> clazz) {
+	public <T> T get(Class<T> clazz) {
 		var sup = getSupplier(clazz);
 		return sup != null ? sup.get() : null;
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> @Nullable Supplier<T> getSupplier(Class<T> clazz) {
+	public <T> Supplier<T> getSupplier(Class<T> clazz) {
 		if (!suppliers.containsKey(clazz) && !Modifier.isAbstract(clazz.getModifiers())) {
 			try {
 				var ctor = clazz.getConstructor();

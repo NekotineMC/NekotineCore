@@ -5,16 +5,15 @@ import java.util.LinkedList;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.comphenix.protocol.wrappers.EnumWrappers;
-import com.comphenix.protocol.wrappers.WrappedChatComponent;
-import com.comphenix.protocol.wrappers.WrappedTeamParameters;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.utility.MinecraftReflection;
+import com.comphenix.protocol.wrappers.EnumWrappers;
+import com.comphenix.protocol.wrappers.WrappedChatComponent;
+import com.comphenix.protocol.wrappers.WrappedTeamParameters;
 
 public class ScoreboardTeamCreatePacketWrapper {
 
@@ -39,7 +38,7 @@ public class ScoreboardTeamCreatePacketWrapper {
 		packet.getStrings().write(0, teamName);
 	}
 	
-	public void setColor(EnumWrappers.ChatFormatting color) {
+	public void setColor(EnumWrappers. ChatFormatting color) {
 		var param = WrappedTeamParameters.newBuilder()
 				.displayName(WrappedChatComponent.fromText(color.name()))
 				.prefix(WrappedChatComponent.fromText(""))

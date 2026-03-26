@@ -4,10 +4,9 @@ import java.util.Collection;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 
-import io.papermc.paper.registry.RegistryAccess;
-import io.papermc.paper.registry.RegistryKey;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.attribute.Attributable;
@@ -20,14 +19,15 @@ import org.bukkit.entity.Llama;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Slime;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.PacketContainer;
 
-import fr.nekotine.core.ioc.Ioc;
+import fr.nekotine.core.logging.NekotineLogger;
+import io.papermc.paper.registry.RegistryAccess;
+import io.papermc.paper.registry.RegistryKey;
 
 public class EntityUtil {
 	/**
@@ -112,14 +112,10 @@ public class EntityUtil {
 		EntityType type = entity.getType();
 		if (entity instanceof Llama)
 			type = EntityType.LLAMA;
-
 		try {
-			sound = Sound.valueOf("ENTITY_" + type + "_HURT");
+			sound = RegistryAccess.registryAccess().getRegistry(RegistryKey.SOUND_EVENT).get(NamespacedKey.minecraft("entity."+type+".hurt"));
 		} catch (IllegalArgumentException e) {
-			Ioc.resolve(JavaPlugin.class).getLogger().log(Level.SEVERE,
-					"[NekotineCore] > [UtilEntity] > [PlayDamageSound] impossible d'obtenir le son pour "
-							+ entity.getType(),
-					(Throwable) e);
+			new NekotineLogger(EntityUtil.class).log(Level.SEVERE, "[PlayDamageSound] impossible d'obtenir le son pour "+ type, e);
 		}
 
 		entity.getWorld().playSound(entity.getLocation(), sound, 1.5f + (float) (0.5f * Math.random()),
@@ -201,6 +197,7 @@ public class EntityUtil {
 	public static void fakeDamage(LivingEntity target, Iterable<Player> observers) {
 		PacketContainer packet = new PacketContainer(PacketType.Play.Server.HURT_ANIMATION);
 		packet.getIntegers().write(0, target.getEntityId());
+		packet.getIntegers().write(1, 1); // Animation 1 = TAKE_DAMAGE
 		var pmanager = ProtocolLibrary.getProtocolManager();
 		for (var player : observers) {
 			pmanager.sendServerPacket(player, packet);
@@ -210,6 +207,7 @@ public class EntityUtil {
 	public static void fakeDamage(LivingEntity target) {
 		PacketContainer packet = new PacketContainer(PacketType.Play.Server.HURT_ANIMATION);
 		packet.getIntegers().write(0, target.getEntityId());
+		packet.getIntegers().write(1, 1); // Animation 1 = TAKE_DAMAGE
 		var pmanager = ProtocolLibrary.getProtocolManager();
 		pmanager.broadcastServerPacket(packet);
 	}

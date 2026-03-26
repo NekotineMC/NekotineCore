@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedList;
 
-import javax.annotation.Nullable;
-
 import org.apache.commons.lang3.NotImplementedException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -60,7 +58,7 @@ public class MapModule implements IMapModule {
 	}
 
 	@Override
-	public <T> @Nullable T getContent(MapMetadata metadata, Class<T> contentType) {
+	public <T> T getContent(MapMetadata metadata, Class<T> contentType) {
 		return getContent(metadata.getName(), contentType);
 	}
 
@@ -70,7 +68,7 @@ public class MapModule implements IMapModule {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private <T> @Nullable T getContent(String mapName, Class<T> contentType) {
+	private <T> T getContent(String mapName, Class<T> contentType) {
 		if (!ConfigurationSerializable.class.isAssignableFrom(contentType)) {
 			throw new NotImplementedException(
 					String.format("Cette implémentation du MapModule (%s) ne peut deserializer que des ConfigrationSerializable",

@@ -297,7 +297,7 @@ public enum DamageFunction {
 			private static final Material ATTACK_COOLDOWN_MATERIAL = Material.BARRIER;
 			private static final int ATTACK_COOLDOWN_TICK = 10;
 			private static final int NO_DAMAGE_DURATION_TICK = 20;
-			private static final DamageCause[] DAMAGE_CAUSE_WITH_INVINCIBILITY_FRAME = {DamageCause.CONTACT, DamageCause.DRAGON_BREATH, DamageCause.FIRE, DamageCause.HOT_FLOOR, DamageCause.LAVA, DamageCause.SUFFOCATION};
+			private static final DamageCause[] DAMAGE_CAUSE_WITH_INVINCIBILITY_FRAME = {DamageCause.CONTACT, DamageCause.FIRE, DamageCause.HOT_FLOOR, DamageCause.LAVA, DamageCause.SUFFOCATION};
 
 			private boolean Contains(DamageCause[] causes, DamageCause cause) {
 				for(int i=0 ; i<causes.length ; i++) {

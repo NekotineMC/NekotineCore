@@ -13,12 +13,12 @@ public class NekotineLogger extends Logger{
 	private final String prefix;
 
 	public NekotineLogger(Class<?> clazz) {
+		this(clazz,nameFromClass(clazz));
+	}
+	
+	public NekotineLogger(Class<?> clazz, String name) {
 		super(loggerName(clazz), null);
-		var pre = clazz.getTypeName();
-		if (!IPluginModule.class.isAssignableFrom(clazz)) {
-			pre = clazz.getSimpleName();
-		}
-		prefix = '[' + pre + "] > ";
+		prefix = '('+ name + ") > ";
 		setParent(Ioc.resolve(Logger.class));
 	}
 	
@@ -33,6 +33,14 @@ public class NekotineLogger extends Logger{
 			return "NekotineCore";
 		}
 		return Ioc.resolve(JavaPlugin.class).getName();
+	}
+	
+	private static String nameFromClass(Class<?> clazz) {
+		if (IPluginModule.class.isAssignableFrom(clazz)) {
+			return clazz.getTypeName();
+		}else {
+			return clazz.getSimpleName();
+		}
 	}
 
 }
