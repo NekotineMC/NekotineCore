@@ -10,6 +10,7 @@
 /.idea
 .envrc
 .direnv/
+.project
 
 # Compiled class file
 *.class
