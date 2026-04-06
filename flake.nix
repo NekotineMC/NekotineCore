@@ -13,13 +13,14 @@
     flake-utils,
     ...
   }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let
+    flake-utils.lib.eachDefaultSystem (
+      system: let
         pkgs = nixpkgs.legacyPackages.${system};
       in {
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
             gradle
+            jdt-language-server
           ];
         };
       }
