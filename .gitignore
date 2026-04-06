@@ -8,6 +8,8 @@
 /.settings/
 /bin/
 /.idea
+.envrc
+.direnv/
 
 # Compiled class file
 *.class
