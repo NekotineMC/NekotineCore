@@ -20,11 +20,10 @@ import com.destroystokyo.paper.event.player.PlayerReadyArrowEvent;
 
 import fr.nekotine.core.ioc.Ioc;
 import fr.nekotine.core.util.ItemStackUtil;
+import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.text.Component;
 
 public class Usable {
-	
-	private static final Enchantment GLOW_ENCHANT = Enchantment.UNBREAKING;
 	
 	@NotNull
 	private ItemStack item;
@@ -81,17 +80,24 @@ public class Usable {
 	}
 	
 	/**
-	 * Si l'objet doit briller (SI L'OBJET A DEJA UN ENCHANTEMENT IL EST IMPOSSIBLE DE CACHER CE BRILLEMENT)
+	 * Si l'objet doit briller
 	 * @param glow
 	 */
 	public @NotNull Usable forceEnchantGlint(boolean glow) {
-		if(glow) {
-			item.addUnsafeEnchantment(GLOW_ENCHANT, 1);
-		}else {
-			item.removeEnchantment(GLOW_ENCHANT);
-		}
-		return null;
+		item.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, glow);
+		return this;
 	}
+	
+	/**
+	 * Définit le model pour l'item a partir d'un Material
+	 * @param material
+	 * @return l'usable
+	 */
+	public Usable setDisplayMaterial(Material material) {
+		item.setData(DataComponentTypes.ITEM_MODEL, material.key());
+		return this;
+	}
+	
 	/**
 	 * Ajoute un enchantement
 	 * @param enchantement
@@ -167,18 +173,7 @@ public class Usable {
 	 * @param lore
 	 */
 	public @NotNull Usable setLore(List<Component> lore) {
-		ItemMeta meta = item.getItemMeta();
-		meta.lore(lore);
-		item.setItemMeta(meta);
-		return this;
-	}
-	
-	/**
-	 * Change le matériau de l'objet
-	 * @param material
-	 */
-	public @NotNull Usable setMaterial(Material material) {
-		item.setType(material);
+		item.lore(lore);
 		return this;
 	}
 	

@@ -1,5 +1,6 @@
 package fr.nekotine.core.util;
 
+import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -44,6 +45,16 @@ public class SpatialUtil {
 		}
 	}
 	
+	public static final void disk2DDensity(double radius, double blockDensity, BiConsumer<Double, Double> consumer) {
+		var rand = new Random();
+		var dens = Math.PI * radius * radius * blockDensity;
+		for (var step = 0; step <= dens; step++ ) {
+			var dist = Math.sqrt(rand.nextDouble());
+			var angle = radius * rand.nextDouble();
+			consumer.accept(Math.cos(angle) * dist, Math.sin(angle) * dist);
+		}
+	}
+	
 	//
 	
 	public static final void sphere3DDensity(double radius, double blockDensity, SphereAlgorithm algorithm, TriConsumer<Double, Double, Double> consumer) {
@@ -85,6 +96,14 @@ public class SpatialUtil {
 			consumer.accept(x * radius, y * radius, z * radius);
 		}
 	}
+	
+	/**
+	 * While Sphere is only the surface, ball also takes the inside
+	 * @param radius
+	 * @param blockDensity
+	 * @param algorithm
+	 * @param consumer
+	 */
 	public static final void ball3DDensity(double radius, double blockDensity, SphereAlgorithm algorithm, TriConsumer<Double, Double, Double> consumer) {
 		switch(algorithm) {
 		case UNIFORM:

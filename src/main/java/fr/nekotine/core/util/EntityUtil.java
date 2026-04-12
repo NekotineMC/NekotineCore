@@ -51,6 +51,10 @@ public class EntityUtil {
 	public static boolean IsOnGround(Entity entity) {
 		return entity.isOnGround();
 	}
+	
+	public static boolean IsOnGround(Player player) {
+		return player.getLocation().subtract(0, 0.1, 0).getBlock().getType().isSolid();
+	}
 
 	/**
 	 * 

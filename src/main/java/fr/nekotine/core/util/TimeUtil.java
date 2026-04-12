@@ -1,5 +1,7 @@
 package fr.nekotine.core.util;
 
+import java.time.Duration;
+
 public class TimeUtil {
 	
 	/**
@@ -9,5 +11,9 @@ public class TimeUtil {
 	 */
 	public static long elapsedFromMillis(long started) {
 		return System.currentTimeMillis() - started;
+	}
+	
+	public static Duration fromSeconds(double seconds) {
+		return Duration.ofMillis((long)(seconds*1000));
 	}
 }

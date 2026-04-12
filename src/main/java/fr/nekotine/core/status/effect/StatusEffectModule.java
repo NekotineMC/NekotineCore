@@ -29,6 +29,14 @@ public class StatusEffectModule implements IPluginModule, Listener{
 	@Override
 	public void unload() {
 		EventUtil.unregister(this);
+		for (var entity : effectMap.keySet()) {
+			var entityMap = effectMap.get(entity);
+			for (var effectType : entityMap.keySet()) {
+				effectType.removeEffect(entity);
+			}
+			entityMap.clear();
+		}
+		effectMap.clear();
 	}
 	
 	public void addEffect(LivingEntity entity, StatusEffect effect) {

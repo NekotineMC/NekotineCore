@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import fr.nekotine.core.ioc.Ioc;
 import org.bukkit.Material;
@@ -54,6 +55,8 @@ public class ItemStackBuilder {
 	private String skullUrl;
 	
 	private double attack_damage = 0;
+	
+	private Consumer<ItemStack> postApply;
 	
 	public ItemStackBuilder(Material material) {
 		this.material = material;
@@ -171,6 +174,11 @@ public class ItemStackBuilder {
 		return this;
 	}
 	
+	public ItemStackBuilder postApply(Consumer<ItemStack> action) {
+		postApply = action;
+		return this;
+	}
+	
 	/**
 	 * Créée une nouvelle instance d'ItemStack
 	 * @return
@@ -184,7 +192,9 @@ public class ItemStackBuilder {
 		for (var ench : enchantments.entrySet()) {
 			meta.addEnchant(ench.getKey(), ench.getValue(), true);
 		}
-		applyOldPvp();
+		if (oldPvp) {
+			applyOldPvp();
+		}
 		for (var attr : attributeModifiers) {
 			meta.addAttributeModifier(attr.a(), attr.b());
 		}
@@ -198,6 +208,7 @@ public class ItemStackBuilder {
 			new AttributeModifier(new NamespacedKey(Ioc.resolve(JavaPlugin.class), "generic.attackDamage"), attack_damage, Operation.ADD_NUMBER));
 		}
 		itemStack.setItemMeta(meta);
+		postApply.accept(itemStack);
 		if(skullUrl!=null) {
 			ItemStackUtil.skull(itemStack, skullUrl);
 		}

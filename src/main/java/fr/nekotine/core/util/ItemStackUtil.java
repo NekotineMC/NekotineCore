@@ -26,6 +26,7 @@ import org.jetbrains.annotations.NotNull;
 import com.destroystokyo.paper.profile.PlayerProfile;
 
 import fr.nekotine.core.ioc.Ioc;
+import fr.nekotine.core.logging.NekotineLogger;
 import net.kyori.adventure.text.Component;
 
 public class ItemStackUtil {
@@ -162,20 +163,10 @@ public class ItemStackUtil {
 	}
 	
 	public static void skull(ItemStack item, String uri) {
-		uri = "http://textures.minecraft.net/texture/"+uri;
-		try {
-			URL url = new URI(uri).toURL();
 			if (item.getItemMeta() instanceof SkullMeta skullMeta) {
-				var profile = Bukkit.createProfile(UUID.randomUUID());
-				var texture = profile.getTextures();
-				texture.setSkin(url);
-				profile.setTextures(texture);
-				skullMeta.setPlayerProfile(profile);
+				skullMeta.setPlayerProfile(PlayerProfileUtil.makeProfileFromMinecraftNetUriPart(uri));
 				item.setItemMeta(skullMeta);
 			}
-		} catch (MalformedURLException | URISyntaxException e) {
-			e.printStackTrace();
-		}
 	}
 	
 	/// MAKE SHORTCUTS

@@ -1,12 +1,19 @@
 package fr.nekotine.core.util;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.Nullable;
 
 import fr.nekotine.core.snapshot.InventorySnapshot;
 import fr.nekotine.core.snapshot.PlayerInventorySnapshot;
@@ -170,5 +177,37 @@ public class InventoryUtil {
 		}else {
 			inventory.addItem(newItem);	
 		}
-	}	
+	}
+	
+	public static void removeIf(Inventory inventory, Predicate<ItemStack> predicate) {
+		Arrays.stream(inventory.getContents()).filter(i -> i != null).filter(predicate).forEach(i -> inventory.removeItem(i));
+	}
+	
+	public static boolean containTaggerItem(Inventory inventory, NamespacedKey key) {
+		return Arrays.stream(inventory.getContents()).anyMatch(i -> i.getPersistentDataContainer().getKeys().contains(key));
+	}
+	
+	public static boolean containTaggerItem(Inventory inventory, NamespacedKey key, String value) {
+		return Arrays.stream(inventory.getContents()).anyMatch(i -> i.getPersistentDataContainer().get(key, PersistentDataType.STRING) == value);
+	}
+	
+	public static boolean containTaggerItem(Inventory inventory, NamespacedKey key, int value) {
+		return Arrays.stream(inventory.getContents()).anyMatch(i -> i.getPersistentDataContainer().get(key, PersistentDataType.INTEGER) == value);
+	}
+	
+	public static Set<@Nullable ItemStack> taggedItems(Inventory inventory, NamespacedKey key) {
+		return Arrays.stream(inventory.getContents()).filter(i -> i.getPersistentDataContainer().getKeys().contains(key)).collect(Collectors.toUnmodifiableSet());
+	}
+	
+	public static Set<@Nullable ItemStack> taggedItems(Inventory inventory, NamespacedKey key, String value) {
+		return Arrays.stream(inventory.getContents()).filter(i -> i.getPersistentDataContainer().get(key, PersistentDataType.STRING) == value).collect(Collectors.toUnmodifiableSet());
+	}
+	
+	public static Set<@Nullable ItemStack> taggedItems(Inventory inventory, NamespacedKey key, int value) {
+		return Arrays.stream(inventory.getContents()).filter(i -> i.getPersistentDataContainer().get(key, PersistentDataType.INTEGER) == value).collect(Collectors.toUnmodifiableSet());
+	}
+	
+	public static boolean anyMatch(Inventory inventory, Predicate<ItemStack> predicate) {
+		return Arrays.stream(inventory.getContents()).anyMatch(predicate);
+	}
 }
