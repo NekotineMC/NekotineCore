@@ -208,7 +208,9 @@ public class ItemStackBuilder {
 			new AttributeModifier(new NamespacedKey(Ioc.resolve(JavaPlugin.class), "generic.attackDamage"), attack_damage, Operation.ADD_NUMBER));
 		}
 		itemStack.setItemMeta(meta);
-		postApply.accept(itemStack);
+		if (postApply != null) {
+			postApply.accept(itemStack);
+		}
 		if(skullUrl!=null) {
 			ItemStackUtil.skull(itemStack, skullUrl);
 		}
