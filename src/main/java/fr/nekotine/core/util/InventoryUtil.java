@@ -184,27 +184,27 @@ public class InventoryUtil {
 	}
 	
 	public static boolean containTaggerItem(Inventory inventory, NamespacedKey key) {
-		return Arrays.stream(inventory.getContents()).anyMatch(i -> i.getPersistentDataContainer().getKeys().contains(key));
+		return Arrays.stream(inventory.getContents()).anyMatch(i -> i != null && i.getPersistentDataContainer().getKeys().contains(key));
 	}
 	
 	public static boolean containTaggerItem(Inventory inventory, NamespacedKey key, String value) {
-		return Arrays.stream(inventory.getContents()).anyMatch(i -> i.getPersistentDataContainer().get(key, PersistentDataType.STRING) == value);
+		return Arrays.stream(inventory.getContents()).anyMatch(i -> i != null && i.getPersistentDataContainer().get(key, PersistentDataType.STRING) == value);
 	}
 	
 	public static boolean containTaggerItem(Inventory inventory, NamespacedKey key, int value) {
-		return Arrays.stream(inventory.getContents()).anyMatch(i -> i.getPersistentDataContainer().get(key, PersistentDataType.INTEGER) == value);
+		return Arrays.stream(inventory.getContents()).anyMatch(i -> i != null && i.getPersistentDataContainer().get(key, PersistentDataType.INTEGER) == value);
 	}
 	
 	public static Set<@Nullable ItemStack> taggedItems(Inventory inventory, NamespacedKey key) {
-		return Arrays.stream(inventory.getContents()).filter(i -> i.getPersistentDataContainer().getKeys().contains(key)).collect(Collectors.toUnmodifiableSet());
+		return Arrays.stream(inventory.getContents()).filter(i -> i != null && i.getPersistentDataContainer().getKeys().contains(key)).collect(Collectors.toUnmodifiableSet());
 	}
 	
 	public static Set<@Nullable ItemStack> taggedItems(Inventory inventory, NamespacedKey key, String value) {
-		return Arrays.stream(inventory.getContents()).filter(i -> i.getPersistentDataContainer().get(key, PersistentDataType.STRING) == value).collect(Collectors.toUnmodifiableSet());
+		return Arrays.stream(inventory.getContents()).filter(i -> i != null && i.getPersistentDataContainer().get(key, PersistentDataType.STRING) == value).collect(Collectors.toUnmodifiableSet());
 	}
 	
 	public static Set<@Nullable ItemStack> taggedItems(Inventory inventory, NamespacedKey key, int value) {
-		return Arrays.stream(inventory.getContents()).filter(i -> i.getPersistentDataContainer().get(key, PersistentDataType.INTEGER) == value).collect(Collectors.toUnmodifiableSet());
+		return Arrays.stream(inventory.getContents()).filter(i -> i != null && i.getPersistentDataContainer().get(key, PersistentDataType.INTEGER) == value).collect(Collectors.toUnmodifiableSet());
 	}
 	
 	public static boolean anyMatch(Inventory inventory, Predicate<ItemStack> predicate) {
