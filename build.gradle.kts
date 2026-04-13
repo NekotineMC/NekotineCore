@@ -38,12 +38,12 @@ tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
 tasks.named<Test>("test") {
     useJUnitPlatform()
 }
-
+/*
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(25))
     }
-}
+}*/
 
 // make Shadowjar the default output and remove relocated dependencies
 configurations {

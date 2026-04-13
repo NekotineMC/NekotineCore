@@ -263,10 +263,12 @@ public class SpatialUtil {
 		var scale = new Vector3f((float)(max.getX()-min.getX()), (float)(max.getY()-min.getY()), (float)(max.getZ()-min.getZ()));
 		var transform = new Transformation(new Vector3f(), new AxisAngle4f(), scale, new AxisAngle4f());
 		var display = (BlockDisplay)world.spawnEntity(min.toLocation(world), EntityType.BLOCK_DISPLAY, CreatureSpawnEvent.SpawnReason.CUSTOM, b -> {
-			b.setPersistent(false);
+			if (b instanceof BlockDisplay dis) {
+				b.setPersistent(false);
+				dis.setBlock(data);
+				dis.setTransformation(transform);
+			}
 		});
-		display.setBlock(data);
-		display.setTransformation(transform);
 		return display;
 	}
 	
