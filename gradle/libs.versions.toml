@@ -1,0 +1,18 @@
+[versions]
+paper = "1.21.11-rc3-R0.1-SNAPSHOT"
+protocollib = "5.4.0"
+fawe = "2.15.1-SNAPSHOT"
+commandapi = "11.1.1-SNAPSHOT"
+junit = "5.14.4-SNAPSHOT"
+shadow = "9.4.1"
+
+[libraries]
+paper-api = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper" }
+protocollib = { group = "net.dmulloy2", name = "ProtocolLib", version.ref = "protocollib" }
+fawe-core = { group = "com.fastasyncworldedit", name = "FastAsyncWorldEdit-Core", version.ref = "fawe" }
+fawe-bukkit = { group = "com.fastasyncworldedit", name = "FastAsyncWorldEdit-Bukkit", version.ref = "fawe" }
+commandapi = { group = "dev.jorel", name = "commandapi-paper-shade", version.ref = "commandapi" }
+junit-jupiter-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "junit" }
+
+[plugins]
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
