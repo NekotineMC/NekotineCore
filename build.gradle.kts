@@ -1,6 +1,6 @@
 plugins {
     java
-    id("com.gradleup.shadow") version "+"
+    alias(libs.plugins.shadow)
 }
 
 group = "fr.nekotine"
@@ -10,26 +10,36 @@ description = "NekotineCore"
 repositories {
     mavenLocal()
     mavenCentral()
-    // PAPERMC
     maven("https://repo.papermc.io/repository/maven-public/"){
     	name = "papermc"
     }
-    // CommandAPI
     maven ("https://repo.codemc.org/repository/maven-public/"){
     	name = "commandapi"
     }
 }
 
 dependencies {
-	compileOnly("io.papermc.paper:paper-api:1.21.11+")
-	compileOnly("net.dmulloy2:ProtocolLib:+")
-	compileOnly("com.fastasyncworldedit:FastAsyncWorldEdit-Core:+")
-	compileOnly("com.fastasyncworldedit:FastAsyncWorldEdit-Bukkit:+")
-	implementation("dev.jorel:commandapi-paper-shade:11.1+")
-	testImplementation("org.junit.jupiter:junit-jupiter-engine:5.+")
-	testImplementation("io.papermc.paper:paper-api:1.21.11+")
+	compileOnly(libs.paper.api)
+	compileOnly(libs.protocollib)
+	compileOnly(libs.fawe.core)
+	compileOnly(libs.fawe.bukkit)
+	implementation(libs.commandapi)
+	testImplementation(libs.junit.jupiter.engine)
+	testImplementation(libs.paper.api)
 }
 
+dependencyLocking {
+    lockAllConfigurations()
+}
+
+
+tasks.withType<JavaCompile> {
+    options.encoding = "UTF-8"
+}
+
+tasks.withType<ProcessResources> {
+    filteringCharset = "UTF-8"
+}
 
 tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
     relocate("dev.jorel.commandapi", "fr.nekotine.core.commandapi")
@@ -38,14 +48,14 @@ tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
 tasks.named<Test>("test") {
     useJUnitPlatform()
 }
-/*
+
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(25))
     }
-}*/
+}
 
-// make Shadowjar the default output and remove relocated dependencies
+// make shadowJar the default output and remove relocated dependencies
 configurations {
   named("apiElements") {
     outgoing.artifacts.clear()
@@ -61,5 +71,5 @@ configurations {
   }
 }
 
-// CONFIGURATION
+// Configuration
 defaultTasks("shadowJar")
