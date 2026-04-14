@@ -183,15 +183,15 @@ public class InventoryUtil {
 		Arrays.stream(inventory.getContents()).filter(i -> i != null).filter(predicate).forEach(i -> inventory.removeItem(i));
 	}
 	
-	public static boolean containTaggerItem(Inventory inventory, NamespacedKey key) {
+	public static boolean containTaggedItem(Inventory inventory, NamespacedKey key) {
 		return Arrays.stream(inventory.getContents()).anyMatch(i -> i != null && i.getPersistentDataContainer().getKeys().contains(key));
 	}
 	
-	public static boolean containTaggerItem(Inventory inventory, NamespacedKey key, String value) {
+	public static boolean containTaggedItem(Inventory inventory, NamespacedKey key, String value) {
 		return Arrays.stream(inventory.getContents()).anyMatch(i -> i != null && i.getPersistentDataContainer().get(key, PersistentDataType.STRING) == value);
 	}
 	
-	public static boolean containTaggerItem(Inventory inventory, NamespacedKey key, int value) {
+	public static boolean containTaggedItem(Inventory inventory, NamespacedKey key, int value) {
 		return Arrays.stream(inventory.getContents()).anyMatch(i -> i != null && i.getPersistentDataContainer().get(key, PersistentDataType.INTEGER) == value);
 	}
 	
