@@ -200,7 +200,7 @@ public class EntityUtil {
 	public static void fakeDamage(LivingEntity target, Iterable<Player> observers) {
 		PacketContainer packet = new PacketContainer(PacketType.Play.Server.HURT_ANIMATION);
 		packet.getIntegers().write(0, target.getEntityId());
-		packet.getIntegers().write(1, 1); // Animation 1 = TAKE_DAMAGE
+		//packet.getFloat().write(0, 0f); //packet.getIntegers().write(1, 1); // Animation 1 = TAKE_DAMAGE
 		var pmanager = ProtocolLibrary.getProtocolManager();
 		for (var player : observers) {
 			pmanager.sendServerPacket(player, packet);
@@ -210,7 +210,7 @@ public class EntityUtil {
 	public static void fakeDamage(LivingEntity target) {
 		PacketContainer packet = new PacketContainer(PacketType.Play.Server.HURT_ANIMATION);
 		packet.getIntegers().write(0, target.getEntityId());
-		packet.getIntegers().write(1, 1); // Animation 1 = TAKE_DAMAGE
+		//packet.getFloat().write(0, 0f);
 		var pmanager = ProtocolLibrary.getProtocolManager();
 		pmanager.broadcastServerPacket(packet);
 	}
