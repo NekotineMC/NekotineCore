@@ -3,14 +3,13 @@ package fr.nekotine.core.snapshot;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.potion.PotionEffect;
 
-public class PotionEffectConsumerSnapshot implements Snapshot<LivingEntity>{
+public class PotionEffectConsumerSnapshot implements Snapshot<LivingEntity> {
 
 	List<Map<String, Object>> serializedeffects;
-	
+
 	@Override
 	public Snapshot<LivingEntity> snapshot(LivingEntity item) {
 		deepSnapshot(item);
@@ -37,5 +36,4 @@ public class PotionEffectConsumerSnapshot implements Snapshot<LivingEntity>{
 			}
 		}
 	}
-
 }

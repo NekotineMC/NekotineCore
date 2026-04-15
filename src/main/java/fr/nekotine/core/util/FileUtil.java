@@ -11,11 +11,11 @@ public class FileUtil {
 	public static String fileNameWithoutExtension(File file) {
 		var name = file.getName();
 		if (name.contains(".")) {
-			return name.substring(0,name.lastIndexOf('.'));
+			return name.substring(0, name.lastIndexOf('.'));
 		}
 		return name;
 	}
-	
+
 	public static String getExtension(File file) {
 		var name = file.getName();
 		if (name.contains(".")) {
@@ -23,16 +23,15 @@ public class FileUtil {
 		}
 		return "";
 	}
-	
+
 	public static void createNewFile(File file, InputStream input) throws FileNotFoundException, IOException {
 		var parFile = file.getParentFile();
-		if(parFile!=null)
+		if (parFile != null)
 			parFile.mkdirs();
-		if(file.createNewFile()) {
+		if (file.createNewFile()) {
 			var output = new FileOutputStream(file);
 			input.transferTo(output);
 			output.close();
 		}
 	}
-	
 }

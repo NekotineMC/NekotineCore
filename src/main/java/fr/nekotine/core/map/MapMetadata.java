@@ -2,41 +2,40 @@ package fr.nekotine.core.map;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
-
 @SerializableAs("MapMetadata")
-public class MapMetadata implements ConfigurationSerializable{
-	
+public class MapMetadata implements ConfigurationSerializable {
+
 	private @Nonnull String name = "unnamed";
-	
+
 	private @Nullable Component displayName;
-	
+
 	private @Nullable Component description;
-	
+
 	private @Nullable Material icon;
-	
-	public MapMetadata() {}
-	
+
+	public MapMetadata() {
+	}
+
 	public MapMetadata(@Nonnull String name) {
 		this.name = name;
 	}
-	
-	public MapMetadata(@Nonnull String name, @Nullable Component displayName, @Nullable Component description, @Nullable Material icon) {
+
+	public MapMetadata(@Nonnull String name, @Nullable Component displayName, @Nullable Component description,
+			@Nullable Material icon) {
 		this.name = name;
 		this.displayName = displayName;
 		this.description = description;
 		this.icon = icon;
 	}
-	
+
 	@Override
 	public @Nonnull Map<String, Object> serialize() {
 		Map<String, Object> map = new HashMap<>();
@@ -54,10 +53,14 @@ public class MapMetadata implements ConfigurationSerializable{
 	}
 
 	public static MapMetadata deserialize(Map<String, Object> map) throws ClassNotFoundException {
-		return new MapMetadata((String)map.get("name"),
-				map.containsKey("displayName")?JSONComponentSerializer.json().deserialize((String)map.get("displayName")):Component.text(""),
-				map.containsKey("description")?JSONComponentSerializer.json().deserialize((String)map.get("description")):Component.text(""),
-				map.containsKey("icon")?Material.valueOf((String) map.get("icon")):null);
+		return new MapMetadata((String) map.get("name"),
+				map.containsKey("displayName")
+						? JSONComponentSerializer.json().deserialize((String) map.get("displayName"))
+						: Component.text(""),
+				map.containsKey("description")
+						? JSONComponentSerializer.json().deserialize((String) map.get("description"))
+						: Component.text(""),
+				map.containsKey("icon") ? Material.valueOf((String) map.get("icon")) : null);
 	}
 
 	public @Nullable Component getDisplayName() {
@@ -83,13 +86,12 @@ public class MapMetadata implements ConfigurationSerializable{
 	public void setIcon(@Nullable Material icon) {
 		this.icon = icon;
 	}
-	
+
 	public @Nonnull String getName() {
 		return name;
 	}
-	
+
 	public void setName(@Nonnull String name) {
 		this.name = name;
 	}
-	
 }

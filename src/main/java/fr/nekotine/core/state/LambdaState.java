@@ -11,5 +11,4 @@ public record LambdaState(Runnable setupLambda, Runnable teardownLambda) impleme
 	public void teardown() {
 		teardownLambda.run();
 	}
-	
 }

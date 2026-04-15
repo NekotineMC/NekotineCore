@@ -5,5 +5,4 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 public interface ClickableMenuComponent {
 
 	public void onClick(InventoryClickEvent event);
-	
 }

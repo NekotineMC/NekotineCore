@@ -1,25 +1,25 @@
 package fr.nekotine.core.itemcharge;
 
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.ItemStack;
-
 import fr.nekotine.core.charge.ICharge;
 import fr.nekotine.core.util.CustomAction;
 import fr.nekotine.core.util.EventUtil;
 import fr.nekotine.core.util.GearUtil;
 import fr.nekotine.core.util.TimeUtil;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
 
-public class ItemCharge implements ICharge{
-	
-	//D�lai maximal entre deux appel d'Interract Event afin de constater la fin de la charge
+public class ItemCharge implements ICharge {
+
+	// D�lai maximal entre deux appel d'Interract Event afin de constater la fin de
+	// la charge
 	private final long RELEASE_DELAY_MS = 350;
-	
+
 	private boolean released;
 	private long lastFired;
 	//
-	
+
 	private final ItemChargeModule swordChargeManager;
 	private final Player user;
 	private final String chargeName;
@@ -32,9 +32,10 @@ public class ItemCharge implements ICharge{
 	private final boolean bindToItem;
 	private final ItemStack bindItem;
 	private final IItemCharge iSwordCharge;
-	
-	public ItemCharge(ItemChargeModule swordChargeManager, Player user, String chargeName, long duration, boolean activated, boolean displayOnExpBar, boolean withAudio, long audioBipNumber,
-			CustomAction action, boolean bindToItem, ItemStack bindItem, IItemCharge iSwordCharge) {
+
+	public ItemCharge(ItemChargeModule swordChargeManager, Player user, String chargeName, long duration,
+			boolean activated, boolean displayOnExpBar, boolean withAudio, long audioBipNumber, CustomAction action,
+			boolean bindToItem, ItemStack bindItem, IItemCharge iSwordCharge) {
 		this.swordChargeManager = swordChargeManager;
 		this.user = user;
 		this.chargeName = chargeName;
@@ -47,48 +48,54 @@ public class ItemCharge implements ICharge{
 		this.bindToItem = bindToItem;
 		this.bindItem = bindItem;
 		this.iSwordCharge = iSwordCharge;
-		
+
 		this.released = false;
-		
-		if(activated){
+
+		if (activated) {
 			lastFired = System.currentTimeMillis();
 			swordChargeManager.AddCharge(user, chargeName, duration, displayOnExpBar, withAudio, audioBipNumber, this);
 		}
 	}
-	
+
 	//
-	
+
 	public boolean Update() {
-		if(activated && TimeUtil.elapsedFromMillis(lastFired) > RELEASE_DELAY_MS) released = true;
-		if(activated && bindToItem && !GearUtil.HasInAnyHand(user, bindItem)) released = true;
-		
-		if(released) {
+		if (activated && TimeUtil.elapsedFromMillis(lastFired) > RELEASE_DELAY_MS)
+			released = true;
+		if (activated && bindToItem && !GearUtil.HasInAnyHand(user, bindItem))
+			released = true;
+
+		if (released) {
 			iSwordCharge.Released(user, chargeName, GetTimeLeft());
 			SetCancelled();
 			return true;
 		}
-		
+
 		return false;
 	}
-	
+
 	//
-	
+
 	@EventHandler
 	public void Action(PlayerInteractEvent e) {
-		if(released) return;
-		if(!user.equals(e.getPlayer())) return;
-		if(!EventUtil.isCustomAction(e.getAction(), action)) return;
-		if(bindToItem && !GearUtil.IsItem(bindItem, e.getItem())) return;
-		
-		if(!activated) {
+		if (released)
+			return;
+		if (!user.equals(e.getPlayer()))
+			return;
+		if (!EventUtil.isCustomAction(e.getAction(), action))
+			return;
+		if (bindToItem && !GearUtil.IsItem(bindItem, e.getItem()))
+			return;
+
+		if (!activated) {
 			activated = true;
 			swordChargeManager.AddCharge(user, chargeName, duration, displayOnExpBar, withAudio, audioBipNumber, this);
 		}
 		lastFired = System.currentTimeMillis();
 	}
-	
+
 	//
-	
+
 	@Override
 	public void Ended(String user, String chargeName) {
 		iSwordCharge.Ended(this.user, chargeName);
@@ -97,23 +104,24 @@ public class ItemCharge implements ICharge{
 	@Override
 	public void Cancelled(String user, String chargeName, long left) {
 	}
-	
+
 	//
-	
+
 	private long GetTimeLeft() {
 		return Math.max(0, swordChargeManager.GetTimeLeft(user, chargeName));
 	}
+
 	private void SetCancelled() {
 		swordChargeManager.SetCancelled(user, chargeName, true);
 	}
-	
+
 	//
-	
+
 	public IItemCharge GetInterface() {
 		return iSwordCharge;
 	}
+
 	public Player GetPlayer() {
 		return user;
 	}
-
 }

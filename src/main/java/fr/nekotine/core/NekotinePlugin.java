@@ -1,12 +1,5 @@
 package fr.nekotine.core;
 
-import java.util.function.Supplier;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
-import org.bukkit.configuration.Configuration;
-import org.bukkit.plugin.java.JavaPlugin;
-
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIPaperConfig;
 import fr.nekotine.core.defaut.DefaultProvider;
@@ -21,12 +14,17 @@ import fr.nekotine.core.reflexion.ReflexionUtil;
 import fr.nekotine.core.serialization.configurationserializable.ConfigurationSerializableAdapterSerializer;
 import fr.nekotine.core.serialization.configurationserializable.IConfigurationSerializableAdapterContainer;
 import fr.nekotine.core.util.DebugUtil;
+import java.util.function.Supplier;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
+import org.bukkit.configuration.Configuration;
+import org.bukkit.plugin.java.JavaPlugin;
 
-public class NekotinePlugin extends JavaPlugin{
-	
+public class NekotinePlugin extends JavaPlugin {
+
 	private final ComponentLogger nekotinePluginLogger = NekotineLogger.make(NekotinePlugin.class);
-	
+
 	@Override
 	public void onLoad() {
 		super.onLoad();
@@ -35,13 +33,13 @@ public class NekotinePlugin extends JavaPlugin{
 		setupConfiguration();
 		setupModules();
 	}
-	
+
 	@Override
 	public void onEnable() {
 		super.onEnable();
 		CommandAPI.onEnable();
 	}
-	
+
 	@Override
 	public void onDisable() {
 		DebugUtil.clearDebugEntities();
@@ -49,7 +47,7 @@ public class NekotinePlugin extends JavaPlugin{
 		CommandAPI.onDisable();
 		super.onDisable();
 	}
-	
+
 	private void setupIoc() {
 		var ioc = Ioc.getProvider(); // Use default IIocProvider
 		// Register some defaults
@@ -64,10 +62,10 @@ public class NekotinePlugin extends JavaPlugin{
 		// Some services
 		ioc.registerSingletonAs(MapCommandGenerator::new, IMapCommandGenerator.class);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private void setupModules() {
-    	try {
+		try {
 			var moduleManager = new ModuleManager();
 			Ioc.getProvider().registerSingleton(moduleManager);
 			// Nekotine Core Modules
@@ -76,39 +74,42 @@ public class NekotinePlugin extends JavaPlugin{
 					.collect(Collectors.toSet());
 			for (var mc : allCoreModuleClasses) {
 				if (mc.isInterface()) {
-					var impl = allCoreModuleClasses.stream().filter(c -> mc.isAssignableFrom(c) && !c.isInterface()).findAny();
+					var impl = allCoreModuleClasses.stream().filter(c -> mc.isAssignableFrom(c) && !c.isInterface())
+							.findAny();
 					if (impl.isPresent()) {
 						var implType = impl.get();
-						Ioc.getProvider().registerSingletonAs((Supplier)() -> moduleManager.get((Class<? extends IPluginModule>) implType), mc);
-						nekotinePluginLogger.info(String.format("Module %s ajouté dans l'IOC en tant que %s", implType.getSimpleName(),mc.getSimpleName()));
+						Ioc.getProvider().registerSingletonAs(
+								(Supplier) () -> moduleManager.get((Class<? extends IPluginModule>) implType), mc);
+						nekotinePluginLogger.info(String.format("Module %s ajouté dans l'IOC en tant que %s",
+								implType.getSimpleName(), mc.getSimpleName()));
 					}
-				}else {
-					Ioc.getProvider().registerSingletonAs((Supplier)() -> moduleManager.get((Class<? extends IPluginModule>) mc), mc);
+				} else {
+					Ioc.getProvider().registerSingletonAs(
+							(Supplier) () -> moduleManager.get((Class<? extends IPluginModule>) mc), mc);
 					nekotinePluginLogger.info(String.format("Module %s ajouté dans l'IOC", mc.getSimpleName()));
 				}
 			}
-		}catch(Exception e) {
+		} catch (Exception e) {
 			nekotinePluginLogger.error("Erreur lors de la mise en place des modules", e);
 		}
-    }
-    
-    @SafeVarargs
-	public final void loadModules(Class<? extends IPluginModule> ... modules) {
-    	var moduleManager = Ioc.resolve(ModuleManager.class);
-    	for (var module : modules) {
-    		moduleManager.tryLoad(module);
-    	}
-    }
-    
-    public final void mapCommandsFor(Class<?> ... mapTypes) {
+	}
+
+	@SafeVarargs
+	public final void loadModules(Class<? extends IPluginModule>... modules) {
+		var moduleManager = Ioc.resolve(ModuleManager.class);
+		for (var module : modules) {
+			moduleManager.tryLoad(module);
+		}
+	}
+
+	public final void mapCommandsFor(Class<?>... mapTypes) {
 		var gen = Ioc.resolve(IMapCommandGenerator.class);
 		gen.generateFor(mapTypes);
 		gen.register();
 	}
-    
-    private void setupConfiguration() {
+
+	private void setupConfiguration() {
 		saveDefaultConfig();
 		Ioc.getProvider().registerTransientAs(this::getConfig, Configuration.class);
 	}
-	
 }

@@ -8,5 +8,4 @@ public class NekotineCoreBootstrapper implements PluginBootstrap {
 	@Override
 	public void bootstrap(BootstrapContext context) {
 	}
-	
 }

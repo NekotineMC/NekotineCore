@@ -1,12 +1,11 @@
 package fr.nekotine.core.logging;
 
-import org.bukkit.plugin.java.JavaPlugin;
-
 import fr.nekotine.core.ioc.Ioc;
 import fr.nekotine.core.util.ReflexionUtil;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
+import org.bukkit.plugin.java.JavaPlugin;
 
-public class NekotineLogger{
+public class NekotineLogger {
 
 	private static final String loggerName(Class<?> clazz) {
 		if (clazz.getPackageName().startsWith("fr.nekotine.core")) {
@@ -17,8 +16,10 @@ public class NekotineLogger{
 			var plugin = Ioc.getProvider().tryResolve(JavaPlugin.class);
 			if (plugin.isPresent()) {
 				return plugin.get().getName();
-			}else {
-				make().warn("Le NekotineLogger est créé avant que l'Ioc ai une référence au Plugin. Le nom du plugin sera donc incorrect. Si ce logger est créé pour un JavaPlugin, vous pouvez utiliser make(JavaPlugin) pour contourner le problème.");
+			} else {
+				make().warn("Le NekotineLogger est créé avant que l'Ioc ai une référence au Plugin. Le nom du"
+						+ " plugin sera donc incorrect. Si ce logger est créé pour un JavaPlugin, vous"
+						+ " pouvez utiliser make(JavaPlugin) pour contourner le problème.");
 				return clazz.getSimpleName();
 			}
 		}
@@ -29,26 +30,25 @@ public class NekotineLogger{
 		var clazz = ReflexionUtil.getCallingClass();
 		return make(clazz);
 	}
-	
+
 	public static ComponentLogger make(Class<?> clazz) {
 		return make(clazz, clazz.getSimpleName());
 	}
-	
+
 	public static ComponentLogger make(String name) {
 		var clazz = ReflexionUtil.getCallingClass();
 		return make(clazz, name);
 	}
-	
+
 	public static ComponentLogger make(Class<?> clazz, String name) {
-		return ComponentLogger.logger(loggerName(clazz) + " > (" + name +')');
+		return ComponentLogger.logger(loggerName(clazz) + " > (" + name + ')');
 	}
-	
+
 	public static ComponentLogger make(JavaPlugin plugin) {
-		return ComponentLogger.logger(plugin.getName() + " > (" + plugin.getClass().getSimpleName() +')');
+		return ComponentLogger.logger(plugin.getName() + " > (" + plugin.getClass().getSimpleName() + ')');
 	}
-	
+
 	public static ComponentLogger make(JavaPlugin plugin, String name) {
-		return ComponentLogger.logger(plugin.getName() + " > (" + name +')');
+		return ComponentLogger.logger(plugin.getName() + " > (" + name + ')');
 	}
-	
 }

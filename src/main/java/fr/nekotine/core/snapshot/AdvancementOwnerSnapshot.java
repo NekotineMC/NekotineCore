@@ -2,18 +2,19 @@ package fr.nekotine.core.snapshot;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.bukkit.Bukkit;
 import org.bukkit.advancement.Advancement;
 import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.entity.Player;
 
-public class AdvancementOwnerSnapshot implements Snapshot<Player>{
+public class AdvancementOwnerSnapshot implements Snapshot<Player> {
 
-	private Map<Advancement, Snapshot<AdvancementProgress> > advancements;
-	
+	private Map<Advancement, Snapshot<AdvancementProgress>> advancements;
+
 	/**
-	 * @implNote c'est l'équivalent du {@link fr.nekotine.core.snapshot.PlayerStatusSnaphot#deepSnapshot deepSnapshot}
+	 * @implNote c'est l'équivalent du
+	 *           {@link fr.nekotine.core.snapshot.PlayerStatusSnaphot#deepSnapshot
+	 *           deepSnapshot}
 	 */
 	@Override
 	public Snapshot<Player> snapshot(Player item) {
@@ -41,5 +42,4 @@ public class AdvancementOwnerSnapshot implements Snapshot<Player>{
 			advancements.get(adv).patch(advProg);
 		}
 	}
-
 }

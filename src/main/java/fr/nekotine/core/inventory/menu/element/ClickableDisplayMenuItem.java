@@ -1,19 +1,17 @@
 package fr.nekotine.core.inventory.menu.element;
 
 import fr.nekotine.core.inventory.menu.ClickableMenuComponent;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-
 /**
  * MenuElement pour afficher un Component dynamique
- * 
- * @author XxGoldenbluexX
  *
+ * @author XxGoldenbluexX
  */
 public class ClickableDisplayMenuItem extends MenuElement implements ClickableMenuComponent {
 
@@ -25,7 +23,7 @@ public class ClickableDisplayMenuItem extends MenuElement implements ClickableMe
 
 	public ClickableDisplayMenuItem(ItemStack item, Supplier<Component> valueSupplier, Consumer<Player> onClick) {
 		this.item = item;
-		this.valueSupplier= valueSupplier;
+		this.valueSupplier = valueSupplier;
 		this.click = onClick;
 	}
 
@@ -39,10 +37,10 @@ public class ClickableDisplayMenuItem extends MenuElement implements ClickableMe
 
 	@Override
 	public void onClick(InventoryClickEvent event) {
-		if (click == null){
+		if (click == null) {
 			return;
 		}
-		if (!(event.getWhoClicked() instanceof Player p)){
+		if (!(event.getWhoClicked() instanceof Player p)) {
 			return;
 		}
 		var item = event.getCurrentItem();

@@ -1,31 +1,31 @@
-//package fr.nekotine.core.map;
+// package fr.nekotine.core.map;
 //
-//import fr.nekotine.core.map.annotation.GenerateCommandFor;
-//import fr.nekotine.core.map.element.MapBlockLocationElement;
-//import fr.nekotine.core.map.element.MapPositionElement;
+// import fr.nekotine.core.map.annotation.GenerateCommandFor;
+// import fr.nekotine.core.map.element.MapBlockLocationElement;
+// import fr.nekotine.core.map.element.MapPositionElement;
 //
-//public class MapTestComposite {
+// public class MapTestComposite {
 //
-//	@GenerateCommandFor
-//	private MapPositionElement position;
-//	
-//	@GenerateCommandFor("blockPositionRename")
-//	private MapBlockLocationElement blockPosition;
+// @GenerateCommandFor
+// private MapPositionElement position;
 //
-//	public MapPositionElement getPosition() {
-//		return position;
-//	}
+// @GenerateCommandFor("blockPositionRename")
+// private MapBlockLocationElement blockPosition;
 //
-//	public void setPosition(MapPositionElement position) {
-//		this.position = position;
-//	}
+// public MapPositionElement getPosition() {
+// return position;
+// }
 //
-//	public MapBlockLocationElement getBlockPosition() {
-//		return blockPosition;
-//	}
+// public void setPosition(MapPositionElement position) {
+// this.position = position;
+// }
 //
-//	public void setBlockPosition(MapBlockLocationElement blockPosition) {
-//		this.blockPosition = blockPosition;
-//	}
-//	
-//}
+// public MapBlockLocationElement getBlockPosition() {
+// return blockPosition;
+// }
+//
+// public void setBlockPosition(MapBlockLocationElement blockPosition) {
+// this.blockPosition = blockPosition;
+// }
+//
+// }

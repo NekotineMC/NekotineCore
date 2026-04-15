@@ -1,5 +1,9 @@
 package fr.nekotine.core.game.phase;
 
+import fr.nekotine.core.logging.NekotineLogger;
+import fr.nekotine.core.util.Stopwatch;
+import fr.nekotine.core.util.map.TypeHashMap;
+import fr.nekotine.core.util.map.TypeMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -7,36 +11,32 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-
-import fr.nekotine.core.logging.NekotineLogger;
-import fr.nekotine.core.util.Stopwatch;
-import fr.nekotine.core.util.map.TypeHashMap;
-import fr.nekotine.core.util.map.TypeMap;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 
-public class PhaseMachine implements IPhaseMachine{
+public class PhaseMachine implements IPhaseMachine {
 
 	private boolean loop;
-	
+
 	private final ComponentLogger logger = NekotineLogger.make();
-	
+
 	private boolean running;
-	
+
 	private final Map<Object, Object> registeredPhases = new HashMap<>();
-	
+
 	private final TypeMap runningPhases = new TypeHashMap();
-	
+
 	@SuppressWarnings("rawtypes")
 	private final List<Class<? extends IPhase>> phaseOrder = new ArrayList<>();
-	
+
 	private int currentPhaseIndex;
-	
+
 	@SuppressWarnings("rawtypes")
 	private IPhase currentPhase;
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public <P extends Phase, T extends IPhase<P>> void registerPhase(Class<T> type, Function<IPhaseMachine, T> phaseSupplier) {
+	public <P extends Phase, T extends IPhase<P>> void registerPhase(Class<T> type,
+			Function<IPhaseMachine, T> phaseSupplier) {
 		registeredPhases.put(type, phaseSupplier);
 		phaseOrder.add(type);
 	}
@@ -52,10 +52,11 @@ public class PhaseMachine implements IPhaseMachine{
 			var parents = getParents(currentPhase);
 			parents.add(currentPhase);
 			for (var p : parents) {
-				try (var watch = new Stopwatch(w -> logger.info("La phase "+p.getClass().getSimpleName()+" est setup ("+w.elapsedMillis()+" ms)"))){
+				try (var watch = new Stopwatch(w -> logger.info(
+						"La phase " + p.getClass().getSimpleName() + " est setup (" + w.elapsedMillis() + " ms)"))) {
 					p.setup(inputData);
-				}catch(Exception e) {
-					logger.error("Une erreur est survenue lors du setup de la phase "+p.getClass(), e);
+				} catch (Exception e) {
+					logger.error("Une erreur est survenue lors du setup de la phase " + p.getClass(), e);
 				}
 			}
 			return;
@@ -74,18 +75,20 @@ public class PhaseMachine implements IPhaseMachine{
 		}
 		Collections.reverse(curParents);
 		for (var p : curParents) {
-			try (var watch = new Stopwatch(w -> logger.info("La phase "+p.getClass().getSimpleName()+" est teardown ("+w.elapsedMillis()+" ms)"))){
+			try (var watch = new Stopwatch(w -> logger.info(
+					"La phase " + p.getClass().getSimpleName() + " est teardown (" + w.elapsedMillis() + " ms)"))) {
 				p.tearDown();
-			}catch(Exception e) {
-				logger.error("Une erreur est survenue lors du teardown de la phase "+p.getClass(), e);
+			} catch (Exception e) {
+				logger.error("Une erreur est survenue lors du teardown de la phase " + p.getClass(), e);
 			}
 			runningPhases.remove(p.getClass());
 		}
 		for (var p : nextParents) {
-			try (var watch = new Stopwatch(w -> logger.info("La phase "+p.getClass().getSimpleName()+" est setup ("+w.elapsedMillis()+" ms)"))){
+			try (var watch = new Stopwatch(w -> logger
+					.info("La phase " + p.getClass().getSimpleName() + " est setup (" + w.elapsedMillis() + " ms)"))) {
 				p.setup(inputData);
-			}catch(Exception e) {
-				logger.error("Une erreur est survenue lors du setup de la phase "+p.getClass(), e);
+			} catch (Exception e) {
+				logger.error("Une erreur est survenue lors du setup de la phase " + p.getClass(), e);
 				running = false;
 				return;
 			}
@@ -106,10 +109,11 @@ public class PhaseMachine implements IPhaseMachine{
 		currentPhase = null;
 		Collections.reverse(all);
 		for (var p : all) {
-			try (var watch = new Stopwatch(w -> logger.info("La phase "+p.getClass().getSimpleName()+" est teardown ("+w.elapsedMillis()+" ms)"))){
+			try (var watch = new Stopwatch(w -> logger.info(
+					"La phase " + p.getClass().getSimpleName() + " est teardown (" + w.elapsedMillis() + " ms)"))) {
 				p.tearDown();
-			}catch(Exception e) {
-				logger.error("Une erreur est survenue lors du teardown de la phase "+p.getClass(), e);
+			} catch (Exception e) {
+				logger.error("Une erreur est survenue lors du teardown de la phase " + p.getClass(), e);
 			}
 			runningPhases.remove(p.getClass());
 		}
@@ -138,14 +142,14 @@ public class PhaseMachine implements IPhaseMachine{
 		}
 		goTo(phaseOrder.get(currentPhaseIndex), outData);
 	}
-	
-	@SuppressWarnings({ "unchecked" })
+
+	@SuppressWarnings({"unchecked"})
 	private <P, T extends IPhase<P>> T makePhase(Class<T> phaseType) {
 		var oNextPhaseSupplier = registeredPhases.get(phaseType);
 		if (oNextPhaseSupplier == null) {
 			try {
 				var ctor = phaseType.getConstructor(IPhaseMachine.class);
-				oNextPhaseSupplier = (Function<IPhaseMachine,T>)m -> {
+				oNextPhaseSupplier = (Function<IPhaseMachine, T>) m -> {
 					try {
 						return ctor.newInstance(m);
 					} catch (Exception e) {
@@ -154,17 +158,19 @@ public class PhaseMachine implements IPhaseMachine{
 				};
 				registeredPhases.put(phaseType, oNextPhaseSupplier);
 			} catch (Exception e) {
-				throw new IllegalArgumentException("Impossible de trouver le constructeur pour "+phaseType+", donnez un Supplier ou ajoutez le");
+				throw new IllegalArgumentException("Impossible de trouver le constructeur pour " + phaseType
+						+ ", donnez un Supplier ou ajoutez le");
 			}
 		}
 		T phase;
 		if (oNextPhaseSupplier instanceof Function func) {
 			phase = phaseType.cast(func.apply(this));
-		}else {
-			throw new IllegalArgumentException("Le supplier pour la phase "+phaseType+" n'est pas valide");
+		} else {
+			throw new IllegalArgumentException("Le supplier pour la phase " + phaseType + " n'est pas valide");
 		}
 		if (phase == null) {
-			throw new IllegalArgumentException("Le supplier pour la phase "+phaseType+" n'est pas valide (retourne null)");
+			throw new IllegalArgumentException(
+					"Le supplier pour la phase " + phaseType + " n'est pas valide (retourne null)");
 		}
 		if (phase.getParentType() != Void.class) {
 			var parent = runningPhases.get(phase.getParentType());
@@ -176,9 +182,9 @@ public class PhaseMachine implements IPhaseMachine{
 		runningPhases.put(phase);
 		return phase;
 	}
-	
+
 	@SuppressWarnings("rawtypes")
-	private LinkedList<IPhase> getParents(IPhase phase){
+	private LinkedList<IPhase> getParents(IPhase phase) {
 		var list = new LinkedList<IPhase>();
 		var cur = phase.getParent();
 		while (cur != null && cur instanceof IPhase p) {
@@ -187,15 +193,14 @@ public class PhaseMachine implements IPhaseMachine{
 		}
 		return list;
 	}
-	
+
 	@Override
 	public void setLooping(boolean looping) {
 		loop = looping;
 	}
-	
+
 	@Override
 	public boolean getLooping() {
 		return loop;
 	}
-
 }

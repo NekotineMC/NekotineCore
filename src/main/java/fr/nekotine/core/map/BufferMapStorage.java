@@ -7,10 +7,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-public class BufferMapStorage implements IMapStorage{
+public class BufferMapStorage implements IMapStorage {
 
-	private Map<Class<?>,Map<String, Object>> mapBuffer = new HashMap<>();
-	
+	private Map<Class<?>, Map<String, Object>> mapBuffer = new HashMap<>();
+
 	@Override
 	public <T> T get(Class<T> type, String name) {
 		if (mapBuffer.containsKey(type)) {
@@ -27,7 +27,7 @@ public class BufferMapStorage implements IMapStorage{
 	@Override
 	public <T> void add(String name, T map) {
 		var type = map.getClass();
-		if (!mapBuffer.containsKey(type)){
+		if (!mapBuffer.containsKey(type)) {
 			mapBuffer.put(type, new HashMap<String, Object>());
 		}
 		mapBuffer.get(type).put(name, map);

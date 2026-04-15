@@ -1,24 +1,23 @@
 package fr.nekotine.core.status.flag;
 
+import fr.nekotine.core.module.IPluginModule;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
-
 import org.bukkit.entity.LivingEntity;
 
-import fr.nekotine.core.module.IPluginModule;
-
-public class StatusFlagModule implements IPluginModule{
+public class StatusFlagModule implements IPluginModule {
 
 	private final Map<LivingEntity, Set<StatusFlag>> map = new WeakHashMap<>();
-	
+
 	@Override
 	public void unload() {
 	}
-	
+
 	/**
 	 * Ajoute un flag
+	 *
 	 * @param entity
 	 * @param flag
 	 * @return flag ajouté
@@ -30,21 +29,20 @@ public class StatusFlagModule implements IPluginModule{
 		}
 		return false;
 	}
-	
-	public void addFlags(LivingEntity entity, StatusFlag...flags) {
+
+	public void addFlags(LivingEntity entity, StatusFlag... flags) {
 		for (var f : flags) {
 			addFlag(entity, f);
 		}
 	}
-	
+
 	public void addFlags(LivingEntity entity, Set<StatusFlag> flags) {
 		for (var f : flags) {
 			addFlag(entity, f);
 		}
 	}
-	
+
 	/**
-	 * 
 	 * @param entity
 	 * @param flag
 	 * @return flag supprimé
@@ -63,22 +61,22 @@ public class StatusFlagModule implements IPluginModule{
 		}
 		return false;
 	}
-	
-	public void removeFlags(LivingEntity entity, StatusFlag...flags) {
+
+	public void removeFlags(LivingEntity entity, StatusFlag... flags) {
 		for (var f : flags) {
 			removeFlag(entity, f);
 		}
 	}
-	
+
 	public void removeFlags(LivingEntity entity, Set<StatusFlag> flags) {
 		for (var f : flags) {
 			removeFlag(entity, f);
 		}
 	}
-	
-	public boolean hasAny(LivingEntity entity, StatusFlag...flags) {
+
+	public boolean hasAny(LivingEntity entity, StatusFlag... flags) {
 		var set = map.get(entity);
-		if (set  == null) {
+		if (set == null) {
 			return false;
 		}
 		for (var flag : flags) {
@@ -88,10 +86,10 @@ public class StatusFlagModule implements IPluginModule{
 		}
 		return false;
 	}
-	
+
 	public boolean hasAny(LivingEntity entity, Set<StatusFlag> flags) {
 		var set = map.get(entity);
-		if (set  == null) {
+		if (set == null) {
 			return false;
 		}
 		for (var flag : flags) {
@@ -101,5 +99,4 @@ public class StatusFlagModule implements IPluginModule{
 		}
 		return false;
 	}
-	
 }

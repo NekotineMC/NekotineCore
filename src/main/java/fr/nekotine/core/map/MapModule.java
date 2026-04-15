@@ -1,30 +1,27 @@
 package fr.nekotine.core.map;
 
+import com.sk89q.worldedit.extent.clipboard.Clipboard;
+import fr.nekotine.core.ioc.Ioc;
+import fr.nekotine.core.serialization.configurationserializable.ConfigurationSerializableUtil;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedList;
-
 import org.apache.commons.lang3.NotImplementedException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.sk89q.worldedit.extent.clipboard.Clipboard;
-
-import fr.nekotine.core.ioc.Ioc;
-import fr.nekotine.core.serialization.configurationserializable.ConfigurationSerializableUtil;
-
 public class MapModule implements IMapModule {
 
 	private final File mapFolder = new File(Ioc.resolve(JavaPlugin.class).getDataFolder(), "Maps");
-	
+
 	public MapModule() {
 		if (!mapFolder.exists()) {
 			mapFolder.mkdir();
 		}
 	}
-	
+
 	@Override
 	public Collection<MapMetadata> listMaps() {
 		var list = new LinkedList<MapMetadata>();
@@ -66,12 +63,12 @@ public class MapModule implements IMapModule {
 	public <T> void saveContent(MapMetadata metadata, T content) {
 		saveContent(metadata.getName(), content);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private <T> T getContent(String mapName, Class<T> contentType) {
 		if (!ConfigurationSerializable.class.isAssignableFrom(contentType)) {
-			throw new NotImplementedException(
-					String.format("Cette implémentation du MapModule (%s) ne peut deserializer que des ConfigrationSerializable",
+			throw new NotImplementedException(String.format(
+					"Cette implémentation du MapModule (%s) ne peut deserializer que des" + " ConfigrationSerializable",
 					contentType.getTypeName()));
 		}
 		var mapNameFolder = new File(mapFolder, mapName);
@@ -81,17 +78,18 @@ public class MapModule implements IMapModule {
 			if (matchingFiles.length > 0) {
 				var file = matchingFiles[0];
 				var config = YamlConfiguration.loadConfiguration(file);
-				return contentType.cast(ConfigurationSerializableUtil.getObjectFrom(config, (Class<? extends ConfigurationSerializable>)contentType));
+				return contentType.cast(ConfigurationSerializableUtil.getObjectFrom(config,
+						(Class<? extends ConfigurationSerializable>) contentType));
 			}
 		}
 		return null;
 	}
-	
+
 	private <T> void saveContent(String mapName, T content) {
 		var contentType = content.getClass();
 		if (!ConfigurationSerializable.class.isAssignableFrom(contentType)) {
-			throw new NotImplementedException(
-					String.format("Cette implémentation du MapModule (%s) ne peut deserializer que des ConfigrationSerializable",
+			throw new NotImplementedException(String.format(
+					"Cette implémentation du MapModule (%s) ne peut deserializer que des" + " ConfigrationSerializable",
 					contentType.getTypeName()));
 		}
 		var mapNameFolder = new File(mapFolder, mapName);
@@ -104,8 +102,8 @@ public class MapModule implements IMapModule {
 			File file;
 			if (matchingFiles.length > 0) {
 				file = matchingFiles[0];
-			}else {
-				file = new File(mapNameFolder,nameStart+"yml");
+			} else {
+				file = new File(mapNameFolder, nameStart + "yml");
 				try {
 					file.createNewFile();
 				} catch (IOException e) {
@@ -113,7 +111,7 @@ public class MapModule implements IMapModule {
 				}
 			}
 			var config = YamlConfiguration.loadConfiguration(file);
-			ConfigurationSerializableUtil.setFromObject(config, (ConfigurationSerializable)content);
+			ConfigurationSerializableUtil.setFromObject(config, (ConfigurationSerializable) content);
 			try {
 				config.save(file);
 			} catch (IOException e) {
@@ -136,5 +134,4 @@ public class MapModule implements IMapModule {
 	@Override
 	public void unload() {
 	}
-
 }

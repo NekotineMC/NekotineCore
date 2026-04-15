@@ -6,10 +6,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-public class TypeHashMap implements TypeMap{
+public class TypeHashMap implements TypeMap {
 
 	Map<Object, Object> backing = new HashMap<>();
-	
+
 	@Override
 	public int size() {
 		return backing.size();
@@ -33,7 +33,7 @@ public class TypeHashMap implements TypeMap{
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T remove(Class<T> key) {
-		return (T)backing.remove(key);
+		return (T) backing.remove(key);
 	}
 
 	@Override
@@ -52,14 +52,14 @@ public class TypeHashMap implements TypeMap{
 	}
 
 	@Override
-	public Set<Entry<Object,Object>> entrySet() {
+	public Set<Entry<Object, Object>> entrySet() {
 		return backing.entrySet();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T put(T value) {
-		return (T)backing.put(value.getClass(), value);
+		return (T) backing.put(value.getClass(), value);
 	}
 
 	@Override
@@ -71,5 +71,4 @@ public class TypeHashMap implements TypeMap{
 	public <T> T put(Class<T> type, T value) {
 		return type.cast(backing.put(type, value));
 	}
-
 }

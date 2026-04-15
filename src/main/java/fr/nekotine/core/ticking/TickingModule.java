@@ -1,34 +1,33 @@
 package fr.nekotine.core.ticking;
 
+import fr.nekotine.core.ioc.Ioc;
+import fr.nekotine.core.logging.NekotineLogger;
+import fr.nekotine.core.module.IPluginModule;
+import fr.nekotine.core.ticking.event.TickElapsedEvent;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.event.Event;
 import org.bukkit.plugin.IllegalPluginAccessException;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import fr.nekotine.core.ioc.Ioc;
-import fr.nekotine.core.logging.NekotineLogger;
-import fr.nekotine.core.module.IPluginModule;
-import fr.nekotine.core.ticking.event.TickElapsedEvent;
-import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
+public class TickingModule implements IPluginModule {
 
-public class TickingModule implements IPluginModule{
-	
 	private final ComponentLogger logger = NekotineLogger.make();
-	
+
 	TickEventRunnable runningTask;
-	
+
 	Map<TickTimeStamp, Integer> stamps = new HashMap<>();
-	
+
 	public TickingModule() {
 		runningTask = new TickEventRunnable(this);
 		try {
 			runningTask.runTaskTimer(Ioc.resolve(JavaPlugin.class), 0, 1);
-		}catch(IllegalPluginAccessException e) {
-			throw new IllegalStateException("Impossible de charger le TickingModule avant que le plugin soit activé (OnEnable)", e);
+		} catch (IllegalPluginAccessException e) {
+			throw new IllegalStateException(
+					"Impossible de charger le TickingModule avant que le plugin soit activé (OnEnable)", e);
 		}
 	}
 
@@ -36,15 +35,15 @@ public class TickingModule implements IPluginModule{
 	public void unload() {
 		try {
 			runningTask.cancel();
-		}catch(Exception e) {
+		} catch (Exception e) {
 			logger.warn("Erreur lors de l'arret de l'horloge", e);
 		}
 	}
-	
+
 	private void Tick() {
 		var reachedStamps = new HashSet<TickTimeStamp>();
 		for (TickTimeStamp stamp : TickTimeStamp.values()) {
-			if (stamps.compute(stamp, (s,v) -> v == null?0:++v) > stamp.getNumberOfTick()) {
+			if (stamps.compute(stamp, (s, v) -> v == null ? 0 : ++v) > stamp.getNumberOfTick()) {
 				stamps.put(stamp, 0);
 				reachedStamps.add(stamp);
 			}
@@ -52,20 +51,18 @@ public class TickingModule implements IPluginModule{
 		Event tickEvent = new TickElapsedEvent(reachedStamps);
 		Ioc.resolve(JavaPlugin.class).getServer().getPluginManager().callEvent(tickEvent);
 	}
-	
-	private class TickEventRunnable extends BukkitRunnable{
-		
+
+	private class TickEventRunnable extends BukkitRunnable {
+
 		private TickingModule module;
-		
+
 		private TickEventRunnable(TickingModule module) {
 			this.module = module;
 		}
-		
+
 		@Override
 		public void run() {
 			module.Tick();
 		}
-		
 	}
-	
 }

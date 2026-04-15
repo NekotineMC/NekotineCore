@@ -1,11 +1,5 @@
 package fr.nekotine.core.map.command.generator;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
-
 import dev.jorel.commandapi.arguments.Argument;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.LiteralArgument;
@@ -20,19 +14,24 @@ import fr.nekotine.core.map.command.MapCommandExecutor;
 import fr.nekotine.core.map.command.MapElementCommandGenerator;
 import fr.nekotine.core.text.Colors;
 import fr.nekotine.core.util.CollectionUtil;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 
-public class DictionaryCommandGenerator implements MapElementCommandGenerator{
+public class DictionaryCommandGenerator implements MapElementCommandGenerator {
 
 	private static final String nodeNameSuffix = "Name";
-	
+
 	private final ComponentLogger logger = NekotineLogger.make();
-	
+
 	private Class<?> nestedElementType;
-	
+
 	private String nodeName;
-	
+
 	private Class<? extends MapElementCommandGenerator> elementGeneratorOverride;
 
 	@SuppressWarnings("unchecked")
@@ -45,35 +44,35 @@ public class DictionaryCommandGenerator implements MapElementCommandGenerator{
 		final var finalNodeName = nodeName + nodeNameSuffix;
 		var nodeArg = new LiteralArgument("edit");
 		var nameArg = new StringArgument(finalNodeName);
-		nameArg.includeSuggestions(ArgumentSuggestions.stringCollectionAsync(i -> CompletableFuture.supplyAsync(() ->
-				((Map<String,Object>)pipeline.apply(i.previousArgs())).keySet()
-				)));
+		nameArg.includeSuggestions(ArgumentSuggestions.stringCollectionAsync(i -> CompletableFuture
+				.supplyAsync(() -> ((Map<String, Object>) pipeline.apply(i.previousArgs())).keySet())));
 		MapElementCommandGenerator generator;
 		var resolver = Ioc.resolve(IMapElementCommandGeneratorResolver.class);
 		if (elementGeneratorOverride != null) {
 			generator = resolver.resolveSpecific(elementGeneratorOverride);
-		}else {
+		} else {
 			generator = resolver.resolveFor(nestedElementType);
 		}
-		Function<CommandArguments, Object> pip = a -> ((Map<String,Object>)pipeline.apply(a)).get(finalNodeName);
+		Function<CommandArguments, Object> pip = a -> ((Map<String, Object>) pipeline.apply(a)).get(finalNodeName);
 		for (var branch : generator.generateFor(pip, nestedElementType)) {
 			var branchArgs = CollectionUtil.linkedList(branch.arguments());
 			branchArgs.add(0, nameArg);
 			branchArgs.add(0, nodeArg);
-			MapCommandExecutor executor = (element, sender, args) ->{
-				var mapKey = (String)args.get(finalNodeName);
+			MapCommandExecutor executor = (element, sender, args) -> {
+				var mapKey = (String) args.get(finalNodeName);
 				try {
-					var e = (Map<String,Object>)element;
+					var e = (Map<String, Object>) element;
 					if (!e.containsKey(mapKey)) {
-						sender.sendMessage(Component.text("Ce nom d'élément ("+mapKey+") n'existe pas.", Colors.Command.WARNING));
+						sender.sendMessage(Component.text("Ce nom d'élément (" + mapKey + ") n'existe pas.",
+								Colors.Command.WARNING));
 						return element;
 					}
-					
+
 					e.put(mapKey, branch.consumer().accept(e.get(mapKey), sender, args));
 					return element;
-				}catch(Exception e) {
-					var ex = new RuntimeException("Impossible d'acceder a la valeur "+mapKey+" du dictionnaire "
-				+finalNodeName+" de la classe "+elementType.getName(),e);
+				} catch (Exception e) {
+					var ex = new RuntimeException("Impossible d'acceder a la valeur " + mapKey + " du dictionnaire "
+							+ finalNodeName + " de la classe " + elementType.getName(), e);
 					logger.error("DictionaryCommandGenerator.generateFor(Class<?> elementType)", ex);
 					throw ex;
 				}
@@ -82,43 +81,43 @@ public class DictionaryCommandGenerator implements MapElementCommandGenerator{
 		}
 		return constructionList.toArray(MapCommandBranch[]::new);
 	}
-	
+
 	private MapCommandBranch makeAddCommand() {
 		var provider = Ioc.resolve(IDefaultProvider.class).getSupplier(nestedElementType);
-		var arguments = new Argument<?>[] {new LiteralArgument("add"),new StringArgument("itemName")};
+		var arguments = new Argument<?>[]{new LiteralArgument("add"), new StringArgument("itemName")};
 		MapCommandExecutor executor = (element, sender, args) -> {
-			var mapKey = (String)args.get("itemName");
+			var mapKey = (String) args.get("itemName");
 			if (element == null) {
 				element = new HashMap<>();
 			}
 			@SuppressWarnings("unchecked")
-			var e = (Map<String,Object>)element;
+			var e = (Map<String, Object>) element;
 			try {
 				e.put(mapKey, provider.get());
 				sender.sendMessage(Component.text("L'ajout à bien été fait.", Colors.Command.SUCCESS));
-				
+
 			} catch (Exception ex) {
-				logger.error("DictionaryCommandGenerator.makeAddCommand() > "+
-						"Impossible d'instancier le nouvel element de carte a ajouter au dictionnaire "+nodeName + " du type "+element.getClass().getName(),
-						ex);
+				logger.error("DictionaryCommandGenerator.makeAddCommand() > Impossible d'instancier le nouvel"
+						+ " element de carte a ajouter au dictionnaire " + nodeName + " du type "
+						+ element.getClass().getName(), ex);
 			}
 			return element;
 		};
 		return new MapCommandBranch(arguments, executor);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private MapCommandBranch makeRemoveCommand(Function<CommandArguments, Object> pipeline) {
 		var nameArg = new StringArgument("itemName");
-		nameArg.includeSuggestions(ArgumentSuggestions.stringCollectionAsync(i -> CompletableFuture.supplyAsync(() ->
-		((Map<String,Object>)pipeline.apply(i.previousArgs())).keySet()
-		)));
-		var arguments = new Argument<?>[] {new LiteralArgument("remove"),nameArg};
-		MapCommandExecutor executor = (element, sender, args) ->{
-			var mapKey = (String)args.get("itemName");
-			var e = (Map<String,?>)element;
+		nameArg.includeSuggestions(ArgumentSuggestions.stringCollectionAsync(i -> CompletableFuture
+				.supplyAsync(() -> ((Map<String, Object>) pipeline.apply(i.previousArgs())).keySet())));
+		var arguments = new Argument<?>[]{new LiteralArgument("remove"), nameArg};
+		MapCommandExecutor executor = (element, sender, args) -> {
+			var mapKey = (String) args.get("itemName");
+			var e = (Map<String, ?>) element;
 			if (!e.containsKey(mapKey)) {
-				sender.sendMessage(Component.text("L'élément avec ce nom ("+mapKey+") est déjà absent.", Colors.Command.SUCCESS));
+				sender.sendMessage(Component.text("L'élément avec ce nom (" + mapKey + ") est déjà absent.",
+						Colors.Command.SUCCESS));
 			}
 			e.remove(mapKey);
 			sender.sendMessage(Component.text("La suppression à bien été faite.", Colors.Command.SUCCESS));
@@ -126,17 +125,16 @@ public class DictionaryCommandGenerator implements MapElementCommandGenerator{
 		};
 		return new MapCommandBranch(arguments, executor);
 	}
-	
+
 	public void setNestedElementType(Class<?> nestedElementType) {
 		this.nestedElementType = nestedElementType;
 	}
-	
+
 	public void setNodeName(String name) {
 		this.nodeName = name;
 	}
-	
+
 	public void setElementGeneratorTypeOverride(Class<? extends MapElementCommandGenerator> generatorType) {
 		elementGeneratorOverride = generatorType;
 	}
-
 }

@@ -1,21 +1,19 @@
 package fr.nekotine.core.inventory.menu;
 
+import fr.nekotine.core.inventory.menu.layout.MenuLayout;
+import fr.nekotine.core.ioc.Ioc;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
 
-import fr.nekotine.core.inventory.menu.layout.MenuLayout;
-import fr.nekotine.core.ioc.Ioc;
-import net.kyori.adventure.text.Component;
-
 /**
  * Menu créé avec un coffre.
- * 
- * @author XxGoldenbluexX
  *
+ * @author XxGoldenbluexX
  */
-public class MenuInventory extends MenuLayout{
+public class MenuInventory extends MenuLayout {
 
 	private Inventory inventory;
 
@@ -45,19 +43,19 @@ public class MenuInventory extends MenuLayout{
 	 * Ouvre le menu pour le joueur. Pour rappel, un menu est supposé servire pour
 	 * un seul joueur. Si un menu est ouvert pour plusieurs joueurs, il sera
 	 * synchronisé entre les deux.
-	 * 
+	 *
 	 * @param player
 	 */
 	public void displayTo(@NotNull Player player) {
 		redraw();
 		player.openInventory(inventory);
 	}
-	
+
 	@Override
 	public void askRedraw() {
 		redraw();
 	}
-	
+
 	public void redraw() {
 		inventory.clear();
 		draw(inventory, 0, 0, 9, nbRow);
@@ -71,5 +69,4 @@ public class MenuInventory extends MenuLayout{
 	public void draw(Inventory inventory, int x, int y, int width, int height) {
 		layout.draw(inventory, x, y, width, height);
 	}
-
 }

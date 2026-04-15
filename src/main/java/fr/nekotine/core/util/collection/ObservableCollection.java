@@ -1,50 +1,50 @@
 package fr.nekotine.core.util.collection;
 
+import fr.nekotine.core.logging.NekotineLogger;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
-
-import fr.nekotine.core.logging.NekotineLogger;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 
-public class ObservableCollection<T> implements Collection<T>{
+public class ObservableCollection<T> implements Collection<T> {
 
 	private final List<Consumer<T>> itemAddCallbacks = new LinkedList<>();
-	
+
 	private final List<Consumer<Object>> itemRemoveCallbacks = new LinkedList<>();
-	
+
 	private final ComponentLogger logger = NekotineLogger.make();
-	
+
 	private Collection<T> inner;
-	
-	public static final <T> ObservableCollection<T> wrap(Collection<T> collection){
+
+	public static final <T> ObservableCollection<T> wrap(Collection<T> collection) {
 		return new ObservableCollection<>(collection);
 	}
-	
-	protected ObservableCollection() {}
-	
+
+	protected ObservableCollection() {
+	}
+
 	protected ObservableCollection(Collection<T> innerCollection) {
 		inner = innerCollection;
 	}
-	
+
 	protected void setInnerCollection(Collection<T> collection) {
 		inner = collection;
 	}
-	
+
 	public boolean addAdditionCallback(Consumer<T> callback) {
 		return itemAddCallbacks.add(callback);
 	}
-	
+
 	public boolean removeAdditionCallback(Consumer<T> callback) {
 		return itemAddCallbacks.remove(callback);
 	}
-	
+
 	public boolean addSuppressionCallback(Consumer<Object> callback) {
 		return itemRemoveCallbacks.add(callback);
 	}
-	
+
 	public boolean removeSuppressionCallback(Consumer<Object> callback) {
 		return itemRemoveCallbacks.remove(callback);
 	}
@@ -87,7 +87,7 @@ public class ObservableCollection<T> implements Collection<T>{
 			for (var cb : itemAddCallbacks) {
 				try {
 					cb.accept(e);
-				}catch(Exception ex) {
+				} catch (Exception ex) {
 					logger.error("Une erreur c'est produite dans une callback d'ObservableCollection.add", ex);
 				}
 			}
@@ -103,7 +103,7 @@ public class ObservableCollection<T> implements Collection<T>{
 			while (ite.hasPrevious()) {
 				try {
 					ite.previous().accept(o);
-				}catch(Exception ex) {
+				} catch (Exception ex) {
 					logger.error("Une erreur c'est produite dans une callback d'ObservableCollection.remove", ex);
 				}
 			}
@@ -125,7 +125,7 @@ public class ObservableCollection<T> implements Collection<T>{
 				for (var cb : itemAddCallbacks) {
 					try {
 						cb.accept(e);
-					}catch(Exception ex) {
+					} catch (Exception ex) {
 						logger.error("Une erreur c'est produite dans une callback d'ObservableCollection.addAll", ex);
 					}
 				}
@@ -144,8 +144,9 @@ public class ObservableCollection<T> implements Collection<T>{
 				while (ite.hasPrevious()) {
 					try {
 						ite.previous().accept(e);
-					}catch(Exception ex) {
-						logger.error("Une erreur c'est produite dans une callback d'ObservableCollection.removeAll", ex);
+					} catch (Exception ex) {
+						logger.error("Une erreur c'est produite dans une callback d'ObservableCollection.removeAll",
+								ex);
 					}
 				}
 			}
@@ -165,12 +166,11 @@ public class ObservableCollection<T> implements Collection<T>{
 			while (ite.hasPrevious()) {
 				try {
 					ite.previous().accept(e);
-				}catch(Exception ex) {
+				} catch (Exception ex) {
 					logger.error("Une erreur c'est produite dans une callback d'ObservableCollection.clear", ex);
 				}
 			}
 		}
 		inner.clear();
 	}
-	
 }

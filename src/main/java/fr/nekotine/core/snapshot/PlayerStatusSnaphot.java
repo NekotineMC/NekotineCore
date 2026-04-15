@@ -9,32 +9,34 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.PlayerInventory;
 
-public class PlayerStatusSnaphot implements Snapshot<Player>{
-	
+public class PlayerStatusSnaphot implements Snapshot<Player> {
+
 	private GameMode gamemode;
-	
+
 	private Location location;
-	
+
 	private int experiencePoints;
-	
+
 	private boolean allowFlight;
-	
+
 	private float flySpeed;
-	
+
 	private float walkSpeed;
-	
+
 	private Snapshot<PlayerInventory> inventorySnapshot;
-	
+
 	private Snapshot<Attributable> attributes;
-	
+
 	private Snapshot<LivingEntity> potionEffects;
-	
+
 	private Snapshot<Damageable> healthSnapshot;
-	
+
 	private Snapshot<HumanEntity> hungerSnapshot;
-	
+
 	/**
-	 * @implNote c'est l'équivalent du {@link fr.nekotine.core.snapshot.PlayerStatusSnaphot#deepSnapshot deepSnapshot}
+	 * @implNote c'est l'équivalent du
+	 *           {@link fr.nekotine.core.snapshot.PlayerStatusSnaphot#deepSnapshot
+	 *           deepSnapshot}
 	 */
 	@Override
 	public Snapshot<Player> snapshot(Player item) {
@@ -72,5 +74,4 @@ public class PlayerStatusSnaphot implements Snapshot<Player>{
 		item.setFlySpeed(flySpeed);
 		item.setWalkSpeed(walkSpeed);
 	}
-
 }

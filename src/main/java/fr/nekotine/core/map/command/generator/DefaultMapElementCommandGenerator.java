@@ -1,9 +1,5 @@
 package fr.nekotine.core.map.command.generator;
 
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.function.Function;
-
 import dev.jorel.commandapi.arguments.Argument;
 import dev.jorel.commandapi.arguments.LiteralArgument;
 import dev.jorel.commandapi.executors.CommandArguments;
@@ -17,10 +13,13 @@ import fr.nekotine.core.map.command.MapCommandExecutor;
 import fr.nekotine.core.map.command.MapElementCommandGenerator;
 import fr.nekotine.core.reflexion.annotation.GenericBiTyped;
 import fr.nekotine.core.util.CollectionUtil;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.function.Function;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 
-public class DefaultMapElementCommandGenerator implements MapElementCommandGenerator{
-	
+public class DefaultMapElementCommandGenerator implements MapElementCommandGenerator {
+
 	private final ComponentLogger logger = NekotineLogger.make();
 
 	@Override
@@ -40,25 +39,26 @@ public class DefaultMapElementCommandGenerator implements MapElementCommandGener
 				var selfArgument = new LiteralArgument(finalName);
 				MapElementCommandGenerator generator;
 				var resolver = Ioc.resolve(IMapElementCommandGeneratorResolver.class);
-				
+
 				// special Dictionary case
 				if (Map.class.isAssignableFrom(fieldType)) { // Type précis pour permettre l'héritage par l'utilisateur
 					if (field.isAnnotationPresent(GenericBiTyped.class)) {
 						var dictGenerator = resolver.resolveSpecific(DictionaryCommandGenerator.class);
-						dictGenerator.setElementGeneratorTypeOverride(genForSpecific != null?genForSpecific.value():null);
+						dictGenerator.setElementGeneratorTypeOverride(
+								genForSpecific != null ? genForSpecific.value() : null);
 						dictGenerator.setNodeName(finalName);
 						dictGenerator.setNestedElementType(field.getAnnotation(GenericBiTyped.class).b());
 						generator = dictGenerator;
-					}else {
-						var msg = "[MapCommandGenerator]->Default Le champ %s dans %s est de type dictionnaire mais n'a"
-								+ " pas l'annotation MapElementTyped nécessaire pour sa génération.";
-						throw new IllegalArgumentException(String.format(msg,finalName,elementType.getName()));
+					} else {
+						var msg = "[MapCommandGenerator]->Default Le champ %s dans %s est de type dictionnaire mais"
+								+ " n'a pas l'annotation MapElementTyped nécessaire pour sa génération.";
+						throw new IllegalArgumentException(String.format(msg, finalName, elementType.getName()));
 					}
-				}else {
+				} else {
 					if (genForSpecific != null) {
 						var generatorType = genForSpecific.value();
 						generator = resolver.resolveSpecific(generatorType);
-					}else {
+					} else {
 						generator = resolver.resolveFor(fieldType);
 					}
 				}
@@ -66,18 +66,20 @@ public class DefaultMapElementCommandGenerator implements MapElementCommandGener
 					try {
 						return field.get(pipeline.apply(a));
 					} catch (Exception e) {
-						throw new RuntimeException("Impossible d'acceder au champ "+field.getName()+" de la classe "+elementType.getName(),e);
+						throw new RuntimeException("Impossible d'acceder au champ " + field.getName() + " de la classe "
+								+ elementType.getName(), e);
 					}
 				};
 				for (var branch : generator.generateFor(pip, fieldType)) {
 					var arguments = CollectionUtil.linkedList(branch.arguments());
 					arguments.add(0, selfArgument);
-					MapCommandExecutor executor = (element, sender, args) ->{
+					MapCommandExecutor executor = (element, sender, args) -> {
 						try {
 							field.set(element, branch.consumer().accept(field.get(element), sender, args));
 							return element;
-						}catch(IllegalAccessException e) {
-							var ex = new RuntimeException("Impossible d'acceder au champ "+field.getName()+" de la classe "+elementType.getName(),e);
+						} catch (IllegalAccessException e) {
+							var ex = new RuntimeException("Impossible d'acceder au champ " + field.getName()
+									+ " de la classe " + elementType.getName(), e);
 							logger.error("DefaultMapElementCommandGenerator.generateFor(Class<?> elementType)", ex);
 							throw ex;
 						}
@@ -88,5 +90,4 @@ public class DefaultMapElementCommandGenerator implements MapElementCommandGener
 		}
 		return list.toArray(MapCommandBranch[]::new);
 	}
-
 }

@@ -1,9 +1,17 @@
 package fr.nekotine.core.visibility;
 
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.events.PacketEvent;
+import com.comphenix.protocol.events.PacketListener;
+import fr.nekotine.core.ioc.Ioc;
+import fr.nekotine.core.module.IPluginModule;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -12,32 +20,19 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
-import com.comphenix.protocol.events.PacketAdapter;
-import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.events.PacketListener;
+public class EntityVisibilityModule implements IPluginModule {
 
-import fr.nekotine.core.ioc.Ioc;
-import fr.nekotine.core.module.IPluginModule;
-
-public class EntityVisibilityModule implements IPluginModule{
-	
 	private PacketListener metadataListener;
-	
-	/**
-	 * Status actuel des joueurs (envoyé au joueurs durant le dernier tick).
-	 */
+
+	/** Status actuel des joueurs (envoyé au joueurs durant le dernier tick). */
 	private Set<VisibilityData> currentVisibilityStatus; // Map<JoueurCaché, CachéPour>
-	
+
 	private Set<VisibilityData> toUpdateVisibilityStatus; // Map<JoueurCaché, CachéPour>
-	
+
 	private BukkitRunnable updateVisibilityStatus;
-	
+
 	BukkitTask updateTask;
-	
+
 	public EntityVisibilityModule() {
 		currentVisibilityStatus = new HashSet<>();
 		toUpdateVisibilityStatus = new HashSet<>();
@@ -46,7 +41,7 @@ public class EntityVisibilityModule implements IPluginModule{
 			public void run() {
 				ProtocolManager pmanager = ProtocolLibrary.getProtocolManager();
 				PacketContainer updatePacket;
-				Iterator<VisibilityData> iterator = toUpdateVisibilityStatus.iterator(); 
+				Iterator<VisibilityData> iterator = toUpdateVisibilityStatus.iterator();
 				while (iterator.hasNext()) {
 					VisibilityData vd = iterator.next();
 					currentVisibilityStatus.remove(vd);
@@ -55,11 +50,12 @@ public class EntityVisibilityModule implements IPluginModule{
 					if (vd.isHidden) {
 						updatePacket = pmanager.createPacket(PacketType.Play.Server.ENTITY_DESTROY);
 						updatePacket.getIntegerArrays().write(0, new int[]{vd.hidden.getEntityId()});
-					}else {
+					} else {
 						updatePacket = pmanager.createPacket(PacketType.Play.Server.SPAWN_ENTITY_LIVING);
 						updatePacket.getIntegers().write(0, vd.hidden.getEntityId()); // Entity Id for protocol
 						updatePacket.getUUIDs().write(0, vd.hidden.getUniqueId()); // UUID
-						updatePacket.getIntegers().write(1, 116); // Entity Type Id specified in https://wiki.vg/Entity_metadata#Mobs
+						updatePacket.getIntegers().write(1, 116); // Entity Type Id specified in
+																	// https://wiki.vg/Entity_metadata#Mobs
 						Location playerloc = vd.hidden.getLocation();
 						updatePacket.getDoubles().write(0, playerloc.getX());
 						updatePacket.getDoubles().write(1, playerloc.getY());
@@ -79,14 +75,13 @@ public class EntityVisibilityModule implements IPluginModule{
 				}
 			}
 		};
-		metadataListener = new PacketAdapter(Ioc.resolve(JavaPlugin.class), PacketType.Play.Server.SPAWN_ENTITY_LIVING) {
+		metadataListener = new PacketAdapter(Ioc.resolve(JavaPlugin.class),
+				PacketType.Play.Server.SPAWN_ENTITY_LIVING) {
 			@Override
 			public void onPacketSending(PacketEvent event) {
 				PacketContainer packet = event.getPacket();
-				if (currentVisibilityStatus.stream().anyMatch(
-						vs -> vs.blind.equals(event.getPlayer()) && vs.hidden.getEntityId() == packet.getIntegers().read(0)
-						))
-				{
+				if (currentVisibilityStatus.stream().anyMatch(vs -> vs.blind.equals(event.getPlayer())
+						&& vs.hidden.getEntityId() == packet.getIntegers().read(0))) {
 					event.setCancelled(true);
 				}
 			}
@@ -94,19 +89,19 @@ public class EntityVisibilityModule implements IPluginModule{
 		ProtocolLibrary.getProtocolManager().addPacketListener(metadataListener);
 		updateTask = updateVisibilityStatus.runTaskTimer(Ioc.resolve(JavaPlugin.class), 0, 1);
 	}
-	
+
 	public void hideFrom(Entity hidden, Player blind) {
 		VisibilityData vd = new VisibilityData(hidden, blind, true);
 		toUpdateVisibilityStatus.remove(vd);
 		toUpdateVisibilityStatus.add(vd);
 	}
-	
+
 	public void showFrom(Entity showed, Player blind) {
 		VisibilityData vd = new VisibilityData(showed, blind, false);
 		toUpdateVisibilityStatus.remove(vd);
 		toUpdateVisibilityStatus.add(vd);
 	}
-	
+
 	@Override
 	public void unload() {
 		if (updateTask != null && !updateTask.isCancelled()) {
@@ -114,15 +109,15 @@ public class EntityVisibilityModule implements IPluginModule{
 		}
 		ProtocolLibrary.getProtocolManager().removePacketListener(metadataListener);
 	}
-	
-	private class VisibilityData{
-		
+
+	private class VisibilityData {
+
 		private Entity hidden;
-		
+
 		private Player blind;
-		
+
 		private boolean isHidden;
-		
+
 		@Override
 		public boolean equals(Object obj) {
 			if (obj instanceof VisibilityData) {
@@ -131,21 +126,20 @@ public class EntityVisibilityModule implements IPluginModule{
 			}
 			return false;
 		}
-		
+
 		@Override
 		public int hashCode() {
 			return hidden.hashCode() + blind.hashCode();
 		}
-		
+
 		private VisibilityData(Entity hidden, Player blind, boolean isHidden) {
 			this.hidden = hidden;
 			this.blind = blind;
 			this.isHidden = isHidden;
 		}
-		
+
 		private VisibilityData(Entity hidden, Player blind) {
 			this(hidden, blind, false);
 		}
 	}
-	
 }

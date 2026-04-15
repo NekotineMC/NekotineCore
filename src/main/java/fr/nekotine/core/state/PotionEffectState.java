@@ -3,14 +3,14 @@ package fr.nekotine.core.state;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.potion.PotionEffect;
 
-public class PotionEffectState<T extends LivingEntity> implements ItemState<T>{
+public class PotionEffectState<T extends LivingEntity> implements ItemState<T> {
 
 	private final PotionEffect effect;
-	
+
 	public PotionEffectState(PotionEffect effect) {
 		this.effect = effect;
 	}
-	
+
 	@Override
 	public void setup(LivingEntity item) {
 		item.addPotionEffect(effect);
@@ -20,5 +20,4 @@ public class PotionEffectState<T extends LivingEntity> implements ItemState<T>{
 	public void teardown(LivingEntity item) {
 		item.removePotionEffect(effect.getType());
 	}
-
 }

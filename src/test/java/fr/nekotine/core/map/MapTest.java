@@ -1,78 +1,83 @@
-//package fr.nekotine.core.map;
+// package fr.nekotine.core.map;
 //
-//import fr.nekotine.core.map.annotation.GenerateCommandFor;
-//import fr.nekotine.core.map.element.MapBlockLocationElement;
-//import fr.nekotine.core.map.element.MapDictionaryElement;
-//import fr.nekotine.core.map.element.MapPositionElement;
-//import fr.nekotine.core.reflexion.annotation.GenericBiTyped;
+// import fr.nekotine.core.map.annotation.GenerateCommandFor;
+// import fr.nekotine.core.map.element.MapBlockLocationElement;
+// import fr.nekotine.core.map.element.MapDictionaryElement;
+// import fr.nekotine.core.map.element.MapPositionElement;
+// import fr.nekotine.core.reflexion.annotation.GenericBiTyped;
 //
-//public class MapTest {
+// public class MapTest {
 //
-//	private MapPositionElement notComposing = new MapPositionElement();
-//	
-//	@GenerateCommandFor
-//	private MapTestComposite composite = new MapTestComposite();
-//	
-//	@GenerateCommandFor()
-//	private MapPositionElement poseUnnamed = new MapPositionElement();
-//	
-//	@GenerateCommandFor("blockPoseRenamed")
-//	private MapBlockLocationElement blockPoseToRename = new MapBlockLocationElement();
-//	
-//	@GenericBiTyped(MapBlockLocationElement.class)
-//	@GenerateCommandFor()
-//	private MapDictionaryElement<MapBlockLocationElement> poseList = new MapDictionaryElement<>();
-//	
-//	@GenericBiTyped(MapTestComposite.class)
-//	@GenerateCommandFor()
-//	private MapDictionaryElement<MapTestComposite> compositeList = new MapDictionaryElement<>();
+// private MapPositionElement notComposing = new MapPositionElement();
 //
-//	public MapPositionElement getNotComposing() {
-//		return notComposing;
-//	}
+// @GenerateCommandFor
+// private MapTestComposite composite = new MapTestComposite();
 //
-//	public void setNotComposing(MapPositionElement notComposing) {
-//		this.notComposing = notComposing;
-//	}
+// @GenerateCommandFor()
+// private MapPositionElement poseUnnamed = new MapPositionElement();
 //
-//	public MapTestComposite getComposite() {
-//		return composite;
-//	}
+// @GenerateCommandFor("blockPoseRenamed")
+// private MapBlockLocationElement blockPoseToRename = new
+// MapBlockLocationElement();
 //
-//	public void setComposite(MapTestComposite composite) {
-//		this.composite = composite;
-//	}
+// @GenericBiTyped(MapBlockLocationElement.class)
+// @GenerateCommandFor()
+// private MapDictionaryElement<MapBlockLocationElement> poseList = new
+// MapDictionaryElement<>();
 //
-//	public MapPositionElement getPoseUnnamed() {
-//		return poseUnnamed;
-//	}
+// @GenericBiTyped(MapTestComposite.class)
+// @GenerateCommandFor()
+// private MapDictionaryElement<MapTestComposite> compositeList = new
+// MapDictionaryElement<>();
 //
-//	public void setPoseUnnamed(MapPositionElement poseUnnamed) {
-//		this.poseUnnamed = poseUnnamed;
-//	}
+// public MapPositionElement getNotComposing() {
+// return notComposing;
+// }
 //
-//	public MapBlockLocationElement getBlockPoseToRename() {
-//		return blockPoseToRename;
-//	}
+// public void setNotComposing(MapPositionElement notComposing) {
+// this.notComposing = notComposing;
+// }
 //
-//	public void setBlockPoseToRename(MapBlockLocationElement blockPoseToRename) {
-//		this.blockPoseToRename = blockPoseToRename;
-//	}
+// public MapTestComposite getComposite() {
+// return composite;
+// }
 //
-//	public MapDictionaryElement<MapBlockLocationElement> getPoseList() {
-//		return poseList;
-//	}
+// public void setComposite(MapTestComposite composite) {
+// this.composite = composite;
+// }
 //
-//	public void setPoseList(MapDictionaryElement<MapBlockLocationElement> poseList) {
-//		this.poseList = poseList;
-//	}
+// public MapPositionElement getPoseUnnamed() {
+// return poseUnnamed;
+// }
 //
-//	public MapDictionaryElement<MapTestComposite> getCompositeList() {
-//		return compositeList;
-//	}
+// public void setPoseUnnamed(MapPositionElement poseUnnamed) {
+// this.poseUnnamed = poseUnnamed;
+// }
 //
-//	public void setCompositeList(MapDictionaryElement<MapTestComposite> compositeList) {
-//		this.compositeList = compositeList;
-//	}
-//	
-//}
+// public MapBlockLocationElement getBlockPoseToRename() {
+// return blockPoseToRename;
+// }
+//
+// public void setBlockPoseToRename(MapBlockLocationElement blockPoseToRename) {
+// this.blockPoseToRename = blockPoseToRename;
+// }
+//
+// public MapDictionaryElement<MapBlockLocationElement> getPoseList() {
+// return poseList;
+// }
+//
+// public void setPoseList(MapDictionaryElement<MapBlockLocationElement>
+// poseList) {
+// this.poseList = poseList;
+// }
+//
+// public MapDictionaryElement<MapTestComposite> getCompositeList() {
+// return compositeList;
+// }
+//
+// public void setCompositeList(MapDictionaryElement<MapTestComposite>
+// compositeList) {
+// this.compositeList = compositeList;
+// }
+//
+// }

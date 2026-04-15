@@ -1,5 +1,8 @@
 package fr.nekotine.core.inventory;
 
+import fr.nekotine.core.ioc.Ioc;
+import fr.nekotine.core.tuple.Pair;
+import fr.nekotine.core.util.ItemStackUtil;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,8 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
-
-import fr.nekotine.core.ioc.Ioc;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
@@ -21,43 +23,40 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 
-import fr.nekotine.core.tuple.Pair;
-import fr.nekotine.core.util.ItemStackUtil;
-import net.kyori.adventure.text.Component;
-
 /**
- * Usine à {@link org.bukkit.inventory.ItemStack ItemStack}. Les méthodes de cette classe ne sont pas pures!
- * @author XxGoldenbluexX
+ * Usine à {@link org.bukkit.inventory.ItemStack ItemStack}. Les méthodes de
+ * cette classe ne sont pas pures!
  *
+ * @author XxGoldenbluexX
  */
 public class ItemStackBuilder {
-	
+
 	private Material material;
-	
+
 	private @Nullable Component name;
-	
+
 	private int amount;
-	
+
 	private List<Component> lore;
-	
-	private Map<Enchantment,Integer> enchantments;
-	
+
+	private Map<Enchantment, Integer> enchantments;
+
 	private List<Pair<Attribute, AttributeModifier>> attributeModifiers;
-	
+
 	private Set<ItemFlag> flags;
-	
+
 	private boolean unbreakable;
-	
+
 	private boolean unstackable;
-	
+
 	private boolean oldPvp;
-	
+
 	private String skullUrl;
-	
+
 	private double attack_damage = 0;
-	
+
 	private Consumer<ItemStack> postApply;
-	
+
 	public ItemStackBuilder(Material material) {
 		this.material = material;
 		amount = 1;
@@ -66,7 +65,7 @@ public class ItemStackBuilder {
 		attributeModifiers = new LinkedList<>();
 		flags = new HashSet<>();
 	}
-	
+
 	public ItemStackBuilder(ItemStackBuilder other) {
 		material = other.material;
 		name = other.name;
@@ -79,48 +78,50 @@ public class ItemStackBuilder {
 		unstackable = other.unstackable;
 		oldPvp = other.oldPvp;
 	}
-	
+
 	public ItemStackBuilder material(Material material) {
 		this.material = material;
 		return this;
 	}
-	
+
 	public ItemStackBuilder name(@Nullable Component title) {
 		this.name = title;
 		return this;
 	}
-	
+
 	public ItemStackBuilder amount(int amount) {
 		this.amount = amount;
 		return this;
 	}
-	
+
 	public ItemStackBuilder lore(List<Component> lore) {
 		this.lore = lore;
 		return this;
 	}
-	
+
 	public ItemStackBuilder appendLore(Component loreLine) {
 		this.lore.add(loreLine);
 		return this;
 	}
-	
+
 	public ItemStackBuilder enchant(Enchantment enchant, int level) {
 		enchantments.put(enchant, level);
 		return this;
 	}
-	
+
 	public ItemStackBuilder enchant(Enchantment enchant) {
 		enchantments.put(enchant, 1);
 		return this;
 	}
-	
+
 	/**
-	 * Donne un enchantement par défaut pour l'effet visuel.
-	 * Le flag pour cacher les enchantments est ajouté automatiquement
+	 * Donne un enchantement par défaut pour l'effet visuel. Le flag pour cacher les
+	 * enchantments est ajouté automatiquement
+	 *
 	 * <p>
-	 * Note: L'enchantement utilisé est {@link org.bukkit.enchantments.Enchantment VANISHING_CURSE}
-	 * </p>
+	 * Note: L'enchantement utilisé est {@link org.bukkit.enchantments.Enchantment
+	 * VANISHING_CURSE}
+	 *
 	 * @return
 	 */
 	public ItemStackBuilder enchant() {
@@ -128,59 +129,60 @@ public class ItemStackBuilder {
 		enchantments.put(Enchantment.VANISHING_CURSE, 1);
 		return this;
 	}
-	
+
 	public ItemStackBuilder attributeModifier(Attribute attribute, AttributeModifier modifier) {
 		attributeModifiers.add(new Pair<>(attribute, modifier));
 		return this;
 	}
-	
+
 	public ItemStackBuilder flags(ItemFlag... flags) {
 		this.flags.addAll(Arrays.asList(flags));
 		return this;
 	}
-	
+
 	public ItemStackBuilder unbreakable(boolean unbreakable) {
 		this.unbreakable = unbreakable;
 		return this;
 	}
-	
+
 	public ItemStackBuilder unbreakable() {
 		this.unbreakable = true;
 		return this;
 	}
-	
+
 	public ItemStackBuilder unstackable(boolean unstackable) {
 		this.unstackable = unstackable;
 		return this;
 	}
-	
+
 	public ItemStackBuilder unstackable() {
 		this.unstackable = true;
 		return this;
 	}
-	
+
 	public ItemStackBuilder oldPvp() {
 		oldPvp = true;
 		return this;
 	}
-	
+
 	public ItemStackBuilder skull(String skullUrl) {
 		this.skullUrl = skullUrl;
 		return this;
 	}
-	
+
 	public ItemStackBuilder attackDamage(double damage) {
 		attack_damage = damage;
 		return this;
 	}
-	
+
 	public ItemStackBuilder postApply(Consumer<ItemStack> action) {
 		postApply = action;
 		return this;
 	}
-	
+
 	/**
 	 * Créée une nouvelle instance d'ItemStack
+	 *
 	 * @return
 	 */
 	public ItemStack make() {
@@ -201,57 +203,63 @@ public class ItemStackBuilder {
 		meta.addItemFlags(flags.toArray(ItemFlag[]::new));
 		meta.setUnbreakable(unbreakable);
 		ItemStackUtil.setUnstackable(meta, unstackable);
-		if(attack_damage>0) {
+		if (attack_damage > 0) {
 			meta.removeAttributeModifier(Attribute.ATTACK_DAMAGE);
-			meta.addAttributeModifier(
-			Attribute.ATTACK_DAMAGE,
-			new AttributeModifier(new NamespacedKey(Ioc.resolve(JavaPlugin.class), "generic.attackDamage"), attack_damage, Operation.ADD_NUMBER));
+			meta.addAttributeModifier(Attribute.ATTACK_DAMAGE,
+					new AttributeModifier(new NamespacedKey(Ioc.resolve(JavaPlugin.class), "generic.attackDamage"),
+							attack_damage, Operation.ADD_NUMBER));
 		}
 		itemStack.setItemMeta(meta);
 		if (postApply != null) {
 			postApply.accept(itemStack);
 		}
-		if(skullUrl!=null) {
+		if (skullUrl != null) {
 			ItemStackUtil.skull(itemStack, skullUrl);
 		}
 		return itemStack;
 	}
-	
+
 	public ItemStack build() {
 		return make();
 	}
-	
+
 	private void applyOldPvp() {
 		var key = new NamespacedKey(Ioc.resolve(JavaPlugin.class), "pvp_1.8");
-		switch(material) {
-		case WOODEN_SWORD:
-		case WOODEN_AXE:
-			attributeModifier(Attribute.ATTACK_DAMAGE, new AttributeModifier(key, 3.2D, AttributeModifier.Operation.ADD_NUMBER));
-			break;
-		case STONE_SWORD:
-		case STONE_AXE:
-			attributeModifier(Attribute.ATTACK_DAMAGE, new AttributeModifier(key, 3.2D, AttributeModifier.Operation.ADD_NUMBER));
-			break;
-		case IRON_SWORD:
-		case IRON_AXE:
-			attributeModifier(Attribute.ATTACK_DAMAGE, new AttributeModifier(key, 4D, AttributeModifier.Operation.ADD_NUMBER));
-			break;
-		case GOLDEN_SWORD:
-		case GOLDEN_AXE:
-			attributeModifier(Attribute.ATTACK_DAMAGE, new AttributeModifier(key, 4.8D, AttributeModifier.Operation.ADD_NUMBER));
-			break;
-		case DIAMOND_SWORD:
-		case DIAMOND_AXE:
-			attributeModifier(Attribute.ATTACK_DAMAGE, new AttributeModifier(key, 5.6D, AttributeModifier.Operation.ADD_NUMBER));
-			break;
-		case NETHERITE_SWORD:
-		case NETHERITE_AXE:
-			attributeModifier(Attribute.ATTACK_DAMAGE, new AttributeModifier(key, 6.4D, AttributeModifier.Operation.ADD_NUMBER));
-			break;
-		default:
-			break;
+		switch (material) {
+			case WOODEN_SWORD :
+			case WOODEN_AXE :
+				attributeModifier(Attribute.ATTACK_DAMAGE,
+						new AttributeModifier(key, 3.2D, AttributeModifier.Operation.ADD_NUMBER));
+				break;
+			case STONE_SWORD :
+			case STONE_AXE :
+				attributeModifier(Attribute.ATTACK_DAMAGE,
+						new AttributeModifier(key, 3.2D, AttributeModifier.Operation.ADD_NUMBER));
+				break;
+			case IRON_SWORD :
+			case IRON_AXE :
+				attributeModifier(Attribute.ATTACK_DAMAGE,
+						new AttributeModifier(key, 4D, AttributeModifier.Operation.ADD_NUMBER));
+				break;
+			case GOLDEN_SWORD :
+			case GOLDEN_AXE :
+				attributeModifier(Attribute.ATTACK_DAMAGE,
+						new AttributeModifier(key, 4.8D, AttributeModifier.Operation.ADD_NUMBER));
+				break;
+			case DIAMOND_SWORD :
+			case DIAMOND_AXE :
+				attributeModifier(Attribute.ATTACK_DAMAGE,
+						new AttributeModifier(key, 5.6D, AttributeModifier.Operation.ADD_NUMBER));
+				break;
+			case NETHERITE_SWORD :
+			case NETHERITE_AXE :
+				attributeModifier(Attribute.ATTACK_DAMAGE,
+						new AttributeModifier(key, 6.4D, AttributeModifier.Operation.ADD_NUMBER));
+				break;
+			default :
+				break;
 		}
-		attributeModifier(Attribute.ATTACK_SPEED, new AttributeModifier(key, 100D, AttributeModifier.Operation.ADD_NUMBER));
+		attributeModifier(Attribute.ATTACK_SPEED,
+				new AttributeModifier(key, 100D, AttributeModifier.Operation.ADD_NUMBER));
 	}
-	
 }

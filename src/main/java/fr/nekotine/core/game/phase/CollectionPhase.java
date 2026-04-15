@@ -1,23 +1,22 @@
 package fr.nekotine.core.game.phase;
 
+import fr.nekotine.core.exception.ExceptionCollector;
+import fr.nekotine.core.state.ItemState;
+import fr.nekotine.core.util.collection.ObservableCollection;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
-import fr.nekotine.core.exception.ExceptionCollector;
-import fr.nekotine.core.state.ItemState;
-import fr.nekotine.core.util.collection.ObservableCollection;
+public abstract class CollectionPhase<P, T> extends Phase<P> {
 
-public abstract class CollectionPhase<P, T> extends Phase<P>{
-	
 	private final List<ItemState<T>> composingItemStates = makeAppliedItemStates();
-	
+
 	protected ObservableCollection<T> itemCollection = getItemCollection();
-	
+
 	private final Consumer<T> itemSetupCallback = this::globalItemSetup;
-	
+
 	private final Consumer<Object> objectTeardownCallback = this::globalObjectTearDown;
-	
+
 	public CollectionPhase(IPhaseMachine machine) {
 		super(machine);
 	}
@@ -27,19 +26,19 @@ public abstract class CollectionPhase<P, T> extends Phase<P>{
 		var collector = new ExceptionCollector();
 		try {
 			globalSetup(inputData);
-		}catch(Exception e) {
+		} catch (Exception e) {
 			collector.collect(e);
 		}
 		for (var item : itemCollection) {
 			try {
 				globalItemSetup(item);
-			}catch(Exception e) {
+			} catch (Exception e) {
 				collector.collect(e);
 			}
 		}
 		itemCollection.addAdditionCallback(itemSetupCallback);
 		itemCollection.addSuppressionCallback(objectTeardownCallback);
-		collector.throwAsRuntime("Une erreur est survenue lors du setup des etats composants "+getClass());
+		collector.throwAsRuntime("Une erreur est survenue lors du setup des etats composants " + getClass());
 	}
 
 	@Override
@@ -50,64 +49,68 @@ public abstract class CollectionPhase<P, T> extends Phase<P>{
 		for (var item : itemCollection) {
 			try {
 				globalItemTearDown(item);
-			}catch(Exception e) {
+			} catch (Exception e) {
 				collector.collect(e);
 			}
 		}
 		collector.collect(this::globalTearDown);
-		collector.throwAsRuntime("Une erreur est survenue lors du teardown des etats composants "+getClass());
+		collector.throwAsRuntime("Une erreur est survenue lors du teardown des etats composants " + getClass());
 	}
-	
+
 	public abstract ObservableCollection<T> getItemCollection();
-	
+
 	protected abstract void globalSetup(Object inputData);
-	
+
 	protected abstract void globalTearDown();
-	
+
 	public abstract void itemSetup(T item);
-	
+
 	public abstract void itemTearDown(T item);
-	
-	protected List<ItemState<T>> makeAppliedItemStates(){
+
+	protected List<ItemState<T>> makeAppliedItemStates() {
 		return Collections.emptyList();
 	}
-	
+
 	private void globalItemSetup(T item) {
 		var collector = new ExceptionCollector();
 		for (var state : composingItemStates) {
 			try {
 				state.setup(item);
-			}catch(Exception e) {
-				collector.collect(new RuntimeException("Une erreur est survenue lors du setup des etats d'item composants "+getClass(),e));
+			} catch (Exception e) {
+				collector.collect(new RuntimeException(
+						"Une erreur est survenue lors du setup des etats d'item composants " + getClass(), e));
 			}
 		}
 		try {
 			itemSetup(item);
-		}catch(Exception e) {
-			collector.collect(new RuntimeException("Une erreur est survenue lors du setup des item composants "+getClass(),e));
+		} catch (Exception e) {
+			collector.collect(
+					new RuntimeException("Une erreur est survenue lors du setup des item composants " + getClass(), e));
 		}
 		collector.throwAsRuntime();
 	}
-	
+
 	private void globalItemTearDown(T item) {
 		var collector = new ExceptionCollector();
 		try {
 			itemTearDown(item);
-		}catch(Exception e) {
-			collector.collect(new RuntimeException("Une erreur est survenue lors du setup des items composants "+getClass(),e));
+		} catch (Exception e) {
+			collector.collect(new RuntimeException(
+					"Une erreur est survenue lors du setup des items composants " + getClass(), e));
 		}
 		for (var state : composingItemStates) {
 			try {
 				state.teardown(item);
-			}catch(Exception e) {
-				collector.collect(new RuntimeException("Une erreur est survenue lors du setup des etats d'item composants "+getClass(),e));
+			} catch (Exception e) {
+				collector.collect(new RuntimeException(
+						"Une erreur est survenue lors du setup des etats d'item composants " + getClass(), e));
 			}
 		}
 		collector.throwAsRuntime();
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private void globalObjectTearDown(Object o) {
-		globalItemTearDown((T)o);
+		globalItemTearDown((T) o);
 	}
 }

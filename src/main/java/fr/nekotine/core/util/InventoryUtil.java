@@ -1,11 +1,13 @@
 package fr.nekotine.core.util;
 
+import fr.nekotine.core.snapshot.InventorySnapshot;
+import fr.nekotine.core.snapshot.PlayerInventorySnapshot;
+import fr.nekotine.core.snapshot.Snapshot;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
@@ -15,22 +17,18 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Nullable;
 
-import fr.nekotine.core.snapshot.InventorySnapshot;
-import fr.nekotine.core.snapshot.PlayerInventorySnapshot;
-import fr.nekotine.core.snapshot.Snapshot;
-
 /**
  * Classe utilitaire pour les inventaires minecraft
- * 
- * @author XxGoldenbluexX
  *
+ * @author XxGoldenbluexX
  */
 public class InventoryUtil {
 
 	/**
-	 * Prend une capture de tous les ItemStack de l'inventaire.
-	 * Contrairement à une copie profonde, les {@link org.bukkit.inventory.ItemStack ItemStack} sont ceux de l'inventaire et peuvent
-	 * être modifiés.
+	 * Prend une capture de tous les ItemStack de l'inventaire. Contrairement à une
+	 * copie profonde, les {@link org.bukkit.inventory.ItemStack ItemStack} sont
+	 * ceux de l'inventaire et peuvent être modifiés.
+	 *
 	 * @see InventoryUtil#deepSnapshot
 	 * @param holder
 	 * @return la snapshot
@@ -40,10 +38,12 @@ public class InventoryUtil {
 		snap.snapshot(holder.getInventory());
 		return snap;
 	}
-	
+
 	/**
-	 * Prend une capture de tous les ItemStack de l'inventaire.
-	 * Contrairement à une copie de surface, les {@link org.bukkit.inventory.ItemStack ItemStack} sont clonés.
+	 * Prend une capture de tous les ItemStack de l'inventaire. Contrairement à une
+	 * copie de surface, les {@link org.bukkit.inventory.ItemStack ItemStack} sont
+	 * clonés.
+	 *
 	 * @see InventoryUtil#snapshot
 	 * @param holder
 	 * @return la snapshot
@@ -53,11 +53,12 @@ public class InventoryUtil {
 		snap.deepSnapshot(holder.getInventory());
 		return snap;
 	}
-	
+
 	/**
-	 * Prend une capture de tous les ItemStack de l'inventaire.
-	 * Contrairement à une copie profonde, les {@link org.bukkit.inventory.ItemStack ItemStack} sont ceux de l'inventaire et peuvent
-	 * être modifiés.
+	 * Prend une capture de tous les ItemStack de l'inventaire. Contrairement à une
+	 * copie profonde, les {@link org.bukkit.inventory.ItemStack ItemStack} sont
+	 * ceux de l'inventaire et peuvent être modifiés.
+	 *
 	 * @see InventoryUtil#deepSnapshot
 	 * @param holder
 	 * @return la snapshot
@@ -67,10 +68,12 @@ public class InventoryUtil {
 		snap.snapshot(holder.getInventory());
 		return snap;
 	}
-	
+
 	/**
-	 * Prend une capture de tous les ItemStack de l'inventaire.
-	 * Contrairement à une copie de surface, les {@link org.bukkit.inventory.ItemStack ItemStack} sont clonés.
+	 * Prend une capture de tous les ItemStack de l'inventaire. Contrairement à une
+	 * copie de surface, les {@link org.bukkit.inventory.ItemStack ItemStack} sont
+	 * clonés.
+	 *
 	 * @see InventoryUtil#snapshot
 	 * @param holder
 	 * @return la snapshot
@@ -80,28 +83,34 @@ public class InventoryUtil {
 		snap.deepSnapshot(holder.getInventory());
 		return snap;
 	}
-	
+
 	/**
-	 * Remplis l'inventaire avec les {@link org.bukkit.inventory.ItemStack ItemStack} de la snapshot.
+	 * Remplis l'inventaire avec les {@link org.bukkit.inventory.ItemStack
+	 * ItemStack} de la snapshot.
+	 *
 	 * @param holder
 	 * @param snapshot
 	 */
 	public static void fill(InventoryHolder holder, Snapshot<Inventory> snapshot) {
 		snapshot.patch(holder.getInventory());
 	}
+
 	/**
-	 * Remplis l'inventaire avec les {@link org.bukkit.inventory.ItemStack ItemStack} de la snapshot.
+	 * Remplis l'inventaire avec les {@link org.bukkit.inventory.ItemStack
+	 * ItemStack} de la snapshot.
+	 *
 	 * @param holder
 	 * @param snapshot
 	 */
 	public static void fill(HumanEntity holder, Snapshot<PlayerInventory> snapshot) {
 		snapshot.patch(holder.getInventory());
 	}
-	
+
 	/**
-	 * Forme un rectangle dans l'inventaire aux coordonnées données avec l'ItemStack donné.
-	 * L'axe x est l'axe horizontale et l'axe y le vertical.
-	 * Le point (0,0) est en haut a gauche dans l'inventaire.
+	 * Forme un rectangle dans l'inventaire aux coordonnées données avec l'ItemStack
+	 * donné. L'axe x est l'axe horizontale et l'axe y le vertical. Le point (0,0)
+	 * est en haut a gauche dans l'inventaire.
+	 *
 	 * @param inventory
 	 * @param itemStack
 	 * @param x1
@@ -124,16 +133,18 @@ public class InventoryUtil {
 		}
 		for (var x = minx; x <= maxx; x++) {
 			for (var y = miny; y <= maxy; y++) {
-				inventory.setItem(chestCoordinateToInventoryIndex(x,y), itemStack);
+				inventory.setItem(chestCoordinateToInventoryIndex(x, y), itemStack);
 			}
 		}
 	}
-	
+
 	/**
-	 * Remplis le rectangle spécifié avec les items spécifiés. Il peut y avoir moins d'ItemStack que l'aire du rectangle.
-	 * Dans le cas ou il y a plus d'ItemStack que l'aire du rectangle permet d'en montrer, les ItemStack restant ne sont pas affichés.
-	 * L'axe x est l'axe horizontale et l'axe y le vertical.
-	 * Le point (0,0) est en haut a gauche dans l'inventaire.
+	 * Remplis le rectangle spécifié avec les items spécifiés. Il peut y avoir moins
+	 * d'ItemStack que l'aire du rectangle. Dans le cas ou il y a plus d'ItemStack
+	 * que l'aire du rectangle permet d'en montrer, les ItemStack restant ne sont
+	 * pas affichés. L'axe x est l'axe horizontale et l'axe y le vertical. Le point
+	 * (0,0) est en haut a gauche dans l'inventaire.
+	 *
 	 * @param inventory
 	 * @param content
 	 * @param x1
@@ -158,55 +169,65 @@ public class InventoryUtil {
 		for (var x = minx; x <= maxx; x++) {
 			for (var y = miny; y <= maxy; y++) {
 				if (ite.hasNext()) {
-					inventory.setItem(chestCoordinateToInventoryIndex(x,y), ite.next());
-				}else {
+					inventory.setItem(chestCoordinateToInventoryIndex(x, y), ite.next());
+				} else {
 					return;
 				}
 			}
 		}
 	}
-	
+
 	public static int chestCoordinateToInventoryIndex(int x, int y) {
 		return x + (y * 9);
 	}
-	
+
 	public static void replaceItem(Inventory inventory, ItemStack oldItem, ItemStack newItem) {
 		var id = inventory.first(oldItem);
 		if (id >= 0) {
 			inventory.setItem(id, newItem);
-		}else {
-			inventory.addItem(newItem);	
+		} else {
+			inventory.addItem(newItem);
 		}
 	}
-	
+
 	public static void removeIf(Inventory inventory, Predicate<ItemStack> predicate) {
-		Arrays.stream(inventory.getContents()).filter(i -> i != null).filter(predicate).forEach(i -> inventory.removeItem(i));
+		Arrays.stream(inventory.getContents()).filter(i -> i != null).filter(predicate)
+				.forEach(i -> inventory.removeItem(i));
 	}
-	
+
 	public static boolean containTaggedItem(Inventory inventory, NamespacedKey key) {
-		return Arrays.stream(inventory.getContents()).anyMatch(i -> i != null && i.getPersistentDataContainer().getKeys().contains(key));
+		return Arrays.stream(inventory.getContents())
+				.anyMatch(i -> i != null && i.getPersistentDataContainer().getKeys().contains(key));
 	}
-	
+
 	public static boolean containTaggedItem(Inventory inventory, NamespacedKey key, String value) {
-		return Arrays.stream(inventory.getContents()).anyMatch(i -> i != null && i.getPersistentDataContainer().get(key, PersistentDataType.STRING) == value);
+		return Arrays.stream(inventory.getContents()).anyMatch(
+				i -> i != null && i.getPersistentDataContainer().get(key, PersistentDataType.STRING) == value);
 	}
-	
+
 	public static boolean containTaggedItem(Inventory inventory, NamespacedKey key, int value) {
-		return Arrays.stream(inventory.getContents()).anyMatch(i -> i != null && i.getPersistentDataContainer().get(key, PersistentDataType.INTEGER) == value);
+		return Arrays.stream(inventory.getContents()).anyMatch(
+				i -> i != null && i.getPersistentDataContainer().get(key, PersistentDataType.INTEGER) == value);
 	}
-	
+
 	public static Set<@Nullable ItemStack> taggedItems(Inventory inventory, NamespacedKey key) {
-		return Arrays.stream(inventory.getContents()).filter(i -> i != null && i.getPersistentDataContainer().getKeys().contains(key)).collect(Collectors.toUnmodifiableSet());
+		return Arrays.stream(inventory.getContents())
+				.filter(i -> i != null && i.getPersistentDataContainer().getKeys().contains(key))
+				.collect(Collectors.toUnmodifiableSet());
 	}
-	
+
 	public static Set<@Nullable ItemStack> taggedItems(Inventory inventory, NamespacedKey key, String value) {
-		return Arrays.stream(inventory.getContents()).filter(i -> i != null && i.getPersistentDataContainer().get(key, PersistentDataType.STRING) == value).collect(Collectors.toUnmodifiableSet());
+		return Arrays.stream(inventory.getContents())
+				.filter(i -> i != null && i.getPersistentDataContainer().get(key, PersistentDataType.STRING) == value)
+				.collect(Collectors.toUnmodifiableSet());
 	}
-	
+
 	public static Set<@Nullable ItemStack> taggedItems(Inventory inventory, NamespacedKey key, int value) {
-		return Arrays.stream(inventory.getContents()).filter(i -> i != null && i.getPersistentDataContainer().get(key, PersistentDataType.INTEGER) == value).collect(Collectors.toUnmodifiableSet());
+		return Arrays.stream(inventory.getContents())
+				.filter(i -> i != null && i.getPersistentDataContainer().get(key, PersistentDataType.INTEGER) == value)
+				.collect(Collectors.toUnmodifiableSet());
 	}
-	
+
 	public static boolean anyMatch(Inventory inventory, Predicate<ItemStack> predicate) {
 		return Arrays.stream(inventory.getContents()).anyMatch(predicate);
 	}

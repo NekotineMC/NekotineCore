@@ -5,11 +5,13 @@ import org.bukkit.entity.HumanEntity;
 public class HungerableSnapshot implements Snapshot<HumanEntity> {
 
 	private int foodLevel;
-	
+
 	private float saturation;
-	
+
 	/**
-	 * @implNote c'est l'équivalent du {@link fr.nekotine.core.snapshot.PlayerStatusSnaphot#deepSnapshot deepSnapshot}
+	 * @implNote c'est l'équivalent du
+	 *           {@link fr.nekotine.core.snapshot.PlayerStatusSnaphot#deepSnapshot
+	 *           deepSnapshot}
 	 */
 	@Override
 	public Snapshot<HumanEntity> snapshot(HumanEntity item) {
@@ -28,5 +30,4 @@ public class HungerableSnapshot implements Snapshot<HumanEntity> {
 		item.setFoodLevel(foodLevel);
 		item.setSaturation(saturation);
 	}
-
 }

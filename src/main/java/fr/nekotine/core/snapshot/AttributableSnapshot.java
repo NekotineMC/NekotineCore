@@ -1,10 +1,9 @@
 package fr.nekotine.core.snapshot;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
+import java.util.HashMap;
+import java.util.Map;
 import org.bukkit.attribute.Attributable;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -12,7 +11,7 @@ import org.bukkit.attribute.AttributeInstance;
 public class AttributableSnapshot implements Snapshot<Attributable> {
 
 	private Map<Attribute, Snapshot<AttributeInstance>> attributes;
-	
+
 	@Override
 	public Snapshot<Attributable> snapshot(Attributable item) {
 		attributes = new HashMap<>();
@@ -51,5 +50,4 @@ public class AttributableSnapshot implements Snapshot<Attributable> {
 			}
 		}
 	}
-
 }

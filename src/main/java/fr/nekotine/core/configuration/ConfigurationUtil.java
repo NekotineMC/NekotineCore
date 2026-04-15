@@ -1,14 +1,12 @@
 package fr.nekotine.core.configuration;
 
+import fr.nekotine.core.ioc.Ioc;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import fr.nekotine.core.ioc.Ioc;
 
 public class ConfigurationUtil {
 
@@ -19,7 +17,7 @@ public class ConfigurationUtil {
 		if (confFile.exists()) {
 			conf = YamlConfiguration.loadConfiguration(confFile);
 			confPresent = true;
-		}else {
+		} else {
 			conf = new YamlConfiguration();
 		}
 		var o = conf.options();
@@ -29,15 +27,14 @@ public class ConfigurationUtil {
 		Configuration defaultConfig;
 		var res = Ioc.resolve(JavaPlugin.class).getResource(pathInJar);
 		if (res == null) {
-			throw new RuntimeException("Aucun fichier de config n'est définit dans le jar pour "+pathInJar);
+			throw new RuntimeException("Aucun fichier de config n'est définit dans le jar pour " + pathInJar);
 		}
-		try (var defaultReader = new InputStreamReader(res ,"UTF-8")){
+		try (var defaultReader = new InputStreamReader(res, "UTF-8")) {
 			defaultConfig = YamlConfiguration.loadConfiguration(defaultReader);
 		}
 		conf.setDefaults(defaultConfig);
 		// save
 		conf.save(confFile);
-		return confPresent?conf:defaultConfig;
+		return confPresent ? conf : defaultConfig;
 	}
-	
 }

@@ -1,17 +1,16 @@
 package fr.nekotine.core.state;
 
+import fr.nekotine.core.util.EventUtil;
 import org.bukkit.event.Listener;
 
-import fr.nekotine.core.util.EventUtil;
-
-public class RegisteredEventListenerState implements State{
+public class RegisteredEventListenerState implements State {
 
 	private Listener listener;
-	
+
 	public RegisteredEventListenerState(Listener listener) {
 		this.listener = listener;
 	}
-	
+
 	@Override
 	public void setup() {
 		EventUtil.register(listener);
@@ -21,5 +20,4 @@ public class RegisteredEventListenerState implements State{
 	public void teardown() {
 		EventUtil.unregister(listener);
 	}
-
 }

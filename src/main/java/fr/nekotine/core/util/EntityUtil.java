@@ -1,8 +1,13 @@
 package fr.nekotine.core.util;
 
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.events.PacketContainer;
+import fr.nekotine.core.logging.NekotineLogger;
+import io.papermc.paper.registry.RegistryAccess;
+import io.papermc.paper.registry.RegistryKey;
 import java.util.Collection;
 import java.util.function.Predicate;
-
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -20,21 +25,16 @@ import org.bukkit.entity.Slime;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.util.Vector;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.events.PacketContainer;
-
-import fr.nekotine.core.logging.NekotineLogger;
-import io.papermc.paper.registry.RegistryAccess;
-import io.papermc.paper.registry.RegistryKey;
-
 public class EntityUtil {
 	/**
 	 * Crée un slime de la taille donnée.
-	 * 
-	 * @param location La location du slime
-	 * @param reason   La raison de l'apparition
-	 * @param size     La taille du slime
+	 *
+	 * @param location
+	 *            La location du slime
+	 * @param reason
+	 *            La raison de l'apparition
+	 * @param size
+	 *            La taille du slime
 	 * @return Le slime crée
 	 */
 	public static Slime SpawnSlime(Location location, SpawnReason reason, int size) {
@@ -44,20 +44,19 @@ public class EntityUtil {
 	}
 
 	/**
-	 * 
-	 * @param entity L'entité à regarder
+	 * @param entity
+	 *            L'entité à regarder
 	 * @return True si l'entité est suportée par un block solide
 	 */
 	public static boolean IsOnGround(Entity entity) {
 		return entity.isOnGround();
 	}
-	
+
 	public static boolean IsOnGround(Player player) {
 		return player.getLocation().subtract(0, 0.1, 0).getBlock().getType().isSolid();
 	}
 
 	/**
-	 * 
 	 * @param ent
 	 * @param str
 	 * @param yAdd
@@ -69,7 +68,6 @@ public class EntityUtil {
 	}
 
 	/**
-	 * 
 	 * @param ent
 	 * @param vec
 	 * @param str
@@ -116,9 +114,10 @@ public class EntityUtil {
 		if (entity instanceof Llama)
 			type = EntityType.LLAMA;
 		try {
-			sound = RegistryAccess.registryAccess().getRegistry(RegistryKey.SOUND_EVENT).get(NamespacedKey.minecraft("entity."+type+".hurt"));
+			sound = RegistryAccess.registryAccess().getRegistry(RegistryKey.SOUND_EVENT)
+					.get(NamespacedKey.minecraft("entity." + type + ".hurt"));
 		} catch (IllegalArgumentException e) {
-			NekotineLogger.make().error("[PlayDamageSound] impossible d'obtenir le son pour "+ type, e);
+			NekotineLogger.make().error("[PlayDamageSound] impossible d'obtenir le son pour " + type, e);
 		}
 
 		entity.getWorld().playSound(entity.getLocation(), sound, 1.5f + (float) (0.5f * Math.random()),
@@ -126,7 +125,6 @@ public class EntityUtil {
 	}
 
 	/**
-	 * 
 	 * @param entity
 	 * @return La vie maximale de l'entité
 	 */
@@ -135,9 +133,9 @@ public class EntityUtil {
 	}
 
 	/**
-	 * 
 	 * @param entity
-	 * @param value  (0.5 si <= 0)
+	 * @param value
+	 *            (0.5 si <= 0)
 	 */
 	public static void SetMaxHealth(LivingEntity entity, double value) {
 		entity.getAttribute(Attribute.MAX_HEALTH).setBaseValue(value);
@@ -157,8 +155,9 @@ public class EntityUtil {
 	/**
 	 * Retire tous les effets de potion minecraft à cette
 	 * {@link org.bukkit.entity.LivingEntity LicingEntity}.
-	 * 
-	 * @param target l'entitée vidée de ses effets.
+	 *
+	 * @param target
+	 *            l'entitée vidée de ses effets.
 	 */
 	public static void clearPotionEffects(LivingEntity target) {
 		Registry.POTION_EFFECT_TYPE.forEach(e -> target.removePotionEffect(e));
@@ -169,7 +168,7 @@ public class EntityUtil {
 	 * {@link org.bukkit.attribute.Attribute Attribute} pour leurs valeur de base.
 	 * Supprime également tous les {@link org.bukkit.attribute.AttributeModifier
 	 * AttributeModifier}.
-	 * 
+	 *
 	 * @param target
 	 */
 	public static void defaultAllAttributes(Attributable target) {
@@ -200,7 +199,8 @@ public class EntityUtil {
 	public static void fakeDamage(LivingEntity target, Iterable<Player> observers) {
 		PacketContainer packet = new PacketContainer(PacketType.Play.Server.HURT_ANIMATION);
 		packet.getIntegers().write(0, target.getEntityId());
-		//packet.getFloat().write(0, 0f); //packet.getIntegers().write(1, 1); // Animation 1 = TAKE_DAMAGE
+		// packet.getFloat().write(0, 0f); //packet.getIntegers().write(1, 1); //
+		// Animation 1 = TAKE_DAMAGE
 		var pmanager = ProtocolLibrary.getProtocolManager();
 		for (var player : observers) {
 			pmanager.sendServerPacket(player, packet);
@@ -210,24 +210,24 @@ public class EntityUtil {
 	public static void fakeDamage(LivingEntity target) {
 		PacketContainer packet = new PacketContainer(PacketType.Play.Server.HURT_ANIMATION);
 		packet.getIntegers().write(0, target.getEntityId());
-		//packet.getFloat().write(0, 0f);
+		// packet.getFloat().write(0, 0f);
 		var pmanager = ProtocolLibrary.getProtocolManager();
 		pmanager.broadcastServerPacket(packet);
 	}
-	
+
 	public static void freeze(Player player) {
 		player.setAllowFlight(true);
-		player.teleport(player.getLocation().add(0,0.1,0));
+		player.teleport(player.getLocation().add(0, 0.1, 0));
 		player.setFlying(true);
 		player.setFlySpeed(0);
 	}
-	
+
 	public static void unfreeze(Player player) {
 		player.setAllowFlight(false);
 		player.setFlying(false);
 		player.setFlySpeed(0.1F);
 	}
-	
+
 	public static void fixLighting(BlockDisplay blockDisplay) {
 		var copy = blockDisplay.copy(blockDisplay.getLocation());
 		blockDisplay.setBlock(Material.AIR.createBlockData());

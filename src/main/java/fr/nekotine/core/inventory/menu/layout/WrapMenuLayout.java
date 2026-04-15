@@ -1,32 +1,35 @@
 package fr.nekotine.core.inventory.menu.layout;
 
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-
-import org.bukkit.inventory.Inventory;
-
 import fr.nekotine.core.inventory.menu.ClickableMenuComponent;
 import fr.nekotine.core.inventory.menu.element.MenuElement;
 import fr.nekotine.core.util.InventoryUtil;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+import org.bukkit.inventory.Inventory;
 
 /**
- * Un layout basique, affichant juste des {@link fr.nekotine.core.inventory.menu.element.ActionMenuItem.inventory.menu.MenuItem MenuItem} comme dans un coffre.
- * 
- * Ce layout offre la possibilité aux {@link fr.nekotine.core.inventory.menu.element.ActionMenuItem.inventory.menu.MenuItem MenuItem} d'être triés.
- * @author XxGoldenbluexX
+ * Un layout basique, affichant juste des
+ * {@link fr.nekotine.core.inventory.menu.element.ActionMenuItem.inventory.menu.MenuItem
+ * MenuItem} comme dans un coffre.
  *
+ * <p>
+ * Ce layout offre la possibilité aux
+ * {@link fr.nekotine.core.inventory.menu.element.ActionMenuItem.inventory.menu.MenuItem
+ * MenuItem} d'être triés.
+ *
+ * @author XxGoldenbluexX
  */
-public class WrapMenuLayout extends MenuLayout{
-	
+public class WrapMenuLayout extends MenuLayout {
+
 	private Comparator<MenuElement> sorter;
-	
+
 	private List<MenuElement> items = new LinkedList<>();
-	
+
 	public void setSorter(Comparator<MenuElement> sorter) {
 		this.sorter = sorter;
 	}
-	
+
 	public void addElement(MenuElement element) {
 		items.add(element);
 		element.setParent(this);
@@ -53,5 +56,4 @@ public class WrapMenuLayout extends MenuLayout{
 			curX++;
 		}
 	}
-
 }

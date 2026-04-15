@@ -1,26 +1,23 @@
 package fr.nekotine.core.inventory.menu.element;
 
 import java.util.function.Supplier;
-
-import org.bukkit.inventory.ItemStack;
-
 import net.kyori.adventure.text.Component;
+import org.bukkit.inventory.ItemStack;
 
 /**
  * MenuElement pour afficher un Component dynamique
- * 
- * @author XxGoldenbluexX
  *
+ * @author XxGoldenbluexX
  */
-public class ComponentDisplayMenuItem extends MenuElement{
-	
+public class ComponentDisplayMenuItem extends MenuElement {
+
 	private final Supplier<Component> valueSupplier;
-	
+
 	private ItemStack item;
-	
+
 	public ComponentDisplayMenuItem(ItemStack item, Supplier<Component> valueSupplier) {
 		this.item = item;
-		this.valueSupplier= valueSupplier;
+		this.valueSupplier = valueSupplier;
 	}
 
 	@Override
@@ -30,5 +27,4 @@ public class ComponentDisplayMenuItem extends MenuElement{
 		item.setItemMeta(meta);
 		return item;
 	}
-
 }

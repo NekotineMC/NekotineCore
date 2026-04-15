@@ -1,14 +1,5 @@
 package fr.nekotine.core.map.command;
 
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
-
-import org.bukkit.Location;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import org.bukkit.util.BlockVector;
-import org.bukkit.util.BoundingBox;
-
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.Argument;
@@ -33,28 +24,34 @@ import fr.nekotine.core.map.command.generator.PositionCommandGenerator;
 import fr.nekotine.core.map.command.generator.StringCommandGenerator;
 import fr.nekotine.core.text.Colors;
 import fr.nekotine.core.util.AsyncUtil;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
+import org.bukkit.Location;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.util.BlockVector;
+import org.bukkit.util.BoundingBox;
 
 public class MapCommandGenerator implements IMapCommandGenerator {
 
 	private final ComponentLogger logger = NekotineLogger.make();
-	
+
 	private CommandAPICommand mapCommand;
 
 	private final IMapElementCommandGeneratorResolver generatorResolver;
-	
-	private Argument<MapMetadata> mapArgument = new CustomArgument<MapMetadata, String>(new StringArgument("mapName"), info -> {
-		try {
-			return Ioc.resolve(IMapModule.class).getMapMetadata(info.currentInput());
-		} catch (Exception e) {
-			logger.warn("Erreur lors de la récupération de la carte", e);
-			throw CustomArgumentException.fromString("Erreur interne lors de la récupération de la carte.");
-		}
-	}).replaceSuggestions(ArgumentSuggestions.stringsAsync(info -> CompletableFuture.supplyAsync(
-			() -> {
-				return Ioc.resolve(IMapModule.class).listMaps().stream()
-						.map(handle -> handle.getName())
+
+	private Argument<MapMetadata> mapArgument = new CustomArgument<MapMetadata, String>(new StringArgument("mapName"),
+			info -> {
+				try {
+					return Ioc.resolve(IMapModule.class).getMapMetadata(info.currentInput());
+				} catch (Exception e) {
+					logger.warn("Erreur lors de la récupération de la carte", e);
+					throw CustomArgumentException.fromString("Erreur interne lors de la récupération de la carte.");
+				}
+			}).replaceSuggestions(ArgumentSuggestions.stringsAsync(info -> CompletableFuture.supplyAsync(() -> {
+				return Ioc.resolve(IMapModule.class).listMaps().stream().map(handle -> handle.getName())
 						.toArray(String[]::new);
 			})));
 
@@ -67,7 +64,7 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 				.registerGenerator(BoundingBox.class, new BoundingBoxCommandGenerator())
 				.registerGenerator(BoundingBox.class, new BlockBoundingBoxCommandGenerator())
 				.registerGenerator(String.class, new StringCommandGenerator());
-		Ioc.getProvider().registerSingletonInstanceAs(generatorResolver,IMapElementCommandGeneratorResolver.class);
+		Ioc.getProvider().registerSingletonInstanceAs(generatorResolver, IMapElementCommandGeneratorResolver.class);
 	}
 
 	@Override
@@ -83,22 +80,26 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 			}
 			var editCommand = new CommandAPICommand("edit");
 			editCommand.executes(
-					(CommandExecutor) (sender, args) -> sender.sendMessage(Component.text("Usage: /map edit <mapType> <mapName>", Colors.Command.INFO)),
+					(CommandExecutor) (sender, args) -> sender
+							.sendMessage(Component.text("Usage: /map edit <mapType> <mapName>", Colors.Command.INFO)),
 					ExecutorType.ALL);
 			var addCommand = new CommandAPICommand("add");
 			addCommand.executes(
-					(CommandExecutor) (sender, args) -> sender.sendMessage(Component.text("Usage: /map add <mapType> <mapName>", Colors.Command.INFO)),
+					(CommandExecutor) (sender, args) -> sender
+							.sendMessage(Component.text("Usage: /map add <mapType> <mapName>", Colors.Command.INFO)),
 					ExecutorType.ALL);
 			var removeCommand = new CommandAPICommand("remove");
 			removeCommand.executes(
-					(CommandExecutor) (sender, args) -> sender.sendMessage(Component.text("Usage: /map remove <mapType> <mapName>", Colors.Command.INFO)),
+					(CommandExecutor) (sender, args) -> sender
+							.sendMessage(Component.text("Usage: /map remove <mapType> <mapName>", Colors.Command.INFO)),
 					ExecutorType.ALL);
 			for (var mapType : mapTypes) {
 				try {
 					// EDIT
 					var mapTypeName = mapType.getSimpleName();
 					var generator = generatorResolver.resolveFor(mapType);
-					Function<CommandArguments, Object> pipeline = a -> mapModule.getContent((MapMetadata)a.get("mapName"),mapType);
+					Function<CommandArguments, Object> pipeline = a -> mapModule
+							.getContent((MapMetadata) a.get("mapName"), mapType);
 					for (var branch : generator.generateFor(pipeline, mapType)) {
 						var command = new CommandAPICommand(mapTypeName);
 						command.withArguments(mapArgument);
@@ -109,18 +110,18 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 								throw CommandAPI.failWithString(String.format("Cette carte n'existe pas."));
 							}
 							var config = mapModule.getContent(metadata, mapType);
-							var newConf = (ConfigurationSerializable)branch.consumer().accept(config, sender, args);
+							var newConf = (ConfigurationSerializable) branch.consumer().accept(config, sender, args);
 							sender.sendMessage(Component.text("Sauvegarde de la carte...", Colors.Command.INFO));
-							AsyncUtil.runAsync(
-								AsyncUtil.thenSync(() -> {
-									mapModule.saveContent(metadata, newConf);
-								}, () -> {
-									sender.sendMessage(Component.text("Sauvegarde effectuée.", Colors.Command.SUCCESS));
-								})
-							, (e) -> {sender.sendMessage(Component.text("Une erreur est survenue lors de l'édition:", Colors.Command.ERROR)
-									.append(Component.text(e.getMessage())));
-							logger.warn("Une erreur est survenue lors de la sauvegarde de la carte.", e);}
-							);
+							AsyncUtil.runAsync(AsyncUtil.thenSync(() -> {
+								mapModule.saveContent(metadata, newConf);
+							}, () -> {
+								sender.sendMessage(Component.text("Sauvegarde effectuée.", Colors.Command.SUCCESS));
+							}), (e) -> {
+								sender.sendMessage(Component
+										.text("Une erreur est survenue lors de l'édition:", Colors.Command.ERROR)
+										.append(Component.text(e.getMessage())));
+								logger.warn("Une erreur est survenue lors de la sauvegarde de la carte.", e);
+							});
 						};
 						command.executes(executor, ExecutorType.ALL);
 						editCommand.withSubcommand(command);
@@ -129,20 +130,22 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 					var typedAddCommand = new CommandAPICommand(mapTypeName);
 					typedAddCommand.withArguments(new StringArgument("mapName"));
 					typedAddCommand.executes((CommandExecutor) (sender, args) -> {
-						var mapName = (String)args.get("mapName");
+						var mapName = (String) args.get("mapName");
 						var metadata = new MapMetadata(mapName);
 						sender.sendMessage(Component.text("Ajout de la carte...", Colors.Command.INFO));
-						AsyncUtil.runAsync(() ->{
+						AsyncUtil.runAsync(() -> {
 							AsyncUtil.thenSync(() -> {
 								mapModule.saveMapMetadata(metadata);
 							}, () -> {
 								sender.sendMessage(Component.text("La carte a bien été créé.", Colors.Command.SUCCESS));
 							});
-						}, (e) -> {sender.sendMessage(Component.text("Une erreur est survenue lors de l'ajout:", Colors.Command.ERROR)
-								.append(Component.text(e.getMessage())));
-						logger.warn("Une erreur est survenue lors de la sauvegarde de la carte.", e);}
-						);
-					}, ExecutorType.ALL);// TODO standardiser command messages
+						}, (e) -> {
+							sender.sendMessage(
+									Component.text("Une erreur est survenue lors de l'ajout:", Colors.Command.ERROR)
+											.append(Component.text(e.getMessage())));
+							logger.warn("Une erreur est survenue lors de la sauvegarde de la carte.", e);
+						});
+					}, ExecutorType.ALL); // TODO standardiser command messages
 					addCommand.withSubcommand(typedAddCommand);
 					// REMOVE
 					var typedRemoveCommand = new CommandAPICommand(mapTypeName);
@@ -153,20 +156,21 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 							throw CommandAPI.failWithString(String.format("Cette carte n'existe pas."));
 						}
 						sender.sendMessage(Component.text("Suppression de la carte...", Colors.Command.INFO));
-						AsyncUtil.runAsync(() ->{
+						AsyncUtil.runAsync(() -> {
 							AsyncUtil.thenSync(() -> {
 								mapModule.deleteMap(metadata);
 							}, () -> {
 								sender.sendMessage(Component.text("Suppression effectuée.", Colors.Command.SUCCESS));
 							});
-						}, (e) -> {sender.sendMessage(Component.text("Une erreur est survenue lors de la suppression:", Colors.Command.ERROR)
-								.append(Component.text(e.getMessage())));
-						logger.warn("Une erreur est survenue lors de la suppression de la carte.", e);}
-						);
-					}, ExecutorType.ALL);// TODO standardiser command messages
+						}, (e) -> {
+							sender.sendMessage(Component
+									.text("Une erreur est survenue lors de la suppression:", Colors.Command.ERROR)
+									.append(Component.text(e.getMessage())));
+							logger.warn("Une erreur est survenue lors de la suppression de la carte.", e);
+						});
+					}, ExecutorType.ALL); // TODO standardiser command messages
 					removeCommand.withSubcommand(typedRemoveCommand);
-					logger
-							.info("[MapCommandGenerator] Commandes générées pour le type de carte " + mapTypeName);
+					logger.info("[MapCommandGenerator] Commandes générées pour le type de carte " + mapTypeName);
 				} catch (Exception e) {
 					throw new Exception(
 							"[MapCommandGenerator] Erreur lors de la génération de commande pour le type de map "
@@ -175,9 +179,9 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 				}
 			}
 			mapCommand.withSubcommands(editCommand, addCommand, removeCommand);
-			
-			logger.info(
-					"[MapCommandGenerator] Des commandes ont été automatiquement générées pour gérer des types cartes.");
+
+			logger.info("[MapCommandGenerator] Des commandes ont été automatiquement générées pour gérer des"
+					+ " types cartes.");
 		} catch (Exception e) {
 			logger.error("MapCommandGenerator.generateFor(Class<? extends MapElement> ... element)",
 					"Une erreur est survenue lors de la génération des commandes de map", e);
@@ -186,12 +190,15 @@ public class MapCommandGenerator implements IMapCommandGenerator {
 
 	/**
 	 * Create map command with add,remove and list subcommands
-	 * 
+	 *
 	 * @return
 	 */
 	private void makeMapCommand() {
 		mapCommand = new CommandAPICommand("map");
-		mapCommand.executes((CommandExecutor) (sender, args) -> sender.sendMessage(Component.text("Usage: /map <action>",Colors.Command.INFO)),
-				ExecutorType.ALL);
+		mapCommand
+				.executes(
+						(CommandExecutor) (sender, args) -> sender
+								.sendMessage(Component.text("Usage: /map <action>", Colors.Command.INFO)),
+						ExecutorType.ALL);
 	}
 }
