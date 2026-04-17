@@ -1,9 +1,12 @@
 package fr.nekotine.core.util;
 
-import fr.nekotine.core.util.lambda.TriConsumer;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Random;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+
 import org.bukkit.World;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.BlockDisplay;
@@ -14,6 +17,8 @@ import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
 import org.joml.AxisAngle4f;
 import org.joml.Vector3f;
+
+import fr.nekotine.core.util.lambda.TriConsumer;
 
 public class SpatialUtil {
 	public enum SphereAlgorithm {
@@ -297,5 +302,57 @@ public class SpatialUtil {
 			consumer.accept(new Vector(x, y, z));
 			theta += deltaTheta;
 		}
+	}
+	
+	public static final Collection<BlockDisplay> boundingBoxEdgeAsDisplayBlocks(World world, BoundingBox box, BlockData data){
+		return boundingBoxEdgeAsDisplayBlocks(world, box, data, 0.03f);
+	}
+	
+	public static final Collection<BlockDisplay> boundingBoxEdgeAsDisplayBlocks(World world, BoundingBox box, BlockData data, float thickness) {
+		var min = box.getMin();
+		var max = box.getMax();
+		var displays = new LinkedList<BlockDisplay>();
+		// 4 edges on one Z axis
+		var z_length = (float)(max.getZ() - min.getZ());
+		var transform1 = new Transformation(new Vector3f(), new AxisAngle4f(), new Vector3f(thickness, thickness,z_length), new AxisAngle4f());
+		for (var corner : Set.of(box.getMin(), box.getMin().setX(max.getX()), box.getMin().setY(max.getY()),box.getMin().setX(max.getX()).setY(max.getY()))) {
+			displays.add((BlockDisplay) world.spawnEntity(corner.toLocation(world), EntityType.BLOCK_DISPLAY,
+					CreatureSpawnEvent.SpawnReason.CUSTOM, b -> {
+						if (b instanceof BlockDisplay dis) {
+							b.setPersistent(false);
+							dis.setBlock(data);
+							dis.setTransformation(transform1);
+						}
+					}));
+		}
+		// 4 edges of each opposite faces (8 edges total)
+		var x_length = (float)(max.getX() - min.getX());
+		var y_length = (float)(max.getY() - min.getY());
+		var xtransform = new Transformation(new Vector3f(), new AxisAngle4f(), new Vector3f(x_length, thickness,thickness), new AxisAngle4f());
+		var ytransform = new Transformation(new Vector3f(), new AxisAngle4f(), new Vector3f(thickness, y_length,thickness), new AxisAngle4f());
+		for (var faceCorner : Set.of(box.getMin(), box.getMin().setZ(max.getZ()))) {
+			for (var ycorner : Set.of(faceCorner.clone(), faceCorner.clone().setX(max.getX()))) {
+				displays.add((BlockDisplay) world.spawnEntity(ycorner.toLocation(world), EntityType.BLOCK_DISPLAY,
+						CreatureSpawnEvent.SpawnReason.CUSTOM, b -> {
+							if (b instanceof BlockDisplay dis) {
+								b.setPersistent(false);
+								dis.setBlock(data);
+								dis.setTransformation(ytransform);
+							}
+						}));
+			}
+			for (var xcorner : Set.of(faceCorner.clone(), faceCorner.clone().setY(max.getY()))) {
+				displays.add((BlockDisplay) world.spawnEntity(xcorner.toLocation(world), EntityType.BLOCK_DISPLAY,
+						CreatureSpawnEvent.SpawnReason.CUSTOM, b -> {
+							if (b instanceof BlockDisplay dis) {
+								b.setPersistent(false);
+								dis.setBlock(data);
+								dis.setTransformation(xtransform);
+							}
+						}));
+			}
+			
+		}
+		return displays;
 	}
 }
