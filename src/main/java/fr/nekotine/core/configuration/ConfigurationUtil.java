@@ -37,4 +37,20 @@ public class ConfigurationUtil {
 		conf.save(confFile);
 		return confPresent ? conf : defaultConfig;
 	}
+	
+	public static Configuration overrideAndLoadYaml(String pathInJar, String pathInPluginFolder) throws IOException {
+		var confFile = new File(Ioc.resolve(JavaPlugin.class).getDataFolder(), pathInPluginFolder);
+		// load defaults
+		YamlConfiguration defaultConfig;
+		var res = Ioc.resolve(JavaPlugin.class).getResource(pathInJar);
+		if (res == null) {
+			throw new RuntimeException("Aucun fichier de config n'est définit dans le jar pour " + pathInJar);
+		}
+		try (var defaultReader = new InputStreamReader(res, "UTF-8")) {
+			defaultConfig = YamlConfiguration.loadConfiguration(defaultReader);
+		}
+		// save
+		defaultConfig.save(confFile);
+		return defaultConfig;
+	}
 }
