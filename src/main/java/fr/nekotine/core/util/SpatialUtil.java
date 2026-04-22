@@ -11,6 +11,7 @@ import org.bukkit.World;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Display.Brightness;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Transformation;
@@ -314,40 +315,43 @@ public class SpatialUtil {
 		var displays = new LinkedList<BlockDisplay>();
 		// 4 edges on one Z axis
 		var z_length = (float)(max.getZ() - min.getZ());
+		var x_length = (float)(max.getX() - min.getX());
+		var y_length = (float)(max.getY() - min.getY());
 		var transform1 = new Transformation(new Vector3f(), new AxisAngle4f(), new Vector3f(thickness, thickness,z_length), new AxisAngle4f());
-		for (var corner : Set.of(box.getMin(), box.getMin().setX(max.getX()), box.getMin().setY(max.getY()),box.getMin().setX(max.getX()).setY(max.getY()))) {
+		for (var corner : Set.of(box.getMin(), box.getMin().setX(max.getX()-thickness), box.getMin().setY(max.getY()-thickness),box.getMin().setX(max.getX()-thickness).setY(max.getY()-thickness))) {
 			displays.add((BlockDisplay) world.spawnEntity(corner.toLocation(world), EntityType.BLOCK_DISPLAY,
 					CreatureSpawnEvent.SpawnReason.CUSTOM, b -> {
 						if (b instanceof BlockDisplay dis) {
 							b.setPersistent(false);
 							dis.setBlock(data);
 							dis.setTransformation(transform1);
+							dis.setBrightness(new Brightness(15,15));
 						}
 					}));
 		}
 		// 4 edges of each opposite faces (8 edges total)
-		var x_length = (float)(max.getX() - min.getX());
-		var y_length = (float)(max.getY() - min.getY());
 		var xtransform = new Transformation(new Vector3f(), new AxisAngle4f(), new Vector3f(x_length, thickness,thickness), new AxisAngle4f());
 		var ytransform = new Transformation(new Vector3f(), new AxisAngle4f(), new Vector3f(thickness, y_length,thickness), new AxisAngle4f());
-		for (var faceCorner : Set.of(box.getMin(), box.getMin().setZ(max.getZ()))) {
-			for (var ycorner : Set.of(faceCorner.clone(), faceCorner.clone().setX(max.getX()))) {
+		for (var faceCorner : Set.of(box.getMin(), box.getMin().setZ(max.getZ()-thickness))) {
+			for (var ycorner : Set.of(faceCorner.clone(), faceCorner.clone().setX(max.getX()-thickness))) {
 				displays.add((BlockDisplay) world.spawnEntity(ycorner.toLocation(world), EntityType.BLOCK_DISPLAY,
 						CreatureSpawnEvent.SpawnReason.CUSTOM, b -> {
 							if (b instanceof BlockDisplay dis) {
 								b.setPersistent(false);
 								dis.setBlock(data);
 								dis.setTransformation(ytransform);
+								dis.setBrightness(new Brightness(15,15));
 							}
 						}));
 			}
-			for (var xcorner : Set.of(faceCorner.clone(), faceCorner.clone().setY(max.getY()))) {
+			for (var xcorner : Set.of(faceCorner.clone(), faceCorner.clone().setY(max.getY()-thickness))) {
 				displays.add((BlockDisplay) world.spawnEntity(xcorner.toLocation(world), EntityType.BLOCK_DISPLAY,
 						CreatureSpawnEvent.SpawnReason.CUSTOM, b -> {
 							if (b instanceof BlockDisplay dis) {
 								b.setPersistent(false);
 								dis.setBlock(data);
 								dis.setTransformation(xtransform);
+								dis.setBrightness(new Brightness(15,15));
 							}
 						}));
 			}
