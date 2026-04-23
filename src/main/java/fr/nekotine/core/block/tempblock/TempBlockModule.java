@@ -15,7 +15,7 @@ public class TempBlockModule implements IPluginModule {
 	private Map<Block, LinkedList<AppliedTempBlockPatch>> map = new HashMap<>();
 
 	public void addPatch(AppliedTempBlockPatch patch) {
-		map.computeIfAbsent(patch.getTargetedBlock(), o -> new LinkedList<>()).addLast(patch);
+		map.computeIfAbsent(patch.getTargetedBlock(), _ -> new LinkedList<>()).addLast(patch);
 	}
 
 	public AppliedTempBlockPatch applyPatch(BlockPatch patch, Block block, boolean applyPhysics) {
