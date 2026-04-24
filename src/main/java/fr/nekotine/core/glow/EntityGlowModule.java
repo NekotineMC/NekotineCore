@@ -30,7 +30,7 @@ public class EntityGlowModule implements IPluginModule {
 
 	private Map<Player, Map<Integer, EnumWrappers.ChatFormatting>> map = new HashMap<>();
 
-	private PacketListener packetAdapter = new PacketAdapter(Ioc.resolve(JavaPlugin.class),
+	private final PacketListener packetAdapter = new PacketAdapter(Ioc.resolve(JavaPlugin.class),
 			PacketType.Play.Server.ENTITY_METADATA) {
 
 		@Override

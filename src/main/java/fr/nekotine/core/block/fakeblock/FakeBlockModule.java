@@ -1,31 +1,70 @@
 package fr.nekotine.core.block.fakeblock;
 
-import fr.nekotine.core.block.BlockPatch;
-import fr.nekotine.core.module.IPluginModule;
-import fr.nekotine.core.util.EventUtil;
-import io.papermc.paper.event.packet.PlayerChunkLoadEvent;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.events.PacketEvent;
+import com.comphenix.protocol.events.PacketListener;
+
+import fr.nekotine.core.block.BlockPatch;
+import fr.nekotine.core.ioc.Ioc;
+import fr.nekotine.core.module.IPluginModule;
+import fr.nekotine.core.util.EventUtil;
+import io.papermc.paper.event.packet.PlayerChunkLoadEvent;
 
 public class FakeBlockModule implements IPluginModule, Listener {
 
 	private Map<Player, Map<Block, LinkedList<AppliedFakeBlockPatch>>> map = new HashMap<>();
 
+	private final PacketListener packetAdapter = new PacketAdapter(Ioc.resolve(JavaPlugin.class),
+			PacketType.Play.Server.BLOCK_CHANGE) { // voir MULTI_BLOCK_CHANGE et BLOCK_CHANGED_ACK
+
+		@Override
+		public void onPacketSending(PacketEvent event) {
+			PacketContainer packet = event.getPacket();
+			Player viewer = event.getPlayer();
+			var list = map.get(viewer);
+			if (list == null) {
+				return;
+			}
+			var loc = packet.getBlockPositionModifier().read(0).toLocation(viewer.getWorld());
+			var bloc = loc.getBlock();
+			if (list.containsKey(bloc)) {
+				var patchList = list.get(bloc);
+				if (patchList.size() <= 0) {
+					return;
+				}
+				var fake = appliedBlockData(patchList.getLast());
+				var bdata = packet.getBlockData().read(0);
+				bdata.setType(fake.getMaterial());
+				packet.getBlockData().write(0, bdata);
+			}
+		}
+	};
+	
 	public FakeBlockModule() {
 		EventUtil.register(this);
+		var pmanager = ProtocolLibrary.getProtocolManager();
+		pmanager.addPacketListener(packetAdapter);
 	}
 
 	public void addPatch(Player player, AppliedFakeBlockPatch patch) {
-		map.computeIfAbsent(player, o -> new HashMap<>())
-				.computeIfAbsent(patch.getTargetedBlock(), o -> new LinkedList<>()).addLast(patch);
+		map.computeIfAbsent(player, _ -> new HashMap<>())
+				.computeIfAbsent(patch.getTargetedBlock(), _ -> new LinkedList<>()).addLast(patch);
 		player.sendBlockChange(patch.getTargetedBlock().getLocation(), appliedBlockData(patch));
 	}
 
@@ -68,6 +107,8 @@ public class FakeBlockModule implements IPluginModule, Listener {
 
 	@Override
 	public void unload() {
+		var pmanager = ProtocolLibrary.getProtocolManager();
+		pmanager.removePacketListener(packetAdapter);
 		EventUtil.unregister(this);
 		for (var applied : map.values().stream().flatMap(m -> m.values().stream()).flatMap(LinkedList::stream)
 				.collect(Collectors.toUnmodifiableSet())) {
