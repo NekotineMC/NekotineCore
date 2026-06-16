@@ -17,7 +17,7 @@ public class ActionMenuItem extends ClickableMenuElement {
 
 	public ActionMenuItem(ItemStack itemStack, Runnable action) {
 		this.itemStack = itemStack;
-		runnable = p -> action.run();
+		runnable = _ -> action.run();
 	}
 
 	@Override
