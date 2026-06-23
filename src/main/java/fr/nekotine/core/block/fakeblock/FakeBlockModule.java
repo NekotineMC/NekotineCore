@@ -55,7 +55,7 @@ public class FakeBlockModule implements IPluginModule, Listener {
 			}
 		}
 	};
-	
+
 	public FakeBlockModule() {
 		EventUtil.register(this);
 		var pmanager = ProtocolLibrary.getProtocolManager();
