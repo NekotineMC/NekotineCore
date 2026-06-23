@@ -37,7 +37,7 @@ public class ConfigurationUtil {
 		conf.save(confFile);
 		return confPresent ? conf : defaultConfig;
 	}
-	
+
 	public static Configuration overrideAndLoadYaml(String pathInJar, String pathInPluginFolder) throws IOException {
 		var confFile = new File(Ioc.resolve(JavaPlugin.class).getDataFolder(), pathInPluginFolder);
 		// load defaults
