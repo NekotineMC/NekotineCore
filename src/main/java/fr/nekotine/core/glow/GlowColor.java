@@ -1,6 +1,6 @@
 package fr.nekotine.core.glow;
 
-public enum TeamColor {
+public enum GlowColor {
 	BLACK,
 	/** Represents dark blue */
 	DARK_BLUE,

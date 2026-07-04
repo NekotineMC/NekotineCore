@@ -14,7 +14,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly(libs.paper.api)
+    compileOnly(paperweight.paperDevBundle(libs.versions.paper.get()))
     compileOnly(libs.protocollib)
     compileOnly(libs.fawe.core)
     compileOnly(libs.fawe.bukkit)
@@ -30,6 +30,7 @@ dependencyLocking {
 plugins {
     java
     alias(libs.plugins.shadow)
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.21"
     id("com.diffplug.spotless") version "8.4.0"
 }
 
