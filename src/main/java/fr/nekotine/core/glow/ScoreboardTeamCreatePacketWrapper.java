@@ -1,51 +1,47 @@
 package fr.nekotine.core.glow;
 
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.wrappers.EnumWrappers;
+import com.comphenix.protocol.wrappers.WrappedChatComponent;
+import com.comphenix.protocol.wrappers.WrappedTeamParameters;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket;
-import net.minecraft.world.scores.PlayerTeam;
-import net.minecraft.world.scores.Scoreboard;
-import net.minecraft.world.scores.Team;
-import net.minecraft.world.scores.TeamColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 public class ScoreboardTeamCreatePacketWrapper {
 
-	private String teamName;
-
-	private ChatFormatting color;
+	private final PacketContainer packet = ProtocolLibrary.getProtocolManager()
+			.createPacket(PacketType.Play.Server.SCOREBOARD_TEAM);
 
 	private Collection<Entity> entities = new LinkedList<>();
 
-	public Packet<?> buildPacket() {
-		var dummyScoreboard = new Scoreboard();
-		var team = new PlayerTeam(dummyScoreboard, teamName);
-		team.setColor(Optional.ofNullable(TeamColor.valueOf(color.name())));
-		team.setDisplayName(Component.literal(teamName));
-		team.setNameTagVisibility(Team.Visibility.NEVER);
-		team.setCollisionRule(Team.CollisionRule.NEVER);
-		var playerNames = entities.stream().map(e -> {
+	public PacketContainer buildPacket() {
+		packet.getIntegers().write(0, 0);
+		var entitiew = entities.stream().map(e -> {
+			var entityName = e.getUniqueId().toString();
 			if (e instanceof Player player) {
-				return player.getName();
+				entityName = player.getName();
 			}
-			return e.getUniqueId().toString();
+			return entityName;
 		}).collect(Collectors.toCollection(LinkedList::new));
-		team.getPlayers().addAll(playerNames);
-		return ClientboundSetPlayerTeamPacket.createAddOrModifyPacket(team, true);
+		packet.getSpecificModifier(Collection.class).write(0, entitiew);
+		return packet;
 	}
 
 	public void setTeamName(String teamName) {
-		this.teamName = teamName;
+		packet.getStrings().write(0, teamName);
 	}
 
-	public void setColor(ChatFormatting color) {
-		this.color = color;
+	public void setColor(EnumWrappers.ChatFormatting color) {
+		var param = WrappedTeamParameters.newBuilder().displayName(WrappedChatComponent.fromText(color.name()))
+				.prefix(WrappedChatComponent.fromText("")).suffix(WrappedChatComponent.fromText(""))
+				.nametagVisibility("never").collisionRule("never").color(color).build();
+		packet.getOptionalTeamParameters().write(0, Optional.of(param));
 	}
 
 	public Collection<Entity> getEntities() {

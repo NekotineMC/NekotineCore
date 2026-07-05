@@ -17,8 +17,6 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nullable;
 import net.kyori.adventure.util.TriState;
-import net.minecraft.ChatFormatting;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -117,10 +115,10 @@ public class EntityGlowModule implements IPluginModule {
 			var teamName = "EntityGlowModule" + color.name() + "Team";
 			var tp = new ScoreboardTeamCreatePacketWrapper();
 			tp.setTeamName(teamName);
-			tp.setColor(ChatFormatting.valueOf(color.name()));
+			tp.setColor(color);
 			tp.getEntities().add(glowed);
 			var p = tp.buildPacket();
-			((CraftPlayer) viewer).getHandle().connection.send(p);
+			pmanager.sendServerPacket(viewer, p);
 		}
 	}
 
