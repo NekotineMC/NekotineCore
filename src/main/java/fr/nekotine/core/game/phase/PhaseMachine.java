@@ -1,9 +1,5 @@
 package fr.nekotine.core.game.phase;
 
-import fr.nekotine.core.logging.NekotineLogger;
-import fr.nekotine.core.util.Stopwatch;
-import fr.nekotine.core.util.map.TypeHashMap;
-import fr.nekotine.core.util.map.TypeMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,6 +7,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+
+import fr.nekotine.core.logging.NekotineLogger;
+import fr.nekotine.core.util.Stopwatch;
+import fr.nekotine.core.util.map.TypeHashMap;
+import fr.nekotine.core.util.map.TypeMap;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 
 public class PhaseMachine implements IPhaseMachine {
@@ -52,7 +53,7 @@ public class PhaseMachine implements IPhaseMachine {
 			var parents = getParents(currentPhase);
 			parents.add(currentPhase);
 			for (var p : parents) {
-				try (var watch = new Stopwatch(w -> logger.info(
+				try (var _ = new Stopwatch(w -> logger.info(
 						"La phase " + p.getClass().getSimpleName() + " est setup (" + w.elapsedMillis() + " ms)"))) {
 					p.setup(inputData);
 				} catch (Exception e) {
@@ -75,7 +76,7 @@ public class PhaseMachine implements IPhaseMachine {
 		}
 		Collections.reverse(curParents);
 		for (var p : curParents) {
-			try (var watch = new Stopwatch(w -> logger.info(
+			try (var _ = new Stopwatch(w -> logger.info(
 					"La phase " + p.getClass().getSimpleName() + " est teardown (" + w.elapsedMillis() + " ms)"))) {
 				p.tearDown();
 			} catch (Exception e) {
@@ -84,7 +85,7 @@ public class PhaseMachine implements IPhaseMachine {
 			runningPhases.remove(p.getClass());
 		}
 		for (var p : nextParents) {
-			try (var watch = new Stopwatch(w -> logger
+			try (var _ = new Stopwatch(w -> logger
 					.info("La phase " + p.getClass().getSimpleName() + " est setup (" + w.elapsedMillis() + " ms)"))) {
 				p.setup(inputData);
 			} catch (Exception e) {
@@ -109,7 +110,7 @@ public class PhaseMachine implements IPhaseMachine {
 		currentPhase = null;
 		Collections.reverse(all);
 		for (var p : all) {
-			try (var watch = new Stopwatch(w -> logger.info(
+			try (var _ = new Stopwatch(w -> logger.info(
 					"La phase " + p.getClass().getSimpleName() + " est teardown (" + w.elapsedMillis() + " ms)"))) {
 				p.tearDown();
 			} catch (Exception e) {
