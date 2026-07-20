@@ -1,16 +1,20 @@
 package fr.nekotine.core.map;
 
-import com.sk89q.worldedit.extent.clipboard.Clipboard;
-import fr.nekotine.core.ioc.Ioc;
-import fr.nekotine.core.serialization.configurationserializable.ConfigurationSerializableUtil;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.Objects;
+
 import org.apache.commons.lang3.NotImplementedException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import com.sk89q.worldedit.extent.clipboard.Clipboard;
+
+import fr.nekotine.core.ioc.Ioc;
+import fr.nekotine.core.serialization.configurationserializable.ConfigurationSerializableUtil;
 
 public class MapModule implements IMapModule {
 
@@ -71,6 +75,7 @@ public class MapModule implements IMapModule {
 					"Cette implémentation du MapModule (%s) ne peut deserializer que des" + " ConfigrationSerializable",
 					contentType.getTypeName()));
 		}
+		Objects.requireNonNull(mapName, "Le nom de la carte ne peut pas être null");
 		var mapNameFolder = new File(mapFolder, mapName);
 		if (mapNameFolder.exists() && mapNameFolder.isDirectory()) {
 			var nameStart = contentType.getSimpleName() + '.';
