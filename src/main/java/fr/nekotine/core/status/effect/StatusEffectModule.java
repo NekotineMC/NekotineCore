@@ -1,19 +1,21 @@
 package fr.nekotine.core.status.effect;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
+
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+
 import fr.nekotine.core.ioc.Ioc;
 import fr.nekotine.core.module.IPluginModule;
 import fr.nekotine.core.module.ModuleManager;
 import fr.nekotine.core.ticking.TickingModule;
 import fr.nekotine.core.ticking.event.TickElapsedEvent;
 import fr.nekotine.core.util.EventUtil;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 
 public class StatusEffectModule implements IPluginModule, Listener {
 
@@ -38,14 +40,14 @@ public class StatusEffectModule implements IPluginModule, Listener {
 	}
 
 	public void addEffect(LivingEntity entity, StatusEffect effect) {
-		var entityMap = effectMap.computeIfAbsent(entity, e -> new HashMap<>());
+		var entityMap = effectMap.computeIfAbsent(entity, _ -> new HashMap<>());
 		var list = entityMap.get(effect.type());
 		var applied = new AppliedStatusEffect(effect);
 		if (list != null) {
 			list.add(applied);
 			return;
 		}
-		list = entityMap.compute(effect.type(), (e, old) -> new LinkedList<>());
+		list = entityMap.compute(effect.type(), (_, _) -> new LinkedList<>());
 		list.add(applied);
 		effect.type().applyEffect(entity);
 		return;
@@ -72,6 +74,19 @@ public class StatusEffectModule implements IPluginModule, Listener {
 			return false;
 		}
 		return effectMap.get(entity).keySet().stream().anyMatch(ef -> ef.equals(type));
+	}
+	
+	public <T> boolean removeAllEffectsOfType(LivingEntity entity, StatusEffectType type) {
+		if (!hasEffect(entity, type)) {
+			return  false;
+		}
+		var map = effectMap.get(entity);
+		if (map == null) {
+			return false;
+		}
+		map.get(type).clear();
+		type.removeEffect(entity);
+		return true;
 	}
 
 	@EventHandler
