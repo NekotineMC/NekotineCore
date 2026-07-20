@@ -75,10 +75,10 @@ public class StatusEffectModule implements IPluginModule, Listener {
 		}
 		return effectMap.get(entity).keySet().stream().anyMatch(ef -> ef.equals(type));
 	}
-	
+
 	public <T> boolean removeAllEffectsOfType(LivingEntity entity, StatusEffectType type) {
 		if (!hasEffect(entity, type)) {
-			return  false;
+			return false;
 		}
 		var map = effectMap.get(entity);
 		if (map == null) {
