@@ -1,5 +1,6 @@
 package fr.nekotine.core.module;
 
+import fr.nekotine.core.ioc.Ioc;
 import fr.nekotine.core.logging.NekotineLogger;
 import fr.nekotine.core.util.Stopwatch;
 import fr.nekotine.core.util.map.TypeHashMap;
@@ -39,10 +40,11 @@ public class ModuleManager {
 			return;
 		}
 		logger.info("Chargement du module " + name + "...");
-		try (var watch = new Stopwatch(
+		try (var _ = new Stopwatch(
 				w -> logger.info("Le module " + name + " est charge (" + w.elapsedMillis() + " ms)"))) {
 			var instance = type.getConstructor().newInstance();
 			moduleMap.put(type, instance);
+			Ioc.getProvider().registerSingleton(instance);
 		} catch (Exception e) {
 			logger.error("Impossible de charger le module " + name, e);
 		}
@@ -54,7 +56,7 @@ public class ModuleManager {
 			logger.warn("Le module " + name + " n'est pas charge");
 			return;
 		}
-		try (var watch = new Stopwatch(
+		try (var _ = new Stopwatch(
 				w -> logger.info("Le module " + name + " est decharge (" + w.elapsedMillis() + "ms)"))) {
 			moduleMap.get(type).unload();
 			moduleMap.remove(type);
@@ -69,7 +71,7 @@ public class ModuleManager {
 		while (ite.hasNext()) {
 			var item = (Class<? extends IPluginModule>) ite.next();
 			var name = item.getSimpleName();
-			try (var watch = new Stopwatch(
+			try (var _ = new Stopwatch(
 					w -> logger.info("Le module " + name + " est decharge (" + w.elapsedMillis() + "ms)"))) {
 				moduleMap.get(item).unload();
 			} catch (Exception e) {
