@@ -9,6 +9,8 @@ import fr.nekotine.core.module.ModuleManager;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
+
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
@@ -51,6 +53,25 @@ public class BlockPatch {
 			for (var y = min.getBlockY(); y < max.getBlockY(); y++) {
 				for (var z = min.getBlockZ(); z < max.getBlockZ(); z++) {
 					col.add(fakeModule.applyPatch(this, world.getBlockAt(x, y, z), player));
+				}
+			}
+		}
+		return col;
+	}
+	
+	public List<AppliedFakeBlockPatch> patchPlayer(Player player, BoundingBox boundingbox, Predicate<Block> filter) {
+		var fakeModule = Ioc.resolve(FakeBlockModule.class);
+		var world = player.getWorld();
+		var col = new LinkedList<AppliedFakeBlockPatch>();
+		var min = new BlockVector(boundingbox.getMin());
+		var max = new BlockVector(boundingbox.getMax());
+		for (var x = min.getBlockX(); x < max.getBlockX(); x++) {
+			for (var y = min.getBlockY(); y < max.getBlockY(); y++) {
+				for (var z = min.getBlockZ(); z < max.getBlockZ(); z++) {
+					var block = world.getBlockAt(x, y, z);
+					if (filter.test(block)) {
+						col.add(fakeModule.applyPatch(this, world.getBlockAt(x, y, z), player));
+					}
 				}
 			}
 		}
