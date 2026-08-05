@@ -1,5 +1,11 @@
 package fr.nekotine.core;
 
+import java.util.function.Supplier;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
+import org.bukkit.plugin.java.JavaPlugin;
+
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIPaperConfig;
 import fr.nekotine.core.defaut.DefaultProvider;
@@ -14,12 +20,7 @@ import fr.nekotine.core.reflexion.ReflexionUtil;
 import fr.nekotine.core.serialization.configurationserializable.ConfigurationSerializableAdapterSerializer;
 import fr.nekotine.core.serialization.configurationserializable.IConfigurationSerializableAdapterContainer;
 import fr.nekotine.core.util.DebugUtil;
-import java.util.function.Supplier;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
-import org.bukkit.configuration.Configuration;
-import org.bukkit.plugin.java.JavaPlugin;
 
 public class NekotinePlugin extends JavaPlugin {
 
@@ -30,7 +31,6 @@ public class NekotinePlugin extends JavaPlugin {
 		super.onLoad();
 		CommandAPI.onLoad(new CommandAPIPaperConfig(this).setNamespace("vi6"));
 		setupIoc();
-		setupConfiguration();
 		setupModules();
 	}
 
@@ -106,10 +106,5 @@ public class NekotinePlugin extends JavaPlugin {
 		var gen = Ioc.resolve(IMapCommandGenerator.class);
 		gen.generateFor(mapTypes);
 		gen.register();
-	}
-
-	private void setupConfiguration() {
-		saveDefaultConfig();
-		Ioc.getProvider().registerTransientAs(this::getConfig, Configuration.class);
 	}
 }
