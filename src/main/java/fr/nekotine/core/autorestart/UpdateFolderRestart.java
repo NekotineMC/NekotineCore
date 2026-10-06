@@ -15,14 +15,14 @@ import fr.nekotine.core.ioc.Ioc;
 import fr.nekotine.core.logging.NekotineLogger;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 
-public class UpdateFolderRestart implements AutoCloseable{
+public class UpdateFolderRestart implements AutoCloseable {
 
 	private final ComponentLogger logger = NekotineLogger.make();
-	
+
 	private WatchService watchService;
-	
+
 	private BukkitTask task;
-	
+
 	public UpdateFolderRestart() {
 		try {
 			watchService = FileSystems.getDefault().newWatchService();
@@ -42,11 +42,9 @@ public class UpdateFolderRestart implements AutoCloseable{
 								};
 							}.runTaskLater(Ioc.resolve(JavaPlugin.class), 10);
 						}
-					}
-					catch(ClosedWatchServiceException _) {
+					} catch (ClosedWatchServiceException _) {
 						logger.info("La lecture de fichier du système de restart automatique à été désactivée");
-					}
-					catch (Exception e) {
+					} catch (Exception e) {
 						logger.error("Erreur du system de restart automatique: ", e);
 					}
 				}
@@ -55,7 +53,7 @@ public class UpdateFolderRestart implements AutoCloseable{
 			logger.error("Erreur du system de restart automatique: ", e);
 		}
 	}
-	
+
 	@Override
 	public void close() {
 		if (!task.isCancelled()) {

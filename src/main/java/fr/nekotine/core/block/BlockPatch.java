@@ -58,7 +58,7 @@ public class BlockPatch {
 		}
 		return col;
 	}
-	
+
 	public List<AppliedFakeBlockPatch> patchPlayer(Player player, BoundingBox boundingbox, Predicate<Block> filter) {
 		var fakeModule = Ioc.resolve(FakeBlockModule.class);
 		var world = player.getWorld();

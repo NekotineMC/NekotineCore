@@ -16,27 +16,27 @@ import net.kyori.adventure.text.Component;
 public class ResourcePackModule implements IPluginModule, Listener {
 
 	private List<ResourcePackInfoLike> mandatoryResourcePacks = new ArrayList<>();
-	
+
 	private Component mandatoryMessage;
-	
+
 	public ResourcePackModule() {
 		EventUtil.register(this);
 	}
-	
+
 	@Override
 	public void unload() {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	public void addMandatoryMessage(Component message) {
 		this.mandatoryMessage = message;
 	}
-	
+
 	public void addMandatoryResourcePack(ResourcePackInfoLike resourcePack) {
 		mandatoryResourcePacks.add(resourcePack);
 	}
-	
+
 	@EventHandler
 	public void onPlayerJoined(PlayerJoinEvent evt) {
 		if (mandatoryResourcePacks.size() <= 0) {
@@ -50,5 +50,5 @@ public class ResourcePackModule implements IPluginModule, Listener {
 		}
 		evt.getPlayer().sendResourcePacks(request.build());
 	}
-	
+
 }
