@@ -81,4 +81,4 @@ org.osgi:org.osgi.service.serviceloader:1.0.0=compileClasspath,testCompileClassp
 org.slf4j:jcl-over-slf4j:1.7.36=testRuntimeClasspath
 org.slf4j:slf4j-api:2.0.17=compileClasspath,testCompileClasspath,testRuntimeClasspath
 org.yaml:snakeyaml:2.2=compileClasspath,testCompileClasspath,testRuntimeClasspath
-empty=annotationProcessor,shadow,testAnnotationProcessor
+empty=annotationProcessor,testAnnotationProcessor

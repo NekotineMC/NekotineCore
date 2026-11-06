@@ -1,10 +1,12 @@
 [versions]
 paper = "26.2.build.+"
+# Pinned exactly: must match Vi6Clean's locked dev bundle (each build in a composite resolves on its own).
+paper-devbundle = "26.2.build.65-beta"
 protocollib = "5.4.0"
 fawe = "2.15.1-SNAPSHOT"
 commandapi = "11.2.+"
 junit = "5.14.4-SNAPSHOT"
-shadow = "9.4.+"
+paperweight = "2.0.0-beta.21"
 
 [libraries]
 paper-api = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper" }
@@ -15,4 +17,4 @@ commandapi = { group = "dev.jorel", name = "commandapi-paper-shade", version.ref
 junit-jupiter-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "junit" }
 
 [plugins]
-shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
+paperweight-userdev = { id = "io.papermc.paperweight.userdev", version.ref = "paperweight" }
