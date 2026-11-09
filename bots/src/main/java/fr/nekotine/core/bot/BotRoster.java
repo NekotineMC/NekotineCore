@@ -94,6 +94,7 @@ public class BotRoster implements IPluginModule, Listener {
 
 	/** @return the roster's bots, in spawn order (a snapshot). */
 	public List<Bot> list() {
+		requireMainThread();
 		return List.copyOf(bots);
 	}
 
@@ -124,12 +125,16 @@ public class BotRoster implements IPluginModule, Listener {
 	}
 
 	private void removeBody(BotBody body) {
+		boolean dropped;
 		try {
 			body.remove();
 		} finally {
-			bots.remove(body);
+			dropped = bots.remove(body);
 		}
-		logger.info(body.name() + " left");
+		// A re-entrant remove (from a PlayerQuitEvent listener) already dropped it.
+		if (dropped) {
+			logger.info(body.name() + " left");
+		}
 	}
 
 	private static void requireMainThread() {

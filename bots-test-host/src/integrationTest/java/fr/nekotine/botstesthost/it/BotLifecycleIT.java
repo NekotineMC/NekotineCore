@@ -31,6 +31,7 @@ import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.zip.ZipFile;
+import net.kyori.adventure.text.Component;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
@@ -238,6 +239,7 @@ class BotLifecycleIT {
 			assertNull(PaperServer.onMain(() -> Bukkit.getPlayerExact(ALICE)), "an off-thread spawn joined");
 			var bot = PaperServer.onMain(() -> roster.spawn(ALICE, location));
 			assertThrows(IllegalStateException.class, () -> roster.remove(bot));
+			assertThrows(IllegalStateException.class, roster::list);
 			PaperServer.onMain(() -> {
 				assertTrue(bot.player().isOnline(), "an off-thread remove changed the bot");
 				assertEquals(List.of(bot), roster.list());
@@ -294,6 +296,8 @@ class BotLifecycleIT {
 			assertEquals(List.of(3), List.copyOf(heldItem.ints));
 			assertEquals(3, PaperServer.onMain(() -> bot.player().getInventory().getHeldItemSlot()),
 					"the server handler did not run");
+			assertEquals(List.of(true), List.copyOf(heldItem.onMain),
+					"the bot's packet was not handled on the main thread");
 		} finally {
 			cleanUp(roster, heldItem);
 		}
@@ -354,6 +358,59 @@ class BotLifecycleIT {
 			assertTrue(logs.lines.stream().anyMatch(l -> l.contains(probe)), "log capture is not attached");
 			var closed = logs.lines.stream().filter(l -> l.contains("ClosedChannelException")).toList();
 			assertTrue(closed.isEmpty(), "closed-channel errors logged on removal: " + closed);
+		} finally {
+			cleanUp(roster, events);
+		}
+	}
+
+	@Test
+	void kickedBotIsDroppedFromRoster() throws Exception {
+		var roster = roster();
+		var events = new PlayerEvents();
+		register(events);
+		try (var logs = new LogCapture()) {
+			var location = spawnLocation();
+			var bot = PaperServer.onMain(() -> roster.spawn(ALICE, location));
+			PaperServer.awaitTicks(5);
+			var player = bot.player();
+			PaperServer.onMain(() -> {
+				player.kick(Component.text("kicked by BotLifecycleIT"));
+				return null;
+			});
+			PaperServer.awaitTicks(5);
+			PaperServer.onMain(() -> {
+				assertEquals(List.of(), roster.list(), "kicked bot is still listed");
+				assertFalse(player.isOnline(), "kicked bot is still online");
+				return null;
+			});
+			assertEquals(List.of(player), List.copyOf(events.quit), "PlayerQuitEvent not fired once for the bot");
+			var probe = "BotLifecycleIT log probe " + UUID.randomUUID();
+			LogManager.getContext(Bukkit.class.getClassLoader(), false).getLogger("BotLifecycleIT").info(probe);
+			PaperServer.awaitTicks(5);
+			assertTrue(logs.lines.stream().anyMatch(l -> l.contains(probe)), "log capture is not attached");
+			var closed = logs.lines.stream().filter(l -> l.contains("ClosedChannelException")).toList();
+			assertTrue(closed.isEmpty(), "closed-channel errors logged on kick: " + closed);
+		} finally {
+			cleanUp(roster, events);
+		}
+	}
+
+	@Test
+	void invalidSpawnArgumentsAreRefused() throws Exception {
+		var roster = roster();
+		var events = new PlayerEvents();
+		register(events);
+		try {
+			var location = spawnLocation();
+			var noWorld = new Location(null, location.getX(), location.getY(), location.getZ());
+			PaperServer.onMain(() -> {
+				assertThrows(IllegalArgumentException.class, () -> roster.spawn("Bad-Name", location));
+				assertThrows(IllegalArgumentException.class, () -> roster.spawn("Bot_SeventeenChar", location));
+				assertThrows(IllegalArgumentException.class, () -> roster.spawn(ALICE, noWorld));
+				assertEquals(List.of(), roster.list(), "a refused spawn was listed");
+				return null;
+			});
+			assertTrue(events.joined.isEmpty(), "a refused spawn joined");
 		} finally {
 			cleanUp(roster, events);
 		}
