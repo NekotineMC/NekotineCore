@@ -173,3 +173,7 @@ gradle-app.setting
 .direnv
 .envrc
 gradle.properties
+
+# bots-test-host's integration-test server bundle: local (see bots-test-host/test-bundle/README.md)
+bots-test-host/test-bundle/*
+!bots-test-host/test-bundle/README.md

@@ -1,0 +1,3 @@
+[submodule "paper-junit-server"]
+	path = paper-junit-server
+	url = https://github.com/XxGoldenbluexX/paper-junit-server.git
