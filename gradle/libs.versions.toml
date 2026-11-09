@@ -2,7 +2,7 @@
 paper = "26.2.build.+"
 # Pinned exactly: must match Vi6Clean's locked dev bundle (each build in a composite resolves on its own).
 paper-devbundle = "26.2.build.65-beta"
-protocollib = "5.4.0"
+protocollib = "5.5.0-SNAPSHOT"
 fawe = "2.15.1-SNAPSHOT"
 commandapi = "11.2.+"
 junit = "5.14.4-SNAPSHOT"
