@@ -7,6 +7,7 @@ fawe = "2.15.1-SNAPSHOT"
 commandapi = "11.2.+"
 junit = "5.14.4-SNAPSHOT"
 paperweight = "2.0.0-beta.21"
+shadow = "9.4.+"
 
 [libraries]
 paper-api = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper" }
@@ -18,3 +19,4 @@ junit-jupiter-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engi
 
 [plugins]
 paperweight-userdev = { id = "io.papermc.paperweight.userdev", version.ref = "paperweight" }
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
