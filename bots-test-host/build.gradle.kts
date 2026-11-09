@@ -18,6 +18,8 @@ dependencies {
     )
     // Brings :core (api) and, at runtime, CommandAPI (core's implementation).
     implementation(project(":bots"))
+    // Integration tests register ProtocolLib packet listeners; the server provides it.
+    compileOnly(libs.protocollib)
 }
 
 tasks.shadowJar {
@@ -68,7 +70,7 @@ val verifyShadowJarLayout by tasks.registering {
                 "paper-plugin.yml",
                 "fr/nekotine/botstesthost/BotsTestHost.class",
                 "fr/nekotine/core/NekotinePlugin.class",
-                "fr/nekotine/core/bot/NekotineBots.class",
+                "fr/nekotine/core/bot/BotRoster.class",
             )
         val missing = required.filterNot { it in entries }
         if (missing.isNotEmpty()) {

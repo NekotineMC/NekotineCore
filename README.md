@@ -77,6 +77,13 @@ Voici la liste des modules:
 
 	Module pour permettant au développeurs de créer facilement une carte pour un mode de jeu à partir de composants de    	base.
 	Ce module gère les commandes pour éditer les cartes et pour les enregistrer.
+
+- `BotRoster` ⧖
+
+	Module (dans le module Gradle `bots`, NMS, épinglé sur une version de Minecraft) pour faire apparaître des bots : de faux joueurs côté serveur que le serveur, les autres plugins et ProtocolLib voient comme de vrais joueurs (`PlayerJoinEvent`/`PlayerQuitEvent`, `getOnlinePlayers()`, UUID hors-ligne dérivé du nom).  
+	Il permet de faire apparaître (`spawn`), lister (`list`) et retirer (`remove`) des bots, depuis le thread principal uniquement. Chaque tick, il fait tourner leur connexion et répond aux accusés du client (téléportation, keep-alive, joueur chargé). `unload()` retire tous les bots.
+	
+	> Pas encore de contrôles (déplacement, mains, commandes) : ils arrivent avec les stories suivantes.
 	
 ***
 
