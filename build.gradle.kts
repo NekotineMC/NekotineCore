@@ -36,6 +36,11 @@ subprojects {
         maven("https://repo.codemc.org/repository/maven-public/") {
             name = "commandapi"
         }
+        // ProtocolLib snapshots (servers run 5.5.0-SNAPSHOT); only net.dmulloy2 resolves here.
+        maven("https://repo.dmulloy2.net/repository/public/") {
+            name = "protocollib"
+            content { includeGroup("net.dmulloy2") }
+        }
     }
 
     dependencyLocking {
