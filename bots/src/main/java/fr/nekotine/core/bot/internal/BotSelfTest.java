@@ -89,7 +89,7 @@ public final class BotSelfTest {
 
 	/**
 	 * Test seam, internal: makes the next {@link #run} report {@code accessor} as
-	 * broken. Consumed by that run only.
+	 * broken. Consumed by that run only; {@code null} clears a pending fault.
 	 */
 	public static void injectFault(String accessor) {
 		injectedFault.set(accessor);
@@ -201,7 +201,8 @@ public final class BotSelfTest {
 				if (!checked.add(accessor)) {
 					continue;
 				}
-				problem = load(owner, loader) == null ? "missing" : null;
+				var loaded = load(owner, loader);
+				problem = loaded == null ? "missing" : caller.classAccess(loaded);
 			} else {
 				continue;
 			}
@@ -336,6 +337,20 @@ public final class BotSelfTest {
 			return "package-private";
 		}
 
+		/**
+		 * @return {@code "class not public"} if {@code type} is neither public (a
+		 *         protected nested class is public in its class file) nor in this
+		 *         class's package, else null
+		 */
+		String classAccess(Class<?> type) {
+			int modifiers = type.getModifiers();
+			if (Modifier.isPublic(modifiers) || Modifier.isProtected(modifiers)
+					|| type.getPackageName().equals(packageName)) {
+				return null;
+			}
+			return "class not public";
+		}
+
 		private Class<?> superclass() {
 			if (!superLoaded) {
 				superLoaded = true;
@@ -443,8 +458,9 @@ public final class BotSelfTest {
 	}
 
 	/**
-	 * JVM method resolution: the owner and its superclasses, then its interfaces
-	 * (and {@link Object} for an interface owner); constructors on the owner only.
+	 * JVM method resolution: the owner and its superclasses, then its interfaces,
+	 * minus static and private methods of interfaces other than the owner (and
+	 * {@link Object} for an interface owner); constructors on the owner only.
 	 *
 	 * @return the method or constructor, or null if missing
 	 */
@@ -463,6 +479,12 @@ public final class BotSelfTest {
 		}
 		for (var candidate : candidates) {
 			for (var method : candidate.getDeclaredMethods()) {
+				int modifiers = method.getModifiers();
+				if (candidate != type && candidate.isInterface()
+						&& (Modifier.isStatic(modifiers) || Modifier.isPrivate(modifiers))) {
+					// Never selected from a superinterface.
+					continue;
+				}
 				if (method.getName().equals(name)
 						&& descriptor(method.getParameterTypes(), method.getReturnType()).equals(descriptor)) {
 					return method;

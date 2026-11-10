@@ -18,8 +18,11 @@ import java.lang.classfile.CodeBuilder;
 import java.lang.classfile.TypeKind;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.ConstantDescs;
+import java.lang.constant.DirectMethodHandleDesc;
+import java.lang.constant.MethodHandleDesc;
 import java.lang.constant.MethodTypeDesc;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
@@ -51,6 +54,12 @@ class BotSelfTestIT {
 
 	private static final ClassDesc VEC3 = ClassDesc.of("net.minecraft.world.phys.Vec3");
 
+	private static final ClassDesc PACKET = ClassDesc.of("net.minecraft.network.protocol.Packet");
+
+	/** NMS classes searched by reflection for members of a given access. */
+	private static final List<Class<?>> PROBED = List.of(Entity.class, MinecraftServer.class, ServerPlayer.class,
+			ServerGamePacketListenerImpl.class, Connection.class, PlayerList.class);
+
 	@Test
 	void healthyRosterPasses() throws Exception {
 		try (var logs = new LogCapture()) {
@@ -75,33 +84,39 @@ class BotSelfTestIT {
 	@Test
 	void injectedFaultDisablesOnlyThatRoster() throws Exception {
 		var hostRoster = roster();
-		try (var logs = new LogCapture()) {
-			BotSelfTest.injectFault(FAULT);
-			var broken = PaperServer.onMain(BotRoster::new);
-			try {
-				assertFalse(broken.isAvailable(), "a roster with an injected fault is available");
-				var errors = logs.lines.stream().filter(l -> l.contains(FAULT)).toList();
-				assertEquals(1, errors.size(), "expected one error naming the fault: " + logs.lines);
-				assertTrue(errors.getFirst().contains("disabled"), "error does not say bots are disabled: " + errors);
-				assertTrue(logs.lines.stream().noneMatch(l -> PASS_LINE.matcher(l).find()), "pass line logged");
-				var location = spawnLocation();
-				var hostBot = PaperServer.onMain(() -> hostRoster.spawn("Bot_SelfTest", location));
-				PaperServer.onMain(() -> {
-					assertUnavailable(() -> broken.spawn("Bot_Broken", location));
-					assertUnavailable(() -> broken.remove(hostBot));
-					assertUnavailable(broken::list);
-					assertTrue(PaperServer.plugin().isEnabled(), "the host was disabled");
-					assertEquals(List.of(hostBot), hostRoster.list(), "the host's roster stopped working");
-					assertTrue(hostBot.player().isOnline());
-					return null;
-				});
-			} finally {
-				PaperServer.onMain(() -> {
-					broken.unload();
-					return null;
-				});
-				cleanUp(hostRoster);
+		try {
+			try (var logs = new LogCapture()) {
+				BotSelfTest.injectFault(FAULT);
+				var broken = PaperServer.onMain(BotRoster::new);
+				try {
+					assertFalse(broken.isAvailable(), "a roster with an injected fault is available");
+					var errors = logs.lines.stream().filter(l -> l.contains(FAULT)).toList();
+					assertEquals(1, errors.size(), "expected one error naming the fault: " + logs.lines);
+					assertTrue(errors.getFirst().contains("disabled"),
+							"error does not say bots are disabled: " + errors);
+					assertTrue(logs.lines.stream().noneMatch(l -> PASS_LINE.matcher(l).find()), "pass line logged");
+					var location = spawnLocation();
+					var hostBot = PaperServer.onMain(() -> hostRoster.spawn("Bot_SelfTest", location));
+					PaperServer.onMain(() -> {
+						assertUnavailable(() -> broken.spawn("Bot_Broken", location));
+						assertUnavailable(() -> broken.remove(hostBot));
+						assertUnavailable(broken::list);
+						assertTrue(PaperServer.plugin().isEnabled(), "the host was disabled");
+						assertEquals(List.of(hostBot), hostRoster.list(), "the host's roster stopped working");
+						assertTrue(hostBot.player().isOnline());
+						return null;
+					});
+				} finally {
+					PaperServer.onMain(() -> {
+						broken.unload();
+						return null;
+					});
+					cleanUp(hostRoster);
+				}
 			}
+		} finally {
+			// Never leak the fault to a later roster if the intended run did not happen.
+			BotSelfTest.injectFault(null);
 		}
 		// The seam is consumed by one run.
 		var next = PaperServer.onMain(BotRoster::new);
@@ -218,8 +233,7 @@ class BotSelfTestIT {
 	 * reflection (Paper widens most NMS members to public).
 	 */
 	private static Method packagePrivateStaticMethod() {
-		for (var type : List.of(Entity.class, MinecraftServer.class, ServerPlayer.class,
-				ServerGamePacketListenerImpl.class, Connection.class, PlayerList.class)) {
+		for (var type : PROBED) {
 			for (var method : type.getDeclaredMethods()) {
 				int modifiers = method.getModifiers();
 				if (Modifier.isStatic(modifiers) && !Modifier.isPublic(modifiers) && !Modifier.isProtected(modifiers)
@@ -229,6 +243,81 @@ class BotSelfTestIT {
 			}
 		}
 		throw new AssertionError("no package-private static method found in the probed NMS classes");
+	}
+
+	@Test
+	void ownerKindAndClassAccessMismatchesAreReported() throws Exception {
+		var protectedField = protectedInstanceField();
+		var fieldOwner = ClassDesc.of(protectedField.getDeclaringClass().getName());
+		var fieldType = ClassDesc.ofDescriptor(protectedField.getType().descriptorString());
+		var hidden = nonPublicNestedClass();
+		var bytes = synthesize("SynthesizedOwnerAccessCaller", code -> {
+			code.aconst_null();
+			// Methodref on an interface.
+			code.invokevirtual(PACKET, "isSkippable", MethodTypeDesc.of(ConstantDescs.CD_boolean));
+			code.pop();
+			code.aconst_null();
+			// InterfaceMethodref on a class.
+			code.invokeinterface(VEC3, "length", MethodTypeDesc.of(ConstantDescs.CD_double));
+			code.pop2();
+			code.aconst_null();
+			code.getfield(fieldOwner, protectedField.getName(), fieldType);
+			if (TypeKind.from(fieldType).slotSize() == 2) {
+				code.pop2();
+			} else {
+				code.pop();
+			}
+			code.aconst_null();
+			code.checkcast(ClassDesc.of(hidden.getName()));
+			code.pop();
+		});
+		var broken = BotSelfTest.check(bytes, BotRoster.class.getClassLoader());
+		assertEquals(List.of(
+				"net.minecraft.network.protocol.Packet#isSkippable()Z (owner is an interface, referenced as a class)",
+				"net.minecraft.world.phys.Vec3#length()D (owner is a class, referenced as an interface)",
+				protectedField.getDeclaringClass().getName() + "#" + protectedField.getName() + ":"
+						+ protectedField.getType().descriptorString() + " (protected, caller is not a subclass)",
+				hidden.getName() + " (class not public)").stream().sorted().toList(),
+				broken.stream().sorted().toList());
+	}
+
+	@Test
+	void methodHandleKindMismatchIsReported() throws Exception {
+		var bytes = synthesize("SynthesizedHandleCaller", code -> {
+			code.loadConstant(MethodHandleDesc.ofMethod(DirectMethodHandleDesc.Kind.VIRTUAL, MINECRAFT_SERVER,
+					"getServer", MethodTypeDesc.of(MINECRAFT_SERVER)));
+			code.pop();
+		});
+		assertEquals(List.of("net.minecraft.server.MinecraftServer#getServer()Lnet/minecraft/server/MinecraftServer; "
+				+ "(is static, used as instance)"), BotSelfTest.check(bytes, BotRoster.class.getClassLoader()));
+	}
+
+	/**
+	 * A protected instance field of a well-known NMS class, found by reflection.
+	 */
+	private static Field protectedInstanceField() {
+		for (var type : PROBED) {
+			for (var field : type.getDeclaredFields()) {
+				int modifiers = field.getModifiers();
+				if (Modifier.isProtected(modifiers) && !Modifier.isStatic(modifiers) && !field.isSynthetic()) {
+					return field;
+				}
+			}
+		}
+		throw new AssertionError("no protected instance field found in the probed NMS classes");
+	}
+
+	/** A private or package-private nested class of a well-known NMS class. */
+	private static Class<?> nonPublicNestedClass() {
+		for (var type : PROBED) {
+			for (var nested : type.getDeclaredClasses()) {
+				int modifiers = nested.getModifiers();
+				if (!Modifier.isPublic(modifiers) && !Modifier.isProtected(modifiers)) {
+					return nested;
+				}
+			}
+		}
+		throw new AssertionError("no non-public nested class found in the probed NMS classes");
 	}
 
 	@Test
