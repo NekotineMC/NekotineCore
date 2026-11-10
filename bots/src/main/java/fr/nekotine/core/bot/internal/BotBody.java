@@ -230,7 +230,11 @@ public final class BotBody implements Bot {
 			return;
 		}
 		removed = true;
-		flush();
+		try {
+			flush();
+		} catch (RuntimeException e) {
+			// A broken flush (often what failed the bot) must not stop the quit.
+		}
 		connection.disconnect(Component.literal("Bot removed"));
 		connection.handleDisconnection();
 		channel.releaseOutbound();
@@ -259,7 +263,7 @@ public final class BotBody implements Bot {
 			try {
 				Files.deleteIfExists(file);
 			} catch (IOException | RuntimeException e) {
-				logger.warn(name + " could not delete its saved file " + file + ": " + e);
+				logger.warn(name + " could not delete its saved file " + file, e);
 			}
 		}
 	}

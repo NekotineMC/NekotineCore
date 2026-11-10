@@ -25,6 +25,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -375,6 +376,7 @@ class BotLifecycleIT {
 		try (var logs = new LogCapture()) {
 			var location = spawnLocation();
 			var bot = PaperServer.onMain(() -> roster.spawn(ALICE, location));
+			var files = BotTickIT.savedFiles(bot);
 			PaperServer.awaitTicks(5);
 			var player = bot.player();
 			PaperServer.onMain(() -> {
@@ -388,6 +390,9 @@ class BotLifecycleIT {
 				return null;
 			});
 			assertEquals(List.of(player), List.copyOf(events.quit), "PlayerQuitEvent not fired once for the bot");
+			for (var file : files) {
+				assertFalse(Files.exists(file), "saved file left after the kick: " + file);
+			}
 			var probe = "BotLifecycleIT log probe " + UUID.randomUUID();
 			LogManager.getContext(Bukkit.class.getClassLoader(), false).getLogger("BotLifecycleIT").info(probe);
 			PaperServer.awaitTicks(5);

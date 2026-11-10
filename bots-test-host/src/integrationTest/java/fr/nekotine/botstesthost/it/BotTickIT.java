@@ -31,6 +31,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import net.kyori.adventure.text.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
 import org.bukkit.Bukkit;
@@ -104,7 +105,7 @@ class BotTickIT {
 	}
 
 	/** @return the bot's data, stats and advancements files. */
-	private static List<Path> savedFiles(Bot bot) throws Exception {
+	static List<Path> savedFiles(Bot bot) throws Exception {
 		return PaperServer.onMain(() -> {
 			var server = MinecraftServer.getServer();
 			var uuid = bot.player().getUniqueId().toString();
@@ -274,11 +275,22 @@ class BotTickIT {
 			var location = spawnLocation();
 			var a = PaperServer.onMain(() -> roster.spawn(A, location));
 			var files = savedFiles(a);
+			var dat = files.getFirst();
+			var datOld = dat.resolveSibling(dat.getFileName() + "_old");
 			PaperServer.awaitTicks(3);
+			PaperServer.onMain(() -> {
+				// Two saves: the second backs the first up as .dat_old.
+				a.player().saveData();
+				a.player().saveData();
+				return null;
+			});
+			assertTrue(Files.exists(dat), "no .dat saved before removal");
+			assertTrue(Files.exists(datOld), "no .dat_old saved before removal");
 			PaperServer.onMain(() -> {
 				roster.remove(a);
 				return null;
 			});
+			assertFalse(Files.exists(datOld), ".dat_old left after removal");
 			var left = new ArrayList<Path>();
 			for (var file : files) {
 				if (Files.exists(file) || Files.exists(file.resolveSibling(file.getFileName() + "_old"))) {
@@ -291,6 +303,88 @@ class BotTickIT {
 			assertLibraryLinesNamed(logs, A);
 		} finally {
 			cleanUp(roster);
+		}
+	}
+
+	@Test
+	void removeOfBotSpawnedInSameLoopLeavesAfterIt() throws Exception {
+		var roster = roster();
+		var events = new TickEvents();
+		var players = new PlayerEvents();
+		register(players);
+		try (var logs = new LogCapture()) {
+			var location = spawnLocation();
+			var a = PaperServer.onMain(() -> roster.spawn(A, location));
+			PaperServer.awaitTicks(3);
+			var spawned = new ConcurrentLinkedQueue<Bot>();
+			var duringLoop = new ConcurrentLinkedQueue<Boolean>();
+			events.hook = e -> {
+				if (e.getBot() == a && spawned.isEmpty()) {
+					var c = roster.spawn(C, location);
+					spawned.add(c);
+					roster.remove(c);
+					duringLoop.add(c.player().isOnline());
+					duringLoop.add(!roster.list().contains(c));
+					duringLoop.add(players.quit.isEmpty());
+				}
+			};
+			register(events);
+			PaperServer.awaitTicks(5);
+			var c = spawned.peek();
+			assertNotNull(c, "A's listener did not spawn C");
+			assertEquals(List.of(true, true, true), List.copyOf(duringLoop),
+					"C was not still online, unlisted and not yet quit right after its removal");
+			var player = c.player();
+			assertEquals(List.of(player), List.copyOf(players.quit), "PlayerQuitEvent not fired once for C");
+			assertEquals(List.of(), events.of(C), "C got a tick event");
+			PaperServer.onMain(() -> {
+				assertEquals(List.of(a), roster.list(), "C is listed");
+				assertFalse(player.isOnline(), "C is still online");
+				return null;
+			});
+			for (var file : savedFiles(c)) {
+				assertFalse(Files.exists(file), "saved file left after removal: " + file);
+			}
+			assertLibraryLinesNamed(logs, A, C);
+		} finally {
+			cleanUp(roster, events, players);
+		}
+	}
+
+	@Test
+	void kickedFailedBotLeaves() throws Exception {
+		var roster = roster();
+		var players = new PlayerEvents();
+		register(players);
+		try (var logs = new LogCapture()) {
+			var location = spawnLocation();
+			var a = PaperServer.onMain(() -> roster.spawn(A, location));
+			var files = savedFiles(a);
+			PaperServer.awaitTicks(3);
+			PaperServer.onMain(() -> {
+				assertInstanceOf(BotBody.class, a).failNextTick(new IllegalStateException("BotTickIT kick fault"));
+				return null;
+			});
+			PaperServer.awaitTicks(3);
+			assertEquals(BotState.FAILED, PaperServer.onMain(a::state));
+			var player = a.player();
+			PaperServer.onMain(() -> {
+				player.kick(Component.text("kicked by BotTickIT"));
+				return null;
+			});
+			PaperServer.awaitTicks(5);
+			PaperServer.onMain(() -> {
+				assertEquals(List.of(), roster.list(), "kicked failed bot is still listed");
+				assertFalse(player.isOnline(), "kicked failed bot is still online");
+				return null;
+			});
+			assertEquals(List.of(player), List.copyOf(players.quit), "PlayerQuitEvent not fired once for the bot");
+			for (var file : files) {
+				assertFalse(Files.exists(file), "saved file left after the kick: " + file);
+			}
+			assertLibraryLinesNamed(logs, A);
+		} finally {
+			cleanUp(roster, players);
 		}
 	}
 

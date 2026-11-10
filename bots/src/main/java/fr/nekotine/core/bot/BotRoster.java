@@ -196,7 +196,7 @@ public class BotRoster implements IPluginModule, Listener {
 		try {
 			work.run();
 			return true;
-		} catch (RuntimeException e) {
+		} catch (RuntimeException | LinkageError e) {
 			body.fail();
 			logger.error(body.name() + " failed, it stops ticking", e);
 			return false;
