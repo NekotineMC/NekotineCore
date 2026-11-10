@@ -45,8 +45,11 @@ import java.util.stream.Collectors;
  * <p>
  * An accessor is a class, method or field reference whose owner is not under
  * {@code java/}, {@code javax/}, {@code jdk/}, {@code sun/} or
- * {@code fr/nekotine/}. Reflective accessors (none today) are not covered and
- * would need their own check here.
+ * {@code fr/nekotine/}, or a method or field reference through an internal
+ * class (an internal subclass of a server class, e.g. a call on {@code this})
+ * that resolves to a member inherited from outside those packages, or to
+ * nothing. Reflective accessors (none today) are not covered and would need
+ * their own check here.
  *
  * <p>
  * Internal: hosts see the result through {@code BotRoster.isAvailable()}.
@@ -177,7 +180,8 @@ public final class BotSelfTest {
 			String problem;
 			if (entry instanceof MemberRefEntry member) {
 				var owner = elementName(member.owner().asInternalName());
-				if (owner == null || ignored(owner)) {
+				if (owner == null
+						|| ignored(owner) && !(owner.startsWith(PACKAGE) && inheritsExternal(member, loader))) {
 					continue;
 				}
 				accessor = accessor(member);
@@ -211,6 +215,30 @@ public final class BotSelfTest {
 			}
 		}
 		return broken;
+	}
+
+	/**
+	 * @return whether {@code member}, referenced through an internal class,
+	 *         resolves to a member declared outside the ignored packages, or to
+	 *         nothing (a member the server no longer has); false if the internal
+	 *         class cannot be loaded (its server superclass is then reported by its
+	 *         own class entry)
+	 */
+	private static boolean inheritsExternal(MemberRefEntry member, ClassLoader loader) {
+		var type = load(member.owner().asInternalName(), loader);
+		if (type == null) {
+			return false;
+		}
+		var name = member.name().stringValue();
+		var descriptor = member.type().stringValue();
+		try {
+			Member resolved = member instanceof FieldRefEntry
+					? resolveField(type, name, descriptor)
+					: resolveMethod(type, name, descriptor);
+			return resolved == null || !ignored(resolved.getDeclaringClass().getName().replace('.', '/'));
+		} catch (LinkageError e) {
+			return true;
+		}
 	}
 
 	/** {@code owner#name(descriptor)} or {@code owner#name:descriptor}. */

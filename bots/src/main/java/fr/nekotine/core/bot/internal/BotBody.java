@@ -23,12 +23,17 @@ import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.ServerboundKeepAlivePacket;
 import net.minecraft.network.protocol.game.GameProtocols;
 import net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
+import net.minecraft.network.protocol.game.ServerboundPlayerInputPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerLoadedPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.CommonListenerCookie;
+import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.level.storage.LevelResource;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.Player;
@@ -49,7 +54,7 @@ public final class BotBody implements Bot {
 
 	private final BotConnection connection;
 
-	private final ServerPlayer handle;
+	private final BotPlayer handle;
 
 	private final BotWipe wipe;
 
@@ -61,12 +66,39 @@ public final class BotBody implements Bot {
 
 	private RuntimeException fault;
 
-	private BotBody(String name, EmbeddedChannel channel, BotConnection connection, ServerPlayer handle, BotWipe wipe) {
+	// Controls, applied by the next apply step.
+	private boolean forward;
+
+	private boolean backward;
+
+	private boolean left;
+
+	private boolean right;
+
+	private boolean jump;
+
+	private boolean sneak;
+
+	private boolean sprint;
+
+	private Float heading;
+
+	private float lookYaw;
+
+	private float lookPitch;
+
+	/** The last input sent; the server starts from an empty one. */
+	private Input sentInput = Input.EMPTY;
+
+	private BotBody(String name, EmbeddedChannel channel, BotConnection connection, BotPlayer handle, BotWipe wipe,
+			float lookYaw, float lookPitch) {
 		this.name = name;
 		this.channel = channel;
 		this.connection = connection;
 		this.handle = handle;
 		this.wipe = wipe;
+		this.lookYaw = lookYaw;
+		this.lookPitch = lookPitch;
 	}
 
 	/** @return the offline-mode UUID a player named {@code name} gets. */
@@ -101,12 +133,12 @@ public final class BotBody implements Bot {
 			pipeline.replace("decoder", "inbound_config", new UnconfiguredPipelineHandler.Inbound());
 			connection.setupOutboundProtocol(GameProtocols.CLIENTBOUND_TEMPLATE
 					.bind(RegistryFriendlyByteBuf.decorator(server.registryAccess())));
-			var player = new ServerPlayer(server, level, profile, ClientInformation.createDefault());
+			var player = new BotPlayer(server, level, profile, ClientInformation.createDefault());
 			player.setServerLevel(level);
 			player.snapTo(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
 			server.getPlayerList().placeNewPlayer(connection, player,
 					CommonListenerCookie.createInitial(profile, false));
-			var body = new BotBody(name, channel, connection, player, wipe);
+			var body = new BotBody(name, channel, connection, player, wipe, location.getYaw(), location.getPitch());
 			body.flush();
 			return body;
 		} catch (Exception | Error e) {
@@ -132,13 +164,139 @@ public final class BotBody implements Bot {
 		return state;
 	}
 
+	@Override
+	public void setForward(boolean forward) {
+		requireMainThread();
+		this.forward = forward;
+	}
+
+	@Override
+	public boolean isForward() {
+		return forward;
+	}
+
+	@Override
+	public void setBackward(boolean backward) {
+		requireMainThread();
+		this.backward = backward;
+	}
+
+	@Override
+	public boolean isBackward() {
+		return backward;
+	}
+
+	@Override
+	public void setLeft(boolean left) {
+		requireMainThread();
+		this.left = left;
+	}
+
+	@Override
+	public boolean isLeft() {
+		return left;
+	}
+
+	@Override
+	public void setRight(boolean right) {
+		requireMainThread();
+		this.right = right;
+	}
+
+	@Override
+	public boolean isRight() {
+		return right;
+	}
+
+	@Override
+	public void setJump(boolean jump) {
+		requireMainThread();
+		this.jump = jump;
+	}
+
+	@Override
+	public boolean isJump() {
+		return jump;
+	}
+
+	@Override
+	public void setSneak(boolean sneak) {
+		requireMainThread();
+		this.sneak = sneak;
+	}
+
+	@Override
+	public boolean isSneak() {
+		return sneak;
+	}
+
+	@Override
+	public void setSprint(boolean sprint) {
+		requireMainThread();
+		this.sprint = sprint;
+	}
+
+	@Override
+	public boolean isSprint() {
+		return sprint;
+	}
+
+	@Override
+	public void setHeading(Float yaw) {
+		requireMainThread();
+		if (yaw != null && !Float.isFinite(yaw)) {
+			throw new IllegalArgumentException(name + " heading must be finite: " + yaw);
+		}
+		this.heading = yaw;
+	}
+
+	@Override
+	public Float getHeading() {
+		return heading;
+	}
+
+	@Override
+	public void setLook(float yaw, float pitch) {
+		requireMainThread();
+		if (!Float.isFinite(yaw) || !Float.isFinite(pitch)) {
+			throw new IllegalArgumentException(name + " look must be finite: " + yaw + ", " + pitch);
+		}
+		this.lookYaw = yaw;
+		this.lookPitch = pitch;
+	}
+
+	@Override
+	public float getLookYaw() {
+		return lookYaw;
+	}
+
+	@Override
+	public float getLookPitch() {
+		return lookPitch;
+	}
+
+	private static void requireMainThread() {
+		if (!Bukkit.isPrimaryThread()) {
+			throw new IllegalStateException("Bot controls must be used from the main thread");
+		}
+	}
+
 	/**
-	 * Marks the bot {@link BotState#FAILED}: its roster no longer runs
-	 * {@link #tickBeforeEvent()} or {@link #tickAfterEvent()} for it, only
-	 * {@link #tickFailed()}.
+	 * Marks the bot {@link BotState#FAILED} and releases every key (heading back to
+	 * the look): its roster no longer runs {@link #tickBeforeEvent()} or
+	 * {@link #tickAfterEvent()} for it, only {@link #tickFailed()}, so it sends no
+	 * input and runs no physics.
 	 */
 	public void fail() {
 		state = BotState.FAILED;
+		forward = false;
+		backward = false;
+		left = false;
+		right = false;
+		jump = false;
+		sneak = false;
+		sprint = false;
+		heading = null;
 	}
 
 	/** @return whether the connection is still open. */
@@ -172,9 +330,42 @@ public final class BotBody implements Bot {
 		sendAcks();
 	}
 
-	/** Second half of a server tick, after the bot's tick event: the flush. */
+	/**
+	 * Second half of a server tick, after the bot's tick event: the apply step
+	 * (changed inputs, sprint command, physics, move) if the connection is still
+	 * open, then the flush.
+	 */
 	public void tickAfterEvent() {
+		if (connection.isConnected()) {
+			apply();
+		}
 		flush();
+	}
+
+	/**
+	 * Sends the controls as a client would: the input if it changed (and the sprint
+	 * command if sprint changed), then one client physics step along the heading
+	 * and the resulting position with the look.
+	 */
+	private void apply() {
+		var input = new Input(forward, backward, left, right, jump, sneak, sprint);
+		if (!input.equals(sentInput)) {
+			var previous = sentInput;
+			sentInput = input;
+			writeInbound(new ServerboundPlayerInputPacket(input));
+			if (input.sprint() != previous.sprint()) {
+				writeInbound(new ServerboundPlayerCommandPacket(handle,
+						input.sprint()
+								? ServerboundPlayerCommandPacket.Action.START_SPRINTING
+								: ServerboundPlayerCommandPacket.Action.STOP_SPRINTING));
+			}
+		}
+		if (!connection.isConnected()) {
+			return;
+		}
+		var target = handle.simulate(input, heading != null ? heading : lookYaw, lookPitch);
+		writeInbound(new ServerboundMovePlayerPacket.PosRot(target, lookYaw, lookPitch, handle.clientOnGround(),
+				handle.clientHorizontalCollision()));
 	}
 
 	/**
@@ -192,6 +383,8 @@ public final class BotBody implements Bot {
 	private void sendAcks() {
 		var teleportId = connection.takeTeleportId();
 		if (teleportId != BotConnection.NO_TELEPORT) {
+			// The client lands on the teleport target with no velocity.
+			handle.resetClientVelocity();
 			writeInbound(new ServerboundAcceptTeleportationPacket(teleportId));
 		}
 		for (var keepAlive = connection.pollKeepAlive(); keepAlive != null; keepAlive = connection.pollKeepAlive()) {
