@@ -1,6 +1,7 @@
 package fr.nekotine.core.bot;
 
 import fr.nekotine.core.bot.internal.BotBody;
+import fr.nekotine.core.bot.internal.BotSelfTest;
 import fr.nekotine.core.ioc.Ioc;
 import fr.nekotine.core.logging.NekotineLogger;
 import fr.nekotine.core.module.IPluginModule;
@@ -23,6 +24,16 @@ import org.bukkit.event.Listener;
 /**
  * Spawns, lists, ticks and removes the host plugin's bots. Resolve it with
  * {@code Ioc.resolve(BotRoster.class)}. Every method is main-thread only.
+ *
+ * <p>
+ * Resolve it eagerly in the host's {@code onEnable()}, after
+ * {@code super.onEnable()}: Core loads modules lazily and only logs constructor
+ * errors, and the roster runs its startup self-test when it is constructed. The
+ * self-test resolves every server internal the library links against; it logs
+ * {@code Bots self-test passed} on success. On failure it logs one error naming
+ * each broken accessor, the roster never ticks, {@link #isAvailable()} is false
+ * and {@link #spawn}, {@link #remove} and {@link #list} throw
+ * {@link BotsUnavailableException}; the host and the server keep running.
  *
  * <p>
  * Each server tick, every live bot, in spawn order: runs its connection tick,
@@ -61,9 +72,53 @@ public class BotRoster implements IPluginModule, Listener {
 
 	private boolean ticking;
 
+	private final boolean available;
+
+	/**
+	 * Runs the startup self-test, then, if it passed, starts ticking. Never throws
+	 * on a failed self-test: the roster is then unavailable.
+	 */
 	public BotRoster() {
+		available = selfTest();
 		Ioc.resolve(TickingModule.class);
-		EventUtil.register(this);
+		if (available) {
+			EventUtil.register(this);
+		}
+	}
+
+	private boolean selfTest() {
+		BotSelfTest.Result result;
+		try {
+			result = BotSelfTest.run(BotRoster.class.getClassLoader());
+		} catch (RuntimeException | LinkageError e) {
+			logger.error("Bots self-test failed to run, bots are disabled", e);
+			return false;
+		}
+		if (result.passed()) {
+			logger.info(
+					"Bots self-test passed: " + result.accessors() + " accessors in " + result.classes() + " classes");
+			return true;
+		}
+		logger.error("Bots self-test failed, bots are disabled (BotRoster calls throw BotsUnavailableException). "
+				+ "Server internals the bots library uses are missing or changed, usually after a Paper update: "
+				+ String.join(", ", result.broken()));
+		return false;
+	}
+
+	/**
+	 * @return whether the startup self-test passed; if not, {@link #spawn},
+	 *         {@link #remove} and {@link #list} throw
+	 *         {@link BotsUnavailableException}
+	 */
+	public boolean isAvailable() {
+		return available;
+	}
+
+	private void requireAvailable() {
+		if (!available) {
+			throw new BotsUnavailableException(
+					"Bots unavailable: the bots self-test failed at startup, see the server log");
+		}
 	}
 
 	/**
@@ -88,8 +143,11 @@ public class BotRoster implements IPluginModule, Listener {
 	 *             online, or the location has no world
 	 * @throws IllegalStateException
 	 *             off the main thread, or if the join failed
+	 * @throws BotsUnavailableException
+	 *             if the startup self-test failed
 	 */
 	public Bot spawn(String name, Location location, BotWipe wipe) {
+		requireAvailable();
 		requireMainThread();
 		Objects.requireNonNull(name, "name");
 		Objects.requireNonNull(location, "location");
@@ -126,8 +184,11 @@ public class BotRoster implements IPluginModule, Listener {
 	 *
 	 * @throws IllegalStateException
 	 *             off the main thread
+	 * @throws BotsUnavailableException
+	 *             if the startup self-test failed
 	 */
 	public void remove(Bot bot) {
+		requireAvailable();
 		requireMainThread();
 		if (!(bot instanceof BotBody body) || !(bots.contains(body) || pendingSpawns.contains(body))
 				|| body.isRemoved()) {
@@ -142,8 +203,11 @@ public class BotRoster implements IPluginModule, Listener {
 
 	/**
 	 * @return the roster's bots, in spawn order (a snapshot), failed ones included
+	 * @throws BotsUnavailableException
+	 *             if the startup self-test failed
 	 */
 	public List<Bot> list() {
+		requireAvailable();
 		requireMainThread();
 		return List.copyOf(bots);
 	}
@@ -205,6 +269,7 @@ public class BotRoster implements IPluginModule, Listener {
 
 	@Override
 	public void unload() {
+		// Harmless when unavailable: the roster never registered and holds no bot.
 		EventUtil.unregister(this);
 		var all = new ArrayList<>(bots);
 		all.addAll(pendingSpawns);
