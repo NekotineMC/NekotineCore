@@ -1,9 +1,20 @@
 package fr.nekotine.core.bot.internal;
 
 import java.lang.classfile.ClassFile;
+import java.lang.classfile.ClassModel;
+import java.lang.classfile.Opcode;
+import java.lang.classfile.instruction.FieldInstruction;
+import java.lang.classfile.instruction.InvokeInstruction;
 import java.lang.classfile.constantpool.ClassEntry;
 import java.lang.classfile.constantpool.FieldRefEntry;
+import java.lang.classfile.constantpool.InterfaceMethodRefEntry;
 import java.lang.classfile.constantpool.MemberRefEntry;
+import java.lang.classfile.constantpool.MethodHandleEntry;
+import java.lang.classfile.constantpool.MethodRefEntry;
+import java.lang.invoke.MethodHandleInfo;
+import java.lang.reflect.Field;
+import java.lang.reflect.Member;
+import java.lang.reflect.Modifier;
 import java.lang.classfile.constantpool.PoolEntry;
 import java.io.FileNotFoundException;
 import java.net.URISyntaxException;
@@ -12,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -140,9 +152,13 @@ public final class BotSelfTest {
 
 	/**
 	 * Resolves every external accessor the constant pool of {@code classBytes}
-	 * references, with {@code loader}, without loading the class itself.
+	 * references, with {@code loader}, without loading the class itself. A resolved
+	 * member must also match how the class uses it (static or instance, interface
+	 * or class owner) and be accessible from it.
 	 *
-	 * @return the broken accessors, in constant-pool order
+	 * @return the broken accessors, in constant-pool order, each with its reason
+	 *         unless it is simply missing; a missing class is reported once, not
+	 *         again for its members
 	 * @throws IllegalArgumentException
 	 *             if the bytes are not a class file
 	 */
@@ -150,8 +166,11 @@ public final class BotSelfTest {
 		return check(classBytes, loader, new HashSet<>());
 	}
 
-	private static List<String> check(byte[] classBytes, ClassLoader loader, Set<String> checked) {
+	private static List<String> check(byte[] classBytes, ClassLoader loader, Set<String> counted) {
 		var model = ClassFile.of().parse(classBytes);
+		var caller = new Caller(model, loader);
+		var uses = staticUses(model);
+		var checked = new HashSet<String>();
 		var broken = new ArrayList<String>();
 		for (PoolEntry entry : model.constantPool()) {
 			String accessor;
@@ -161,22 +180,24 @@ public final class BotSelfTest {
 				if (owner == null || ignored(owner)) {
 					continue;
 				}
-				var name = member.name().stringValue();
-				var descriptor = member.type().stringValue();
-				boolean field = member instanceof FieldRefEntry;
-				accessor = dotted(owner) + "#" + name + (field ? ":" : "") + descriptor;
+				accessor = accessor(member);
+				counted.add(accessor);
 				if (!checked.add(accessor)) {
 					continue;
 				}
-				problem = field
-						? resolveField(owner, name, descriptor, loader)
-						: resolveMethod(owner, name, descriptor, loader);
+				var type = load(owner, loader);
+				if (type == null) {
+					// Reported once, by its class entry.
+					continue;
+				}
+				problem = checkMember(type, member, uses.getOrDefault(accessor, Set.of()), caller);
 			} else if (entry instanceof ClassEntry type) {
 				var owner = elementName(type.asInternalName());
 				if (owner == null || ignored(owner)) {
 					continue;
 				}
 				accessor = dotted(owner);
+				counted.add(accessor);
 				if (!checked.add(accessor)) {
 					continue;
 				}
@@ -189,6 +210,145 @@ public final class BotSelfTest {
 			}
 		}
 		return broken;
+	}
+
+	/** {@code owner#name(descriptor)} or {@code owner#name:descriptor}. */
+	private static String accessor(MemberRefEntry member) {
+		var internal = member.owner().asInternalName();
+		var owner = elementName(internal);
+		return dotted(owner == null ? internal : owner) + "#" + member.name().stringValue()
+				+ (member instanceof FieldRefEntry ? ":" : "") + member.type().stringValue();
+	}
+
+	/**
+	 * How the class uses each member ref, from its field and invoke instructions
+	 * and its method handles: {@code true} for a static use, {@code false} for an
+	 * instance one.
+	 */
+	private static Map<String, Set<Boolean>> staticUses(ClassModel model) {
+		var uses = new HashMap<String, Set<Boolean>>();
+		for (var method : model.methods()) {
+			var code = method.code();
+			if (code.isEmpty()) {
+				continue;
+			}
+			for (var element : code.get()) {
+				if (element instanceof FieldInstruction instruction) {
+					var opcode = instruction.opcode();
+					uses.computeIfAbsent(accessor(instruction.field()), _ -> new HashSet<>())
+							.add(opcode == Opcode.GETSTATIC || opcode == Opcode.PUTSTATIC);
+				} else if (element instanceof InvokeInstruction instruction) {
+					uses.computeIfAbsent(accessor(instruction.method()), _ -> new HashSet<>())
+							.add(instruction.opcode() == Opcode.INVOKESTATIC);
+				}
+			}
+		}
+		for (var entry : model.constantPool()) {
+			if (entry instanceof MethodHandleEntry handle) {
+				int kind = handle.kind();
+				boolean isStatic = kind == MethodHandleInfo.REF_getStatic || kind == MethodHandleInfo.REF_putStatic
+						|| kind == MethodHandleInfo.REF_invokeStatic;
+				uses.computeIfAbsent(accessor(handle.reference()), _ -> new HashSet<>()).add(isStatic);
+			}
+		}
+		return uses;
+	}
+
+	/**
+	 * @return why the member is broken, {@code "missing"}, or null if it links from
+	 *         the caller as used
+	 */
+	private static String checkMember(Class<?> type, MemberRefEntry ref, Set<Boolean> staticUses, Caller caller) {
+		var name = ref.name().stringValue();
+		var descriptor = ref.type().stringValue();
+		try {
+			if (ref instanceof MethodRefEntry && type.isInterface()) {
+				return "owner is an interface, referenced as a class";
+			}
+			if (ref instanceof InterfaceMethodRefEntry && !type.isInterface()) {
+				return "owner is a class, referenced as an interface";
+			}
+			Member member = ref instanceof FieldRefEntry
+					? resolveField(type, name, descriptor)
+					: resolveMethod(type, name, descriptor);
+			if (member == null) {
+				return "missing";
+			}
+			if (!name.equals("<init>")) {
+				boolean isStatic = Modifier.isStatic(member.getModifiers());
+				if (isStatic && staticUses.contains(false)) {
+					return "is static, used as instance";
+				}
+				if (!isStatic && staticUses.contains(true)) {
+					return "is instance, used as static";
+				}
+			}
+			return caller.access(member);
+		} catch (LinkageError e) {
+			return e.toString();
+		}
+	}
+
+	/** The class being checked, as the JVM sees it for access checks. */
+	private static final class Caller {
+
+		private final String name;
+
+		private final String packageName;
+
+		private final String superName;
+
+		private final ClassLoader loader;
+
+		private Class<?> superclass;
+
+		private boolean superLoaded;
+
+		Caller(ClassModel model, ClassLoader loader) {
+			name = dotted(model.thisClass().asInternalName());
+			int dot = name.lastIndexOf('.');
+			packageName = dot < 0 ? "" : name.substring(0, dot);
+			superName = model.superclass().map(c -> dotted(c.asInternalName())).orElse(null);
+			this.loader = loader;
+		}
+
+		/**
+		 * @return why {@code member} is not accessible from this class, or null:
+		 *         public, protected from a subclass, same package, or private to this
+		 *         class
+		 */
+		String access(Member member) {
+			int modifiers = member.getModifiers();
+			var declaring = member.getDeclaringClass();
+			if (Modifier.isPublic(modifiers)) {
+				return null;
+			}
+			if (Modifier.isPrivate(modifiers)) {
+				return declaring.getName().equals(name) ? null : "private";
+			}
+			if (declaring.getPackageName().equals(packageName)) {
+				return null;
+			}
+			if (Modifier.isProtected(modifiers)) {
+				var sup = superclass();
+				return sup != null && declaring.isAssignableFrom(sup) ? null : "protected, caller is not a subclass";
+			}
+			return "package-private";
+		}
+
+		private Class<?> superclass() {
+			if (!superLoaded) {
+				superLoaded = true;
+				if (superName != null) {
+					try {
+						superclass = Class.forName(superName, false, loader);
+					} catch (ClassNotFoundException | LinkageError e) {
+						superclass = null;
+					}
+				}
+			}
+			return superclass;
+		}
 	}
 
 	private static Result withInjected(Result result) {
@@ -268,60 +428,48 @@ public final class BotSelfTest {
 	/**
 	 * JVM field resolution, by name and type: the owner, its superclasses and its
 	 * superinterfaces.
+	 *
+	 * @return the field, or null if missing
 	 */
-	private static String resolveField(String owner, String name, String descriptor, ClassLoader loader) {
-		var type = load(owner, loader);
-		if (type == null) {
-			return "missing class " + dotted(owner);
-		}
-		try {
-			for (var candidate : hierarchy(type)) {
-				for (var field : candidate.getDeclaredFields()) {
-					if (field.getName().equals(name) && field.getType().descriptorString().equals(descriptor)) {
-						return null;
-					}
+	private static Field resolveField(Class<?> type, String name, String descriptor) {
+		for (var candidate : hierarchy(type)) {
+			for (var field : candidate.getDeclaredFields()) {
+				if (field.getName().equals(name) && field.getType().descriptorString().equals(descriptor)) {
+					return field;
 				}
 			}
-		} catch (LinkageError e) {
-			return e.toString();
 		}
-		return "missing";
+		return null;
 	}
 
 	/**
 	 * JVM method resolution: the owner and its superclasses, then its interfaces
 	 * (and {@link Object} for an interface owner); constructors on the owner only.
+	 *
+	 * @return the method or constructor, or null if missing
 	 */
-	private static String resolveMethod(String owner, String name, String descriptor, ClassLoader loader) {
-		var type = load(owner, loader);
-		if (type == null) {
-			return "missing class " + dotted(owner);
-		}
-		try {
-			if (name.equals("<init>")) {
-				for (var constructor : type.getDeclaredConstructors()) {
-					if (descriptor(constructor.getParameterTypes(), void.class).equals(descriptor)) {
-						return null;
-					}
-				}
-				return "missing";
-			}
-			var candidates = hierarchy(type);
-			if (type.isInterface()) {
-				candidates.add(Object.class);
-			}
-			for (var candidate : candidates) {
-				for (var method : candidate.getDeclaredMethods()) {
-					if (method.getName().equals(name)
-							&& descriptor(method.getParameterTypes(), method.getReturnType()).equals(descriptor)) {
-						return null;
-					}
+	private static Member resolveMethod(Class<?> type, String name, String descriptor) {
+		if (name.equals("<init>")) {
+			for (var constructor : type.getDeclaredConstructors()) {
+				if (descriptor(constructor.getParameterTypes(), void.class).equals(descriptor)) {
+					return constructor;
 				}
 			}
-		} catch (LinkageError e) {
-			return e.toString();
+			return null;
 		}
-		return "missing";
+		var candidates = hierarchy(type);
+		if (type.isInterface()) {
+			candidates.add(Object.class);
+		}
+		for (var candidate : candidates) {
+			for (var method : candidate.getDeclaredMethods()) {
+				if (method.getName().equals(name)
+						&& descriptor(method.getParameterTypes(), method.getReturnType()).equals(descriptor)) {
+					return method;
+				}
+			}
+		}
+		return null;
 	}
 
 	/** The type, its superclasses, then every superinterface, each once. */
