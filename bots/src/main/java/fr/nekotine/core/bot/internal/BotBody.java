@@ -2,10 +2,17 @@ package fr.nekotine.core.bot.internal;
 
 import fr.nekotine.core.bot.Bot;
 import fr.nekotine.core.bot.BotState;
+import fr.nekotine.core.bot.BotWipe;
 import io.netty.channel.embedded.EmbeddedChannel;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.Connection;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -21,6 +28,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.CommonListenerCookie;
+import net.minecraft.world.level.storage.LevelResource;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.Player;
@@ -43,15 +51,22 @@ public final class BotBody implements Bot {
 
 	private final ServerPlayer handle;
 
+	private final BotWipe wipe;
+
+	private BotState state = BotState.ACTIVE;
+
 	private boolean loadedAckSent;
 
 	private boolean removed;
 
-	private BotBody(String name, EmbeddedChannel channel, BotConnection connection, ServerPlayer handle) {
+	private RuntimeException fault;
+
+	private BotBody(String name, EmbeddedChannel channel, BotConnection connection, ServerPlayer handle, BotWipe wipe) {
 		this.name = name;
 		this.channel = channel;
 		this.connection = connection;
 		this.handle = handle;
+		this.wipe = wipe;
 	}
 
 	/** @return the offline-mode UUID a player named {@code name} gets. */
@@ -62,9 +77,10 @@ public final class BotBody implements Bot {
 	/**
 	 * Builds the fake connection and joins a new player named {@code name} at
 	 * {@code location} through {@code PlayerList.placeNewPlayer}, which fires
-	 * {@code PlayerJoinEvent}. Saved player data is not loaded.
+	 * {@code PlayerJoinEvent}. Saved player data is not loaded. {@code wipe} says
+	 * which saved files {@link #wipe} deletes once the bot has left.
 	 */
-	public static BotBody join(String name, Location location) throws Exception {
+	public static BotBody join(String name, Location location, BotWipe wipe) throws Exception {
 		var server = MinecraftServer.getServer();
 		var level = ((CraftWorld) location.getWorld()).getHandle();
 		var profile = UUIDUtil.createOfflineProfile(name);
@@ -90,7 +106,7 @@ public final class BotBody implements Bot {
 			player.snapTo(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
 			server.getPlayerList().placeNewPlayer(connection, player,
 					CommonListenerCookie.createInitial(profile, false));
-			var body = new BotBody(name, channel, connection, player);
+			var body = new BotBody(name, channel, connection, player, wipe);
 			body.flush();
 			return body;
 		} catch (Exception | Error e) {
@@ -113,7 +129,16 @@ public final class BotBody implements Bot {
 
 	@Override
 	public BotState state() {
-		return BotState.ACTIVE;
+		return state;
+	}
+
+	/**
+	 * Marks the bot {@link BotState#FAILED}: its roster no longer runs
+	 * {@link #tickBeforeEvent()} or {@link #tickAfterEvent()} for it, only
+	 * {@link #tickFailed()}.
+	 */
+	public void fail() {
+		state = BotState.FAILED;
 	}
 
 	/** @return whether the connection is still open. */
@@ -122,16 +147,46 @@ public final class BotBody implements Bot {
 	}
 
 	/**
-	 * One server tick: the connection tick (listener tick: position reset, player
-	 * tick, keep-alive, throttlers), then the client acks, then the flush.
+	 * Test seam, internal: makes the next {@link #tickBeforeEvent()} throw
+	 * {@code fault} before doing anything, as a library failure would.
 	 */
-	public void tick() {
+	public void failNextTick(RuntimeException fault) {
+		this.fault = fault;
+	}
+
+	/**
+	 * First half of a server tick, before the bot's tick event: the connection tick
+	 * (listener tick: position reset, player tick, keep-alive, throttlers), then
+	 * the client acks if the connection is still open.
+	 */
+	public void tickBeforeEvent() {
+		var injected = fault;
+		if (injected != null) {
+			fault = null;
+			throw injected;
+		}
 		connection.tick();
 		if (!connection.isConnected()) {
 			return;
 		}
 		sendAcks();
+	}
+
+	/** Second half of a server tick, after the bot's tick event: the flush. */
+	public void tickAfterEvent() {
 		flush();
+	}
+
+	/**
+	 * The only tick of a {@link BotState#FAILED} bot: flushes and releases what the
+	 * server sent it (so a kick still closes the channel), ignoring any error.
+	 */
+	public void tickFailed() {
+		try {
+			flush();
+		} catch (RuntimeException e) {
+			// Already failed and logged once: stay quiet.
+		}
 	}
 
 	private void sendAcks() {
@@ -180,6 +235,33 @@ public final class BotBody implements Bot {
 		connection.handleDisconnection();
 		channel.releaseOutbound();
 		channel.releaseInbound();
+	}
+
+	/**
+	 * Deletes the saved files selected by the bot's {@link BotWipe}. Call it once
+	 * {@link #remove()} returned, never from a quit listener: the server saves
+	 * after the quit event. A missing file is not an error; a failed delete logs
+	 * one warning starting with the bot's name.
+	 */
+	public void wipe(ComponentLogger logger) {
+		var server = MinecraftServer.getServer();
+		var uuid = handle.getUUID().toString();
+		var files = new ArrayList<Path>();
+		if (wipe.state()) {
+			var data = server.getWorldPath(LevelResource.PLAYER_DATA_DIR);
+			files.addAll(List.of(data.resolve(uuid + ".dat"), data.resolve(uuid + ".dat_old")));
+		}
+		if (wipe.statistics()) {
+			files.add(server.getWorldPath(LevelResource.PLAYER_STATS_DIR).resolve(uuid + ".json"));
+			files.add(server.getWorldPath(LevelResource.PLAYER_ADVANCEMENTS_DIR).resolve(uuid + ".json"));
+		}
+		for (var file : files) {
+			try {
+				Files.deleteIfExists(file);
+			} catch (IOException | RuntimeException e) {
+				logger.warn(name + " could not delete its saved file " + file + ": " + e);
+			}
+		}
 	}
 
 	/** @return whether {@link #remove()} ran. */

@@ -27,6 +27,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -60,15 +61,15 @@ class BotLifecycleIT {
 
 	private static final String ALICE = "Bot_Alice";
 
-	private static BotRoster roster() throws Exception {
+	static BotRoster roster() throws Exception {
 		return PaperServer.onMain(() -> Ioc.resolve(BotRoster.class));
 	}
 
-	private static Location spawnLocation() throws Exception {
+	static Location spawnLocation() throws Exception {
 		return PaperServer.onMain(() -> Bukkit.getWorlds().getFirst().getSpawnLocation().add(0.5, 0, 0.5));
 	}
 
-	private static void cleanUp(BotRoster roster, Object... listeners) throws Exception {
+	static void cleanUp(BotRoster roster, Object... listeners) throws Exception {
 		PaperServer.onMain(() -> {
 			for (var bot : roster.list()) {
 				roster.remove(bot);
@@ -85,14 +86,14 @@ class BotLifecycleIT {
 		});
 	}
 
-	private static void register(Listener listener) throws Exception {
+	static void register(Listener listener) throws Exception {
 		PaperServer.onMain(() -> {
 			Bukkit.getPluginManager().registerEvents(listener, PaperServer.plugin());
 			return null;
 		});
 	}
 
-	private static void register(PacketAdapter adapter) throws Exception {
+	static void register(PacketAdapter adapter) throws Exception {
 		PaperServer.onMain(() -> {
 			ProtocolLibrary.getProtocolManager().addPacketListener(adapter);
 			return null;
@@ -150,8 +151,10 @@ class BotLifecycleIT {
 	 * Captures log lines (message plus thrown class names) of the server's log4j
 	 * context.
 	 */
-	private static final class LogCapture extends AbstractAppender implements AutoCloseable {
+	static final class LogCapture extends AbstractAppender implements AutoCloseable {
 		final Queue<String> lines = new ConcurrentLinkedQueue<>();
+		/** Logger name and line, in the order logged. */
+		final Queue<Map.Entry<String, String>> byLogger = new ConcurrentLinkedQueue<>();
 		private final LoggerContext context;
 
 		LogCapture() {
@@ -169,6 +172,7 @@ class BotLifecycleIT {
 				line.append(' ').append(thrown.getClass().getName()).append(": ").append(thrown.getMessage());
 			}
 			lines.add(line.toString());
+			byLogger.add(Map.entry(String.valueOf(event.getLoggerName()), line.toString()));
 		}
 
 		@Override
