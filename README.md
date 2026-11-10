@@ -81,7 +81,8 @@ Voici la liste des modules:
 - `BotRoster` ⧖
 
 	Module (dans le module Gradle `bots`, NMS, épinglé sur une version de Minecraft) pour faire apparaître des bots : de faux joueurs côté serveur que le serveur, les autres plugins et ProtocolLib voient comme de vrais joueurs (`PlayerJoinEvent`/`PlayerQuitEvent`, `getOnlinePlayers()`, UUID hors-ligne dérivé du nom).  
-	Il permet de faire apparaître (`spawn`), lister (`list`) et retirer (`remove`) des bots, depuis le thread principal uniquement. Chaque tick, il fait tourner leur connexion et répond aux accusés du client (téléportation, keep-alive, joueur chargé). `unload()` retire tous les bots.
+	Il permet de faire apparaître (`spawn`), lister (`list`) et retirer (`remove`) des bots, depuis le thread principal uniquement. Chaque tick, il fait tourner leur connexion et répond aux accusés du client (téléportation, keep-alive, joueur chargé). `unload()` retire tous les bots.  
+	Chaque tick, il lance un `BotTickEvent` par bot (après les accusés, avant l'envoi) ; à leur départ, il efface leurs fichiers sauvegardés selon `BotWipe` (tout par défaut) ; une erreur de la bibliothèque sur un bot le passe `FAILED` (toujours connecté, plus tické) sans arrêter les autres.
 	
 	> Pas encore de contrôles (déplacement, mains, commandes) : ils arrivent avec les stories suivantes.
 	
