@@ -8,6 +8,7 @@ import fr.nekotine.core.module.IPluginModule;
 import fr.nekotine.core.ticking.TickingModule;
 import fr.nekotine.core.ticking.event.TickElapsedEvent;
 import fr.nekotine.core.util.EventUtil;
+import io.papermc.paper.event.player.PlayerFailMoveEvent;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -19,6 +20,7 @@ import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
 /**
@@ -37,11 +39,12 @@ import org.bukkit.event.Listener;
  *
  * <p>
  * Each server tick, every live bot, in spawn order: runs its connection tick,
- * sends its pending client acks, fires its {@link BotTickEvent}, then flushes;
- * a bot whose connection closed then leaves. Bots spawned or removed during
- * this loop (from a listener) join or leave the loop at its end: a spawned bot
- * joins the server at once but is listed and ticked only after the loop; a
- * removed bot is not ticked again and leaves after the loop.
+ * sends its pending client acks, fires its {@link BotTickEvent}, sends its
+ * changed inputs, runs its physics step and sends its move (see {@link Bot}),
+ * then flushes; a bot whose connection closed then leaves. Bots spawned or
+ * removed during this loop (from a listener) join or leave the loop at its end:
+ * a spawned bot joins the server at once but is listed and ticked only after
+ * the loop; a removed bot is not ticked again and leaves after the loop.
  *
  * <p>
  * If the library's own work for a bot throws, the error is logged once, the bot
@@ -49,6 +52,12 @@ import org.bukkit.event.Listener;
  * or event) while the other bots carry on; it stays connected and listed until
  * removed. Exceptions from {@link BotTickEvent} listeners are the server's to
  * log and never fail the bot.
+ *
+ * <p>
+ * Each {@code PlayerFailMoveEvent} the server fires for one of its bots (a move
+ * it found wrong, too quick, into an unloaded chunk or into a block) is logged
+ * as one warning starting with the bot's name, with the reason, the target and
+ * whether the move was refused.
  *
  * <p>
  * Every exit (removal, {@link #unload()}, kick, lost connection) takes the same
@@ -236,6 +245,20 @@ public class BotRoster implements IPluginModule, Listener {
 			pendingRemovals.remove(body);
 			exitQuietly(body);
 		}
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR)
+	public void onFailMove(PlayerFailMoveEvent event) {
+		var player = event.getPlayer();
+		var body = Stream.concat(bots.stream(), pendingSpawns.stream())
+				.filter(b -> !b.isRemoved() && b.player().equals(player)).findFirst().orElse(null);
+		if (body == null) {
+			return;
+		}
+		var to = event.getTo();
+		logger.warn(body.name() + " move " + (event.isAllowed() ? "allowed" : "refused") + " by the server ("
+				+ event.getFailReason() + ") to " + to.getWorld().getName() + " " + to.getX() + " " + to.getY() + " "
+				+ to.getZ());
 	}
 
 	private void tick(BotBody body) {
