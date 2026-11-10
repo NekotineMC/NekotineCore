@@ -353,7 +353,7 @@ public final class BotBody implements Bot {
 			var previous = sentInput;
 			sentInput = input;
 			writeInbound(new ServerboundPlayerInputPacket(input));
-			if (input.sprint() != previous.sprint()) {
+			if (input.sprint() != previous.sprint() && connection.isConnected()) {
 				writeInbound(new ServerboundPlayerCommandPacket(handle,
 						input.sprint()
 								? ServerboundPlayerCommandPacket.Action.START_SPRINTING

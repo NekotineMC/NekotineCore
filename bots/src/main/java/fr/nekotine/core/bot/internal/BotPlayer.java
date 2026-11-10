@@ -72,7 +72,8 @@ final class BotPlayer extends ServerPlayer {
 
 	@Override
 	public void move(MoverType moverType, Vec3 delta) {
-		if (!simulating) {
+		if (!simulating || noPhysics) {
+			// Without physics, move records no movement.
 			super.move(moverType, delta);
 			return;
 		}

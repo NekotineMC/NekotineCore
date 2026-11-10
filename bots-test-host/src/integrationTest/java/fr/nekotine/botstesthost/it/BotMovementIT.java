@@ -15,6 +15,7 @@ import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
+import com.destroystokyo.paper.event.player.PlayerJumpEvent;
 import fr.nekotine.botstesthost.it.BotLifecycleIT.LogCapture;
 import fr.nekotine.botstesthost.it.BotLifecycleIT.PlayerEvents;
 import fr.nekotine.core.bot.Bot;
@@ -34,9 +35,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
@@ -109,6 +112,7 @@ class BotMovementIT {
 		final Queue<Boolean> sneaks = new ConcurrentLinkedQueue<>();
 		final Queue<Boolean> sprints = new ConcurrentLinkedQueue<>();
 		final Queue<PlayerFailMoveEvent.FailReason> fails = new ConcurrentLinkedQueue<>();
+		final Queue<Location> jumps = new ConcurrentLinkedQueue<>();
 
 		MoveEvents(String name, boolean refuse) {
 			this.name = name;
@@ -123,6 +127,13 @@ class BotMovementIT {
 		public void onMove(PlayerMoveEvent event) {
 			if (event.getPlayer().getName().equals(name)) {
 				moves.add(event.getTo());
+			}
+		}
+
+		@EventHandler
+		public void onJump(PlayerJumpEvent event) {
+			if (event.getPlayer().getName().equals(name)) {
+				jumps.add(event.getTo());
 			}
 		}
 
@@ -333,6 +344,7 @@ class BotMovementIT {
 			var end = location(bot);
 			assertTrue(end.getZ() > structure.cz + 3, "bot is not past the step: " + end);
 			assertOnGroundAt(bot, FLOOR_Y + 2);
+			assertFalse(events.jumps.isEmpty(), "no PlayerJumpEvent for the bot");
 			assertEquals(List.of(), List.copyOf(events.fails), "PlayerFailMoveEvent fired");
 			assertNoServerMoveWarnings(logs);
 		} finally {
@@ -359,6 +371,156 @@ class BotMovementIT {
 			PaperServer.awaitTicks(30);
 			var end = location(bot);
 			assertTrue(end.getZ() > structure.cz + 2, "bot did not leave the ledge: " + end);
+			assertOnGroundAt(bot, FLOOR_Y + 1);
+			PaperServer.onMain(() -> {
+				assertEquals(bot.player().getAttribute(Attribute.MAX_HEALTH).getValue(), bot.player().getHealth(),
+						"the 3-block drop hurt the bot");
+				return null;
+			});
+			assertEquals(List.of(), List.copyOf(events.fails), "PlayerFailMoveEvent fired");
+			assertNoServerMoveWarnings(logs);
+		} finally {
+			cleanUp(roster, events);
+			clear(structure);
+		}
+	}
+
+	@Test
+	void lookReachesServerAndDrivesMovement() throws Exception {
+		var roster = roster();
+		var structure = structure();
+		var events = new MoveEvents(NAME);
+		try (var logs = new LogCapture()) {
+			build(structure);
+			var spawnAt = structure.at(FLOOR_Y + 1);
+			spawnAt.setYaw(45);
+			spawnAt.setPitch(-20);
+			var bot = spawn(roster, spawnAt);
+			PaperServer.onMain(() -> {
+				assertEquals(45f, bot.getLookYaw(), "look yaw is not the spawn yaw");
+				assertEquals(-20f, bot.getLookPitch(), "look pitch is not the spawn pitch");
+				return null;
+			});
+			PaperServer.awaitTicks(10);
+			register(events);
+			var start = location(bot);
+			control(() -> {
+				bot.setLook(90, 30);
+				bot.setForward(true);
+			});
+			PaperServer.awaitTicks(15);
+			control(() -> bot.setForward(false));
+			PaperServer.awaitTicks(10);
+			var end = location(bot);
+			assertEquals(90f, end.getYaw(), 0.001f, "the look yaw did not reach the server");
+			assertEquals(30f, end.getPitch(), 0.001f, "the look pitch did not reach the server");
+			assertTrue(start.getX() - end.getX() > 2, "bot did not walk toward -X: " + start + " -> " + end);
+			assertTrue(Math.abs(end.getZ() - start.getZ()) < EPSILON, "bot drifted on Z: " + start + " -> " + end);
+			assertEquals(List.of(), List.copyOf(events.fails), "PlayerFailMoveEvent fired");
+			assertNoServerMoveWarnings(logs);
+		} finally {
+			cleanUp(roster, events);
+			clear(structure);
+		}
+	}
+
+	/** Holds {@code key} for 10 ticks, then lets the bot stop. */
+	private static Location displacement(Bot bot, Consumer<Boolean> key) throws Exception {
+		var start = location(bot);
+		control(() -> key.accept(true));
+		PaperServer.awaitTicks(10);
+		control(() -> key.accept(false));
+		PaperServer.awaitTicks(10);
+		return location(bot).subtract(start);
+	}
+
+	@Test
+	void strafeAndBackwardMoveAlongTheirAxes() throws Exception {
+		var roster = roster();
+		var structure = structure();
+		var events = new MoveEvents(NAME);
+		try (var logs = new LogCapture()) {
+			build(structure);
+			// Facing +Z: left is +X, right is -X, backward is -Z.
+			var bot = spawn(roster, structure.at(FLOOR_Y + 1));
+			PaperServer.awaitTicks(10);
+			register(events);
+			var left = displacement(bot, bot::setLeft);
+			var right = displacement(bot, bot::setRight);
+			var backward = displacement(bot, bot::setBackward);
+			assertTrue(left.getX() > 1 && Math.abs(left.getZ()) < EPSILON, "left did not move along +X: " + left);
+			assertTrue(right.getX() < -1 && Math.abs(right.getZ()) < EPSILON, "right did not move along -X: " + right);
+			assertTrue(backward.getZ() < -1 && Math.abs(backward.getX()) < EPSILON,
+					"backward did not move along -Z: " + backward);
+			assertEquals(List.of(), List.copyOf(events.fails), "PlayerFailMoveEvent fired");
+			assertNoServerMoveWarnings(logs);
+		} finally {
+			cleanUp(roster, events);
+			clear(structure);
+		}
+	}
+
+	/** Spawns a fresh bot, holds forward plus {@code extra} for 15 ticks. */
+	private static double forwardDistance(BotRoster roster, Structure structure, Consumer<Bot> extra) throws Exception {
+		var bot = spawn(roster, structure.at(FLOOR_Y + 1));
+		try {
+			PaperServer.awaitTicks(10);
+			var start = location(bot);
+			control(() -> {
+				bot.setForward(true);
+				extra.accept(bot);
+			});
+			PaperServer.awaitTicks(15);
+			return location(bot).getZ() - start.getZ();
+		} finally {
+			PaperServer.onMain(() -> {
+				roster.remove(bot);
+				return null;
+			});
+		}
+	}
+
+	@Test
+	void sneakSlowsAndSprintSpeedsWalking() throws Exception {
+		var roster = roster();
+		var structure = structure();
+		try (var logs = new LogCapture()) {
+			build(structure);
+			double plain = forwardDistance(roster, structure, bot -> {
+			});
+			double sneaking = forwardDistance(roster, structure, bot -> bot.setSneak(true));
+			double sprinting = forwardDistance(roster, structure, bot -> bot.setSprint(true));
+			assertTrue(plain > 1, "plain walking barely moved: " + plain);
+			assertTrue(sneaking < plain * 0.6, "sneaking is not clearly slower: " + sneaking + " vs " + plain);
+			assertTrue(sprinting > plain * 1.15, "sprinting is not clearly faster: " + sprinting + " vs " + plain);
+			assertNoServerMoveWarnings(logs);
+		} finally {
+			cleanUp(roster);
+			clear(structure);
+		}
+	}
+
+	@Test
+	void teleportWhileWalkingStaysAtTarget() throws Exception {
+		var roster = roster();
+		var structure = structure();
+		var events = new MoveEvents(NAME);
+		try (var logs = new LogCapture()) {
+			build(structure);
+			var bot = spawn(roster, structure.at(FLOOR_Y + 1));
+			PaperServer.awaitTicks(10);
+			register(events);
+			control(() -> bot.setForward(true));
+			PaperServer.awaitTicks(5);
+			var target = structure.at(FLOOR_Y + 1).add(-5, 0, -5);
+			PaperServer.onMain(() -> {
+				bot.setForward(false);
+				assertTrue(bot.player().teleport(target), "teleport refused");
+				return null;
+			});
+			PaperServer.awaitTicks(15);
+			var end = location(bot);
+			assertTrue(end.distance(target) < EPSILON, "bot did not stay at the teleport target: " + end);
 			assertOnGroundAt(bot, FLOOR_Y + 1);
 			assertEquals(List.of(), List.copyOf(events.fails), "PlayerFailMoveEvent fired");
 			assertNoServerMoveWarnings(logs);
@@ -454,7 +616,12 @@ class BotMovementIT {
 				return null;
 			});
 			PaperServer.awaitTicks(20);
-			cleanUp(roster, packets, counter);
+			// Freeze the counts: stop listening, in one go.
+			PaperServer.onMain(() -> {
+				HandlerList.unregisterAll(counter);
+				ProtocolLibrary.getProtocolManager().removePacketListener(packets);
+				return null;
+			});
 			int tickCount = counter.count.get();
 			assertTrue(tickCount >= 20, "too few ticks: " + tickCount);
 			assertEquals(List.of(), packets.of(PacketType.Play.Client.STEER_VEHICLE), "input sent without change");

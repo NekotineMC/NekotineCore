@@ -22,11 +22,16 @@ import org.bukkit.entity.Player;
  *
  * <p>
  * Initially every key is released, the heading follows the look and the look is
- * the spawn location's yaw and pitch. A {@link BotState#FAILED} bot has every
- * key released and its heading back to the look, and sends nothing.
+ * the spawn location's yaw and pitch. {@link BotState#FAILED} sets the getters
+ * to released keys and no heading, but sends nothing, so the server keeps the
+ * last input it got (e.g. the player stays sneaking).
  *
  * <p>
- * Controls are main-thread only: off it, they throw
+ * Not modelled yet: velocity the server or a plugin applies (setVelocity,
+ * knockback, explosions) and creative or spectator flight up and down.
+ *
+ * <p>
+ * Setters are main-thread only: off it, they throw
  * {@link IllegalStateException}.
  */
 public interface Bot {
@@ -107,8 +112,8 @@ public interface Bot {
 	Float getHeading();
 
 	/**
-	 * Sets where the bot looks, in degrees (Minecraft convention); the server
-	 * clamps the pitch to [-90, 90].
+	 * Sets where the bot looks, in degrees (Minecraft convention). The getters
+	 * return the values set; the server clamps the pitch to [-90, 90].
 	 *
 	 * @throws IllegalArgumentException
 	 *             if {@code yaw} or {@code pitch} is not finite

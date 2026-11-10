@@ -154,6 +154,27 @@ class BotSelfTestIT {
 	}
 
 	@Test
+	void membersInheritedThroughAnInternalClassAreChecked() throws Exception {
+		var botPlayer = ClassDesc.of("fr.nekotine.core.bot.internal.BotPlayer");
+		var bytes = synthesize("SynthesizedInheritedCaller", code -> {
+			// Missing: inherited from nowhere.
+			code.aconst_null();
+			code.getfield(botPlayer, "noSuchInheritedField", ConstantDescs.CD_int);
+			code.pop();
+			// Valid: Entity's public field, through BotPlayer.
+			code.aconst_null();
+			code.getfield(botPlayer, "xo", ConstantDescs.CD_double);
+			code.pop2();
+			// Declared by BotPlayer itself: not an accessor, skipped even though private.
+			code.aconst_null();
+			code.getfield(botPlayer, "simulating", ConstantDescs.CD_boolean);
+			code.pop();
+		});
+		assertEquals(List.of("fr.nekotine.core.bot.internal.BotPlayer#noSuchInheritedField:I"),
+				BotSelfTest.check(bytes, BotRoster.class.getClassLoader()));
+	}
+
+	@Test
 	void missingMembersAndClassesAreReported() throws Exception {
 		var bytes = synthesize("SynthesizedMissingCaller", code -> {
 			code.invokestatic(MINECRAFT_SERVER, "noSuchMethod", MethodTypeDesc.of(ConstantDescs.CD_void));
