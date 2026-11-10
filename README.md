@@ -82,7 +82,8 @@ Voici la liste des modules:
 
 	Module (dans le module Gradle `bots`, NMS, épinglé sur une version de Minecraft) pour faire apparaître des bots : de faux joueurs côté serveur que le serveur, les autres plugins et ProtocolLib voient comme de vrais joueurs (`PlayerJoinEvent`/`PlayerQuitEvent`, `getOnlinePlayers()`, UUID hors-ligne dérivé du nom).  
 	Il permet de faire apparaître (`spawn`), lister (`list`) et retirer (`remove`) des bots, depuis le thread principal uniquement. Chaque tick, il fait tourner leur connexion et répond aux accusés du client (téléportation, keep-alive, joueur chargé). `unload()` retire tous les bots.  
-	Chaque tick, il lance un `BotTickEvent` par bot (après les accusés, avant l'envoi) ; à leur départ, il efface leurs fichiers sauvegardés selon `BotWipe` (tout par défaut) ; une erreur de la bibliothèque sur un bot le passe `FAILED` (toujours connecté, plus tické) sans arrêter les autres.
+	Chaque tick, il lance un `BotTickEvent` par bot (après les accusés, avant l'envoi) ; à leur départ, il efface leurs fichiers sauvegardés selon `BotWipe` (tout par défaut) ; une erreur de la bibliothèque sur un bot le passe `FAILED` (toujours connecté, plus tické) sans arrêter les autres.  
+	À sa création, un auto-test résout chaque accès NMS des classes internes : s'il échoue (souvent après une mise à jour de Paper), une erreur nomme chaque accès cassé, les bots sont désactivés (`isAvailable()` faux) et `spawn`/`remove`/`list` lèvent `BotsUnavailableException` ; l'hôte et le serveur continuent de tourner. L'hôte doit résoudre `BotRoster` dans son `onEnable()`.
 	
 	> Pas encore de contrôles (déplacement, mains, commandes) : ils arrivent avec les stories suivantes.
 	
