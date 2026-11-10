@@ -55,14 +55,14 @@ class BotMovementIT {
 	private static final String NAME = "Bot_Mover";
 
 	/** The platform's block layer: bots stand at {@code FLOOR_Y + 1}. */
-	private static final int FLOOR_Y = 199;
+	static final int FLOOR_Y = 199;
 
 	private static final int RADIUS = 10;
 
 	private static final double EPSILON = 0.01;
 
 	/** Stone blocks placed by a test, cleared afterwards. */
-	private static final class Structure {
+	static final class Structure {
 		final World world;
 		final int cx;
 		final int cz;
@@ -210,18 +210,18 @@ class BotMovementIT {
 		}
 	}
 
-	private static Structure structure() throws Exception {
+	static Structure structure() throws Exception {
 		return new Structure(spawnLocation());
 	}
 
-	private static void build(Structure structure) throws Exception {
+	static void build(Structure structure) throws Exception {
 		PaperServer.onMain(() -> {
 			structure.platform();
 			return null;
 		});
 	}
 
-	private static void clear(Structure structure) throws Exception {
+	static void clear(Structure structure) throws Exception {
 		PaperServer.onMain(() -> {
 			structure.clear();
 			return null;

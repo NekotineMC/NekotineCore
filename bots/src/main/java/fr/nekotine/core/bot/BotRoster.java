@@ -40,11 +40,12 @@ import org.bukkit.event.Listener;
  * <p>
  * Each server tick, every live bot, in spawn order: runs its connection tick,
  * sends its pending client acks, fires its {@link BotTickEvent}, sends its
- * changed inputs, runs its physics step and sends its move (see {@link Bot}),
- * then flushes; a bot whose connection closed then leaves. Bots spawned or
- * removed during this loop (from a listener) join or leave the loop at its end:
- * a spawned bot joins the server at once but is listed and ticked only after
- * the loop; a removed bot is not ticked again and leaves after the loop.
+ * changed inputs, runs its physics step and sends its move, then its slot,
+ * hands, commands and respawn (see {@link Bot}), then flushes; a bot whose
+ * connection closed then leaves. Bots spawned or removed during this loop (from
+ * a listener) join or leave the loop at its end: a spawned bot joins the server
+ * at once but is listed and ticked only after the loop; a removed bot is not
+ * ticked again and leaves after the loop.
  *
  * <p>
  * If the library's own work for a bot throws, the error is logged once, the bot

@@ -11,8 +11,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Supplier;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.Connection;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -23,20 +27,39 @@ import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.ServerboundKeepAlivePacket;
 import net.minecraft.network.protocol.game.GameProtocols;
 import net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket;
+import net.minecraft.network.protocol.game.ServerboundAttackPacket;
+import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
+import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
+import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerInputPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerLoadedPacket;
+import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
+import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
+import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.CommonListenerCookie;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.level.storage.LevelResource;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.craftbukkit.CraftEquipmentSlot;
 import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.block.CraftBlock;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EquipmentSlot;
 
 /**
  * A bot's body: the fake connection on an {@link EmbeddedChannel} and the
@@ -87,6 +110,21 @@ public final class BotBody implements Bot {
 
 	private float lookPitch;
 
+	/** The selected hotbar slot. */
+	private int slot;
+
+	/** The last hotbar slot sent, or adopted from the server. */
+	private int sentSlot;
+
+	/**
+	 * One-shots queued since the last apply step, in call order: each builds its
+	 * packet when sent.
+	 */
+	private final List<Supplier<Packet<?>>> oneShots = new ArrayList<>();
+
+	/** The client's prediction sequence, pre-incremented from 0. */
+	private int sequence;
+
 	/** The last input sent; the server starts from an empty one. */
 	private Input sentInput = Input.EMPTY;
 
@@ -99,6 +137,8 @@ public final class BotBody implements Bot {
 		this.wipe = wipe;
 		this.lookYaw = lookYaw;
 		this.lookPitch = lookPitch;
+		this.slot = handle.getInventory().getSelectedSlot();
+		this.sentSlot = slot;
 	}
 
 	/** @return the offline-mode UUID a player named {@code name} gets. */
@@ -275,6 +315,133 @@ public final class BotBody implements Bot {
 		return lookPitch;
 	}
 
+	@Override
+	public void setSlot(int slot) {
+		requireMainThread();
+		if (slot < 0 || slot > 8) {
+			throw new IllegalArgumentException(name + " slot must be in 0-8: " + slot);
+		}
+		this.slot = slot;
+	}
+
+	@Override
+	public int getSlot() {
+		return slot;
+	}
+
+	@Override
+	public void useItem(EquipmentSlot hand) {
+		requireMainThread();
+		var interactionHand = hand(hand);
+		// The look sent with this tick's move.
+		oneShots.add(() -> new ServerboundUseItemPacket(interactionHand, ++sequence, lookYaw, lookPitch));
+	}
+
+	@Override
+	public void useItemOn(Block block, BlockFace face, EquipmentSlot hand) {
+		requireMainThread();
+		var pos = position(block);
+		var direction = direction(face);
+		var interactionHand = hand(hand);
+		var hit = new BlockHitResult(Vec3.atCenterOf(pos).relative(direction, 0.5), direction, pos, false);
+		oneShots.add(() -> new ServerboundUseItemOnPacket(interactionHand, hit, ++sequence));
+	}
+
+	@Override
+	public void leftClick() {
+		requireMainThread();
+		oneShots.add(() -> new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
+	}
+
+	@Override
+	public void startBreaking(Block block, BlockFace face) {
+		requireMainThread();
+		var pos = position(block);
+		var direction = direction(face);
+		oneShots.add(() -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK,
+				pos, direction, ++sequence));
+		oneShots.add(() -> new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
+	}
+
+	@Override
+	public void attack(Entity target) {
+		requireMainThread();
+		int id = entityId(target);
+		oneShots.add(() -> new ServerboundAttackPacket(id));
+		oneShots.add(() -> new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
+	}
+
+	@Override
+	public void interact(Entity target, EquipmentSlot hand) {
+		requireMainThread();
+		int id = entityId(target);
+		var interactionHand = hand(hand);
+		oneShots.add(() -> {
+			var at = target.getBoundingBox().getCenter().subtract(target.getLocation().toVector());
+			// The sneak key as sent with this tick's input.
+			return new ServerboundInteractPacket(id, interactionHand, new Vec3(at.getX(), at.getY(), at.getZ()),
+					sentInput.shift());
+		});
+	}
+
+	@Override
+	public void swapHands() {
+		requireMainThread();
+		oneShots.add(() -> new ServerboundPlayerActionPacket(
+				ServerboundPlayerActionPacket.Action.SWAP_ITEM_WITH_OFFHAND, BlockPos.ZERO, Direction.DOWN));
+	}
+
+	@Override
+	public void sendCommand(String command) {
+		requireMainThread();
+		if (command == null || command.isBlank()) {
+			throw new IllegalArgumentException(name + " command must not be blank");
+		}
+		var line = command.startsWith("/") ? command.substring(1) : command;
+		oneShots.add(() -> new ServerboundChatCommandPacket(line));
+	}
+
+	@Override
+	public void respawn() {
+		requireMainThread();
+		oneShots.add(() -> new ServerboundClientCommandPacket(ServerboundClientCommandPacket.Action.PERFORM_RESPAWN));
+	}
+
+	private InteractionHand hand(EquipmentSlot hand) {
+		if (hand != EquipmentSlot.HAND && hand != EquipmentSlot.OFF_HAND) {
+			throw new IllegalArgumentException(name + " hand must be HAND or OFF_HAND: " + hand);
+		}
+		return CraftEquipmentSlot.getHand(hand);
+	}
+
+	private BlockPos position(Block block) {
+		Objects.requireNonNull(block, "block");
+		requireSameWorld(block.getWorld(), "block");
+		return new BlockPos(block.getX(), block.getY(), block.getZ());
+	}
+
+	private Direction direction(BlockFace face) {
+		var direction = CraftBlock.blockFaceToNotch(face);
+		if (direction == null) {
+			throw new IllegalArgumentException(name + " face must be one of the six cube faces: " + face);
+		}
+		return direction;
+	}
+
+	private int entityId(Entity target) {
+		Objects.requireNonNull(target, "target");
+		requireSameWorld(target.getWorld(), "target");
+		return target.getEntityId();
+	}
+
+	private void requireSameWorld(World world, String what) {
+		var own = player().getWorld();
+		if (!world.equals(own)) {
+			throw new IllegalArgumentException(
+					name + " " + what + " is in world " + world.getName() + ", not in the bot's " + own.getName());
+		}
+	}
+
 	private static void requireMainThread() {
 		if (!Bukkit.isPrimaryThread()) {
 			throw new IllegalStateException("Bot controls must be used from the main thread");
@@ -282,10 +449,10 @@ public final class BotBody implements Bot {
 	}
 
 	/**
-	 * Marks the bot {@link BotState#FAILED} and releases every key (heading back to
-	 * the look): its roster no longer runs {@link #tickBeforeEvent()} or
-	 * {@link #tickAfterEvent()} for it, only {@link #tickFailed()}, so it sends no
-	 * input and runs no physics.
+	 * Marks the bot {@link BotState#FAILED}, releases every key (heading back to
+	 * the look) and drops queued one-shots: its roster no longer runs
+	 * {@link #tickBeforeEvent()} or {@link #tickAfterEvent()} for it, only
+	 * {@link #tickFailed()}, so it sends no input and runs no physics.
 	 */
 	public void fail() {
 		state = BotState.FAILED;
@@ -297,6 +464,7 @@ public final class BotBody implements Bot {
 		sneak = false;
 		sprint = false;
 		heading = null;
+		oneShots.clear();
 	}
 
 	/** @return whether the connection is still open. */
@@ -332,8 +500,8 @@ public final class BotBody implements Bot {
 
 	/**
 	 * Second half of a server tick, after the bot's tick event: the apply step
-	 * (changed inputs, sprint command, physics, move) if the connection is still
-	 * open, then the flush.
+	 * (changed inputs, sprint command, physics, move, slot, one-shots) if the
+	 * connection is still open, then the flush.
 	 */
 	public void tickAfterEvent() {
 		if (connection.isConnected()) {
@@ -345,7 +513,9 @@ public final class BotBody implements Bot {
 	/**
 	 * Sends the controls as a client would: the input if it changed (and the sprint
 	 * command if sprint changed), then one client physics step along the heading
-	 * and the resulting position with the look.
+	 * and the resulting position with the look, then the slot if it changed, then
+	 * the queued one-shots in call order. Stops writing as soon as the connection
+	 * closes; what is left is dropped.
 	 */
 	private void apply() {
 		var input = new Input(forward, backward, left, right, jump, sneak, sprint);
@@ -366,6 +536,20 @@ public final class BotBody implements Bot {
 		var target = handle.simulate(input, heading != null ? heading : lookYaw, lookPitch);
 		writeInbound(new ServerboundMovePlayerPacket.PosRot(target, lookYaw, lookPitch, handle.clientOnGround(),
 				handle.clientHorizontalCollision()));
+		if (slot != sentSlot && connection.isConnected()) {
+			sentSlot = slot;
+			writeInbound(new ServerboundSetCarriedItemPacket(slot));
+		}
+		// Taken first: one-shots queued by listeners of the events these packets
+		// fire wait for the next tick.
+		var queued = List.copyOf(oneShots);
+		oneShots.clear();
+		for (var oneShot : queued) {
+			if (!connection.isConnected()) {
+				return;
+			}
+			writeInbound(oneShot.get());
+		}
 	}
 
 	/**
@@ -390,7 +574,18 @@ public final class BotBody implements Bot {
 		for (var keepAlive = connection.pollKeepAlive(); keepAlive != null; keepAlive = connection.pollKeepAlive()) {
 			writeInbound(new ServerboundKeepAlivePacket(keepAlive));
 		}
-		if (!loadedAckSent) {
+		var heldSlot = connection.takeHeldSlot();
+		if (heldSlot != BotConnection.NO_SLOT) {
+			// The client adopts the server's slot without answering.
+			slot = heldSlot;
+			sentSlot = heldSlot;
+		}
+		boolean respawned = connection.takeRespawn();
+		if (respawned) {
+			// A fresh client player: it resends its held keys.
+			sentInput = Input.EMPTY;
+		}
+		if (!loadedAckSent || respawned) {
 			loadedAckSent = true;
 			writeInbound(new ServerboundPlayerLoadedPacket());
 		}
