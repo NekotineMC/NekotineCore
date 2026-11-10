@@ -87,8 +87,6 @@ Voici la liste des modules:
 	Chaque `Bot` se pilote comme un client (thread principal uniquement) : touches `setForward`/`setBackward`/`setLeft`/`setRight`/`setJump`/`setSneak`/`setSprint`, cap de déplacement `setHeading` (`null` = suit le regard) et regard `setLook` ; ils persistent jusqu'au prochain changement et, après le `BotTickEvent`, partent en vrais paquets (entrées, sprint, puis position calculée par la physique du serveur), d'où `PlayerMoveEvent`, `PlayerToggleSneakEvent`, `PlayerToggleSprintEvent`.  
 	Mains et commandes : `setSlot` (emplacement de la barre, persiste) et des actions ponctuelles envoyées une fois, dans l'ordre d'appel, après la position : `useItem`, `useItemOn`, `leftClick`, `startBreaking`, `attack`, `interact`, `swapHands`, `sendCommand` et `respawn` (le bot répond à chaque réapparition par l'accusé « joueur chargé »).
 	
-	> Pas encore de mains, de commandes ni de réapparition : ils arrivent avec la story suivante.
-	
 ***
 
 ## Autres

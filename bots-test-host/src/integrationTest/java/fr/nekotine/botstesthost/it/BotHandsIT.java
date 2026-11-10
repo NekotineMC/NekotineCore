@@ -62,6 +62,9 @@ class BotHandsIT {
 
 	private static final String NAME = "Bot_Hands";
 
+	/** The entity interact events one interact packet fires, in order. */
+	private static final List<String> INTERACT_EVENTS = List.of("PlayerInteractAtEntityEvent");
+
 	/** One received packet of the watched bot: its NMS class and server tick. */
 	private record Seen(String packet, int tick) {
 	}
@@ -76,7 +79,8 @@ class BotHandsIT {
 					PacketType.Play.Client.ARM_ANIMATION, PacketType.Play.Client.BLOCK_DIG,
 					PacketType.Play.Client.ATTACK, PacketType.Play.Client.USE_ENTITY,
 					PacketType.Play.Client.CHAT_COMMAND, PacketType.Play.Client.CLIENT_COMMAND,
-					PacketType.Play.Client.PLAYER_LOADED, PacketType.Play.Client.POSITION_LOOK);
+					PacketType.Play.Client.PLAYER_LOADED, PacketType.Play.Client.STEER_VEHICLE,
+					PacketType.Play.Client.POSITION_LOOK);
 		}
 
 		@Override
@@ -384,9 +388,8 @@ class BotHandsIT {
 			PaperServer.awaitTicks(5);
 			var clicks = scene.events().interacts.stream().filter(e -> e.getAction() == Action.LEFT_CLICK_BLOCK)
 					.toList();
-			assertFalse(clicks.isEmpty(), "no LEFT_CLICK_BLOCK: " + scene.events().interacts);
-			assertTrue(clicks.stream().allMatch(e -> target.equals(e.getClickedBlock())),
-					"LEFT_CLICK_BLOCK on another block: " + clicks);
+			assertEquals(1, clicks.size(), "not one LEFT_CLICK_BLOCK: " + scene.events().interacts);
+			assertEquals(target, clicks.getFirst().getClickedBlock(), "LEFT_CLICK_BLOCK on another block");
 			assertTrue(scene.events().interacts.stream().noneMatch(e -> e.getAction() == Action.LEFT_CLICK_AIR),
 					"the swing clicked air");
 			assertEquals(List.of("ServerboundPlayerActionPacket", "ServerboundSwingPacket"), scene.packets().sent(),
@@ -438,7 +441,8 @@ class BotHandsIT {
 			control(() -> bot.interact(target, EquipmentSlot.HAND));
 			PaperServer.awaitTicks(5);
 			var interacts = List.copyOf(scene.events().entityInteracts);
-			assertFalse(interacts.isEmpty(), "no PlayerInteractEntityEvent");
+			assertEquals(INTERACT_EVENTS, interacts.stream().map(e -> e.getClass().getSimpleName()).toList(),
+					"unexpected entity interact events");
 			assertTrue(
 					interacts.stream()
 							.allMatch(e -> e.getRightClicked() == target && e.getHand() == EquipmentSlot.HAND),
@@ -608,8 +612,10 @@ class BotHandsIT {
 				assertThrows(IllegalArgumentException.class, () -> bot.sendCommand(null));
 				assertThrows(IllegalArgumentException.class, () -> bot.sendCommand(""));
 				assertThrows(IllegalArgumentException.class, () -> bot.sendCommand("   "));
+				assertThrows(IllegalArgumentException.class, () -> bot.sendCommand("/"));
+				assertThrows(IllegalArgumentException.class, () -> bot.sendCommand("/  "));
 				assertEquals(0, bot.getSlot(), "a refused slot was kept");
-				// Queued, then dropped by the failure.
+				// A failed bot sends nothing, these included.
 				bot.leftClick();
 				bot.swapHands();
 				assertInstanceOf(BotBody.class, bot).fail();
@@ -625,4 +631,128 @@ class BotHandsIT {
 		}
 	}
 
+	@Test
+	void useItemRightClicksTheBlockItLooksAt() throws Exception {
+		Scene scene = null;
+		try (var logs = new LogCapture()) {
+			scene = scene();
+			var bot = scene.bot();
+			var structure = scene.structure();
+			Block target = PaperServer
+					.onMain(() -> structure.world.getBlockAt(structure.cx, FLOOR_Y, structure.cz + 1));
+			control(() -> {
+				bot.player().getInventory().setItemInMainHand(new ItemStack(Material.DIAMOND));
+				// The look ray meets the floor on the block in front of the bot.
+				bot.setLook(0, 60);
+				bot.useItem(EquipmentSlot.HAND);
+			});
+			PaperServer.awaitTicks(5);
+			var interacts = List.copyOf(scene.events().interacts);
+			assertEquals(1, interacts.size(), "not one PlayerInteractEvent: " + interacts);
+			assertEquals(Action.RIGHT_CLICK_BLOCK, interacts.getFirst().getAction(),
+					"the look did not reach the server");
+			assertEquals(target, interacts.getFirst().getClickedBlock());
+			assertEquals(List.of("ServerboundUseItemPacket"), scene.packets().sent(), "not one use-item packet");
+			assertClean(scene, logs);
+		} finally {
+			tearDown(scene);
+		}
+	}
+
+	@Test
+	void interactKeepsTheBotSneaking() throws Exception {
+		Scene scene = null;
+		Pig pig = null;
+		try (var logs = new LogCapture()) {
+			scene = scene();
+			var bot = scene.bot();
+			var target = pig(scene.structure(), 2);
+			pig = target;
+			control(() -> bot.setSneak(true));
+			PaperServer.awaitTicks(2);
+			assertTrue(PaperServer.onMain(() -> bot.player().isSneaking()), "the bot is not sneaking");
+			control(() -> bot.interact(target, EquipmentSlot.HAND));
+			PaperServer.awaitTicks(3);
+			assertEquals(INTERACT_EVENTS.size(), scene.events().entityInteracts.size(), "the interact did not land");
+			assertTrue(PaperServer.onMain(() -> bot.player().isSneaking()), "the interact released sneak");
+			assertClean(scene, logs);
+		} finally {
+			removeEntity(pig);
+			tearDown(scene);
+		}
+	}
+
+	@Test
+	void respawnResendsHeldKeys() throws Exception {
+		Scene scene = null;
+		try (var logs = new LogCapture()) {
+			scene = scene();
+			var bot = scene.bot();
+			control(() -> bot.setSneak(true));
+			PaperServer.awaitTicks(2);
+			control(() -> bot.player().setHealth(0));
+			PaperServer.awaitTicks(3);
+			assertTrue(PaperServer.onMain(() -> bot.player().isDead()), "the bot did not die");
+			scene.packets().seen.clear();
+			control(bot::respawn);
+			PaperServer.awaitTicks(5);
+			assertEquals(1, scene.events().respawns.size(), "not one PlayerRespawnEvent");
+			var sent = scene.packets().sent();
+			int loaded = sent.indexOf("ServerboundPlayerLoadedPacket");
+			assertTrue(loaded >= 0, "no loaded ack: " + sent);
+			assertTrue(sent.subList(loaded, sent.size()).contains("ServerboundPlayerInputPacket"),
+					"no input packet after the loaded ack: " + sent);
+			PaperServer.onMain(() -> {
+				assertTrue(bot.isSneak(), "the sneak key was released");
+				assertTrue(bot.player().isSneaking(), "the respawned bot is not sneaking");
+				return null;
+			});
+			assertClean(scene, logs);
+		} finally {
+			tearDown(scene);
+		}
+	}
+
+	/** Kicks the bot on its first left click into air. */
+	public static final class KickOnLeftClick implements Listener {
+		@EventHandler
+		public void onInteract(PlayerInteractEvent event) {
+			if (event.getPlayer().getName().equals(NAME) && event.getAction() == Action.LEFT_CLICK_AIR) {
+				event.getPlayer().kick(net.kyori.adventure.text.Component.text("kicked by BotHandsIT"));
+			}
+		}
+	}
+
+	@Test
+	void kickDuringOneShotsDropsTheRest() throws Exception {
+		Scene scene = null;
+		var kicker = new KickOnLeftClick();
+		try (var logs = new LogCapture()) {
+			scene = scene();
+			var bot = scene.bot();
+			var roster = scene.roster();
+			register(kicker);
+			var player = bot.player();
+			control(() -> {
+				bot.setLook(0, -90);
+				bot.leftClick();
+				bot.swapHands();
+			});
+			PaperServer.awaitTicks(5);
+			PaperServer.onMain(() -> {
+				assertEquals(List.of(), roster.list(), "kicked bot is still listed");
+				assertFalse(player.isOnline(), "kicked bot is still online");
+				return null;
+			});
+			assertEquals(List.of(player), List.copyOf(scene.players().quit), "PlayerQuitEvent not fired once");
+			assertTrue(scene.events().swaps.isEmpty(), "the swap after the kick reached the server");
+			assertEquals(List.of("ServerboundSwingPacket"), scene.packets().sent(), "a packet was sent after the kick");
+			var errors = logs.lines.stream()
+					.filter(l -> l.contains("ClosedChannelException") || l.contains(" failed, it stops ticking"))
+					.toList();
+			assertEquals(List.of(), errors, "errors logged on the kick");
+		} finally {
+			tearDown(scene, kicker);
+		}
+	}
 }

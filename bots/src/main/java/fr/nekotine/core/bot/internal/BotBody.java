@@ -334,7 +334,7 @@ public final class BotBody implements Bot {
 		requireMainThread();
 		var interactionHand = hand(hand);
 		// The look sent with this tick's move.
-		oneShots.add(() -> new ServerboundUseItemPacket(interactionHand, ++sequence, lookYaw, lookPitch));
+		queue(() -> new ServerboundUseItemPacket(interactionHand, ++sequence, lookYaw, lookPitch));
 	}
 
 	@Override
@@ -344,13 +344,13 @@ public final class BotBody implements Bot {
 		var direction = direction(face);
 		var interactionHand = hand(hand);
 		var hit = new BlockHitResult(Vec3.atCenterOf(pos).relative(direction, 0.5), direction, pos, false);
-		oneShots.add(() -> new ServerboundUseItemOnPacket(interactionHand, hit, ++sequence));
+		queue(() -> new ServerboundUseItemOnPacket(interactionHand, hit, ++sequence));
 	}
 
 	@Override
 	public void leftClick() {
 		requireMainThread();
-		oneShots.add(() -> new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
+		queue(() -> new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
 	}
 
 	@Override
@@ -358,17 +358,17 @@ public final class BotBody implements Bot {
 		requireMainThread();
 		var pos = position(block);
 		var direction = direction(face);
-		oneShots.add(() -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK,
-				pos, direction, ++sequence));
-		oneShots.add(() -> new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
+		queue(() -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, pos,
+				direction, ++sequence));
+		queue(() -> new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
 	}
 
 	@Override
 	public void attack(Entity target) {
 		requireMainThread();
 		int id = entityId(target);
-		oneShots.add(() -> new ServerboundAttackPacket(id));
-		oneShots.add(() -> new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
+		queue(() -> new ServerboundAttackPacket(id));
+		queue(() -> new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
 	}
 
 	@Override
@@ -376,7 +376,7 @@ public final class BotBody implements Bot {
 		requireMainThread();
 		int id = entityId(target);
 		var interactionHand = hand(hand);
-		oneShots.add(() -> {
+		queue(() -> {
 			var at = target.getBoundingBox().getCenter().subtract(target.getLocation().toVector());
 			// The sneak key as sent with this tick's input.
 			return new ServerboundInteractPacket(id, interactionHand, new Vec3(at.getX(), at.getY(), at.getZ()),
@@ -387,8 +387,8 @@ public final class BotBody implements Bot {
 	@Override
 	public void swapHands() {
 		requireMainThread();
-		oneShots.add(() -> new ServerboundPlayerActionPacket(
-				ServerboundPlayerActionPacket.Action.SWAP_ITEM_WITH_OFFHAND, BlockPos.ZERO, Direction.DOWN));
+		queue(() -> new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.SWAP_ITEM_WITH_OFFHAND,
+				BlockPos.ZERO, Direction.DOWN));
 	}
 
 	@Override
@@ -398,13 +398,27 @@ public final class BotBody implements Bot {
 			throw new IllegalArgumentException(name + " command must not be blank");
 		}
 		var line = command.startsWith("/") ? command.substring(1) : command;
-		oneShots.add(() -> new ServerboundChatCommandPacket(line));
+		if (line.isBlank()) {
+			throw new IllegalArgumentException(name + " command must not be blank");
+		}
+		queue(() -> new ServerboundChatCommandPacket(line));
 	}
 
 	@Override
 	public void respawn() {
 		requireMainThread();
-		oneShots.add(() -> new ServerboundClientCommandPacket(ServerboundClientCommandPacket.Action.PERFORM_RESPAWN));
+		queue(() -> new ServerboundClientCommandPacket(ServerboundClientCommandPacket.Action.PERFORM_RESPAWN));
+	}
+
+	/**
+	 * Queues a one-shot for the next apply step; dropped at once when the bot is
+	 * {@link BotState#FAILED} or removed, since it never applies again.
+	 */
+	private void queue(Supplier<Packet<?>> oneShot) {
+		if (state == BotState.FAILED || removed) {
+			return;
+		}
+		oneShots.add(oneShot);
 	}
 
 	private InteractionHand hand(EquipmentSlot hand) {

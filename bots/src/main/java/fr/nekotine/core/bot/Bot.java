@@ -44,7 +44,8 @@ import org.bukkit.inventory.EquipmentSlot;
  * library checks no reach: the server's own checks decide, as for a client. The
  * server ignores hand packets while the bot is dead and until it has loaded
  * after a respawn. Writes stop as soon as the connection closes; queued
- * one-shots are then dropped, as they are on {@link BotState#FAILED}.
+ * one-shots are then dropped, as they are on {@link BotState#FAILED}, and a
+ * one-shot called on a failed or removed bot is dropped at once.
  *
  * <p>
  * After each respawn the server sends (death or world change), the bot answers
@@ -261,7 +262,7 @@ public interface Bot {
 	 * @param command
 	 *            the command line, with or without its leading {@code /}
 	 * @throws IllegalArgumentException
-	 *             if {@code command} is null or blank
+	 *             if {@code command} is null or blank, leading {@code /} aside
 	 */
 	void sendCommand(String command);
 
