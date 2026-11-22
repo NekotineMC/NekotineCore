@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -23,14 +24,18 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.data.Bisected;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Waterlogged;
 import org.bukkit.block.data.type.Door;
 import org.junit.jupiter.api.Test;
 
@@ -72,7 +77,7 @@ class PathFinderIT {
 			structure.platform();
 			build.accept(structure);
 			var future = finder().find(at(structure, fx, fy, fz), at(structure, tx, ty, tz), rule);
-			var onMain = future.thenApply(path -> Bukkit.isPrimaryThread());
+			var onMain = future.handle((path, error) -> Bukkit.isPrimaryThread());
 			after.accept(structure);
 			return new Search(future, onMain);
 		});
@@ -288,10 +293,104 @@ class PathFinderIT {
 			var noWorld = new Location(null, 0, FEET_Y, 0);
 			assertThrows(IllegalArgumentException.class, () -> finder.find(noWorld, to, PathRule.ANY));
 			var other = Bukkit.getWorlds().stream().filter(w -> !w.equals(structure.world)).findFirst();
-			var elsewhere = other.map(w -> new Location(w, 0, 64, 0)).orElse(noWorld);
+			assertTrue(other.isPresent(), "the test server has a single world: " + Bukkit.getWorlds());
+			var elsewhere = new Location(other.get(), 0, 64, 0);
 			assertThrows(IllegalArgumentException.class, () -> finder.find(from, elsewhere, PathRule.ANY));
 			assertNotNull(finder.find(from, to, PathRule.ANY), "a good call failed");
 			return null;
 		});
+	}
+
+	/**
+	 * Whether a path crosses a 3-high wall along dz = 0 through its one gap at dx
+	 * 0, whose feet block is {@code feet} (and, for a door, its head block the
+	 * upper half), under a stone ceiling at head + 1, over {@code floor} (stone if
+	 * null).
+	 */
+	private static boolean crossesGap(Supplier<BlockData> feet, Supplier<BlockData> head, Supplier<BlockData> floor)
+			throws Exception {
+		var structure = structure();
+		try {
+			Consumer<Structure> gap = s -> {
+				s.fill(-10, FEET_Y, 0, 10, FEET_Y + 2, 0);
+				var feetBlock = s.world.getBlockAt(s.cx, FEET_Y, s.cz);
+				feetBlock.setBlockData(feet.get(), false);
+				feetBlock.getRelative(0, 1, 0).setBlockData(head.get(), false);
+				s.placed.add(feetBlock.getRelative(0, 1, 0));
+				feetBlock.getRelative(0, -1, 0).setBlockData(floor.get(), false);
+			};
+			return find(structure, gap, 0, -5, 0, 5, PathRule.ANY).result().canReachFinalPoint();
+		} finally {
+			clear(structure);
+		}
+	}
+
+	private static boolean crossesGap(Supplier<BlockData> feet) throws Exception {
+		return crossesGap(feet, Material.AIR::createBlockData, Material.STONE::createBlockData);
+	}
+
+	@Test
+	void blocksAreClassifiedForAPlayerSizedBody() throws Exception {
+		assertTrue(crossesGap(Material.AIR::createBlockData), "air is not passable");
+		assertTrue(crossesGap(Material.WHITE_CARPET::createBlockData), "a carpet is not passable");
+		assertTrue(crossesGap(() -> door(Bisected.Half.BOTTOM), () -> door(Bisected.Half.TOP),
+				Material.STONE::createBlockData), "an oak door is not passable");
+		assertFalse(crossesGap(Material.STONE::createBlockData), "stone is passable");
+		assertFalse(crossesGap(Material.OAK_FENCE::createBlockData), "an oak fence is passable");
+		assertFalse(crossesGap(Material.COBBLESTONE_WALL::createBlockData), "a cobblestone wall is passable");
+		assertFalse(crossesGap(Material.OAK_FENCE_GATE::createBlockData), "an oak fence gate is passable");
+		assertFalse(crossesGap(Material.WATER::createBlockData), "water is passable");
+		assertFalse(crossesGap(() -> Material.OAK_SLAB.createBlockData(d -> ((Waterlogged) d).setWaterlogged(true))),
+				"a waterlogged slab is passable");
+		assertFalse(crossesGap(Material.FIRE::createBlockData), "fire is passable");
+		assertFalse(crossesGap(Material.MAGMA_BLOCK::createBlockData), "magma is passable");
+		// As floors: stone carries the body, magma does not.
+		assertTrue(crossesGap(Material.AIR::createBlockData, Material.AIR::createBlockData,
+				Material.STONE::createBlockData), "a stone floor is not a floor");
+		assertFalse(crossesGap(Material.AIR::createBlockData, Material.AIR::createBlockData,
+				Material.MAGMA_BLOCK::createBlockData), "a magma floor is a floor");
+	}
+
+	private static BlockData door(Bisected.Half half) {
+		var door = (Door) Material.OAK_DOOR.createBlockData();
+		door.setOpen(false);
+		door.setHalf(half);
+		return door;
+	}
+
+	@Test
+	void aFailingRuleFailsTheFutureOnTheMainThread() throws Exception {
+		var structure = structure();
+		var boom = new IllegalStateException("rule bug");
+		try {
+			var search = find(structure, s -> {
+			}, 0, -5, 0, 5, (view, x, y, z) -> {
+				throw boom;
+			});
+			var error = assertThrows(ExecutionException.class, () -> search.future().get(10, TimeUnit.SECONDS));
+			assertSame(boom, error.getCause());
+			assertTrue(search.completedOnMain().get(10, TimeUnit.SECONDS), "the future failed off the main thread");
+		} finally {
+			clear(structure);
+		}
+	}
+
+	@Test
+	void unloadedChunksAreImpassableAndStayUnloaded() throws Exception {
+		var structure = structure();
+		int far = 4000;
+		int chunkX = (structure.cx + far) >> 4;
+		int chunkZ = structure.cz >> 4;
+		try {
+			assertFalse(PaperServer.onMain(() -> structure.world.isChunkLoaded(chunkX, chunkZ)),
+					"the far chunk is already loaded");
+			var path = find(structure, s -> {
+			}, 0, 0, far, 0, PathRule.ANY).result();
+			assertFalse(path.canReachFinalPoint(), "a goal in an unloaded chunk was reached");
+			assertFalse(PaperServer.onMain(() -> structure.world.isChunkLoaded(chunkX, chunkZ)),
+					"the search loaded the far chunk");
+		} finally {
+			clear(structure);
+		}
 	}
 }

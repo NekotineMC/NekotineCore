@@ -27,18 +27,29 @@ class AStarSearchTest {
 	private static final int BUDGET = 100_000;
 
 	/**
-	 * A box of cells, bounds inclusive: stone at y 0, open above, blocked outside
-	 * (as outside a snapshot).
+	 * A box of cells, bounds inclusive: stone at the floor level (y 0 by default),
+	 * open up to 10 blocks above, blocked outside (as outside a snapshot).
 	 */
 	private static final class Grid implements CellGrid {
+		final int minX;
+		final int minZ;
+		final int floorY;
 		final int maxX;
 		final int maxZ;
-		final int maxY = 10;
+		final int maxY;
 		final Map<Long, Cell> cells = new HashMap<>();
 
-		Grid(int maxX, int maxZ) {
+		Grid(int minX, int minZ, int floorY, int maxX, int maxZ) {
+			this.minX = minX;
+			this.minZ = minZ;
+			this.floorY = floorY;
 			this.maxX = maxX;
 			this.maxZ = maxZ;
+			this.maxY = floorY + 10;
+		}
+
+		Grid(int maxX, int maxZ) {
+			this(0, 0, 0, maxX, maxZ);
 		}
 
 		Grid set(Cell cell, int x1, int y1, int z1, int x2, int y2, int z2) {
@@ -58,10 +69,10 @@ class AStarSearchTest {
 
 		@Override
 		public Cell cell(int x, int y, int z) {
-			if (x < 0 || x > maxX || z < 0 || z > maxZ || y < 0 || y > maxY) {
+			if (x < minX || x > maxX || z < minZ || z > maxZ || y < floorY || y > maxY) {
 				return Cell.BLOCKED;
 			}
-			return cells.getOrDefault(AStarSearch.key(x, y, z), y == 0 ? Cell.SOLID : Cell.OPEN);
+			return cells.getOrDefault(AStarSearch.key(x, y, z), y == floorY ? Cell.SOLID : Cell.OPEN);
 		}
 	}
 
@@ -164,8 +175,8 @@ class AStarSearchTest {
 
 	@Test
 	void noDiagonalPastACorner() {
-		// A single pillar at (1, z 1): going from (0,0) to (1,2)... the diagonal
-		// (0,1)->(1,2) has (1,1) as a side, so it is refused.
+		// A pillar at x 1, z 1: the diagonal (0,1,1) -> (1,1,2) has the pillar as
+		// a side, so it is refused.
 		var grid = new Grid(2, 2).solid(1, 1, 1, 1, 2, 1);
 		var result = search(grid, PathRule.ANY, new Point(0, 1, 1), new Point(1, 1, 2));
 		assertTrue(result.reached());
@@ -292,5 +303,66 @@ class AStarSearchTest {
 		assertTrue(lifted.reached());
 		assertEquals(new Point(0, 1, 0), points(lifted).getFirst());
 		assertEquals(new Point(2, 1, 0), last(lifted));
+	}
+
+	@Test
+	void noDiagonalPastASideTheRuleForbids() {
+		// The diagonal (0,1,0) -> (1,1,1) has sides (1,1,0) and (0,1,1).
+		PathRule rule = (view, x, y, z) -> !(x == 1 && y == 1 && z == 0);
+		var result = search(new Grid(2, 2), rule, new Point(0, 1, 0), new Point(1, 1, 1));
+		assertTrue(result.reached());
+		assertEquals(List.of(new Point(0, 1, 0), new Point(0, 1, 1), new Point(1, 1, 1)), points(result));
+	}
+
+	@Test
+	void aDoorIsEnteredAndLeftStraight() {
+		// A wall along z 5 across a wide field, with a door at x 5.
+		var grid = new Grid(10, 10).solid(0, 1, 5, 10, 3, 5).set(Cell.DOOR, 5, 1, 5, 5, 2, 5);
+		var result = search(grid, PathRule.ANY, new Point(1, 1, 1), new Point(9, 1, 9));
+		assertTrue(result.reached(), "goal not reached: " + points(result));
+		assertAdjacent(result);
+		var points = points(result);
+		int door = points.indexOf(new Point(5, 1, 5));
+		assertTrue(door > 0, "path does not go through the door: " + points);
+		assertEquals(new Point(5, 1, 4), points.get(door - 1), "door not entered straight");
+		assertEquals(new Point(5, 1, 6), points.get(door + 1), "door not left straight");
+		assertEquals(PathMove.DOOR, result.moves()[door]);
+		assertEquals(PathMove.WALK, result.moves()[door + 1]);
+	}
+
+	@Test
+	void noDropThroughAForbiddenEdgeOrFall() {
+		// A 2-high ledge ending at z 2: the drop lands at (0, 1, 3).
+		var ledge = new Grid(0, 6).solid(0, 1, 0, 0, 2, 2);
+		var from = new Point(0, 3, 0);
+		var to = new Point(0, 1, 5);
+		assertTrue(search(ledge, PathRule.ANY, from, to).reached());
+		PathRule noEdge = (view, x, y, z) -> !(z == 3 && y == 3);
+		assertFalse(search(ledge, noEdge, from, to).reached(), "the drop crossed a forbidden edge");
+		PathRule noFall = (view, x, y, z) -> !(z == 3 && y == 2);
+		assertFalse(search(ledge, noFall, from, to).reached(), "the drop fell through a forbidden block");
+	}
+
+	@Test
+	void airborneStartAndGoalAreLowered() {
+		var result = search(new Grid(5, 5), PathRule.ANY, new Point(0, 2, 0), new Point(5, 3, 5));
+		assertTrue(result.reached(), "airborne goal not reached: " + points(result));
+		assertEquals(new Point(0, 1, 0), points(result).getFirst());
+		assertEquals(new Point(5, 1, 5), last(result));
+		// More than 3 blocks up: kept as is, so unreachable.
+		assertFalse(search(new Grid(5, 5), PathRule.ANY, new Point(0, 1, 0), new Point(5, 5, 5)).reached());
+	}
+
+	@Test
+	void searchesAtNegativeCoordinates() {
+		var grid = new Grid(-20, -20, -60, -10, -10).solid(-15, -59, -20, -15, -57, -12);
+		var result = search(grid, PathRule.ANY, new Point(-19, -59, -19), new Point(-11, -59, -13));
+		assertTrue(result.reached(), "goal not reached: " + points(result));
+		assertAdjacent(result);
+		assertEquals(new Point(-19, -59, -19), points(result).getFirst());
+		assertEquals(new Point(-11, -59, -13), last(result));
+		assertTrue(
+				points(result).contains(new Point(-15, -59, -11)) || points(result).contains(new Point(-15, -59, -10)),
+				"path does not go around the wall: " + points(result));
 	}
 }

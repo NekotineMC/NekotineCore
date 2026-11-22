@@ -78,9 +78,11 @@ final class SnapshotView implements BlockView, CellGrid {
 
 	/**
 	 * Wooden doors are doors; fences, walls and fence gates are not floors (the
-	 * body would stand 1.5 blocks up) and block; other solid blocks are floors;
-	 * liquids, waterlogged blocks and hazards block the body (no swimming); the
-	 * rest is open.
+	 * body would stand 1.5 blocks up) and block; liquids and hazards (fire,
+	 * campfires, magma, cactus, cobweb, powder snow, berry bushes, wither roses,
+	 * dripstone) block the body (no swimming), solid or not; carpets are open;
+	 * other solid blocks are floors, partial ones (slabs, stairs, snow layers)
+	 * counted as full blocks; waterlogged non-solid blocks block; the rest is open.
 	 */
 	static Cell classify(BlockData data) {
 		if (data == null) {
@@ -93,17 +95,25 @@ final class SnapshotView implements BlockView, CellGrid {
 		if (Tag.FENCES.isTagged(material) || Tag.WALLS.isTagged(material) || Tag.FENCE_GATES.isTagged(material)) {
 			return Cell.BLOCKED;
 		}
+		switch (material) {
+			case WATER, LAVA, BUBBLE_COLUMN, KELP, KELP_PLANT, SEAGRASS, TALL_SEAGRASS, FIRE, SOUL_FIRE, CAMPFIRE,
+					SOUL_CAMPFIRE, MAGMA_BLOCK, CACTUS, COBWEB, POWDER_SNOW, SWEET_BERRY_BUSH, WITHER_ROSE,
+					POINTED_DRIPSTONE :
+				return Cell.BLOCKED;
+			case MOSS_CARPET, PALE_MOSS_CARPET :
+				return Cell.OPEN;
+			default :
+				break;
+		}
+		if (Tag.WOOL_CARPETS.isTagged(material)) {
+			return Cell.OPEN;
+		}
 		if (material.isSolid()) {
 			return Cell.SOLID;
 		}
 		if (data instanceof Waterlogged waterlogged && waterlogged.isWaterlogged()) {
 			return Cell.BLOCKED;
 		}
-		return switch (material) {
-			case WATER, LAVA, BUBBLE_COLUMN, KELP, KELP_PLANT, SEAGRASS, TALL_SEAGRASS, FIRE, SOUL_FIRE, COBWEB,
-					POWDER_SNOW, SWEET_BERRY_BUSH ->
-				Cell.BLOCKED;
-			default -> Cell.OPEN;
-		};
+		return Cell.OPEN;
 	}
 }

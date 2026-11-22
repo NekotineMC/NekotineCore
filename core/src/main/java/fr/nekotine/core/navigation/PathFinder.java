@@ -18,6 +18,8 @@ import org.bukkit.Location;
  * only with that snapshot's {@link BlockView}, and completes the future on the
  * main thread. A synchronous implementation completes it before returning. A
  * search that fails (e.g. the rule throws) completes the future exceptionally.
+ * If the implementation's owning plugin is disabled before completion, the
+ * future may never complete.
  *
  * <h2>Result</h2>
  *
@@ -44,7 +46,8 @@ public interface PathFinder {
 	 *            the passability and cost rule of this search
 	 * @return a future of the path, completed on the main thread
 	 * @throws IllegalStateException
-	 *             if not called on the main thread
+	 *             if not called on the main thread, or if the implementation cannot
+	 *             search (e.g. its owning plugin is disabled)
 	 * @throws IllegalArgumentException
 	 *             if an argument or a location's world is {@code null}, or the
 	 *             locations are in different worlds

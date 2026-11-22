@@ -7,6 +7,13 @@ package fr.nekotine.core.navigation;
  * positions and adds cost on top.
  *
  * <p>
+ * A rule is asked about the feet blocks of the path's points, and also about
+ * the feet blocks the body passes through between two points (for
+ * {@code AStarPathFinder}: a diagonal's two side blocks, a drop's edge block
+ * and the blocks it falls through); refusing one of those refuses the move. It
+ * is never asked about the start.
+ *
+ * <p>
  * A rule reads blocks only through the {@link BlockView} it is given, never a
  * live world: a search may call it off the main thread (see
  * {@link PathFinder}). It must be pure (same answer for the same view and
@@ -27,7 +34,7 @@ public interface PathRule {
 	 *            feet block y
 	 * @param z
 	 *            feet block z
-	 * @return whether a path may have a body's feet in that block
+	 * @return whether a body's feet may be in, or pass through, that block
 	 */
 	boolean allows(BlockView view, int x, int y, int z);
 

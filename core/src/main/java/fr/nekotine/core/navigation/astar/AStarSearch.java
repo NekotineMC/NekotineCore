@@ -18,7 +18,9 @@ import java.util.Arrays;
  * clear for feet and head, and neither end is a door), step one block up on a
  * straight move when the block above its head is clear, or walk off an edge on
  * a straight move and land up to {@link #MAX_DROP} blocks lower. The rule only
- * removes positions and adds cost; it is never asked about the start.
+ * removes positions and adds cost; it is never asked about the start, but is
+ * asked about every block the body's feet pass through: a diagonal's two sides,
+ * a drop's edge and the levels it falls through.
  *
  * <h2>Determinism</h2>
  *
@@ -126,8 +128,10 @@ final class AStarSearch {
 
 	/**
 	 * Searches a path from the start to the goal feet block. A start or goal inside
-	 * a non-passable block whose block above is passable (e.g. standing on a slab
-	 * or a dirt path) moves up one block first.
+	 * a non-passable block whose two blocks above are passable (e.g. standing on a
+	 * slab or a dirt path) moves up one block first; one with no solid floor below
+	 * (e.g. mid-jump) moves down to the first standable block within
+	 * {@link #MAX_DROP} blocks, if any.
 	 *
 	 * @param budget
 	 *            how many nodes the search may expand; running out counts as
@@ -143,11 +147,25 @@ final class AStarSearch {
 			throw new IllegalArgumentException("node budget must be at least 1, got " + budget);
 		}
 		var search = new AStarSearch(grid, view, rule);
-		return search.run(sx, liftOutOfFloor(grid, sx, sy, sz), sz, gx, liftOutOfFloor(grid, gx, gy, gz), gz, budget);
+		return search.run(sx, settle(grid, sx, sy, sz), sz, gx, settle(grid, gx, gy, gz), gz, budget);
 	}
 
-	private static int liftOutOfFloor(CellGrid grid, int x, int y, int z) {
-		return !grid.cell(x, y, z).passable() && grid.cell(x, y + 1, z).passable() ? y + 1 : y;
+	/** @return the feet y a body at that block stands at, see {@link #search}. */
+	private static int settle(CellGrid grid, int x, int y, int z) {
+		if (!grid.cell(x, y, z).passable()) {
+			return grid.cell(x, y + 1, z).passable() && grid.cell(x, y + 2, z).passable() ? y + 1 : y;
+		}
+		if (grid.cell(x, y - 1, z) != Cell.SOLID) {
+			for (int drop = 1; drop <= MAX_DROP; drop++) {
+				if (!grid.cell(x, y - drop, z).passable()) {
+					break;
+				}
+				if (grid.cell(x, y - drop - 1, z) == Cell.SOLID) {
+					return y - drop;
+				}
+			}
+		}
+		return y;
 	}
 
 	private Result run(int sx, int sy, int sz, int gx, int gy, int gz, int budget) {
@@ -202,7 +220,9 @@ final class AStarSearch {
 						break;
 					}
 					if (grid.cell(nx, y - drop - 1, nz) == Cell.SOLID) {
-						relax(current, nx, y - drop, nz, PathMove.DROP, WALK_COST + drop * DROP_COST_PER_BLOCK);
+						if (fallAllowed(nx, y, nz, drop)) {
+							relax(current, nx, y - drop, nz, PathMove.DROP, WALK_COST + drop * DROP_COST_PER_BLOCK);
+						}
 						break;
 					}
 				}
@@ -219,6 +239,19 @@ final class AStarSearch {
 				relax(current, nx, y, nz, PathMove.WALK, DIAGONAL_COST);
 			}
 		}
+	}
+
+	/**
+	 * @return whether the rule allows the edge column and every level a drop falls
+	 *         through, above its landing (the landing is checked by relax)
+	 */
+	private boolean fallAllowed(int x, int y, int z, int drop) {
+		for (int level = 0; level < drop; level++) {
+			if (!allowed(x, y - level, z)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/** @return whether a body fits there, feet and head, with no door. */
