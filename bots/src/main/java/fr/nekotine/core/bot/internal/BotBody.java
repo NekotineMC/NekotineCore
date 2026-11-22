@@ -3,6 +3,7 @@ package fr.nekotine.core.bot.internal;
 import fr.nekotine.core.bot.Bot;
 import fr.nekotine.core.bot.BotState;
 import fr.nekotine.core.bot.BotWipe;
+import fr.nekotine.core.navigation.Body;
 import io.netty.channel.embedded.EmbeddedChannel;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -128,6 +129,9 @@ public final class BotBody implements Bot {
 	/** The last input sent; the server starts from an empty one. */
 	private Input sentInput = Input.EMPTY;
 
+	/** The control port, applied at the start of {@link #tickAfterEvent()}. */
+	private final BotControlPort port;
+
 	private BotBody(String name, EmbeddedChannel channel, BotConnection connection, BotPlayer handle, BotWipe wipe,
 			float lookYaw, float lookPitch) {
 		this.name = name;
@@ -139,6 +143,7 @@ public final class BotBody implements Bot {
 		this.lookPitch = lookPitch;
 		this.slot = handle.getInventory().getSelectedSlot();
 		this.sentSlot = slot;
+		this.port = new BotControlPort(this, handle);
 	}
 
 	/** @return the offline-mode UUID a player named {@code name} gets. */
@@ -202,6 +207,11 @@ public final class BotBody implements Bot {
 	@Override
 	public BotState state() {
 		return state;
+	}
+
+	@Override
+	public Body body() {
+		return port;
 	}
 
 	@Override
@@ -456,7 +466,7 @@ public final class BotBody implements Bot {
 		}
 	}
 
-	private static void requireMainThread() {
+	static void requireMainThread() {
 		if (!Bukkit.isPrimaryThread()) {
 			throw new IllegalStateException("Bot controls must be used from the main thread");
 		}
@@ -479,6 +489,7 @@ public final class BotBody implements Bot {
 		sprint = false;
 		heading = null;
 		oneShots.clear();
+		port.clear();
 	}
 
 	/** @return whether the connection is still open. */
@@ -513,11 +524,13 @@ public final class BotBody implements Bot {
 	}
 
 	/**
-	 * Second half of a server tick, after the bot's tick event: the apply step
-	 * (changed inputs, sprint command, physics, move, slot, one-shots) if the
-	 * connection is still open, then the flush.
+	 * Second half of a server tick, after the bot's tick event: the control port's
+	 * winning writes into the controls (over any direct write of this tick), the
+	 * apply step (changed inputs, sprint command, physics, move, slot, one-shots)
+	 * if the connection is still open, then the flush.
 	 */
 	public void tickAfterEvent() {
+		port.apply();
 		if (connection.isConnected()) {
 			apply();
 		}
@@ -632,6 +645,7 @@ public final class BotBody implements Bot {
 			return;
 		}
 		removed = true;
+		port.clear();
 		try {
 			flush();
 		} catch (RuntimeException e) {

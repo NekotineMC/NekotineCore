@@ -89,6 +89,14 @@ final class BotPlayer extends ServerPlayer {
 		clientVelocity = Vec3.ZERO;
 	}
 
+	/**
+	 * @return the client's velocity after the last {@link #simulate}, in blocks per
+	 *         tick
+	 */
+	Vec3 clientVelocity() {
+		return clientVelocity;
+	}
+
 	/** @return the client's on-ground flag after the last {@link #simulate}. */
 	boolean clientOnGround() {
 		return clientOnGround;
