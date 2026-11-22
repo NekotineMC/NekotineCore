@@ -16,6 +16,8 @@ fawe-core = { group = "com.fastasyncworldedit", name = "FastAsyncWorldEdit-Core"
 fawe-bukkit = { group = "com.fastasyncworldedit", name = "FastAsyncWorldEdit-Bukkit", version.ref = "fawe" }
 commandapi = { group = "dev.jorel", name = "commandapi-paper-shade", version.ref = "commandapi" }
 junit-jupiter-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "junit" }
+# Gradle 9 no longer supplies it; its version comes from the junit-bom the engine imports.
+junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher" }
 
 [plugins]
 paperweight-userdev = { id = "io.papermc.paperweight.userdev", version.ref = "paperweight" }

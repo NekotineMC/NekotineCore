@@ -8,5 +8,6 @@ dependencies {
     compileOnly(libs.fawe.bukkit)
     implementation(libs.commandapi)
     testImplementation(libs.junit.jupiter.engine)
+    testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(libs.paper.api)
 }

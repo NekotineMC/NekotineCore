@@ -1,5 +1,7 @@
 package fr.nekotine.core.bot;
 
+import fr.nekotine.core.navigation.Body;
+import fr.nekotine.core.navigation.ControlPriority;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
@@ -77,6 +79,27 @@ public interface Bot {
 
 	/** @return the bot's current state. */
 	BotState state();
+
+	/**
+	 * The bot's control port, for navigation strategies (walkers, melee
+	 * controllers) and brains that drive it by {@link ControlPriority}: reads
+	 * (location, client velocity and on-ground, look) and one
+	 * {@link fr.nekotine.core.navigation.BodyControls} writer per priority, mapped
+	 * 1:1 onto this bot's controls.
+	 *
+	 * <p>
+	 * Per control group and per tick, the winning priority's writes are applied
+	 * right after the bot's {@link BotTickEvent}, before the apply step: they
+	 * overwrite a same-tick direct write of the same control, so the setters of
+	 * this interface rank below every port priority. A group no priority wrote
+	 * keeps its controls as they are, direct writes included. Port writes follow
+	 * the same timing, threading and argument rules as the setters below; written
+	 * to a failed or removed bot they are dropped, and failing a bot drops its
+	 * pending ones.
+	 *
+	 * @return the bot's {@link Body}, the same on every call
+	 */
+	Body body();
 
 	/** Holds or releases the forward key. */
 	void setForward(boolean forward);
