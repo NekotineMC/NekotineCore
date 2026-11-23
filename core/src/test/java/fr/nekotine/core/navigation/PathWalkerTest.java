@@ -119,7 +119,7 @@ class PathWalkerTest {
 
 	/** A body that stands where the test puts it. */
 	private static final class FakeBody implements Body {
-		final World world;
+		World world;
 		final ControlArbiter arbiter;
 		double x;
 		double y;
@@ -129,7 +129,7 @@ class PathWalkerTest {
 		FakeBody(World world) {
 			this.world = world;
 			this.arbiter = new ControlArbiter("fake", () -> {
-			}, () -> world, () -> true);
+			}, () -> this.world, () -> true);
 		}
 
 		FakeBody at(double x, double y, double z) {
@@ -377,6 +377,76 @@ class PathWalkerTest {
 		var movement = movement(body.applied());
 		float yaw = Float.parseFloat(movement.getFirst().substring("heading ".length()));
 		assertTrue(yaw > 0 && yaw < 45, "not heading for the point after the drop: " + movement);
+	}
+
+	@Test
+	void aFinalDropPointIsArrivedAtOnlyOnceLanded() {
+		var walker = walker();
+		walker.follow(path(0, 2, 0, 0, 2, 1, 0, 0, 2));
+		body.at(0.5, 2, 1.5);
+		assertEquals(WalkStatus.WALKING, walker.tick());
+		// Falling through the final point's level.
+		body.onGround = false;
+		body.at(0.5, 0.5, 2.5);
+		assertEquals(WalkStatus.WALKING, walker.tick(), "arrived in the air");
+		body.onGround = true;
+		body.at(0.5, 0, 2.5);
+		assertEquals(WalkStatus.ARRIVED, walker.tick());
+	}
+
+	@Test
+	void aPassedPointIsSkipped() {
+		var walker = walker();
+		walker.follow(path(0, 0, 0, 0, 0, 1, 0, 0, 2, 1, 0, 3));
+		walker.tick();
+		assertEquals(walking(0f, false), movement(body.applied()));
+		// From before point 1 straight into point 2's block in one tick.
+		body.at(0.5, 0, 2.5);
+		assertEquals(WalkStatus.WALKING, walker.tick());
+		assertEquals(walking(-45f, false), movement(body.applied()), "not heading for point 3");
+	}
+
+	@Test
+	void aSearchThatNeverLandsIsStuck() {
+		var walker = walker(5);
+		walker.walkTo(new Location(world, 0.5, 0, 6.5), new ManualFinder(), PathRule.ANY);
+		for (int i = 0; i < 4; i++) {
+			assertEquals(WalkStatus.WALKING, walker.tick(), "stuck early at tick " + i);
+			assertEquals(NEUTRAL, body.applied(), "not released keys without a look at tick " + i);
+		}
+		assertEquals(WalkStatus.STUCK, walker.tick());
+		assertEquals(NEUTRAL, body.applied());
+		assertEquals(WalkStatus.STUCK, walker.tick());
+		assertEquals(List.of(), body.applied(), "a stuck walker wrote again");
+	}
+
+	@Test
+	void aPathSwapKeepsTheStuckTimerRunning() {
+		var walker = walker(5);
+		var finder = new ManualFinder();
+		walker.walkTo(new Location(world, 0.5, 0, 2.5), finder, PathRule.ANY);
+		finder.searches.getLast().complete(path(0, 0, 0, 0, 0, 1, 0, 0, 2));
+		for (int i = 0; i < 3; i++) {
+			assertEquals(WalkStatus.WALKING, walker.tick());
+		}
+		walker.walkTo(new Location(world, 2.5, 0, 2.5), finder, PathRule.ANY);
+		assertEquals(2, finder.searches.size());
+		var second = path(0, 0, 0, 1, 0, 1, 2, 0, 2);
+		finder.searches.getLast().complete(second);
+		assertEquals(WalkStatus.WALKING, walker.tick());
+		assertSame(second, walker.getPath());
+		assertEquals(WalkStatus.STUCK, walker.tick(), "the swap restarted the stuck timer");
+	}
+
+	@Test
+	void aBodyInAnotherWorldIsStuck() {
+		var walker = walker();
+		walker.follow(path(0, 0, 0, 0, 0, 3));
+		assertEquals(WalkStatus.WALKING, walker.tick());
+		body.applied();
+		body.world = world("other");
+		assertEquals(WalkStatus.STUCK, walker.tick());
+		assertEquals(NEUTRAL, body.applied());
 	}
 
 	@Test

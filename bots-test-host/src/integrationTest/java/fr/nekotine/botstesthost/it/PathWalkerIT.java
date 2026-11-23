@@ -266,6 +266,7 @@ class PathWalkerIT {
 		var structure = structure();
 		var events = new MoveEvents(NAME);
 		Walk walk = null;
+		Zombie zombie = null;
 		try {
 			var goal = at(structure, 0, FEET_Y + 1, 4);
 			PaperServer.onMain(() -> {
@@ -276,19 +277,19 @@ class PathWalkerIT {
 			});
 			// The bot first, so a player keeps the zombie's chunk ticking.
 			var bot = spawn(roster, structure, 0, -3);
-			var zombie = PaperServer
-					.onMain(() -> structure.world.spawn(at(structure, 0, FEET_Y, -4), Zombie.class, z -> {
-						z.setAdult();
-						// No goals, so it does not go for the bot; physics still apply.
-						z.setAware(false);
-						z.setShouldBurnInDay(false);
-						z.setSilent(true);
-					}));
+			var mob = PaperServer.onMain(() -> structure.world.spawn(at(structure, 0, FEET_Y, -4), Zombie.class, z -> {
+				z.setAdult();
+				// No goals, so it does not go for the bot; physics still apply.
+				z.setAware(false);
+				z.setShouldBurnInDay(false);
+				z.setSilent(true);
+			}));
+			zombie = mob;
 			// A mob plans paths only from the ground.
-			PaperServer.awaitUntil(zombie::isOnGround, 40);
+			PaperServer.awaitUntil(mob::isOnGround, 40);
 			var path = PaperServer.onMain(() -> {
-				var found = zombie.getPathfinder().findPath(goal);
-				zombie.remove();
+				var found = mob.getPathfinder().findPath(goal);
+				mob.remove();
 				return found;
 			});
 			assertNotNull(path, "the zombie found no path");
@@ -305,6 +306,15 @@ class PathWalkerIT {
 			assertEquals(FEET_Y + 1, end.getBlockY(), "not up the step: " + end);
 			assertEquals(List.of(), List.copyOf(events.fails), "PlayerFailMoveEvent fired");
 		} finally {
+			var spawned = zombie;
+			if (spawned != null) {
+				PaperServer.onMain(() -> {
+					if (spawned.isValid()) {
+						spawned.remove();
+					}
+					return null;
+				});
+			}
 			cleanUp(roster, events, walk);
 			clear(structure);
 		}

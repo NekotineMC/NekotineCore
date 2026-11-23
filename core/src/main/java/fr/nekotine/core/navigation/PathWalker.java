@@ -79,9 +79,10 @@ import org.bukkit.inventory.EquipmentSlot;
  * there is none.
  *
  * <p>
- * The same world and inputs give the same walk. Main thread only: every method
- * throws {@link IllegalStateException} off it. Exceptions thrown while ticking
- * (by the body or the finder) propagate to the caller.
+ * The same world and inputs give the same walk. Main thread only:
+ * {@link #follow}, {@link #walkTo}, {@link #stop} and {@link #tick} throw
+ * {@link IllegalStateException} off it. Exceptions thrown while ticking (by the
+ * body or the finder) propagate to the caller.
  */
 public final class PathWalker {
 
@@ -355,7 +356,7 @@ public final class PathWalker {
 			}
 			advanced = true;
 		}
-		if (cursor == last && arrived(location, level) && !newerGoalPending()) {
+		if (cursor == last && arrived(location, level, onGround) && !newerGoalPending()) {
 			return finish(track.reaches() ? WalkStatus.ARRIVED : WalkStatus.STUCK);
 		}
 		double distance = distanceTo(cursor, location);
@@ -536,9 +537,10 @@ public final class PathWalker {
 				&& (onGround || !track.isDrop(i));
 	}
 
-	private boolean arrived(Location location, int level) {
+	private boolean arrived(Location location, int level, boolean onGround) {
 		int last = track.size() - 1;
-		return level == track.ys()[last] && horizontalDistanceTo(last, location) <= ARRIVAL_RADIUS;
+		return level == track.ys()[last] && horizontalDistanceTo(last, location) <= ARRIVAL_RADIUS
+				&& (onGround || !track.isDrop(last));
 	}
 
 	private void drive(Location location, int level, boolean onGround) {
