@@ -115,7 +115,7 @@ class PathFinderIT {
 	/**
 	 * A 3-high wall along dz = 0 across the platform, with gaps at the given dx.
 	 */
-	private static Consumer<Structure> wallWithGaps(int... gaps) {
+	static Consumer<Structure> wallWithGaps(int... gaps) {
 		return structure -> {
 			int start = -10;
 			for (int gap : gaps) {
@@ -165,7 +165,7 @@ class PathFinderIT {
 	 * A sealed 1-wide corridor along +Z: a step up at dz -5, another at -2, a
 	 * 2-block drop at 1, a closed oak door at 4.
 	 */
-	private static void course(Structure structure) {
+	static void course(Structure structure) {
 		structure.fill(-1, FEET_Y, -10, -1, FEET_Y + 5, 10).fill(1, FEET_Y, -10, 1, FEET_Y + 5, 10)
 				.fill(0, FEET_Y, -10, 0, FEET_Y + 5, -10).fill(0, FEET_Y, 10, 0, FEET_Y + 5, 10)
 				.fill(0, FEET_Y, -5, 0, FEET_Y, 0).fill(0, FEET_Y + 1, -2, 0, FEET_Y + 1, 0);
