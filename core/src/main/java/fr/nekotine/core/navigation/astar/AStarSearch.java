@@ -3,6 +3,7 @@ package fr.nekotine.core.navigation.astar;
 import fr.nekotine.core.navigation.BlockView;
 import fr.nekotine.core.navigation.PathMove;
 import fr.nekotine.core.navigation.PathRule;
+import fr.nekotine.core.navigation.Passage;
 import java.util.Arrays;
 
 /**
@@ -17,8 +18,13 @@ import java.util.Arrays;
  * neighbouring columns on the same level (a diagonal only when both sides are
  * clear for feet and head, and neither end is a door), step one block up on a
  * straight move when the block above its head is clear, or walk off an edge on
- * a straight move and land up to {@link #MAX_DROP} blocks lower. The rule only
- * removes positions and adds cost; it is never asked about the start, but is
+ * a straight move and land up to {@link #MAX_DROP} blocks lower. Cells are the
+ * grid's, except where the rule's {@link PathRule#passage} overrides a block
+ * the view covers ({@link Passage#OPEN} reads as {@link Cell#OPEN},
+ * {@link Passage#FLOOR} as {@link Cell#SOLID}, {@link Passage#BLOCKED} as
+ * {@link Cell#BLOCKED}); each block is read once per search. On top of that,
+ * the rule's {@link PathRule#allows} only removes positions and its
+ * {@link PathRule#cost} adds cost; it is never asked about the start, but is
  * asked about every block the body's feet pass through: a diagonal's two sides,
  * a drop's edge and the levels it falls through.
  *
@@ -121,7 +127,7 @@ final class AStarSearch {
 	private int gz;
 
 	private AStarSearch(CellGrid grid, BlockView view, PathRule rule) {
-		this.grid = grid;
+		this.grid = new PassageGrid(grid, view, rule);
 		this.view = view;
 		this.rule = rule;
 	}
@@ -139,7 +145,8 @@ final class AStarSearch {
 	 * @return the path to the goal, or, if the goal is not reached, to the expanded
 	 *         node closest to it (Euclidean, ties to the lowest cost)
 	 * @throws IllegalStateException
-	 *             if the rule returns a negative or non-finite cost
+	 *             if the rule returns a negative or non-finite cost, or a
+	 *             {@code null} passage
 	 */
 	static Result search(CellGrid grid, BlockView view, PathRule rule, int sx, int sy, int sz, int gx, int gy, int gz,
 			int budget) {
@@ -147,7 +154,8 @@ final class AStarSearch {
 			throw new IllegalArgumentException("node budget must be at least 1, got " + budget);
 		}
 		var search = new AStarSearch(grid, view, rule);
-		return search.run(sx, settle(grid, sx, sy, sz), sz, gx, settle(grid, gx, gy, gz), gz, budget);
+		var cells = search.grid;
+		return search.run(sx, settle(cells, sx, sy, sz), sz, gx, settle(cells, gx, gy, gz), gz, budget);
 	}
 
 	/** @return the feet y a body at that block stands at, see {@link #search}. */
@@ -451,6 +459,63 @@ final class AStarSearch {
 		}
 		heap[index] = id;
 		heapIndex[id] = index;
+	}
+
+	/**
+	 * The grid as the rule's {@link PathRule#passage} overrides it, every block
+	 * read once and cached for the search, so a pure rule is asked at most once per
+	 * block.
+	 */
+	private static final class PassageGrid implements CellGrid {
+
+		private static final Cell[] CELLS = Cell.values();
+
+		private final CellGrid grid;
+
+		private final BlockView view;
+
+		private final PathRule rule;
+
+		private final IdTable cache = new IdTable();
+
+		PassageGrid(CellGrid grid, BlockView view, PathRule rule) {
+			this.grid = grid;
+			this.view = view;
+			this.rule = rule;
+		}
+
+		@Override
+		public Cell cell(int x, int y, int z) {
+			long key = key(x, y, z);
+			int known = cache.get(key);
+			if (known >= 0) {
+				return CELLS[known];
+			}
+			var cell = read(x, y, z);
+			cache.put(key, cell.ordinal());
+			return cell;
+		}
+
+		private Cell read(int x, int y, int z) {
+			if (view.getBlockData(x, y, z) != null) {
+				var passage = rule.passage(view, x, y, z);
+				if (passage == null) {
+					throw new IllegalStateException(
+							"the path rule returned a null passage at " + x + " " + y + " " + z);
+				}
+				switch (passage) {
+					case OPEN :
+						return Cell.OPEN;
+					case FLOOR :
+						return Cell.SOLID;
+					case BLOCKED :
+						return Cell.BLOCKED;
+					case DEFAULT :
+						break;
+				}
+			}
+			return grid.cell(x, y, z);
+		}
 	}
 
 	/** An open-addressing {@code long -> int} map, ids only (never removes). */

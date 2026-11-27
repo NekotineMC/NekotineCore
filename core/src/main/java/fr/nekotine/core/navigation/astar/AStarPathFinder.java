@@ -34,7 +34,9 @@ import org.bukkit.plugin.Plugin;
  * (slabs, stairs, snow layers) count as full blocks. No swimming, ladders or
  * jumps over gaps; liquids, fences, walls and hazards block. A start or goal
  * inside a non-passable block (a slab, a dirt path) counts from the block
- * above; one in the air, from the first floor up to 3 blocks below. Results are
+ * above; one in the air, from the first floor up to 3 blocks below. The rule's
+ * {@link PathRule#passage} overrides are honoured inside the snapshot (outside
+ * it, blocks stay impassable and the rule is not asked). Results are
  * {@link HintedPathResult}s. A search expands at most its node budget of
  * positions; running out counts as unreachable. No caching: each call snapshots
  * and searches anew.
