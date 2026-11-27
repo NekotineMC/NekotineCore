@@ -9,22 +9,55 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import fr.nekotine.core.navigation.BlockView;
 import fr.nekotine.core.navigation.PathMove;
 import fr.nekotine.core.navigation.PathRule;
+import fr.nekotine.core.navigation.Passage;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.bukkit.block.data.BlockData;
 import org.junit.jupiter.api.Test;
 
 /**
  * Story 5.2: the pure A* search over hand-built cell grids, with no server: the
  * walking model, hints, the caller's rule, unreachable goals, the node budget
- * and determinism.
+ * and determinism. Story 5.4: the rule's passage overrides.
  */
 class AStarSearchTest {
 
 	private static final BlockView NO_BLOCKS = (x, y, z) -> null;
 
 	private static final int BUDGET = 100_000;
+
+	/** Some block: the search never reads it, only whether the view covers it. */
+	private static final BlockData SOME_BLOCK = (BlockData) Proxy.newProxyInstance(
+			AStarSearchTest.class.getClassLoader(), new Class<?>[]{BlockData.class}, (proxy, method, args) -> null);
+
+	/** A view that covers the box, bounds inclusive, and nothing else. */
+	private static BlockView covering(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
+		return (x, y,
+				z) -> x >= minX && x <= maxX && y >= minY && y <= maxY && z >= minZ && z <= maxZ ? SOME_BLOCK : null;
+	}
+
+	/** A view over all of a {@code Grid(maxX, maxZ)}. */
+	private static BlockView covering(int maxX, int maxZ) {
+		return covering(0, 0, 0, maxX, 10, maxZ);
+	}
+
+	/** A rule that allows every position and overrides the given blocks. */
+	private static PathRule passages(Map<Point, Passage> overrides) {
+		return new PathRule() {
+			@Override
+			public boolean allows(BlockView view, int x, int y, int z) {
+				return true;
+			}
+
+			@Override
+			public Passage passage(BlockView view, int x, int y, int z) {
+				return overrides.getOrDefault(new Point(x, y, z), Passage.DEFAULT);
+			}
+		};
+	}
 
 	/**
 	 * A box of cells, bounds inclusive: stone at the floor level (y 0 by default),
@@ -85,6 +118,10 @@ class AStarSearchTest {
 
 	private static AStarSearch.Result search(CellGrid grid, PathRule rule, Point from, Point to) {
 		return search(grid, rule, from, to, BUDGET);
+	}
+
+	private static AStarSearch.Result search(CellGrid grid, BlockView view, PathRule rule, Point from, Point to) {
+		return AStarSearch.search(grid, view, rule, from.x, from.y, from.z, to.x, to.y, to.z, BUDGET);
 	}
 
 	private static List<Point> points(AStarSearch.Result result) {
@@ -364,5 +401,91 @@ class AStarSearchTest {
 		assertTrue(
 				points(result).contains(new Point(-15, -59, -11)) || points(result).contains(new Point(-15, -59, -10)),
 				"path does not go around the wall: " + points(result));
+	}
+
+	@Test
+	void passageOpenLetsThePathThroughAWall() {
+		var wall = wallWithGaps();
+		var from = new Point(5, 1, 2);
+		var to = new Point(5, 1, 8);
+		assertFalse(search(wall, covering(10, 10), PathRule.ANY, from, to).reached());
+		var rule = passages(Map.of(new Point(5, 1, 5), Passage.OPEN, new Point(5, 2, 5), Passage.OPEN));
+		var result = search(wall, covering(10, 10), rule, from, to);
+		assertTrue(result.reached(), "goal not reached: " + points(result));
+		assertAdjacent(result);
+		assertTrue(points(result).contains(new Point(5, 1, 5)), "path does not cross the wall: " + points(result));
+	}
+
+	@Test
+	void passageFloorBridgesAGap() {
+		// A strip of water across the field, at the floor level.
+		var grid = new Grid(10, 10).set(Cell.BLOCKED, 0, 0, 5, 10, 0, 5);
+		var from = new Point(3, 1, 2);
+		var to = new Point(3, 1, 8);
+		assertFalse(search(grid, covering(10, 10), PathRule.ANY, from, to).reached());
+		var result = search(grid, covering(10, 10), passages(Map.of(new Point(3, 0, 5), Passage.FLOOR)), from, to);
+		assertTrue(result.reached(), "goal not reached: " + points(result));
+		assertTrue(points(result).contains(new Point(3, 1, 5)),
+				"path does not walk over the bridge: " + points(result));
+	}
+
+	@Test
+	void passageBlockedKeepsThePathOutOfAirAndDefaultChangesNothing() {
+		var grid = new Grid(4, 6);
+		var from = new Point(2, 1, 0);
+		var to = new Point(2, 1, 6);
+		var free = search(grid, covering(4, 6), PathRule.ANY, from, to);
+		assertTrue(points(free).contains(new Point(2, 1, 3)), "the straight line is not used: " + points(free));
+		var blocked = search(grid, covering(4, 6), passages(Map.of(new Point(2, 1, 3), Passage.BLOCKED)), from, to);
+		assertTrue(blocked.reached(), "goal not reached: " + points(blocked));
+		assertAdjacent(blocked);
+		assertFalse(points(blocked).contains(new Point(2, 1, 3)), "path enters the blocked cell: " + points(blocked));
+		var unchanged = search(grid, covering(4, 6), passages(Map.of()), from, to);
+		assertEquals(points(free), points(unchanged));
+		assertArrayEquals(free.moves(), unchanged.moves());
+	}
+
+	@Test
+	void passageIsAskedOnlyWhereTheViewCoversAndOncePerBlock() {
+		var asked = new ArrayList<Point>();
+		var rule = new PathRule() {
+			@Override
+			public boolean allows(BlockView view, int x, int y, int z) {
+				return true;
+			}
+
+			@Override
+			public Passage passage(BlockView view, int x, int y, int z) {
+				asked.add(new Point(x, y, z));
+				return Passage.DEFAULT;
+			}
+		};
+		var from = new Point(0, 1, 0);
+		var to = new Point(6, 1, 6);
+		assertTrue(search(new Grid(6, 6), NO_BLOCKS, rule, from, to).reached());
+		assertTrue(asked.isEmpty(), "asked outside the view: " + asked);
+		assertTrue(search(new Grid(6, 6), covering(0, 0, 0, 3, 10, 6), rule, from, to).reached());
+		assertFalse(asked.isEmpty(), "never asked inside the view");
+		for (var point : asked) {
+			assertTrue(point.x >= 0 && point.x <= 3, "asked outside the view: " + point);
+		}
+		assertEquals(asked.size(), asked.stream().distinct().count(), "asked twice about a block");
+	}
+
+	@Test
+	void nullPassageFailsTheSearch() {
+		var rule = new PathRule() {
+			@Override
+			public boolean allows(BlockView view, int x, int y, int z) {
+				return true;
+			}
+
+			@Override
+			public Passage passage(BlockView view, int x, int y, int z) {
+				return null;
+			}
+		};
+		assertThrows(IllegalStateException.class,
+				() -> search(new Grid(3, 3), covering(3, 3), rule, new Point(0, 1, 0), new Point(3, 1, 3)));
 	}
 }
